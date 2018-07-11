@@ -1,0 +1,63 @@
+* Component References
+
+General approaches for components to reference each other:
+
+ - Dependency Injection (DI): references are provided at construction time.
+ - API w/ Discovery: discover running instances of the API, call them.
+ - Dynamic Configuration: references are many-to-many and based on
+   loaded/unloaded events.
+
+* Comparison to "Microservices"
+
+Microservice approach:
+
+ - Declare a contract for a component as an API (Rest, GRPC)
+ - Other components link against the client for that API
+ - Communication between components occurs over IPC or TCP.
+ - Subroutines (like Goroutines) in processes concurrently process requests.
+
+The kernel, on the other hand, works by declaring a single memory space,
+header-based contracts between components, and loading dynamic modules (plugins)
+at runtime. This model is not used beyond core system code, because it is
+insecure to share a common memory space between different executing processes.
+
+The goal of this project is to find a happy medium between the two:
+
+ - In-process (statically linked) code when necessary and possible
+ - Plugin based (dynamically linked) when necessary
+ - Cross-machine (networked) when necessary, possibly even using a controller
+   transport implemented on top of a meshing router or similar.
+
+The primary advantages gained by this approach:
+
+ - Modularity: clearly defined and documented components.
+ - Performance:
+ - Licensing: 
+ - Flexibility: in-process first, cross-process later.
+
+** Example w/ Microservice Model
+
+Following the traditional model, and still splitting into components:
+
+ - Declare Transport, Link, as an API surface.
+ - Execute an API server for each component that implements the API.
+ - Other components discover the component via configuration (?) or discovery
+ - Calls are made via the API.
+
+Why this is not good enough:
+
+ - Tracing operations between servers is cumbersome (OpenTracing, spans)
+ - Unnecessary slow marshaling and data copying between memory spaces
+
+How is this different from:
+
+ - Declare the components of Bifrost as repos of interfaces (like libp2p)
+ - Dynamically load those components as plugins at runtime (IPFS transport load)?
+
+Well, this is! This is an opinionated implementation of this approach, with:
+
+ - Configuration: solved with configuration objects for each controller.
+ - Construction: plugin factories with self-identifying metadata.
+ - 
+
+Ideas to solve this problem:
