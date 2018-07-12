@@ -4,12 +4,16 @@ import (
 	"context"
 
 	"github.com/aperturerobotics/controllerbus/config"
+	"github.com/aperturerobotics/controllerbus/directive"
 	"github.com/blang/semver"
 	"github.com/sirupsen/logrus"
 )
 
 // Controller tracks a particular process.
 type Controller interface {
+	// Handler handles directives.
+	directive.Handler
+
 	// Execute executes the given controller.
 	// Returning nil ends execution.
 	// Returning an error triggers a retry with backoff.
@@ -41,6 +45,8 @@ func (c *ConstructOpts) GetLogger() *logrus.Entry {
 type Factory interface {
 	// GetControllerID returns the unique ID for the controller.
 	GetControllerID() string
+	// ConstructConfig constructs an instance of the controller configuration.
+	ConstructConfig() config.Config
 	// Construct constructs the associated controller given configuration.
 	Construct(config.Config, ConstructOpts) (Controller, error)
 	// GetVersion returns the version of this controller.
