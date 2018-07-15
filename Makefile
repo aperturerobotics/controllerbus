@@ -1,6 +1,3 @@
-t:
-	# echo
-
 gengo:
 	shopt -s globstar; \
 	protowrap -I $${GOPATH}/src \

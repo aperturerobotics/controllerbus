@@ -6,22 +6,23 @@ import (
 	"github.com/aperturerobotics/controllerbus/directive"
 )
 
-// LoadController is a directive indicating a controller instance should be
-// constructed given a factory and a configuration.
-type LoadController interface {
+// ExecController is a directive indicating a controller instance should be
+// constructed and executed given a factory and a configuration.
+// If/when the controller exits, the directive is canceled with the error.
+type ExecController interface {
 	// Directive indicates this is a directive.
 	directive.Directive
 
-	// GetLoadControllerFactory returns the factory desired to load.
-	GetLoadControllerFactory() controller.Factory
+	// GetExecControllerFactory returns the factory desired to load.
+	GetExecControllerFactory() controller.Factory
 
-	// GetLoadControllerConfig returns the config to load the controller with.
-	GetLoadControllerConfig() config.Config
+	// GetExecControllerConfig returns the config to load the controller with.
+	GetExecControllerConfig() config.Config
 }
 
-// LoadControllerValue is the value emitted to satisfy the LoadController
+// ExecControllerValue is the value emitted to satisfy the ExecController
 // directive.
-type LoadControllerValue = controller.Controller
+type ExecControllerValue = controller.Controller
 
 // _ is a type assertion
-var _ directive.Value = ((LoadControllerValue)(nil))
+var _ directive.Value = ((ExecControllerValue)(nil))

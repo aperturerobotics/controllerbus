@@ -10,7 +10,7 @@ import (
 )
 
 // Controller implements the loader controller.
-// It responds to LoadController directives and attaches to a bus.
+// It responds to ExecController directives and attaches to a bus.
 type Controller struct {
 	// le is the logger
 	le *logrus.Entry
@@ -26,17 +26,19 @@ func NewController(le *logrus.Entry, bus bus.Bus) (*Controller, error) {
 // Execute executes the loader controller.
 func (c *Controller) Execute(ctx context.Context) error {
 	// TODO
+	<-ctx.Done()
 	return nil
 }
 
 // HandleDirective asks if the handler can resolve the directive.
 func (c *Controller) HandleDirective(
-	dir directive.Instance,
+	di directive.Instance,
 ) (directive.Resolver, error) {
-	switch d := dir.(type) {
-	case LoadController:
-		return c.resolveLoadController(d)
+	dir := di.GetDirective()
+	if d, ok := dir.(ExecController); ok {
+		return c.resolveExecController(d)
 	}
+
 	return nil, nil
 }
 

@@ -1,0 +1,8 @@
+syntax = "proto3";
+package main;
+
+// ToyControllerConfig contains configuration for the toy controller.
+message ToyControllerConfig {
+  // Name is the name to say hello to.
+  string name = 1;
+}
