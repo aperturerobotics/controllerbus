@@ -56,7 +56,20 @@ func (c *DirectiveController) AddDirective(
 	}
 
 	// Build new reference
-	di, ref := NewDirectiveInstance(dir, cb)
+	var di *DirectiveInstance
+	var ref directive.Reference
+	di, ref = NewDirectiveInstance(dir, cb, func() {
+		c.directivesMtx.Lock()
+		for i, d := range c.directives {
+			if d == di {
+				c.directives[i] = c.directives[len(c.directives)-1]
+				c.directives[len(c.directives)-1] = nil
+				c.directives = c.directives[:len(c.directives)-1]
+				break
+			}
+		}
+		c.directivesMtx.Unlock()
+	})
 	c.directives = append(c.directives, di)
 	c.handlersMtx.Lock()
 	for _, handler := range c.handlers {

@@ -19,6 +19,11 @@ type DirectiveInstance struct {
 	valsMtx sync.Mutex
 	// vals is the list of emitted values
 	vals []directive.Value
+
+	// rel is the released cb
+	rel func()
+	// relOnce ensures rel is called once
+	relOnce sync.Once
 }
 
 // directiveInstanceReference implements directive reference
@@ -49,8 +54,8 @@ func (r *directiveInstanceReference) Release() {
 }
 
 // NewDirectiveInstance constructs a new directive instance with an initial reference.
-func NewDirectiveInstance(dir directive.Directive, cb func(directive.Value)) (*DirectiveInstance, directive.Reference) {
-	i := &DirectiveInstance{dir: dir}
+func NewDirectiveInstance(dir directive.Directive, cb func(directive.Value), released func()) (*DirectiveInstance, directive.Reference) {
+	i := &DirectiveInstance{dir: dir, rel: released}
 	ref := &directiveInstanceReference{di: i, valCb: cb}
 	i.refs = append(i.refs, ref)
 	return i, ref
@@ -107,13 +112,19 @@ func (r *DirectiveInstance) GetDirective() directive.Directive {
 
 // Close cancels the directive instance.
 func (r *DirectiveInstance) Close() {
-	r.refsMtx.Lock()
-	r.refs = nil
-	r.refsMtx.Unlock()
+	r.relOnce.Do(func() {
+		r.refsMtx.Lock()
+		r.refs = nil
+		r.refsMtx.Unlock()
 
-	r.valsMtx.Lock()
-	r.vals = nil
-	r.valsMtx.Unlock()
+		r.valsMtx.Lock()
+		r.vals = nil
+		r.valsMtx.Unlock()
+
+		if r.rel != nil {
+			r.rel()
+		}
+	})
 }
 
 // _ is a type assertion
