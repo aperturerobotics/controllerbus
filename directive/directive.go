@@ -11,11 +11,6 @@ import (
 
 // Directive implements a requested state (with a set of values).
 type Directive interface {
-	// Message requires Directive is a Protobuf message.
-	// This allows easy transport / serialization.
-	// TODO: determine if this is worth it
-	// proto.Message
-
 	// Validate validates the directive.
 	// This is a cursory validation to see if the values "look correct."
 	Validate() error

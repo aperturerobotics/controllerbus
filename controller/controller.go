@@ -57,9 +57,9 @@ type Factory interface {
 type FactoryResolver interface {
 	// GetConfigByID returns a config object and factory matching the ID.
 	// If none found, return nil, nil
-	GetConfigByID(id string) (config.Config, Factory, error)
+	GetConfigByID(ctx context.Context, id string) (config.Config, Factory, error)
 	// GetFactoryMatchingConfig returns the factory that matches the config.
 	// If no factory is found, return nil.
 	// If an unexpected error occurs, return it.
-	GetFactoryMatchingConfig(config.Config) (Factory, error)
+	GetFactoryMatchingConfig(ctx context.Context, conf config.Config) (Factory, error)
 }

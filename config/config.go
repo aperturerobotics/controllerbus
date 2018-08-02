@@ -16,4 +16,7 @@ type Config interface {
 	// This string is stored with the encoded config.
 	// Example: bifrost/transport/udp/1
 	GetConfigID() string
+
+	// EqualsConfig checks if the config is equal to another.
+	EqualsConfig(other Config) bool
 }

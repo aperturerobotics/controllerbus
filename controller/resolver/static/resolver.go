@@ -1,6 +1,7 @@
 package static
 
 import (
+	"context"
 	"sync"
 
 	"github.com/aperturerobotics/controllerbus/config"
@@ -15,8 +16,16 @@ type Resolver struct {
 }
 
 // NewResolver constructs a new resolver.
-func NewResolver() *Resolver {
-	return &Resolver{factories: make(map[string]controller.Factory)}
+func NewResolver(factories ...controller.Factory) *Resolver {
+	r := &Resolver{
+		factories: make(map[string]controller.Factory),
+	}
+
+	for _, f := range factories {
+		r.AddFactory(f)
+	}
+
+	return r
 }
 
 // AddFactory adds a factory to the resolver.
@@ -40,7 +49,9 @@ func (r *Resolver) AddFactory(factory controller.Factory) {
 
 // GetConfigByID returns a config object and factory matching the ID.
 // If none found, return nil, nil
-func (r *Resolver) GetConfigByID(id string) (config.Config, controller.Factory, error) {
+func (r *Resolver) GetConfigByID(
+	ctx context.Context, id string,
+) (config.Config, controller.Factory, error) {
 	r.factoryMtx.Lock()
 	defer r.factoryMtx.Unlock()
 
@@ -55,7 +66,9 @@ func (r *Resolver) GetConfigByID(id string) (config.Config, controller.Factory, 
 // GetFactoryMatchingConfig returns the factory that matches the config.
 // If no factory is found, return nil.
 // If an unexpected error occurs, return it.
-func (r *Resolver) GetFactoryMatchingConfig(c config.Config) (controller.Factory, error) {
+func (r *Resolver) GetFactoryMatchingConfig(
+	ctx context.Context, c config.Config,
+) (controller.Factory, error) {
 	r.factoryMtx.Lock()
 	defer r.factoryMtx.Unlock()
 

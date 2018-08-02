@@ -148,7 +148,6 @@ func (c *DirectiveController) callResolver(res directive.Resolver, inst *Directi
 		case <-c.ctx.Done():
 			return
 		case val := <-valCh:
-			c.le.Debugf("emitting value: %#v", val)
 			inst.emitValue(val)
 		case err := <-errCh:
 			if err != nil {
