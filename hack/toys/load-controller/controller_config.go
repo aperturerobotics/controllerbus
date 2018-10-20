@@ -2,6 +2,9 @@ package main
 
 import (
 	"errors"
+
+	"github.com/aperturerobotics/controllerbus/config"
+	"github.com/golang/protobuf/proto"
 )
 
 // Validate validates the configuration.
@@ -18,5 +21,10 @@ func (c *ToyControllerConfig) Validate() error {
 // This string is stored with the encoded config.
 // Example: bifrost/transport/udp/1
 func (c *ToyControllerConfig) GetConfigID() string {
-	return "toy-controller/config/1"
+	return ControllerID
+}
+
+// EqualsConfig checks if the config is equal to another.
+func (c *ToyControllerConfig) EqualsConfig(other config.Config) bool {
+	return proto.Equal(c, other)
 }

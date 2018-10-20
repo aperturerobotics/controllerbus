@@ -6,7 +6,14 @@ import (
 
 	"github.com/aperturerobotics/controllerbus/config"
 	"github.com/aperturerobotics/controllerbus/controller"
+	"github.com/blang/semver"
 )
+
+// ResolverID is the resolver identifier.
+const ResolverID = "static"
+
+// Version is the resolver version.
+var Version = semver.MustParse("0.0.1")
 
 // Resolver implements the controller resolver using a list of built-in
 // controller implementations.
@@ -26,6 +33,16 @@ func NewResolver(factories ...controller.Factory) *Resolver {
 	}
 
 	return r
+}
+
+// GetResolverID returns the resolver identifier.
+func (r *Resolver) GetResolverID() string {
+	return ResolverID
+}
+
+// GetResolverVersion returns the resolver version.
+func (r *Resolver) GetResolverVersion() semver.Version {
+	return Version
 }
 
 // AddFactory adds a factory to the resolver.

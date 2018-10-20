@@ -1,0 +1,12 @@
+syntax = "proto3";
+package controller;
+
+// Info contains information about a controller.
+message Info {
+  // Id contains the identifier of the controller.
+  string id = 1;
+  // Version contains the version string for the controller.
+  string version = 2;
+  // Description contains a descriptive string about the controller.
+  string description = 3;
+}

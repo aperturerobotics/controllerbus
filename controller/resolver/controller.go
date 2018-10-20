@@ -2,13 +2,14 @@ package resolver
 
 import (
 	"context"
+	"strings"
 
 	"github.com/aperturerobotics/controllerbus/bus"
 	"github.com/aperturerobotics/controllerbus/controller"
 	"github.com/aperturerobotics/controllerbus/directive"
 )
 
-// Controller implements the controller resolver contlroller.
+// Controller implements the controller resolver controller.
 // This controller responds to LoadControllerWithConfig directives.
 type Controller struct {
 	// bus is the controller bus
@@ -20,6 +21,20 @@ type Controller struct {
 // NewController constructs a new controller with a resolver.
 func NewController(bus bus.Bus, resolver controller.FactoryResolver) *Controller {
 	return &Controller{resolver: resolver, bus: bus}
+}
+
+// GetControllerID returns the controller ID.
+func (c *Controller) GetControllerID() string {
+	return strings.Join([]string{"controllerbus", "resolver", c.resolver.GetResolverID(), c.resolver.GetResolverVersion().String()}, "/")
+}
+
+// GetControllerInfo returns information about the controller.
+func (c *Controller) GetControllerInfo() controller.Info {
+	return controller.NewInfo(
+		c.GetControllerID(),
+		c.resolver.GetResolverVersion(),
+		"controller resolver "+c.resolver.GetResolverID()+"@"+c.resolver.GetResolverVersion().String(),
+	)
 }
 
 // HandleDirective asks if the handler can resolve the directive.

@@ -5,8 +5,15 @@ import (
 
 	"github.com/aperturerobotics/controllerbus/controller"
 	"github.com/aperturerobotics/controllerbus/directive"
+	"github.com/blang/semver"
 	"github.com/sirupsen/logrus"
 )
+
+// ControllerID is the controller ID.
+const ControllerID = "bifrost/toys/load-controller/controller/1"
+
+// Version is the controller version.
+var Version = semver.MustParse("0.0.1")
 
 // ToyController is an example controller.
 type ToyController struct {
@@ -19,6 +26,15 @@ type ToyController struct {
 // NewToyController constructs a new toy controller.
 func NewToyController(le *logrus.Entry, conf *ToyControllerConfig) (*ToyController, error) {
 	return &ToyController{le: le, conf: conf}, nil
+}
+
+// GetControllerInfo returns information about the controller.
+func (c *ToyController) GetControllerInfo() controller.Info {
+	return controller.NewInfo(
+		ControllerID,
+		Version,
+		"toy controller",
+	)
 }
 
 // HandleDirective asks if the handler can resolve the directive.

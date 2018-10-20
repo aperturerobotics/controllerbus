@@ -14,6 +14,8 @@ type Controller interface {
 	// Handler handles directives.
 	directive.Handler
 
+	// GetControllerInfo returns information about the controller.
+	GetControllerInfo() Info
 	// Execute executes the given controller.
 	// Returning nil ends execution.
 	// Returning an error triggers a retry with backoff.
@@ -55,6 +57,11 @@ type Factory interface {
 
 // FactoryResolver looks up factories that match configurations.
 type FactoryResolver interface {
+	// GetResolverID returns the resolver identifier.
+	// Ex: static, go-plugin
+	GetResolverID() string
+	// GetResolverVersion returns the resolver version.
+	GetResolverVersion() semver.Version
 	// GetConfigByID returns a config object and factory matching the ID.
 	// If none found, return nil, nil
 	GetConfigByID(ctx context.Context, id string) (config.Config, Factory, error)
