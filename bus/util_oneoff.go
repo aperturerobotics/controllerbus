@@ -5,32 +5,6 @@ import (
 	"github.com/aperturerobotics/controllerbus/directive"
 )
 
-type oneoffHandler struct {
-	valCb     func(directive.Value)
-	disposeCb func()
-}
-
-// HandleValueAdded is called when a value is added to the directive.
-func (h *oneoffHandler) HandleValueAdded(_ directive.Instance, v directive.Value) {
-	h.valCb(v)
-}
-
-// HandleValueRemoved is called when a value is removed from the directive.
-func (h *oneoffHandler) HandleValueRemoved(directive.Instance, directive.Value) {
-	// noop
-}
-
-// HandleInstanceDisposed is called when a directive instance is disposed.
-// This will occur if Close() is called on the directive instance.
-func (h *oneoffHandler) HandleInstanceDisposed(directive.Instance) {
-	if h.disposeCb != nil {
-		h.disposeCb()
-	}
-}
-
-// _ is a type assertion
-var _ directive.ReferenceHandler = ((*oneoffHandler)(nil))
-
 // ExecOneOff executes a one-off directive.
 // Returns nil if the directive is canceled for some reason during the execution.
 func ExecOneOff(
@@ -42,7 +16,7 @@ func ExecOneOff(
 	valCh := make(chan directive.Value, 1)
 	_, ref, err := bus.AddDirective(
 		dir,
-		&oneoffHandler{
+		&CallbackHandler{
 			disposeCb: valDisposeCallback,
 			valCb: func(v directive.Value) {
 				select {
