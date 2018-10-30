@@ -38,7 +38,10 @@ func (c *ToyController) GetControllerInfo() controller.Info {
 }
 
 // HandleDirective asks if the handler can resolve the directive.
-func (c *ToyController) HandleDirective(di directive.Instance) (directive.Resolver, error) {
+func (c *ToyController) HandleDirective(
+	ctx context.Context,
+	di directive.Instance,
+) (directive.Resolver, error) {
 	// Pass for the example controller
 	return nil, nil
 }

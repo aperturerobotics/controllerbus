@@ -1,14 +1,19 @@
 package controller
 
 import (
+	"context"
 	"github.com/aperturerobotics/controllerbus/directive"
 	"sync"
 )
 
 // DirectiveInstance implements the directive instance interface.
 type DirectiveInstance struct {
+	// ctx is the parent directive controller ctx
+	ctx context.Context
 	// dir is the underlying directive.
 	dir directive.Directive
+	// valueOpts are the directive options
+	valueOpts directive.ValueOptions
 
 	// refsMtx guards refs
 	refsMtx sync.Mutex
@@ -17,45 +22,38 @@ type DirectiveInstance struct {
 
 	// valsMtx guards vals
 	valsMtx sync.Mutex
-	// vals is the list of emitted values
-	vals []directive.Value
+	// nvalID stores the next value id
+	nvalID uint32
+	// vals is the map of emitted values
+	vals map[uint32]directive.Value
 
-	// rel is the released cb
-	rel func()
-	// relOnce ensures rel is called once
-	relOnce sync.Once
-}
+	// relMtx guards rel
+	relMtx sync.Mutex
+	// rel is the released cb list
+	rel []func()
+	// released flags the instance as released
+	released bool
 
-// directiveInstanceReference implements directive reference
-type directiveInstanceReference struct {
-	relOnce sync.Once
-	di      *DirectiveInstance
-	valCb   func(directive.Value)
-}
-
-// Release releases the reference.
-func (r *directiveInstanceReference) Release() {
-	r.relOnce.Do(func() {
-		r.di.refsMtx.Lock()
-		for i, ref := range r.di.refs {
-			if ref == r {
-				r.di.refs[i] = r.di.refs[len(r.di.refs)-1]
-				r.di.refs[len(r.di.refs)-1] = nil
-				r.di.refs = r.di.refs[:len(r.di.refs)-1]
-				break
-			}
-		}
-
-		if len(r.di.refs) == 0 {
-			defer r.di.Close()
-		}
-		r.di.refsMtx.Unlock()
-	})
+	// attachedResolversMtx guards attachedResolvers
+	attachedResolversMtx sync.Mutex
+	attachedResolvers    []*attachedResolver
+	// attachedResolverCtx is the current context for resolvers
+	attachedResolverCtx context.Context
+	// attachedResolverCtxCancel is the cancellation func for the resolvers ctx
+	attachedResolverCtxCancel context.CancelFunc
 }
 
 // NewDirectiveInstance constructs a new directive instance with an initial reference.
-func NewDirectiveInstance(dir directive.Directive, cb func(directive.Value), released func()) (*DirectiveInstance, directive.Reference) {
-	i := &DirectiveInstance{dir: dir, rel: released}
+func NewDirectiveInstance(
+	ctx context.Context,
+	dir directive.Directive,
+	cb directive.ReferenceHandler,
+	released func(),
+) (*DirectiveInstance, directive.Reference) {
+	i := &DirectiveInstance{ctx: ctx, dir: dir, rel: []func(){released}}
+	i.attachedResolverCtx, i.attachedResolverCtxCancel = context.WithCancel(ctx)
+	i.vals = make(map[uint32]directive.Value)
+	i.valueOpts = dir.GetValueOptions()
 	ref := &directiveInstanceReference{di: i, valCb: cb}
 	i.refs = append(i.refs, ref)
 	return i, ref
@@ -63,7 +61,14 @@ func NewDirectiveInstance(dir directive.Directive, cb func(directive.Value), rel
 
 // AddReference adds a reference to the directive.
 // Will return nil if the directive is already expired.
-func (r *DirectiveInstance) AddReference(cb func(directive.Value)) directive.Reference {
+func (r *DirectiveInstance) AddReference(cb directive.ReferenceHandler) directive.Reference {
+	r.relMtx.Lock()
+	defer r.relMtx.Unlock()
+
+	if r.released {
+		return nil
+	}
+
 	ref := &directiveInstanceReference{
 		di:    r,
 		valCb: cb,
@@ -79,7 +84,7 @@ func (r *DirectiveInstance) AddReference(cb func(directive.Value)) directive.Ref
 			go func() {
 				// cb should not block
 				for _, v := range r.vals {
-					cb(v)
+					cb.HandleValueAdded(r, v)
 				}
 				r.valsMtx.Unlock()
 			}()
@@ -92,43 +97,189 @@ func (r *DirectiveInstance) AddReference(cb func(directive.Value)) directive.Ref
 	return ref
 }
 
-// emitValue emits a value to all listeners
-func (r *DirectiveInstance) emitValue(v directive.Value) {
+// emitValue emits a new value to all listeners
+// returns the value ID and boolean OK
+func (r *DirectiveInstance) emitValue(v directive.Value) (uint32, bool) {
+	r.relMtx.Lock()
+	defer r.relMtx.Unlock()
+
+	if r.released {
+		return 0, false
+	}
+
+	var reject bool
+	var cancelOthers bool
 	r.valsMtx.Lock()
-	r.vals = append(r.vals, v)
+	valCount := len(r.vals)
+	if maxCount := r.valueOpts.MaxValueCount; maxCount != 0 {
+		if valCount >= maxCount && r.valueOpts.MaxValueHardCap {
+			// reject value
+			reject = true
+		} else if valCount+1 >= maxCount {
+			cancelOthers = true
+		}
+	}
+	nvid := r.nvalID
+	if !reject {
+		r.nvalID++
+		r.vals[nvid] = v
+	}
 	r.valsMtx.Unlock()
+
+	if reject {
+		return 0, false
+	}
 
 	r.refsMtx.Lock()
 	for _, ref := range r.refs {
-		ref.valCb(v)
+		ref.valCb.HandleValueAdded(r, v)
 	}
 	r.refsMtx.Unlock()
+
+	if cancelOthers {
+		r.cancelResolvers()
+	}
+
+	return nvid, true
+}
+
+// purgeEmittedValue deletes and returns an emitted value
+// returns the value ID and boolean OK
+func (r *DirectiveInstance) purgeEmittedValue(id uint32) (directive.Value, bool) {
+	r.relMtx.Lock()
+	defer r.relMtx.Unlock()
+
+	if r.released {
+		return 0, false
+	}
+
+	r.valsMtx.Lock()
+	val, ok := r.vals[id]
+	delete(r.vals, id)
+	valCount := len(r.vals)
+	r.valsMtx.Unlock()
+
+	if maxCount := r.valueOpts.MaxValueCount; maxCount != 0 {
+		if valCount+1 == maxCount {
+			r.restartResolvers()
+		}
+	}
+
+	if ok {
+		r.refsMtx.Lock()
+		for _, ref := range r.refs {
+			ref.valCb.HandleValueRemoved(r, val)
+		}
+		r.refsMtx.Unlock()
+	}
+
+	return val, true
 }
 
 // GetDirective returns the underlying directive.
 func (r *DirectiveInstance) GetDirective() directive.Directive {
+	if r == nil {
+		return nil
+	}
+
 	return r.dir
+}
+
+// AddDisposeCallback adds a callback that will be called when the instance
+// is disposed, either when Close() is called, or when the reference count
+// drops to zero. The callback may occur immediately if the instance is
+// already disposed, but will be made in a new goroutine.
+func (r *DirectiveInstance) AddDisposeCallback(cb func()) {
+	r.relMtx.Lock()
+	defer r.relMtx.Unlock()
+
+	if r.released {
+		go cb()
+		return
+	}
+
+	r.rel = append(r.rel, cb)
 }
 
 // Close cancels the directive instance.
 func (r *DirectiveInstance) Close() {
-	r.relOnce.Do(func() {
-		r.refsMtx.Lock()
-		r.refs = nil
-		r.refsMtx.Unlock()
+	r.callRel()
+}
 
-		r.valsMtx.Lock()
-		r.vals = nil
-		r.valsMtx.Unlock()
+// callRel calls the release callbacks.
+func (r *DirectiveInstance) callRel() {
+	r.relMtx.Lock()
+	defer r.relMtx.Unlock()
 
-		if r.rel != nil {
-			r.rel()
+	if r.released {
+		return
+	}
+
+	r.released = true
+	r.refsMtx.Lock()
+	for _, ref := range r.refs {
+		go ref.valCb.HandleInstanceDisposed(r)
+	}
+	r.refs = nil
+	r.refsMtx.Unlock()
+
+	r.valsMtx.Lock()
+	r.vals = nil
+	r.valsMtx.Unlock()
+
+	for _, ref := range r.rel {
+		go ref()
+	}
+	r.rel = nil
+}
+
+// attachResolver calls and attaches a directive resolver.
+func (r *DirectiveInstance) attachResolver(handlerCtx context.Context, res directive.Resolver) {
+	inst := r
+	r.attachedResolversMtx.Lock()
+	ares := newAttachedResolver(inst, res)
+	r.attachedResolvers = append(r.attachedResolvers, ares)
+	ares.pushHandlerContext(r.attachedResolverCtx)
+	go func() {
+		err := ares.execResolver(handlerCtx)
+		// TODO: handle resolver error (log it)
+		_ = err
+		r.attachedResolversMtx.Lock()
+		for i, ai := range r.attachedResolvers {
+			if ai == ares {
+				r.attachedResolvers[i] = r.attachedResolvers[len(r.attachedResolvers)-1]
+				r.attachedResolvers[len(r.attachedResolvers)-1] = nil
+				r.attachedResolvers = r.attachedResolvers[:len(r.attachedResolvers)-1]
+				break
+			}
 		}
-	})
+		r.attachedResolversMtx.Unlock()
+	}()
+	r.attachedResolversMtx.Unlock()
+}
+
+// cancelResolvers cancels all children resolvers.
+// requires restartResolvers to resume them.
+func (r *DirectiveInstance) cancelResolvers() {
+	r.attachedResolverCtxCancel()
+}
+
+// restartResolvers pushes a fresh resolver context to child resolvers.
+// if the resolver context is not already canceled, does nothing
+func (r *DirectiveInstance) restartResolvers() {
+	r.attachedResolversMtx.Lock()
+	select {
+	default:
+		r.attachedResolversMtx.Unlock()
+		return
+	case <-r.attachedResolverCtx.Done():
+	}
+	r.attachedResolverCtx, r.attachedResolverCtxCancel = context.WithCancel(r.ctx)
+	for _, re := range r.attachedResolvers {
+		re.pushHandlerContext(r.attachedResolverCtx)
+	}
+	r.attachedResolversMtx.Unlock()
 }
 
 // _ is a type assertion
 var _ directive.Instance = ((*DirectiveInstance)(nil))
-
-// _ is a type assertion
-var _ directive.Reference = ((*directiveInstanceReference)(nil))

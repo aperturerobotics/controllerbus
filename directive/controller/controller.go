@@ -2,6 +2,7 @@ package controller
 
 import (
 	"context"
+	"errors"
 	"sync"
 
 	"github.com/aperturerobotics/controllerbus/directive"
@@ -20,7 +21,7 @@ type DirectiveController struct {
 
 	// handlersMtx guards handlers
 	handlersMtx sync.Mutex
-	handlers    []directive.Handler
+	handlers    []*attachedHandler
 
 	// directivesMtx guards directives
 	directivesMtx sync.Mutex
@@ -30,7 +31,11 @@ type DirectiveController struct {
 // NewDirectiveController builds a new directive controller.
 func NewDirectiveController(ctx context.Context, le *logrus.Entry) *DirectiveController {
 	nctx, nctxCancel := context.WithCancel(ctx)
-	return &DirectiveController{ctx: nctx, ctxCancel: nctxCancel, le: le}
+	return &DirectiveController{
+		ctx:       nctx,
+		ctxCancel: nctxCancel,
+		le:        le,
+	}
 }
 
 // AddDirective adds a directive to the controller.
@@ -38,12 +43,17 @@ func NewDirectiveController(ctx context.Context, le *logrus.Entry) *DirectiveCon
 // Returns the instance, new reference, and any error.
 func (c *DirectiveController) AddDirective(
 	dir directive.Directive,
-	cb func(val directive.Value),
+	cb directive.ReferenceHandler,
 ) (directive.Instance, directive.Reference, error) {
+	if dir == nil {
+		return nil, nil, errors.New("directive cannot be nil")
+	}
+
 	c.directivesMtx.Lock()
 	defer c.directivesMtx.Unlock()
 
-	for _, di := range c.directives {
+	for ii := 0; ii < len(c.directives); ii++ {
+		di := c.directives[ii]
 		d := di.GetDirective()
 		if d.IsEquivalent(dir) {
 			if dir.Superceeds(d) {
@@ -51,14 +61,23 @@ func (c *DirectiveController) AddDirective(
 				break
 			}
 
-			return di, di.AddReference(cb), nil
+			ref := di.AddReference(cb)
+			if ref == nil {
+				c.directives[ii] = c.directives[len(c.directives)-1]
+				c.directives[len(c.directives)-1] = nil
+				c.directives = c.directives[:len(c.directives)-1]
+				ii--
+				continue
+			} else {
+				return di, ref, nil
+			}
 		}
 	}
 
 	// Build new reference
 	var di *DirectiveInstance
 	var ref directive.Reference
-	di, ref = NewDirectiveInstance(dir, cb, func() {
+	di, ref = NewDirectiveInstance(c.ctx, dir, cb, func() {
 		c.directivesMtx.Lock()
 		for i, d := range c.directives {
 			if d == di {
@@ -84,19 +103,16 @@ func (c *DirectiveController) AddDirective(
 // AddHandler adds a directive handler.
 // The handler will receive calls for all existing directives (initial set).
 func (c *DirectiveController) AddHandler(hnd directive.Handler) error {
-	var err error
-	c.directivesMtx.Lock()
-	defer c.directivesMtx.Unlock()
-	for _, dir := range c.directives {
-		err = c.callHandler(hnd, dir)
-		if err != nil {
-			return err
-		}
-	}
-
+	c.directivesMtx.Lock() // lock first
 	c.handlersMtx.Lock()
-	c.handlers = append(c.handlers, hnd)
+	ahnd := newAttachedHandler(c.ctx, hnd)
+	c.handlers = append(c.handlers, ahnd)
 	c.handlersMtx.Unlock()
+
+	for _, dir := range c.directives {
+		_ = c.callHandler(ahnd, dir)
+	}
+	c.directivesMtx.Unlock()
 
 	return nil
 }
@@ -105,12 +121,11 @@ func (c *DirectiveController) AddHandler(hnd directive.Handler) error {
 func (c *DirectiveController) RemoveHandler(hnd directive.Handler) {
 	c.handlersMtx.Lock()
 	for i, h := range c.handlers {
-		if h == hnd {
+		if h.Handler == hnd {
+			h.Cancel()
 			c.handlers[i] = c.handlers[len(c.handlers)-1]
 			c.handlers[len(c.handlers)-1] = nil
 			c.handlers = c.handlers[:len(c.handlers)-1]
-
-			// TODO: expire all resolvers attached to handler.
 			break
 		}
 	}
@@ -118,46 +133,23 @@ func (c *DirectiveController) RemoveHandler(hnd directive.Handler) {
 }
 
 // callHandler calls the directive handler with the directive, managing the resolver if returned.
-func (c *DirectiveController) callHandler(hnd directive.Handler, inst *DirectiveInstance) error {
+func (c *DirectiveController) callHandler(ahnd *attachedHandler, inst *DirectiveInstance) error {
 	// HandleDirective asks if the handler can resolve the directive.
 	// If it can, it returns a resolver. If not, returns nil.
 	// Any exceptional errors are returned for logging.
 	// It is safe to add a reference to the directive during this call.
-	resolver, err := hnd.HandleDirective(inst)
+	hnd := ahnd.Handler
+	resolver, err := hnd.HandleDirective(ahnd.Context, inst)
 	if err != nil {
 		return err
 	}
 
 	if resolver != nil {
-		go c.callResolver(resolver, inst)
+		// attach resolver
+		inst.attachResolver(ahnd.Context, resolver)
 	}
 
 	return nil
-}
-
-// callResolver calls a directive resolver.
-func (c *DirectiveController) callResolver(res directive.Resolver, inst *DirectiveInstance) {
-	valCh := make(chan directive.Value, 10)
-	errCh := make(chan error, 1)
-	go func() {
-		errCh <- res.Resolve(c.ctx, valCh)
-	}()
-
-	for {
-		select {
-		case <-c.ctx.Done():
-			return
-		case val := <-valCh:
-			inst.emitValue(val)
-		case err := <-errCh:
-			if err != nil {
-				c.le.
-					WithError(err).
-					Warn("resolver exited with error")
-			}
-			return
-		}
-	}
 }
 
 // Close closes the directive instance.

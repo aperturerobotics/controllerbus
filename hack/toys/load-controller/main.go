@@ -3,9 +3,9 @@ package main
 import (
 	"context"
 
+	"github.com/aperturerobotics/controllerbus/bus"
 	"github.com/aperturerobotics/controllerbus/bus/inmem"
 	"github.com/aperturerobotics/controllerbus/controller/loader"
-	"github.com/aperturerobotics/controllerbus/directive"
 	cdc "github.com/aperturerobotics/controllerbus/directive/controller"
 	"github.com/sirupsen/logrus"
 )
@@ -34,20 +34,17 @@ func execToy() {
 	loadToy := loader.NewExecControllerSingleton(NewToyFactory(), &ToyControllerConfig{
 		Name: "world",
 	})
-	dirInst, dirRef, err := b.AddDirective(loadToy, func(val directive.Value) {
-		tc := val.(*ToyController)
-		le.Debug("toy controller resolved")
-		tc.SayHello()
+	val, valRef, err := bus.ExecOneOff(ctx, b, loadToy, func() {
 		close(resolved)
 	})
 	if err != nil {
 		panic(err)
 	}
-	defer dirRef.Release()
-	_ = dirInst
+	defer valRef.Release()
 
-	// Wait for the toy controller to be resolved
-	_, _ = <-resolved
+	tc := val.(*ToyController)
+	le.Debug("toy controller resolved")
+	tc.SayHello()
 }
 
 func main() {

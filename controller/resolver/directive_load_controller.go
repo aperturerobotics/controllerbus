@@ -27,6 +27,14 @@ func (d *LoadControllerWithConfigSingleton) GetDesiredControllerConfig() config.
 	return d.config
 }
 
+// GetValueOptions returns options relating to value handling.
+func (d *LoadControllerWithConfigSingleton) GetValueOptions() directive.ValueOptions {
+	return directive.ValueOptions{
+		MaxValueCount:   1,
+		MaxValueHardCap: true,
+	}
+}
+
 // Validate validates the directive.
 // This is a cursory validation to see if the values "look correct."
 func (d *LoadControllerWithConfigSingleton) Validate() error {

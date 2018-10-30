@@ -41,10 +41,10 @@ func (c *Controller) GetControllerInfo() controller.Info {
 // If it can, it returns a resolver. If not, returns nil.
 // Any exceptional errors are returned for logging.
 // It is safe to add a reference to the directive during this call.
-func (c *Controller) HandleDirective(di directive.Instance) (directive.Resolver, error) {
+func (c *Controller) HandleDirective(ctx context.Context, di directive.Instance) (directive.Resolver, error) {
 	dir := di.GetDirective()
 	if d, ok := dir.(LoadControllerWithConfig); ok {
-		return c.resolveLoadControllerWithConfig(d)
+		return c.resolveLoadControllerWithConfig(ctx, d)
 	}
 
 	return nil, nil
