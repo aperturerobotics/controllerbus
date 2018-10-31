@@ -94,7 +94,8 @@ type Instance interface {
 	// is disposed, either when Close() is called, or when the reference count
 	// drops to zero. The callback may occur immediately if the instance is
 	// already disposed, but will be made in a new goroutine.
-	AddDisposeCallback(cb func())
+	// Returns a callback release function.
+	AddDisposeCallback(cb func()) func()
 
 	// Close cancels the directive instance.
 	Close()

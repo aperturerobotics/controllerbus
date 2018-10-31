@@ -29,8 +29,10 @@ type DirectiveInstance struct {
 
 	// relMtx guards rel
 	relMtx sync.Mutex
+	// nrelID stores the next rel id
+	nrelID uint32
 	// rel is the released cb list
-	rel []func()
+	rel map[uint32]func()
 	// released flags the instance as released
 	released bool
 
@@ -50,9 +52,14 @@ func NewDirectiveInstance(
 	cb directive.ReferenceHandler,
 	released func(),
 ) (*DirectiveInstance, directive.Reference) {
-	i := &DirectiveInstance{ctx: ctx, dir: dir, rel: []func(){released}}
+	i := &DirectiveInstance{ctx: ctx, dir: dir}
 	i.attachedResolverCtx, i.attachedResolverCtxCancel = context.WithCancel(ctx)
 	i.vals = make(map[uint32]directive.Value)
+	i.rel = make(map[uint32]func())
+	if released != nil {
+		i.rel[0] = released
+		i.nrelID++
+	}
 	i.valueOpts = dir.GetValueOptions()
 	ref := &directiveInstanceReference{di: i, valCb: cb}
 	i.refs = append(i.refs, ref)
@@ -189,16 +196,26 @@ func (r *DirectiveInstance) GetDirective() directive.Directive {
 // is disposed, either when Close() is called, or when the reference count
 // drops to zero. The callback may occur immediately if the instance is
 // already disposed, but will be made in a new goroutine.
-func (r *DirectiveInstance) AddDisposeCallback(cb func()) {
+// Returns a callback release function.
+func (r *DirectiveInstance) AddDisposeCallback(cb func()) func() {
 	r.relMtx.Lock()
 	defer r.relMtx.Unlock()
 
 	if r.released {
 		go cb()
-		return
+		return func() {}
 	}
 
-	r.rel = append(r.rel, cb)
+	relid := r.nrelID
+	r.nrelID++
+	r.rel[relid] = cb
+	return func() {
+		r.relMtx.Lock()
+		if r.rel != nil {
+			delete(r.rel, relid)
+		}
+		r.relMtx.Unlock()
+	}
 }
 
 // Close cancels the directive instance.
