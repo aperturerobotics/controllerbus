@@ -66,8 +66,8 @@ func (c *resolver) Resolve(ctx context.Context, vh directive.ResolverHandler) er
 		err := bus.ExecuteController(c.ctx, ci)
 		if err != nil {
 			le.WithError(err).Warn("controller exited with error")
+			vh.RemoveValue(vid)
 		}
-		vh.RemoveValue(vid)
 	}()
 
 	return nil
