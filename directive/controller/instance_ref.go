@@ -26,7 +26,7 @@ func (r *directiveInstanceReference) Release() {
 				r.di.refs[i] = r.di.refs[len(r.di.refs)-1]
 				r.di.refs[len(r.di.refs)-1] = nil
 				r.di.refs = r.di.refs[:len(r.di.refs)-1]
-			} else if !ref.weakRef {
+			} else if ref != nil && !ref.weakRef {
 				nonWeakRefCount++
 			}
 
@@ -35,10 +35,12 @@ func (r *directiveInstanceReference) Release() {
 			}
 		}
 
-		if nonWeakRefCount == 0 {
-			defer r.di.Close()
+		if r.di != nil {
+			if nonWeakRefCount == 0 {
+				defer r.di.Close()
+			}
+			r.di.refsMtx.Unlock()
 		}
-		r.di.refsMtx.Unlock()
 	})
 }
 
