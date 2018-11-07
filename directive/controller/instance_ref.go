@@ -1,8 +1,9 @@
 package controller
 
 import (
-	"github.com/aperturerobotics/controllerbus/directive"
 	"sync"
+
+	"github.com/aperturerobotics/controllerbus/directive"
 )
 
 // directiveInstanceReference implements directive reference
@@ -10,22 +11,33 @@ type directiveInstanceReference struct {
 	relOnce sync.Once
 	di      *DirectiveInstance
 	valCb   directive.ReferenceHandler
+	weakRef bool
 }
 
 // Release releases the reference.
 func (r *directiveInstanceReference) Release() {
 	r.relOnce.Do(func() {
 		r.di.refsMtx.Lock()
+		found := false
+		nonWeakRefCount := 0
 		for i, ref := range r.di.refs {
-			if ref == r {
+			if !ref.weakRef {
+				nonWeakRefCount++
+			}
+
+			if !found && ref == r {
+				found = true
 				r.di.refs[i] = r.di.refs[len(r.di.refs)-1]
 				r.di.refs[len(r.di.refs)-1] = nil
 				r.di.refs = r.di.refs[:len(r.di.refs)-1]
+			}
+
+			if found && nonWeakRefCount != 0 {
 				break
 			}
 		}
 
-		if len(r.di.refs) == 0 {
+		if nonWeakRefCount == 0 {
 			defer r.di.Close()
 		}
 		r.di.refsMtx.Unlock()

@@ -55,7 +55,7 @@ type Controller interface {
 	// AddHandler adds a directive handler.
 	// The handler will receive calls for all existing directives (initial set).
 	// If the handler returns an error for the initial set, will be returned.
-	AddHandler(Handler) error
+	AddHandler(handler Handler) error
 
 	// RemoveHandler removes a directive handler.
 	RemoveHandler(Handler)
@@ -88,7 +88,8 @@ type Instance interface {
 	// cb is called for each value.
 	// cb calls should return immediately.
 	// Will return nil if the directive is already expired.
-	AddReference(cb ReferenceHandler) Reference
+	// If marked as a weak ref, the handler will not count towards the ref count.
+	AddReference(cb ReferenceHandler, weakRef bool) Reference
 
 	// AddDisposeCallback adds a callback that will be called when the instance
 	// is disposed, either when Close() is called, or when the reference count

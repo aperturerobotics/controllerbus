@@ -61,7 +61,7 @@ func (c *DirectiveController) AddDirective(
 				break
 			}
 
-			ref := di.AddReference(cb)
+			ref := di.AddReference(cb, false)
 			if ref == nil {
 				c.directives[ii] = c.directives[len(c.directives)-1]
 				c.directives[len(c.directives)-1] = nil

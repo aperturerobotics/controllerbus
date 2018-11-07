@@ -2,8 +2,9 @@ package controller
 
 import (
 	"context"
-	"github.com/aperturerobotics/controllerbus/directive"
 	"sync"
+
+	"github.com/aperturerobotics/controllerbus/directive"
 )
 
 // DirectiveInstance implements the directive instance interface.
@@ -68,7 +69,11 @@ func NewDirectiveInstance(
 
 // AddReference adds a reference to the directive.
 // Will return nil if the directive is already expired.
-func (r *DirectiveInstance) AddReference(cb directive.ReferenceHandler) directive.Reference {
+// Weak references do not contribute to the reference count.
+func (r *DirectiveInstance) AddReference(
+	cb directive.ReferenceHandler,
+	weakRef bool,
+) directive.Reference {
 	r.relMtx.Lock()
 	defer r.relMtx.Unlock()
 
@@ -77,28 +82,25 @@ func (r *DirectiveInstance) AddReference(cb directive.ReferenceHandler) directiv
 	}
 
 	ref := &directiveInstanceReference{
-		di:    r,
-		valCb: cb,
+		di:      r,
+		valCb:   cb,
+		weakRef: weakRef,
 	}
 
 	r.refsMtx.Lock()
-	if len(r.refs) == 0 {
-		ref = nil
-	} else {
-		r.valsMtx.Lock()
-		// avoid calling cb() before returning addreference
-		defer func() {
-			go func() {
-				// cb should not block
-				for _, v := range r.vals {
-					cb.HandleValueAdded(r, v)
-				}
-				r.valsMtx.Unlock()
-			}()
+	r.valsMtx.Lock()
+	// avoid calling cb() before returning addreference
+	defer func() {
+		go func() {
+			// cb should not block
+			for _, v := range r.vals {
+				cb.HandleValueAdded(r, v)
+			}
+			r.valsMtx.Unlock()
 		}()
+	}()
 
-		r.refs = append(r.refs, ref)
-	}
+	r.refs = append(r.refs, ref)
 	r.refsMtx.Unlock()
 
 	return ref
