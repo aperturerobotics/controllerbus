@@ -21,15 +21,13 @@ func (r *directiveInstanceReference) Release() {
 		found := false
 		nonWeakRefCount := 0
 		for i, ref := range r.di.refs {
-			if !ref.weakRef {
-				nonWeakRefCount++
-			}
-
 			if !found && ref == r {
 				found = true
 				r.di.refs[i] = r.di.refs[len(r.di.refs)-1]
 				r.di.refs[len(r.di.refs)-1] = nil
 				r.di.refs = r.di.refs[:len(r.di.refs)-1]
+			} else if !ref.weakRef {
+				nonWeakRefCount++
 			}
 
 			if found && nonWeakRefCount != 0 {
