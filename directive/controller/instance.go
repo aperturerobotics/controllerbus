@@ -141,7 +141,9 @@ func (r *DirectiveInstance) emitValue(v directive.Value) (uint32, bool) {
 
 	r.refsMtx.Lock()
 	for _, ref := range r.refs {
-		ref.valCb.HandleValueAdded(r, v)
+		if ref != nil && ref.valCb != nil {
+			ref.valCb.HandleValueAdded(r, v)
+		}
 	}
 	r.refsMtx.Unlock()
 
