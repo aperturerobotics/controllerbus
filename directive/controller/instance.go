@@ -165,6 +165,10 @@ func (r *DirectiveInstance) purgeEmittedValue(id uint32) (directive.Value, bool)
 	}
 
 	r.valsMtx.Lock()
+	if r.vals == nil {
+		r.valsMtx.Unlock()
+		return 0, false
+	}
 	val, ok := r.vals[id]
 	delete(r.vals, id)
 	valCount := len(r.vals)
@@ -179,7 +183,9 @@ func (r *DirectiveInstance) purgeEmittedValue(id uint32) (directive.Value, bool)
 	if ok {
 		r.refsMtx.Lock()
 		for _, ref := range r.refs {
-			ref.valCb.HandleValueRemoved(r, val)
+			if ref.valCb != nil {
+				ref.valCb.HandleValueRemoved(r, val)
+			}
 		}
 		r.refsMtx.Unlock()
 	}
