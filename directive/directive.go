@@ -98,6 +98,11 @@ type Instance interface {
 	// Returns a callback release function.
 	AddDisposeCallback(cb func()) func()
 
+	// AddIdleCallback adds a callback that will be called when idle.
+	// The callback is called exactly once.
+	// Returns a callback release function.
+	AddIdleCallback(cb func()) func()
+
 	// Close cancels the directive instance.
 	Close()
 }

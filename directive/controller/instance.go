@@ -44,6 +44,12 @@ type DirectiveInstance struct {
 	attachedResolverCtx context.Context
 	// attachedResolverCtxCancel is the cancellation func for the resolvers ctx
 	attachedResolverCtxCancel context.CancelFunc
+	// runningResolvers is the number of executing resolvers
+	runningResolvers int
+	// nidleID is the next callback id
+	nidleID uint32
+	// idleCallbacks are the list of idle callback functions
+	idleCallbacks map[uint32]func()
 }
 
 // NewDirectiveInstance constructs a new directive instance with an initial reference.
@@ -57,6 +63,7 @@ func NewDirectiveInstance(
 	i.attachedResolverCtx, i.attachedResolverCtxCancel = context.WithCancel(ctx)
 	i.vals = make(map[uint32]directive.Value)
 	i.rel = make(map[uint32]func())
+	i.idleCallbacks = make(map[uint32]func())
 	if released != nil {
 		i.rel[0] = released
 		i.nrelID++
@@ -228,6 +235,39 @@ func (r *DirectiveInstance) AddDisposeCallback(cb func()) func() {
 	}
 }
 
+// AddIdleCallback adds a callback that will be called when idle.
+// The callback is called exactly once.
+// Returns a callback release function.
+func (r *DirectiveInstance) AddIdleCallback(cb func()) func() {
+	r.relMtx.Lock()
+	defer r.relMtx.Unlock()
+
+	if r.released {
+		go cb()
+		return func() {}
+	}
+
+	r.attachedResolversMtx.Lock()
+	defer r.attachedResolversMtx.Unlock()
+
+	if r.runningResolvers == 0 {
+		go cb()
+		return func() {}
+	}
+
+	relid := r.nidleID
+	r.nidleID++
+	r.idleCallbacks[relid] = cb
+
+	return func() {
+		r.attachedResolversMtx.Lock()
+		if r.idleCallbacks != nil {
+			delete(r.idleCallbacks, relid)
+		}
+		r.attachedResolversMtx.Unlock()
+	}
+}
+
 // Close cancels the directive instance.
 func (r *DirectiveInstance) Close() {
 	r.callRel()
@@ -266,6 +306,7 @@ func (r *DirectiveInstance) attachResolver(handlerCtx context.Context, res direc
 	r.attachedResolversMtx.Lock()
 	ares := newAttachedResolver(inst, res)
 	r.attachedResolvers = append(r.attachedResolvers, ares)
+	r.runningResolvers++
 	ares.pushHandlerContext(r.attachedResolverCtx)
 	go func() {
 		err := ares.execResolver(handlerCtx)
@@ -304,6 +345,30 @@ func (r *DirectiveInstance) restartResolvers() {
 	r.attachedResolverCtx, r.attachedResolverCtxCancel = context.WithCancel(r.ctx)
 	for _, re := range r.attachedResolvers {
 		re.pushHandlerContext(r.attachedResolverCtx)
+	}
+	r.attachedResolversMtx.Unlock()
+}
+
+// incrementRunningResolvers is called when a resolver starts.
+func (r *DirectiveInstance) incrementRunningResolvers() {
+	r.attachedResolversMtx.Lock()
+	r.runningResolvers++
+	r.attachedResolversMtx.Unlock()
+}
+
+// decrementRunningResolvers is called when a resolver exits.
+func (r *DirectiveInstance) decrementRunningResolvers() {
+	r.attachedResolversMtx.Lock()
+	if r.runningResolvers != 0 {
+		r.runningResolvers--
+		if r.runningResolvers == 0 {
+			for id, idleCb := range r.idleCallbacks {
+				if idleCb != nil {
+					go idleCb()
+				}
+				delete(r.idleCallbacks, id)
+			}
+		}
 	}
 	r.attachedResolversMtx.Unlock()
 }

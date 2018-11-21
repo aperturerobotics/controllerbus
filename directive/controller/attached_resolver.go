@@ -57,6 +57,7 @@ func (r *attachedResolver) execResolver(handlerCtx context.Context) error {
 	for {
 		go func() {
 			errCh <- r.res.Resolve(nctx, r)
+			r.di.decrementRunningResolvers()
 		}()
 
 		var gerr bool
@@ -86,6 +87,8 @@ func (r *attachedResolver) execResolver(handlerCtx context.Context) error {
 			return nctx.Err()
 		case rctx = <-r.handlerCh:
 		}
+
+		r.di.incrementRunningResolvers()
 	}
 }
 
