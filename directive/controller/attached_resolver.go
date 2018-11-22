@@ -16,16 +16,16 @@ type attachedResolver struct {
 	valsMtx sync.Mutex
 	vals    []uint32
 
-	res       directive.Resolver
-	handlerCh chan context.Context
+	res             directive.Resolver
+	resolutionCtxCh chan context.Context
 }
 
 // newAttachedResolver constructs a new attachedResolver.
 func newAttachedResolver(di *DirectiveInstance, res directive.Resolver) *attachedResolver {
 	return &attachedResolver{
-		di:        di,
-		res:       res,
-		handlerCh: make(chan context.Context, 1),
+		di:              di,
+		res:             res,
+		resolutionCtxCh: make(chan context.Context, 1),
 	}
 }
 
@@ -34,13 +34,13 @@ func (r *attachedResolver) pushHandlerContext(ctx context.Context) {
 PushLoop:
 	for {
 		select {
-		case r.handlerCh <- ctx:
+		case r.resolutionCtxCh <- ctx:
 			break PushLoop
 		default:
 		}
 
 		select {
-		case <-r.handlerCh:
+		case <-r.resolutionCtxCh:
 		default:
 		}
 	}
@@ -49,43 +49,63 @@ PushLoop:
 // handlerCtx is canceled when the handler is removed or di canceled.
 func (r *attachedResolver) execResolver(handlerCtx context.Context) error {
 	errCh := make(chan error, 1)
-	rctx := <-r.handlerCh
+	rctx := <-r.resolutionCtxCh
 
-	nctx, nctxCancel := context.WithCancel(handlerCtx)
-	defer nctxCancel()
+	// the running resolver count is incremented before execResolver is called.
+	// rctx is the context for all currently running resolvers, may be canceled
+	// resolutionCtxCh will emit the next rctx context when the previous is canceled
+	// handlerCtx is the context for this specific handler and may be canceled separately from rctx
+
+	// Resolve() needs to exit if either rctx or handlerCtx is canceled.
+	// Create a new sub-context and cancel it when execOnce returns.
 
 	for {
-		go func() {
-			errCh <- r.res.Resolve(nctx, r)
+		nctx, nctxCancel := context.WithCancel(handlerCtx)
+		go func(ctx context.Context) {
+			// if skipCtx then rctx was already canceled
+			var skipCtx bool
+			select {
+			case <-ctx.Done():
+				skipCtx = true
+			default:
+			}
+			if !skipCtx {
+				errCh <- r.res.Resolve(ctx, r)
+			} else {
+				errCh <- nil
+			}
 			r.di.decrementRunningResolvers()
-		}()
+		}(nctx)
 
 		var gerr bool
 		select {
 		case err := <-errCh:
+			nctxCancel()
 			gerr = true
-			if err != context.Canceled {
+			if err != nil && err != context.Canceled {
 				return err
 			}
-		case <-nctx.Done():
-			return nctx.Err()
+		case <-handlerCtx.Done():
+			nctxCancel()
+			return handlerCtx.Err()
 		case <-rctx.Done():
+			nctxCancel()
 		}
 
 		// ensure we wait for resolve to return
 		if !gerr {
 			select {
 			case _ = <-errCh:
-			case <-nctx.Done():
-				return nctx.Err()
+			case <-handlerCtx.Done():
+				return handlerCtx.Err()
 			}
 		}
 
 		// wait for signal to restart resolver
 		select {
-		case <-nctx.Done():
-			return nctx.Err()
-		case rctx = <-r.handlerCh:
+		case <-handlerCtx.Done():
+			return handlerCtx.Err()
+		case rctx = <-r.resolutionCtxCh:
 		}
 
 		r.di.incrementRunningResolvers()

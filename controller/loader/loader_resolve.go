@@ -2,24 +2,35 @@ package loader
 
 import (
 	"context"
+	"time"
 
 	"github.com/aperturerobotics/controllerbus/controller"
 	"github.com/aperturerobotics/controllerbus/directive"
+	"github.com/cenkalti/backoff"
+	"github.com/pkg/errors"
 )
 
 // resolver tracks a ExecController request
 type resolver struct {
-	ctx        context.Context
-	directive  ExecController
-	controller *Controller
+	ctx         context.Context
+	directive   ExecController
+	controller  *Controller
+	execBackoff backoff.BackOff
+	lastErr     error
 }
 
 // newResolver builds a new ExecController resolver.
 func newResolver(ctx context.Context, directive ExecController, controller *Controller) *resolver {
+	ebo := backoff.NewExponentialBackOff()
+	ebo.InitialInterval = time.Millisecond * 500
+	ebo.MaxInterval = time.Second * 30
+	ebo.Multiplier = 2
+	ebo.MaxElapsedTime = time.Minute
 	return &resolver{
-		ctx:        ctx,
-		directive:  directive,
-		controller: controller,
+		ctx:         ctx,
+		directive:   directive,
+		controller:  controller,
+		execBackoff: ebo,
 	}
 }
 
@@ -38,32 +49,58 @@ func (c *Controller) resolveExecController(
 // When the context is canceled valCh will not be drained anymore.
 func (c *resolver) Resolve(ctx context.Context, vh directive.ResolverHandler) error {
 	// Construct and attach the new controller to the bus.
-	le := c.controller.le
+	factory := c.directive.GetExecControllerFactory()
+	le := c.controller.le.WithField("controller", factory.GetControllerID())
 	bus := c.controller.bus
 	config := c.directive.GetExecControllerConfig()
-	factory := c.directive.GetExecControllerFactory()
 
 	ci, err := factory.Construct(config, controller.ConstructOpts{
-		Logger: le.WithField("controller", factory.GetControllerID()),
+		Logger: le,
 	})
 	if err != nil {
 		return err
 	}
 
-	// type assertion
-	var civ ExecControllerValue = ci
-
-	// emit the value
-	vid, ok := vh.AddValue(civ)
-	if !ok {
-		// value rejected, drop the controller on the floor.
-		go ci.Close()
-		return nil
+	// execute the controller
+	var execNextBo time.Duration
+	if c.lastErr == nil {
+		c.execBackoff.Reset()
+	} else {
+		execNextBo = c.execBackoff.NextBackOff()
+		if execNextBo == -1 {
+			return errors.Wrap(c.lastErr, "backoff timeout exceeded")
+		}
 	}
 
-	// execute the controller
+	if execNextBo != 0 {
+		le.
+			WithField("backoff-duration", execNextBo.String()).
+			Debug("backing off before controller re-start")
+		boTimer := time.NewTimer(execNextBo)
+		defer boTimer.Stop()
+
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case <-boTimer.C:
+		}
+	}
+
 	go func() {
+		// type assertion
+		var civ ExecControllerValue = ci
+
+		// emit the value
+		vid, ok := vh.AddValue(civ)
+		if !ok {
+			// value rejected, drop the controller on the floor.
+			ci.Close()
+			return
+		}
+
+		le.Debug("executing controller")
 		err := bus.ExecuteController(c.ctx, ci)
+		c.lastErr = err
 		if err != nil {
 			le.WithError(err).Warn("controller exited with error")
 			vh.RemoveValue(vid)

@@ -78,6 +78,7 @@ func (c *DirectiveController) AddDirective(
 	var di *DirectiveInstance
 	var ref directive.Reference
 	di, ref = NewDirectiveInstance(c.ctx, dir, cb, func() {
+		// c.le.Debugf("removed directive: %#v", dir)
 		c.directivesMtx.Lock()
 		for i, d := range c.directives {
 			if d == di {
@@ -89,6 +90,7 @@ func (c *DirectiveController) AddDirective(
 		}
 		c.directivesMtx.Unlock()
 	})
+	// c.le.Debugf("added directive: %#v", dir)
 	c.directives = append(c.directives, di)
 	c.handlersMtx.Lock()
 	for _, handler := range c.handlers {
