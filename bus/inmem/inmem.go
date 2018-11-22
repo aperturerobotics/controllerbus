@@ -52,8 +52,9 @@ func (b *Bus) ExecuteController(ctx context.Context, c controller.Controller) er
 func (b *Bus) addController(c controller.Controller) {
 	b.controllersMtx.Lock()
 	b.controllers = append(b.controllers, c)
-	b.Controller.AddHandler(c)
 	b.controllersMtx.Unlock()
+
+	b.Controller.AddHandler(c)
 }
 
 // removeController removes a controller from the bus
@@ -64,7 +65,7 @@ func (b *Bus) removeController(c controller.Controller) {
 			b.controllers[i] = b.controllers[len(b.controllers)-1]
 			b.controllers[len(b.controllers)-1] = nil
 			b.controllers = b.controllers[:len(b.controllers)-1]
-			b.Controller.RemoveHandler(ci)
+			defer b.Controller.RemoveHandler(ci)
 			break
 		}
 	}

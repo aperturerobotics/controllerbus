@@ -61,7 +61,7 @@ func (c *DirectiveController) AddDirective(
 	}
 	le := c.le.WithField("directive", dirNameDebugStr)
 
-	c.directivesMtx.Lock()
+	c.directivesMtx.Lock() // lock first
 	defer c.directivesMtx.Unlock()
 
 	for ii := 0; ii < len(c.directives); ii++ {
@@ -91,7 +91,7 @@ func (c *DirectiveController) AddDirective(
 	var ref directive.Reference
 	di, ref = NewDirectiveInstance(c.ctx, dir, cb, func() {
 		le.Debug("removed directive")
-		c.directivesMtx.Lock()
+		c.directivesMtx.Lock() // lock first
 		for i, d := range c.directives {
 			if d == di {
 				c.directives[i] = c.directives[len(c.directives)-1]
@@ -123,10 +123,13 @@ func (c *DirectiveController) AddHandler(hnd directive.Handler) error {
 	c.handlers = append(c.handlers, ahnd)
 	c.handlersMtx.Unlock()
 
-	for _, dir := range c.directives {
+	dirs := make([]*DirectiveInstance, len(c.directives))
+	copy(dirs, c.directives)
+	c.directivesMtx.Unlock()
+
+	for _, dir := range dirs {
 		_ = c.callHandler(ahnd, dir)
 	}
-	c.directivesMtx.Unlock()
 
 	return nil
 }
@@ -154,7 +157,7 @@ func (c *DirectiveController) callHandler(ahnd *attachedHandler, inst *Directive
 	// It is safe to add a reference to the directive during this call.
 	hnd := ahnd.Handler
 	handleCtx, handleCtxCancel := context.WithCancel(ahnd.Context)
-	inst.AddDisposeCallback(handleCtxCancel)
+	go inst.AddDisposeCallback(handleCtxCancel)
 	resolver, err := hnd.HandleDirective(handleCtx, inst)
 	if err != nil {
 		return err
