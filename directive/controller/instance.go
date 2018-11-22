@@ -101,7 +101,9 @@ func (r *DirectiveInstance) AddReference(
 		go func() {
 			// cb should not block
 			for _, v := range r.vals {
-				cb.HandleValueAdded(r, v)
+				if cb != nil {
+					cb.HandleValueAdded(r, v)
+				}
 			}
 			r.valsMtx.Unlock()
 		}()
@@ -285,7 +287,9 @@ func (r *DirectiveInstance) callRel() {
 	r.released = true
 	r.refsMtx.Lock()
 	for _, ref := range r.refs {
-		go ref.valCb.HandleInstanceDisposed(r)
+		if ref.valCb != nil {
+			go ref.valCb.HandleInstanceDisposed(r)
+		}
 	}
 	r.refs = nil
 	r.refsMtx.Unlock()
