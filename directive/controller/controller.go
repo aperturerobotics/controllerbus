@@ -3,6 +3,7 @@ package controller
 import (
 	"context"
 	"errors"
+	"net/url"
 	"sync"
 
 	"github.com/aperturerobotics/controllerbus/directive"
@@ -49,6 +50,17 @@ func (c *DirectiveController) AddDirective(
 		return nil, nil, errors.New("directive cannot be nil")
 	}
 
+	var dirDebugStr string
+	if debugVals := dir.GetDebugVals(); debugVals != nil {
+		dirDebugStr = url.Values(debugVals).Encode()
+		dirDebugStr, _ = url.PathUnescape(dirDebugStr)
+	}
+	dirNameDebugStr := dir.GetName()
+	if dirDebugStr != "" {
+		dirNameDebugStr += "<" + dirDebugStr + ">"
+	}
+	le := c.le.WithField("directive", dirNameDebugStr)
+
 	c.directivesMtx.Lock()
 	defer c.directivesMtx.Unlock()
 
@@ -78,7 +90,7 @@ func (c *DirectiveController) AddDirective(
 	var di *DirectiveInstance
 	var ref directive.Reference
 	di, ref = NewDirectiveInstance(c.ctx, dir, cb, func() {
-		// c.le.Debugf("removed directive: %#v", dir)
+		le.Debug("removed directive")
 		c.directivesMtx.Lock()
 		for i, d := range c.directives {
 			if d == di {
@@ -90,12 +102,12 @@ func (c *DirectiveController) AddDirective(
 		}
 		c.directivesMtx.Unlock()
 	})
-	// c.le.Debugf("added directive: %#v", dir)
+	le.Debug("added directive")
 	c.directives = append(c.directives, di)
 	c.handlersMtx.Lock()
 	for _, handler := range c.handlers {
 		if err := c.callHandler(handler, di); err != nil {
-			c.le.WithError(err).Warn("unable to call directive handler")
+			le.WithError(err).Warn("unable to call directive handler")
 		}
 	}
 	c.handlersMtx.Unlock()
@@ -141,14 +153,16 @@ func (c *DirectiveController) callHandler(ahnd *attachedHandler, inst *Directive
 	// Any exceptional errors are returned for logging.
 	// It is safe to add a reference to the directive during this call.
 	hnd := ahnd.Handler
-	resolver, err := hnd.HandleDirective(ahnd.Context, inst)
+	handleCtx, handleCtxCancel := context.WithCancel(ahnd.Context)
+	inst.AddDisposeCallback(handleCtxCancel)
+	resolver, err := hnd.HandleDirective(handleCtx, inst)
 	if err != nil {
 		return err
 	}
 
 	if resolver != nil {
 		// attach resolver
-		inst.attachResolver(ahnd.Context, resolver)
+		inst.attachResolver(handleCtx, resolver)
 	}
 
 	return nil

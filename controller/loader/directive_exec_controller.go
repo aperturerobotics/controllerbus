@@ -87,6 +87,20 @@ func (d *ExecControllerSingleton) Superceeds(other directive.Directive) bool {
 	return f.GetVersion().GT(otherf.GetVersion())
 }
 
+// GetName returns the directive's type name.
+// This is not necessarily unique, and is primarily intended for display.
+func (d *ExecControllerSingleton) GetName() string {
+	return "ExecController"
+}
+
+// GetDebugVals returns the directive arguments as k/v pairs.
+// This is not necessarily unique, and is primarily intended for display.
+func (d *ExecControllerSingleton) GetDebugVals() directive.DebugValues {
+	vals := directive.NewDebugValues()
+	vals["config-id"] = []string{d.GetExecControllerConfig().GetConfigID()}
+	return vals
+}
+
 // _ is a type assertion
 var _ directive.Directive = ((*ExecControllerSingleton)(nil))
 

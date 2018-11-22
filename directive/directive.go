@@ -9,6 +9,15 @@ import (
 	// 	"github.com/golang/protobuf/proto"
 )
 
+// DebugValues maps string key to a list of values.
+// It is used for debug visualizations.
+type DebugValues map[string][]string
+
+// NewDebugValues constructs a new DebugValues.
+func NewDebugValues() DebugValues {
+	return DebugValues{}
+}
+
 // ValueOptions are options related to value handling.
 type ValueOptions struct {
 	// MaxValueCount indicates a maximum number of values to retrieve.
@@ -40,6 +49,15 @@ type Directive interface {
 	// Superceeds checks if the directive overrides another.
 	// The other directive will be canceled if superceded.
 	Superceeds(other Directive) bool
+
+	// GetName returns the directive's type name.
+	// This is not necessarily unique, and is primarily intended for display.
+	GetName() string
+
+	// GetDebugVals returns the directive arguments as key/value pairs.
+	// This should be something like param1="test", param2="test".
+	// This is not necessarily unique, and is primarily intended for display.
+	GetDebugVals() DebugValues
 }
 
 // Controller manages directives.

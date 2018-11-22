@@ -63,6 +63,21 @@ func (d *LoadControllerWithConfigSingleton) Superceeds(other directive.Directive
 	return false
 }
 
+// GetName returns the directive's type name.
+// This is not necessarily unique, and is primarily intended for display.
+func (d *LoadControllerWithConfigSingleton) GetName() string {
+	return "LoadControllerWithConfig"
+}
+
+// GetDebugVals returns the directive arguments as k/v pairs.
+// This is not necessarily unique, and is primarily intended for display.
+func (d *LoadControllerWithConfigSingleton) GetDebugVals() directive.DebugValues {
+	vals := directive.NewDebugValues()
+	confID := d.GetDesiredControllerConfig().GetConfigID()
+	vals["config-id"] = []string{confID}
+	return vals
+}
+
 // _ is a type assertion
 var _ directive.Directive = ((*LoadControllerWithConfigSingleton)(nil))
 

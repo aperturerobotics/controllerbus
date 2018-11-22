@@ -98,12 +98,16 @@ func (c *resolver) Resolve(ctx context.Context, vh directive.ResolverHandler) er
 			return
 		}
 
-		le.Debug("executing controller")
+		le.Debug("starting controller")
+		t1 := time.Now()
 		err := bus.ExecuteController(c.ctx, ci)
 		c.lastErr = err
+		le := le.WithField("exec-time", time.Now().Sub(t1).String())
 		if err != nil {
 			le.WithError(err).Warn("controller exited with error")
 			vh.RemoveValue(vid)
+		} else {
+			le.Debug("controller exited normally")
 		}
 	}()
 
