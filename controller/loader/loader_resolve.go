@@ -103,11 +103,13 @@ func (c *resolver) Resolve(ctx context.Context, vh directive.ResolverHandler) er
 		err := bus.ExecuteController(c.ctx, ci)
 		c.lastErr = err
 		le := le.WithField("exec-time", time.Now().Sub(t1).String())
-		if err != nil {
+		if err != nil && err != context.Canceled {
 			le.WithError(err).Warn("controller exited with error")
-			vh.RemoveValue(vid)
 		} else {
 			le.Debug("controller exited normally")
+		}
+		if err != nil {
+			vh.RemoveValue(vid)
 		}
 	}()
 
