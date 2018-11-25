@@ -14,6 +14,7 @@ type Bus interface {
 
 	// GetControllers returns a list of all currently active controllers.
 	GetControllers() []controller.Controller
+
 	// ExecuteController adds a controller to the bus and calls Execute().
 	// Any fatal error in the controller is returned.
 	// The controller will receive directive callbacks until this returns.

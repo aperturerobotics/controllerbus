@@ -57,7 +57,7 @@ func NewDirectiveInstance(
 	ctx context.Context,
 	dir directive.Directive,
 	cb directive.ReferenceHandler,
-	released func(),
+	released func(di *DirectiveInstance),
 ) (*DirectiveInstance, directive.Reference) {
 	i := &DirectiveInstance{ctx: ctx, dir: dir}
 	i.attachedResolverCtx, i.attachedResolverCtxCancel = context.WithCancel(ctx)
@@ -65,7 +65,9 @@ func NewDirectiveInstance(
 	i.rel = make(map[uint32]func())
 	i.idleCallbacks = make(map[uint32]func())
 	if released != nil {
-		i.rel[0] = released
+		i.rel[0] = func() {
+			released(i)
+		}
 		i.nrelID++
 	}
 	i.valueOpts = dir.GetValueOptions()
@@ -96,20 +98,13 @@ func (r *DirectiveInstance) AddReference(
 
 	r.refsMtx.Lock()
 	r.valsMtx.Lock()
-	// avoid calling cb() before returning addreference
-	defer func() {
-		go func() {
-			// cb should not block
-			for _, v := range r.vals {
-				if cb != nil {
-					cb.HandleValueAdded(r, v)
-				}
-			}
-			r.valsMtx.Unlock()
-		}()
-	}()
-
 	r.refs = append(r.refs, ref)
+	for _, v := range r.vals {
+		if cb != nil {
+			go cb.HandleValueAdded(r, v)
+		}
+	}
+	r.valsMtx.Unlock()
 	r.refsMtx.Unlock()
 
 	return ref
@@ -278,13 +273,14 @@ func (r *DirectiveInstance) Close() {
 // callRel calls the release callbacks.
 func (r *DirectiveInstance) callRel() {
 	r.relMtx.Lock()
-	defer r.relMtx.Unlock()
 
 	if r.released {
 		return
 	}
 
 	r.released = true
+	r.relMtx.Unlock()
+
 	r.refsMtx.Lock()
 	for _, ref := range r.refs {
 		if ref.valCb != nil {

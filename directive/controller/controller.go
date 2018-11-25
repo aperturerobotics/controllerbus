@@ -75,10 +75,6 @@ func (c *DirectiveController) AddDirective(
 
 			ref := di.AddReference(cb, false)
 			if ref == nil {
-				c.directives[ii] = c.directives[len(c.directives)-1]
-				c.directives[len(c.directives)-1] = nil
-				c.directives = c.directives[:len(c.directives)-1]
-				ii--
 				continue
 			} else {
 				return di, ref, nil
@@ -87,9 +83,7 @@ func (c *DirectiveController) AddDirective(
 	}
 
 	// Build new reference
-	var di *DirectiveInstance
-	var ref directive.Reference
-	di, ref = NewDirectiveInstance(c.ctx, dir, cb, func() {
+	di, ref := NewDirectiveInstance(c.ctx, dir, cb, func(di *DirectiveInstance) {
 		le.Debug("removed directive")
 		c.directivesMtx.Lock() // lock first
 		for i, d := range c.directives {
@@ -147,6 +141,17 @@ func (c *DirectiveController) RemoveHandler(hnd directive.Handler) {
 		}
 	}
 	c.handlersMtx.Unlock()
+}
+
+// GetDirectives returns a list of all currently active directives.
+func (c *DirectiveController) GetDirectives() []directive.Instance {
+	c.directivesMtx.Lock()
+	d := make([]directive.Instance, len(c.directives))
+	for i := range c.directives {
+		d[i] = c.directives[i]
+	}
+	c.directivesMtx.Unlock()
+	return d
 }
 
 // callHandler calls the directive handler with the directive, managing the resolver if returned.

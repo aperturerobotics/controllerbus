@@ -77,6 +77,9 @@ type Controller interface {
 
 	// RemoveHandler removes a directive handler.
 	RemoveHandler(Handler)
+
+	// GetDirectives returns a list of all currently executing directives.
+	GetDirectives() []Instance
 }
 
 // Reference is a reference to a directive.
