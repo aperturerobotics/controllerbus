@@ -3,6 +3,7 @@ package controller
 import (
 	"context"
 	"sync"
+	"time"
 
 	"github.com/aperturerobotics/controllerbus/directive"
 )
@@ -36,6 +37,8 @@ type DirectiveInstance struct {
 	rel map[uint32]func()
 	// released flags the instance as released
 	released bool
+	// unrefDestroyTimer is the timer to call Close()
+	unrefDestroyTimer *time.Timer
 
 	// attachedResolversMtx guards attachedResolvers
 	attachedResolversMtx sync.Mutex
@@ -294,10 +297,12 @@ func (r *DirectiveInstance) callRel() {
 	r.vals = nil
 	r.valsMtx.Unlock()
 
-	for _, ref := range r.rel {
-		go ref()
-	}
+	rel := r.rel
 	r.rel = nil
+	for _, ref := range rel {
+		// go ref()
+		ref()
+	}
 }
 
 // attachResolver calls and attaches a directive resolver.
@@ -371,6 +376,56 @@ func (r *DirectiveInstance) decrementRunningResolvers() {
 		}
 	}
 	r.attachedResolversMtx.Unlock()
+}
+
+// releaseReference releases a instance reference.
+func (r *DirectiveInstance) releaseReference(dr *directiveInstanceReference) {
+	r.refsMtx.Lock()
+	found := false
+	nonWeakRefCount := 0
+	for i := 0; i < len(r.refs); i++ {
+		ref := r.refs[i]
+		if !found && ref == dr {
+			found = true
+			r.refs[i] = r.refs[len(r.refs)-1]
+			r.refs[len(r.refs)-1] = nil
+			r.refs = r.refs[:len(r.refs)-1]
+			i--
+		} else if ref != nil && !ref.weakRef {
+			nonWeakRefCount++
+		}
+
+		if found && nonWeakRefCount != 0 {
+			break
+		}
+	}
+
+	if nonWeakRefCount == 0 {
+		r.markUnreferenced()
+	} else {
+		r.markReferenced()
+	}
+	r.refsMtx.Unlock()
+}
+
+// markUnreferenced requires refsMtx is locked, and starts the Close() timer
+func (r *DirectiveInstance) markUnreferenced() {
+	if r.unrefDestroyTimer == nil {
+		udd := r.valueOpts.UnrefDisposeDur
+		if udd == 0 {
+			go r.Close()
+		} else {
+			r.unrefDestroyTimer = time.AfterFunc(udd, r.Close)
+		}
+	}
+}
+
+// markReferenced requires refsMtx is locked, and stops the Close() timer
+func (r *DirectiveInstance) markReferenced() {
+	if r.unrefDestroyTimer != nil {
+		r.unrefDestroyTimer.Stop()
+		r.unrefDestroyTimer = nil
+	}
 }
 
 // _ is a type assertion

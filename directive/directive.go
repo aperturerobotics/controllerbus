@@ -6,6 +6,7 @@ package directive
 
 import (
 	"context"
+	"time"
 	// 	"github.com/golang/protobuf/proto"
 )
 
@@ -30,6 +31,10 @@ type ValueOptions struct {
 	// it is a hard cap, any values found after resolvers are canceled will be
 	// rejected.
 	MaxValueHardCap bool
+
+	// UnrefDisposeDur is the duration to wait to dispose a directive after all
+	// references have been released.
+	UnrefDisposeDur time.Duration
 }
 
 // Directive implements a requested state (with a set of values).
