@@ -100,6 +100,8 @@ func (r *DirectiveInstance) AddReference(
 	}
 
 	r.refsMtx.Lock()
+	r.markReferenced()
+
 	r.valsMtx.Lock()
 	r.refs = append(r.refs, ref)
 	for _, v := range r.vals {
