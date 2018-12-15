@@ -59,10 +59,8 @@ func (r *loadWithConfigResolver) Resolve(ctx context.Context, vh directive.Resol
 	}
 
 	// cancel the reference when ctx is canceled
-	// TODO: handle early dispose of exec directive?
 	go func() {
 		<-valCtx.Done()
-		// valCtxCancel()
 		execRef.Release()
 		_, _ = vh.RemoveValue(vid)
 	}()

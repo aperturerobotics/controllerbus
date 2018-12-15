@@ -25,7 +25,12 @@ func NewController(bus bus.Bus, resolver controller.FactoryResolver) *Controller
 
 // GetControllerID returns the controller ID.
 func (c *Controller) GetControllerID() string {
-	return strings.Join([]string{"controllerbus", "resolver", c.resolver.GetResolverID(), c.resolver.GetResolverVersion().String()}, "/")
+	return strings.Join([]string{
+		"controllerbus",
+		"resolver",
+		c.resolver.GetResolverID(),
+		c.resolver.GetResolverVersion().String(),
+	}, "/")
 }
 
 // GetControllerInfo returns information about the controller.
