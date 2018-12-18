@@ -1,0 +1,12 @@
+syntax = "proto3";
+package controller.exec;
+
+// ControllerStatus holds basic status for a controller.
+enum ControllerStatus {
+  // ControllerStatus_UNKNOWN is unrecognized.
+  ControllerStatus_UNKNOWN = 0;
+  // ControllerStatus_CONFIGURING indicates the controller is configuring.
+  ControllerStatus_CONFIGURING = 1;
+  // ControllerStatus_RUNNING indicates the controller is running.
+  ControllerStatus_RUNNING = 2;
+}

@@ -10,6 +10,11 @@ type MockDirective struct {
 	ValueOpts   directive.ValueOptions
 }
 
+// GetName returns the directive name.
+func (m *MockDirective) GetName() string {
+	return "Mock"
+}
+
 // Validate validates the directive.
 // This is a cursory validation to see if the values "look correct."
 func (m *MockDirective) Validate() error {
@@ -31,6 +36,13 @@ func (m *MockDirective) IsEquivalent(other directive.Directive) bool {
 // The other directive will be canceled if superceded.
 func (m *MockDirective) Superceeds(other directive.Directive) bool {
 	return false
+}
+
+// GetDebugVals returns the directive arguments as key/value pairs.
+// This should be something like param1="test", param2="test".
+// This is not necessarily unique, and is primarily intended for display.
+func (m *MockDirective) GetDebugVals() directive.DebugValues {
+	return directive.DebugValues{}
 }
 
 // _ is a type assertion
