@@ -18,7 +18,7 @@ func ExecuteController(
 	if cb == nil {
 		cb = func(ControllerStatus) {}
 	}
-	dir := resolver.NewLoadControllerWithConfigSingleton(conf)
+	dir := resolver.NewLoadControllerWithConfig(conf)
 
 	cb(ControllerStatus_ControllerStatus_CONFIGURING)
 	_, valRef, err := bus.ExecOneOff(ctx, cbus, dir, nil)

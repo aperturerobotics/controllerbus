@@ -47,13 +47,13 @@ func (r *Resolver) GetResolverVersion() semver.Version {
 
 // AddFactory adds a factory to the resolver.
 func (r *Resolver) AddFactory(factory controller.Factory) {
-	controllerID := factory.GetControllerID()
+	configID := factory.GetConfigID()
 	version := factory.GetVersion()
 
 	r.factoryMtx.Lock()
 	defer r.factoryMtx.Unlock()
 
-	existing, ok := r.factories[controllerID]
+	existing, ok := r.factories[configID]
 	if ok {
 		existingVer := existing.GetVersion()
 		if existingVer.GTE(version) {
@@ -61,23 +61,25 @@ func (r *Resolver) AddFactory(factory controller.Factory) {
 		}
 	}
 
-	r.factories[controllerID] = factory
+	r.factories[configID] = factory
 }
 
-// GetConfigByID returns a config object and factory matching the ID.
+// GetConfigCtorByID returns a config constructor matching the ID.
 // If none found, return nil, nil
-func (r *Resolver) GetConfigByID(
+func (r *Resolver) GetConfigCtorByID(
 	ctx context.Context, id string,
-) (config.Config, controller.Factory, error) {
+) (config.Constructor, error) {
 	r.factoryMtx.Lock()
 	defer r.factoryMtx.Unlock()
 
-	f, ok := r.factories[id]
-	if !ok {
-		return nil, nil, nil
+	for _, f := range r.factories {
+		cid := f.GetConfigID()
+		if cid == id {
+			return newConfigCtor(cid, f), nil
+		}
 	}
 
-	return f.ConstructConfig(), f, nil
+	return nil, nil
 }
 
 // GetFactoryMatchingConfig returns the factory that matches the config.
@@ -89,11 +91,9 @@ func (r *Resolver) GetFactoryMatchingConfig(
 	r.factoryMtx.Lock()
 	defer r.factoryMtx.Unlock()
 
-	for _, f := range r.factories {
-		cid := f.ConstructConfig().GetConfigID()
-		if cid == c.GetConfigID() {
-			return f, nil
-		}
+	f, ok := r.factories[c.GetConfigID()]
+	if ok {
+		return f, nil
 	}
 
 	return nil, nil

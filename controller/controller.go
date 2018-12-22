@@ -47,6 +47,8 @@ func (c *ConstructOpts) GetLogger() *logrus.Entry {
 type Factory interface {
 	// GetControllerID returns the unique ID for the controller.
 	GetControllerID() string
+	// GetConfigID returns the unique config ID for the controller.
+	GetConfigID() string
 	// ConstructConfig constructs an instance of the controller configuration.
 	ConstructConfig() config.Config
 	// Construct constructs the associated controller given configuration.
@@ -62,9 +64,9 @@ type FactoryResolver interface {
 	GetResolverID() string
 	// GetResolverVersion returns the resolver version.
 	GetResolverVersion() semver.Version
-	// GetConfigByID returns a config object and factory matching the ID.
+	// GetConfigCtorByID returns a config constructor by ID.
 	// If none found, return nil, nil
-	GetConfigByID(ctx context.Context, id string) (config.Config, Factory, error)
+	GetConfigCtorByID(ctx context.Context, id string) (config.Constructor, error)
 	// GetFactoryMatchingConfig returns the factory that matches the config.
 	// If no factory is found, return nil.
 	// If an unexpected error occurs, return it.
