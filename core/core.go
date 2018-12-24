@@ -5,6 +5,7 @@ import (
 	"github.com/aperturerobotics/controllerbus/bus"
 	"github.com/aperturerobotics/controllerbus/bus/inmem"
 	"github.com/aperturerobotics/controllerbus/controller"
+	"github.com/aperturerobotics/controllerbus/controller/configset/controller"
 	"github.com/aperturerobotics/controllerbus/controller/loader"
 	"github.com/aperturerobotics/controllerbus/controller/resolver"
 	"github.com/aperturerobotics/controllerbus/controller/resolver/static"
@@ -37,5 +38,6 @@ func NewCoreBus(
 		resolver.NewController(b, sr),
 	)
 
+	sr.AddFactory(configset_controller.NewFactory(b))
 	return b, sr, nil
 }

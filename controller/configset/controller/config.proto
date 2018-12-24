@@ -1,0 +1,7 @@
+syntax = "proto3";
+package configset.controller;
+
+// Config is the configset controller configuration.
+message Config {
+  // TODO Future options might control how configsets are merged.
+}

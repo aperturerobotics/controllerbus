@@ -48,8 +48,11 @@ func (c *Controller) GetControllerInfo() controller.Info {
 // It is safe to add a reference to the directive during this call.
 func (c *Controller) HandleDirective(ctx context.Context, di directive.Instance) (directive.Resolver, error) {
 	dir := di.GetDirective()
-	if d, ok := dir.(LoadControllerWithConfig); ok {
+	switch d := dir.(type) {
+	case LoadControllerWithConfig:
 		return c.resolveLoadControllerWithConfig(ctx, d)
+	case LoadConfigConstructorByID:
+		return c.resolveLoadConfigConstructorByID(ctx, d)
 	}
 
 	return nil, nil

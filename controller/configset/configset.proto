@@ -1,0 +1,26 @@
+syntax = "proto3";
+package configset;
+
+// ConfigSet is a set of uniquely identified controllers to be executed.
+// ConfigSets can be loaded from configuration files, or other sources. The
+// ConfigSet controller merges all desired ConfigSets together and executes the
+// resultant set.
+//
+// Configurations are applied with the ApplyConfigSet directive.
+message ConfigSet {
+  // ControllerConfigs contains the mapping of unique controller ID to
+  // configuration object.
+  map<string, ControllerConfig> controller_configs = 1;
+}
+
+// ControllerConfig contains an encoded controllerbus config object.
+message ControllerConfig {
+  // ConfigId is the configuration ID. This will be used to construct the
+  // appropriate config object on the heap.
+  string config_id = 1;
+  // Data is the encoded protobuf configuration object.
+  bytes data = 2;
+  // Revision is the revision number of the configuration.
+  // Higher revision numbers take precedence.
+  uint64 revision = 3;
+}
