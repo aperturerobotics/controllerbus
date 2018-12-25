@@ -49,12 +49,12 @@ func (r *applyConfigSetResolver) Resolve(
 	handler directive.ResolverHandler,
 ) error {
 	confSet := r.dir.GetApplyConfigSet()
-	if confSet.GetControllerConfigs() == nil {
+	if confSet == nil {
 		return nil
 	}
 
 	// For each key/value controller config...
-	for k, v := range confSet.GetControllerConfigs() {
+	for k, v := range confSet {
 		if k == "" {
 			continue
 		}

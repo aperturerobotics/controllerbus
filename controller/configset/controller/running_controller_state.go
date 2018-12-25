@@ -7,11 +7,11 @@ import (
 // runningControllerState implements configset state
 type runningControllerState struct {
 	err  error
-	conf *configset.ControllerConfig
+	conf configset.ControllerConfig
 }
 
 // GetControllerConfig returns the current controller config in use.
-func (s *runningControllerState) GetControllerConfig() *configset.ControllerConfig {
+func (s *runningControllerState) GetControllerConfig() configset.ControllerConfig {
 	return s.conf
 }
 

@@ -116,7 +116,7 @@ func (c *Controller) GetControllerInfo() controller.Info {
 func (c *Controller) PushControllerConfig(
 	ctx context.Context,
 	key string,
-	conf *configset.ControllerConfig,
+	conf configset.ControllerConfig,
 ) (configset.Reference, error) {
 	c.mtx.Lock()
 	defer c.mtx.Unlock()

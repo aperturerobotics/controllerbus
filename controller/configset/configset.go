@@ -3,6 +3,7 @@ package configset
 import (
 	"context"
 
+	"github.com/aperturerobotics/controllerbus/config"
 	"github.com/aperturerobotics/controllerbus/controller"
 )
 
@@ -16,8 +17,46 @@ type Controller interface {
 	PushControllerConfig(
 		ctx context.Context,
 		key string,
-		conf *ControllerConfig,
+		conf ControllerConfig,
 	) (Reference, error)
+}
+
+// ConfigSet is a key/value set of controller configs.
+type ConfigSet map[string]ControllerConfig
+
+// Equal checks if the configset is equal to the other.
+func (c ConfigSet) Equal(os ConfigSet) bool {
+	if os == nil || c == nil {
+		return false
+	}
+	for k, v := range c {
+		ov, ok := os[k]
+		if !ok {
+			return false
+		}
+		if !ov.GetConfig().EqualsConfig(v.GetConfig()) {
+			return false
+		}
+		if ov.GetRevision() != v.GetRevision() {
+			return false
+		}
+	}
+
+	for k := range os {
+		if _, ok := c[k]; !ok {
+			return false
+		}
+	}
+
+	return true
+}
+
+// ControllerConfig is a wrapped controller configuration.
+type ControllerConfig interface {
+	// GetRevision returns the revision.
+	GetRevision() uint64
+	// GetConfig returns the config object.
+	GetConfig() config.Config
 }
 
 // Reference is a reference to a pushed controller config. The reference is used
@@ -41,7 +80,7 @@ type Reference interface {
 // State contains controller state.
 type State interface {
 	// GetControllerConfig returns the current controller config in use.
-	GetControllerConfig() *ControllerConfig
+	GetControllerConfig() ControllerConfig
 	// GetError returns any error processing the controller config.
 	GetError() error
 }

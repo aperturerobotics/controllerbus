@@ -2,7 +2,6 @@ package configset
 
 import (
 	"github.com/aperturerobotics/controllerbus/directive"
-	"github.com/golang/protobuf/proto"
 	"strconv"
 	"strings"
 )
@@ -14,7 +13,7 @@ type ApplyConfigSet interface {
 	directive.Directive
 
 	// GetApplyConfigSet returns the configset to apply.
-	GetApplyConfigSet() *ConfigSet
+	GetApplyConfigSet() ConfigSet
 }
 
 // ApplyConfigSetValue is the result type for ApplyConfigSet.
@@ -23,18 +22,18 @@ type ApplyConfigSetValue = State
 
 // applyConfigSet implements ApplyConfigSet
 type applyConfigSet struct {
-	configSet *ConfigSet
+	configSet ConfigSet
 }
 
 // NewApplyConfigSet constructs a new ApplyConfigSet directive.
-func NewApplyConfigSet(configSet *ConfigSet) ApplyConfigSet {
+func NewApplyConfigSet(configSet ConfigSet) ApplyConfigSet {
 	return &applyConfigSet{
 		configSet: configSet,
 	}
 }
 
 // GetApplyConfigSet returns the configset to apply.
-func (d *applyConfigSet) GetApplyConfigSet() *ConfigSet {
+func (d *applyConfigSet) GetApplyConfigSet() ConfigSet {
 	return d.configSet
 }
 
@@ -58,7 +57,7 @@ func (d *applyConfigSet) IsEquivalent(other directive.Directive) bool {
 		return false
 	}
 
-	return proto.Equal(od.GetApplyConfigSet(), d.GetApplyConfigSet())
+	return d.GetApplyConfigSet().Equal(od.GetApplyConfigSet())
 }
 
 // Superceeds checks if the directive overrides another.
@@ -78,12 +77,10 @@ func (d *applyConfigSet) GetName() string {
 // This is not necessarily unique, and is primarily intended for display.
 func (d *applyConfigSet) GetDebugVals() directive.DebugValues {
 	vals := directive.DebugValues{}
-	confIDs := make([]string, len(d.GetApplyConfigSet().GetControllerConfigs()))
+	confIDs := make([]string, len(d.GetApplyConfigSet()))
 	if len(confIDs) != 0 {
 		i := 0
-		for k, v := range d.GetApplyConfigSet().GetControllerConfigs() {
-
-			v.GetRevision()
+		for k, v := range d.GetApplyConfigSet() {
 			confIDs[i] = strings.Join([]string{
 				k,
 				"@",

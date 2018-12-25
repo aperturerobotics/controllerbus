@@ -5,10 +5,8 @@ import (
 	"sync"
 
 	"github.com/aperturerobotics/controllerbus/bus"
-	"github.com/aperturerobotics/controllerbus/config"
 	"github.com/aperturerobotics/controllerbus/controller/configset"
 	"github.com/aperturerobotics/controllerbus/controller/resolver"
-	"github.com/golang/protobuf/proto"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 )
@@ -22,7 +20,7 @@ type runningController struct {
 	// key is the controller key
 	key string
 	// conf is the controller config
-	conf *configset.ControllerConfig
+	conf configset.ControllerConfig
 	// confRestartCh indicates the controller should be restarted
 	confRestartCh chan struct{}
 
@@ -37,7 +35,7 @@ type runningController struct {
 func newRunningController(
 	c *Controller,
 	key string,
-	conf *configset.ControllerConfig,
+	conf configset.ControllerConfig,
 ) *runningController {
 	return &runningController{
 		c:             c,
@@ -74,25 +72,27 @@ func (c *runningController) Execute(ctx context.Context) (rerr error) {
 		c.mtx.Unlock()
 
 		// load config constructor by id
-		c.le.Debug("loading config constructor")
-		configCtorDir := resolver.NewLoadConfigConstructorByID(conf.GetConfigId())
-		configCtorVal, configCtorRef, err := bus.ExecOneOff(ctx, c.c.bus, configCtorDir, nil)
-		if err != nil {
-			return errors.WithMessage(err, "resolve config object")
-		}
+		/*
+			c.le.Debug("loading config constructor")
+			configCtorDir := resolver.NewLoadConfigConstructorByID(conf.GetConfigId())
+			configCtorVal, configCtorRef, err := bus.ExecOneOff(ctx, c.c.bus, configCtorDir, nil)
+			if err != nil {
+				return errors.WithMessage(err, "resolve config object")
+			}
 
-		confObj := configCtorVal.(config.Constructor).ConstructConfig()
-		if err := proto.Unmarshal(conf.GetData(), confObj); err != nil {
-			configCtorRef.Release()
-			return errors.WithMessage(err, "unmarshal config")
-		}
+			confObj := configCtorVal.(config.Constructor).ConstructConfig()
+			if err := proto.Unmarshal(conf.GetData(), confObj); err != nil {
+				configCtorRef.Release()
+				return errors.WithMessage(err, "unmarshal config")
+			}
+		*/
 
 		// execute the controller with the current config
 		valCtx, valCtxCancel := context.WithCancel(ctx)
-		execDir := resolver.NewLoadControllerWithConfig(confObj)
+		execDir := resolver.NewLoadControllerWithConfig(conf.GetConfig())
 		c.le.Debug("executing controller")
 		_, execRef, err := bus.ExecOneOff(valCtx, c.c.bus, execDir, valCtxCancel)
-		configCtorRef.Release()
+		// configCtorRef.Release()
 		if err != nil {
 			valCtxCancel()
 			return errors.WithMessage(err, "exec controller")
@@ -115,7 +115,7 @@ func (c *runningController) Execute(ctx context.Context) (rerr error) {
 
 // GetControllerConfig returns the controller config in use.
 // The value will be revoked and re-emitted if this changes.
-func (c *runningController) GetControllerConfig() *configset.ControllerConfig {
+func (c *runningController) GetControllerConfig() configset.ControllerConfig {
 	return c.conf
 }
 
@@ -150,7 +150,7 @@ func (c *runningController) DelReference(ref *runningControllerRef) {
 }
 
 // ApplyConfig applies a configuration if the revision is newer
-func (c *runningController) ApplyConfig(conf *configset.ControllerConfig) bool {
+func (c *runningController) ApplyConfig(conf configset.ControllerConfig) bool {
 	c.mtx.Lock()
 	defer c.mtx.Unlock()
 
