@@ -97,9 +97,9 @@ type Reference interface {
 // ReferenceHandler handles values emitted by the directive instance.
 type ReferenceHandler interface {
 	// HandleValueAdded is called when a value is added to the directive.
-	HandleValueAdded(Instance, Value)
+	HandleValueAdded(Instance, AttachedValue)
 	// HandleValueRemoved is called when a value is removed from the directive.
-	HandleValueRemoved(Instance, Value)
+	HandleValueRemoved(Instance, AttachedValue)
 	// HandleInstanceDisposed is called when a directive instance is disposed.
 	// This will occur if Close() is called on the directive instance.
 	HandleInstanceDisposed(Instance)
@@ -135,6 +135,14 @@ type Instance interface {
 
 // Value satisfies a directive.
 type Value interface{}
+
+// AttachedValue is a value with some metadata.
+type AttachedValue interface {
+	// GetValueID returns the value ID.
+	GetValueID() uint32
+	// GetValue returns the value.
+	GetValue() Value
+}
 
 // ResolverHandler handles values emitted by the resolver.
 type ResolverHandler interface {

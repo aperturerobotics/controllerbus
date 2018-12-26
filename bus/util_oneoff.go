@@ -18,7 +18,7 @@ func ExecOneOff(
 		dir,
 		&CallbackHandler{
 			disposeCb: valDisposeCallback,
-			valCb: func(v directive.Value) {
+			valCb: func(v directive.AttachedValue) {
 				select {
 				case valCh <- v:
 				case <-ctx.Done():

@@ -27,7 +27,7 @@ type DirectiveInstance struct {
 	// nvalID stores the next value id
 	nvalID uint32
 	// vals is the map of emitted values
-	vals map[uint32]directive.Value
+	vals map[uint32]*attachedValue
 
 	// relMtx guards rel
 	relMtx sync.Mutex
@@ -64,7 +64,7 @@ func NewDirectiveInstance(
 ) (*DirectiveInstance, directive.Reference) {
 	i := &DirectiveInstance{ctx: ctx, dir: dir}
 	i.attachedResolverCtx, i.attachedResolverCtxCancel = context.WithCancel(ctx)
-	i.vals = make(map[uint32]directive.Value)
+	i.vals = make(map[uint32]*attachedValue)
 	i.rel = make(map[uint32]func())
 	i.idleCallbacks = make(map[uint32]func())
 	if released != nil {
@@ -138,9 +138,11 @@ func (r *DirectiveInstance) emitValue(v directive.Value) (uint32, bool) {
 		}
 	}
 	nvid := r.nvalID
+	var nav *attachedValue
 	if !reject {
 		r.nvalID++
-		r.vals[nvid] = v
+		nav = newAttachedValue(nvid, v)
+		r.vals[nvid] = nav
 	}
 	r.valsMtx.Unlock()
 
@@ -151,7 +153,7 @@ func (r *DirectiveInstance) emitValue(v directive.Value) (uint32, bool) {
 	r.refsMtx.Lock()
 	for _, ref := range r.refs {
 		if ref != nil && ref.valCb != nil {
-			ref.valCb.HandleValueAdded(r, v)
+			ref.valCb.HandleValueAdded(r, nav)
 		}
 	}
 	r.refsMtx.Unlock()
