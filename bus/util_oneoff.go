@@ -12,8 +12,8 @@ func ExecOneOff(
 	bus Bus,
 	dir directive.Directive,
 	valDisposeCallback func(),
-) (directive.Value, directive.Reference, error) {
-	valCh := make(chan directive.Value, 1)
+) (directive.AttachedValue, directive.Reference, error) {
+	valCh := make(chan directive.AttachedValue, 1)
 	_, ref, err := bus.AddDirective(
 		dir,
 		&CallbackHandler{
