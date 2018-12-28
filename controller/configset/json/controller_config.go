@@ -37,6 +37,9 @@ func (c *ControllerConfig) GetRevision() uint64 {
 
 // Resolve resolves the config into a configset.ControllerConfig
 func (c *ControllerConfig) Resolve(ctx context.Context, b bus.Bus) (configset.ControllerConfig, error) {
+	if c == nil {
+		return nil, nil
+	}
 	if c.Config == nil {
 		return nil, errors.New("config was not specified")
 	}

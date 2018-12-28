@@ -52,7 +52,7 @@ func (r *loadWithConfigResolver) Resolve(ctx context.Context, vh directive.Resol
 		return err
 	}
 
-	vid, added := vh.AddValue(execVal)
+	vid, added := vh.AddValue(execVal.GetValue())
 	if !added {
 		execRef.Release()
 		return errors.New("exec controller value rejected, likely due to duplicate controller load")
