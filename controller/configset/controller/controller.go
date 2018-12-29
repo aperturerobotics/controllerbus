@@ -58,7 +58,16 @@ ExecLoop:
 
 		c.mtx.Lock()
 		for k, cancel := range execControllers {
-			if _, ok := c.controllers[k]; !ok {
+			cv, ok := c.controllers[k]
+			if ok {
+				cv.mtx.Lock()
+				if len(cv.refs) == 0 {
+					delete(c.controllers, k)
+					ok = false
+				}
+				cv.mtx.Unlock()
+			}
+			if !ok {
 				cancel()
 				delete(execControllers, k)
 			}

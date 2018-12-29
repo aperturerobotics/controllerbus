@@ -72,7 +72,6 @@ type Reference interface {
 	// Should not block.
 	// Will be called with the initial state.
 	AddStateCb(func(State))
-	// AddChangeCb adds a callback that is called when controllerconfig, error,
 	// Release releases the reference.
 	Release()
 }

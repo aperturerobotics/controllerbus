@@ -53,9 +53,21 @@ func (r *applyConfigSetResolver) Resolve(
 		return nil
 	}
 
+	// Catalog existing references
+	existingRefs := make(map[string]directive.Reference)
+	r.refsMtx.Lock()
+	for ref := range r.refs {
+		existingRefs[ref.GetConfigKey()] = ref
+	}
+	r.refsMtx.Unlock()
+
 	// For each key/value controller config...
 	for k, v := range confSet {
 		if k == "" {
+			continue
+		}
+
+		if _, ok := existingRefs[k]; ok {
 			continue
 		}
 
