@@ -39,7 +39,7 @@ func (c *ControllerConfig) Resolve(ctx context.Context, b bus.Bus) (configset.Co
 	}
 	defer configCtorRef.Release()
 
-	ctor, ctorOk := configCtorVal.(config.Constructor)
+	ctor, ctorOk := configCtorVal.GetValue().(config.Constructor)
 	if !ctorOk {
 		return nil, errors.New("load config constructor directive returned invalid object")
 	}

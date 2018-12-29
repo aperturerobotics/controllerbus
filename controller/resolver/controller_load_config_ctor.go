@@ -46,6 +46,10 @@ func (r *LoadConfigConstructorByIDResolver) Resolve(
 		return err
 	}
 
+	if ctor == nil {
+		return nil
+	}
+
 	vh.AddValue(ctor)
 	return nil
 }

@@ -27,7 +27,7 @@ func (c *Config) Resolve(ctx context.Context, configID string, b bus.Bus) error 
 	}
 	defer configCtorRef.Release()
 
-	ctor, ctorOk := configCtorVal.(config.Constructor)
+	ctor, ctorOk := configCtorVal.GetValue().(config.Constructor)
 	if !ctorOk {
 		return errors.New("load config constructor directive returned invalid object")
 	}

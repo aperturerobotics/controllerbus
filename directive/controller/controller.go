@@ -49,6 +49,9 @@ func (c *DirectiveController) AddDirective(
 	if dir == nil {
 		return nil, nil, errors.New("directive cannot be nil")
 	}
+	if err := dir.Validate(); err != nil {
+		return nil, nil, err
+	}
 
 	var dirDebugStr string
 	if debugVals := dir.GetDebugVals(); debugVals != nil {
