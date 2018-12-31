@@ -97,6 +97,10 @@ func (c *runningController) Execute(ctx context.Context) (rerr error) {
 		// configCtorRef.Release()
 		if err != nil {
 			valCtxCancel()
+			if err == context.Canceled {
+				return err
+			}
+
 			return errors.WithMessage(err, "exec controller")
 		}
 		c.mtx.Lock()
