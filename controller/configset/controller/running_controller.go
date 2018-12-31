@@ -5,6 +5,7 @@ import (
 	"sync"
 
 	"github.com/aperturerobotics/controllerbus/bus"
+	"github.com/aperturerobotics/controllerbus/controller"
 	"github.com/aperturerobotics/controllerbus/controller/configset"
 	"github.com/aperturerobotics/controllerbus/controller/resolver"
 	"github.com/pkg/errors"
@@ -59,6 +60,7 @@ func (c *runningController) Execute(ctx context.Context) (rerr error) {
 				c.le.WithError(rerr).Warn("controller exited with error")
 			}
 			c.mtx.Lock()
+			c.state.ctrl = nil
 			c.state.err = rerr
 			s := c.state
 			c.pushState(&s)
@@ -91,13 +93,17 @@ func (c *runningController) Execute(ctx context.Context) (rerr error) {
 		valCtx, valCtxCancel := context.WithCancel(ctx)
 		execDir := resolver.NewLoadControllerWithConfig(conf.GetConfig())
 		c.le.Debug("executing controller")
-		_, execRef, err := bus.ExecOneOff(valCtx, c.c.bus, execDir, valCtxCancel)
+		ev, execRef, err := bus.ExecOneOff(valCtx, c.c.bus, execDir, valCtxCancel)
 		// configCtorRef.Release()
 		if err != nil {
 			valCtxCancel()
 			return errors.WithMessage(err, "exec controller")
 		}
-
+		c.mtx.Lock()
+		c.state.ctrl, _ = ev.GetValue().(controller.Controller)
+		s := c.state
+		c.pushState(&s)
+		c.mtx.Unlock()
 		select {
 		case <-ctx.Done():
 			execRef.Release()
@@ -109,6 +115,11 @@ func (c *runningController) Execute(ctx context.Context) (rerr error) {
 			valCtxCancel()
 			execRef.Release()
 			c.le.Debug("restarting with new config")
+			c.mtx.Lock()
+			c.state.ctrl = nil
+			s := c.state
+			c.pushState(&s)
+			c.mtx.Unlock()
 		}
 	}
 }

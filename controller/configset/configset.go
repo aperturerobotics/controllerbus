@@ -80,6 +80,9 @@ type Reference interface {
 type State interface {
 	// GetControllerConfig returns the current controller config in use.
 	GetControllerConfig() ControllerConfig
+	// GetController returns the controller instance if running.
+	// Returns nil otherwise.
+	GetController() controller.Controller
 	// GetError returns any error processing the controller config.
 	GetError() error
 }

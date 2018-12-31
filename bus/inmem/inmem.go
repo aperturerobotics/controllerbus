@@ -7,6 +7,7 @@ import (
 	"github.com/aperturerobotics/controllerbus/bus"
 	"github.com/aperturerobotics/controllerbus/controller"
 	"github.com/aperturerobotics/controllerbus/directive"
+	"github.com/pkg/errors"
 )
 
 // Bus is an in-memory controller bus.
@@ -38,14 +39,23 @@ func (b *Bus) GetControllers() []controller.Controller {
 // Any fatal error in the controller is returned.
 // The controller will receive directive callbacks.
 // If the controller returns nil, will not be removed automatically.
-func (b *Bus) ExecuteController(ctx context.Context, c controller.Controller) error {
+func (b *Bus) ExecuteController(ctx context.Context, c controller.Controller) (err error) {
 	b.addController(c)
 
-	err := c.Execute(ctx)
-	if err != nil {
-		b.removeController(c)
-	}
-	return err
+	defer func() {
+		if rerr := recover(); rerr != nil {
+			e, eOk := rerr.(error)
+			if eOk {
+				err = errors.Wrap(e, "controller paniced")
+			} else if err == nil {
+				err = errors.New("controller paniced")
+			}
+		}
+		if err != nil {
+			b.removeController(c)
+		}
+	}()
+	return c.Execute(ctx)
 }
 
 // addController adds a controller to the bus
