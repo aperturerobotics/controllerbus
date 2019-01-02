@@ -104,9 +104,9 @@ func (r *DirectiveInstance) AddReference(
 
 	r.valsMtx.Lock()
 	r.refs = append(r.refs, ref)
-	for _, v := range r.vals {
-		if cb != nil {
-			go cb.HandleValueAdded(r, v)
+	if cb != nil {
+		for _, v := range r.vals {
+			cb.HandleValueAdded(r, v)
 		}
 	}
 	r.valsMtx.Unlock()
@@ -223,7 +223,7 @@ func (r *DirectiveInstance) AddDisposeCallback(cb func()) func() {
 	defer r.relMtx.Unlock()
 
 	if r.released {
-		go cb()
+		cb()
 		return func() {}
 	}
 
@@ -247,7 +247,7 @@ func (r *DirectiveInstance) AddIdleCallback(cb func()) func() {
 	defer r.relMtx.Unlock()
 
 	if r.released {
-		go cb()
+		cb()
 		return func() {}
 	}
 
@@ -255,7 +255,7 @@ func (r *DirectiveInstance) AddIdleCallback(cb func()) func() {
 	defer r.attachedResolversMtx.Unlock()
 
 	if r.runningResolvers == 0 {
-		go cb()
+		cb()
 		return func() {}
 	}
 
@@ -291,7 +291,7 @@ func (r *DirectiveInstance) callRel() {
 	r.refsMtx.Lock()
 	for _, ref := range r.refs {
 		if ref.valCb != nil {
-			go ref.valCb.HandleInstanceDisposed(r)
+			ref.valCb.HandleInstanceDisposed(r)
 		}
 	}
 	r.refs = nil

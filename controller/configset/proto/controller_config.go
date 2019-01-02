@@ -35,6 +35,9 @@ func (c *ControllerConfig) Resolve(ctx context.Context, b bus.Bus) (configset.Co
 	configCtorDir := resolver.NewLoadConfigConstructorByID(c.GetId())
 	configCtorVal, configCtorRef, err := bus.ExecOneOff(ctx, b, configCtorDir, nil)
 	if err != nil {
+		if err == context.Canceled {
+			return nil, err
+		}
 		return nil, errors.WithMessage(err, "resolve config object")
 	}
 	defer configCtorRef.Release()
