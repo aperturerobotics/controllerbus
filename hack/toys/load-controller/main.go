@@ -42,7 +42,7 @@ func execToy() {
 	}
 	defer valRef.Release()
 
-	tc := val.(*ToyController)
+	tc := val.GetValue().(*ToyController)
 	le.Debug("toy controller resolved")
 	tc.SayHello()
 }
