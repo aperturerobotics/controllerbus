@@ -137,10 +137,10 @@ func (r *DirectiveInstance) emitValue(v directive.Value) (uint32, bool) {
 			cancelOthers = true
 		}
 	}
+	r.nvalID++
 	nvid := r.nvalID
 	var nav *attachedValue
 	if !reject {
-		r.nvalID++
 		nav = newAttachedValue(nvid, v)
 		r.vals[nvid] = nav
 	}

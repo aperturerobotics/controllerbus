@@ -4,6 +4,7 @@ import (
 	"errors"
 
 	"github.com/aperturerobotics/controllerbus/config"
+	loader "github.com/aperturerobotics/controllerbus/controller/loader"
 	"github.com/aperturerobotics/controllerbus/directive"
 )
 
@@ -16,6 +17,10 @@ type LoadControllerWithConfig interface {
 	// GetDesiredControllerConfig returns the desired controller config.
 	GetDesiredControllerConfig() config.Config
 }
+
+// LoadControllerWithConfig is the value emitted to satisfy the
+// LoadControllerWithConfig directive.
+type LoadControllerWithConfigValue = loader.ExecControllerValue
 
 // loadControllerWithConfig is an LoadControllerWithConfig directive.
 // Will override or yield to exiting directives for the controller.

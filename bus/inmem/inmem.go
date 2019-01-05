@@ -55,6 +55,7 @@ func (b *Bus) ExecuteController(ctx context.Context, c controller.Controller) (e
 			b.removeController(c)
 		}
 	}()
+
 	return c.Execute(ctx)
 }
 

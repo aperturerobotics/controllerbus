@@ -122,7 +122,7 @@ func (r *attachedResolver) execResolver(handlerCtx context.Context) error {
 // accepted. The value may be accepted, immediately before the resolver is
 // canceled (limit reached). It is always safe to call RemoveValue with the
 // ID at any time, even if the resolver is cancelled.
-func (r *attachedResolver) AddValue(val directive.Value) (id uint32, accepted bool) {
+func (r *attachedResolver) AddValue(val directive.Value) (uint32, bool) {
 	r.diMtx.Lock()
 	di := r.di
 	r.diMtx.Unlock()
@@ -132,14 +132,14 @@ func (r *attachedResolver) AddValue(val directive.Value) (id uint32, accepted bo
 	}
 
 	r.valsMtx.Lock()
-	id, accepted = di.emitValue(val)
+	id, accepted := di.emitValue(val)
 	if !accepted {
-		return
+		return 0, accepted
 	}
 
 	r.vals = append(r.vals, id)
 	r.valsMtx.Unlock()
-	return
+	return id, accepted
 }
 
 // RemoveValue removes a value from the result, returning found.
