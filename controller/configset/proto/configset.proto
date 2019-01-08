@@ -9,7 +9,7 @@ message ConfigSet {
 
 // ControllerConfig contains a controller configuration.
 message ControllerConfig {
-  // Id is the controller configuration ID.
+  // Id is the config ID.
   string id = 1;
   // Revision is the revision number of the configuration.
   uint64 revision = 2;

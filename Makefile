@@ -1,7 +1,7 @@
 gengo:
 	shopt -s globstar; \
 	protowrap -I $${GOPATH}/src \
-		--go_out=$${GOPATH}/src \
+		--go_out=plugins=grpc:$${GOPATH}/src \
 		--proto_path $${GOPATH}/src \
 		--print_structure \
 		--only_specified_files \

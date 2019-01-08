@@ -31,7 +31,7 @@ func (m *ConfigSet) Reset()         { *m = ConfigSet{} }
 func (m *ConfigSet) String() string { return proto.CompactTextString(m) }
 func (*ConfigSet) ProtoMessage()    {}
 func (*ConfigSet) Descriptor() ([]byte, []int) {
-	return fileDescriptor_configset_30ee9ab0098eae68, []int{0}
+	return fileDescriptor_configset_b647bdaa01c3c15f, []int{0}
 }
 func (m *ConfigSet) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ConfigSet.Unmarshal(m, b)
@@ -60,7 +60,7 @@ func (m *ConfigSet) GetConfigurations() map[string]*ControllerConfig {
 
 // ControllerConfig contains a controller configuration.
 type ControllerConfig struct {
-	// Id is the controller configuration ID.
+	// Id is the config ID.
 	Id string `protobuf:"bytes,1,opt,name=id" json:"id,omitempty"`
 	// Revision is the revision number of the configuration.
 	Revision uint64 `protobuf:"varint,2,opt,name=revision" json:"revision,omitempty"`
@@ -75,7 +75,7 @@ func (m *ControllerConfig) Reset()         { *m = ControllerConfig{} }
 func (m *ControllerConfig) String() string { return proto.CompactTextString(m) }
 func (*ControllerConfig) ProtoMessage()    {}
 func (*ControllerConfig) Descriptor() ([]byte, []int) {
-	return fileDescriptor_configset_30ee9ab0098eae68, []int{1}
+	return fileDescriptor_configset_b647bdaa01c3c15f, []int{1}
 }
 func (m *ControllerConfig) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ControllerConfig.Unmarshal(m, b)
@@ -123,10 +123,10 @@ func init() {
 }
 
 func init() {
-	proto.RegisterFile("github.com/aperturerobotics/controllerbus/controller/configset/proto/configset.proto", fileDescriptor_configset_30ee9ab0098eae68)
+	proto.RegisterFile("github.com/aperturerobotics/controllerbus/controller/configset/proto/configset.proto", fileDescriptor_configset_b647bdaa01c3c15f)
 }
 
-var fileDescriptor_configset_30ee9ab0098eae68 = []byte{
+var fileDescriptor_configset_b647bdaa01c3c15f = []byte{
 	// 243 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x6c, 0x8f, 0xcf, 0x4a, 0xc3, 0x40,
 	0x10, 0xc6, 0xd9, 0x44, 0x8b, 0x9d, 0x4a, 0x2d, 0x2b, 0x48, 0xe8, 0x29, 0xf6, 0x94, 0xd3, 0x06,
