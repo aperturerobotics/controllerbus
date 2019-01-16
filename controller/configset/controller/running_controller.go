@@ -73,6 +73,12 @@ func (c *runningController) Execute(ctx context.Context) (rerr error) {
 		conf := c.conf
 		c.mtx.Unlock()
 
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		default:
+		}
+
 		// load config constructor by id
 		/*
 			c.le.Debug("loading config constructor")
