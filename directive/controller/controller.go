@@ -165,9 +165,9 @@ func (c *DirectiveController) callHandler(ahnd *attachedHandler, inst *Directive
 	// It is safe to add a reference to the directive during this call.
 	hnd := ahnd.Handler
 	handleCtx, handleCtxCancel := context.WithCancel(ahnd.Context)
-	// TODO: is go needed here?
-	// go inst.AddDisposeCallback(handleCtxCancel)
-	inst.AddDisposeCallback(handleCtxCancel)
+	// go is needed here due to relMtx being locked
+	go inst.AddDisposeCallback(handleCtxCancel)
+	// inst.AddDisposeCallback(handleCtxCancel)
 	resolver, err := hnd.HandleDirective(handleCtx, inst)
 	if err != nil {
 		return err
