@@ -86,7 +86,7 @@ func (c *DirectiveController) AddDirective(
 	}
 
 	// Build new reference
-	di, ref := NewDirectiveInstance(c.ctx, dir, cb, func(di *DirectiveInstance) {
+	di, ref := NewDirectiveInstance(c.ctx, c.le, dir, cb, func(di *DirectiveInstance) {
 		le.Debug("removed directive")
 		c.directivesMtx.Lock() // lock first
 		for i, d := range c.directives {

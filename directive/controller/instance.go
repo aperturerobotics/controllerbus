@@ -6,12 +6,15 @@ import (
 	"time"
 
 	"github.com/aperturerobotics/controllerbus/directive"
+	"github.com/sirupsen/logrus"
 )
 
 // DirectiveInstance implements the directive instance interface.
 type DirectiveInstance struct {
 	// ctx is the parent directive controller ctx
 	ctx context.Context
+	// le is the logger
+	le *logrus.Entry
 	// dir is the underlying directive.
 	dir directive.Directive
 	// valueOpts are the directive options
@@ -58,11 +61,12 @@ type DirectiveInstance struct {
 // NewDirectiveInstance constructs a new directive instance with an initial reference.
 func NewDirectiveInstance(
 	ctx context.Context,
+	le *logrus.Entry,
 	dir directive.Directive,
 	cb directive.ReferenceHandler,
 	released func(di *DirectiveInstance),
 ) (*DirectiveInstance, directive.Reference) {
-	i := &DirectiveInstance{ctx: ctx, dir: dir}
+	i := &DirectiveInstance{ctx: ctx, dir: dir, le: le}
 	i.attachedResolverCtx, i.attachedResolverCtxCancel = context.WithCancel(ctx)
 	i.vals = make(map[uint32]*attachedValue)
 	i.rel = make(map[uint32]func())
@@ -319,7 +323,9 @@ func (r *DirectiveInstance) attachResolver(handlerCtx context.Context, res direc
 	ares.pushHandlerContext(r.attachedResolverCtx)
 	go func() {
 		err := ares.execResolver(handlerCtx)
-		// TODO: handle resolver error (log it)
+		if err != context.Canceled {
+			r.le.WithError(err).Warn("resolver returned with error")
+		}
 		_ = err
 		r.attachedResolversMtx.Lock()
 		for i, ai := range r.attachedResolvers {

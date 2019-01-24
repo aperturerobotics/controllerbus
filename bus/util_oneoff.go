@@ -27,7 +27,9 @@ func ExecOneOff(
 		},
 	)
 	if err != nil {
-		ref.Release()
+		if ref != nil {
+			ref.Release()
+		}
 		return nil, nil, err
 	}
 
