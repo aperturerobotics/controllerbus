@@ -7,11 +7,14 @@ import (
 	"github.com/aperturerobotics/controllerbus/bus"
 	"github.com/aperturerobotics/controllerbus/controller"
 	"github.com/aperturerobotics/controllerbus/directive"
+	"github.com/sirupsen/logrus"
 )
 
 // Controller implements the controller resolver controller.
 // This controller responds to LoadControllerWithConfig directives.
 type Controller struct {
+	// le is the default logger
+	le *logrus.Entry
 	// bus is the controller bus
 	bus bus.Bus
 	// resolver is the factory resolver
@@ -19,8 +22,8 @@ type Controller struct {
 }
 
 // NewController constructs a new controller with a resolver.
-func NewController(bus bus.Bus, resolver controller.FactoryResolver) *Controller {
-	return &Controller{resolver: resolver, bus: bus}
+func NewController(le *logrus.Entry, bus bus.Bus, resolver controller.FactoryResolver) *Controller {
+	return &Controller{le: le, resolver: resolver, bus: bus}
 }
 
 // GetControllerID returns the controller ID.

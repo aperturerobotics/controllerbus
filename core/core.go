@@ -35,7 +35,7 @@ func NewCoreBus(
 	sr := static.NewResolver(builtInFactories...)
 	go b.ExecuteController(
 		ctx,
-		resolver.NewController(b, sr),
+		resolver.NewController(le, b, sr),
 	)
 
 	sr.AddFactory(configset_controller.NewFactory(b))

@@ -2,6 +2,7 @@ package inmem
 
 import (
 	"context"
+	"runtime/debug"
 	"sync"
 
 	"github.com/aperturerobotics/controllerbus/bus"
@@ -46,6 +47,7 @@ func (b *Bus) ExecuteController(ctx context.Context, c controller.Controller) (e
 		if rerr := recover(); rerr != nil {
 			e, eOk := rerr.(error)
 			if eOk {
+				debug.PrintStack()
 				err = errors.Wrap(e, "controller paniced")
 			} else if err == nil {
 				err = errors.New("controller paniced")
