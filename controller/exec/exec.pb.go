@@ -3,9 +3,11 @@
 
 package controller_exec
 
-import proto "github.com/golang/protobuf/proto"
-import fmt "fmt"
-import math "math"
+import (
+	fmt "fmt"
+	proto "github.com/golang/protobuf/proto"
+	math "math"
+)
 
 // Reference imports to suppress errors if they are not otherwise used.
 var _ = proto.Marshal
@@ -16,7 +18,7 @@ var _ = math.Inf
 // is compatible with the proto package it is being compiled against.
 // A compilation error at this line likely means your copy of the
 // proto package needs to be updated.
-const _ = proto.ProtoPackageIsVersion2 // please upgrade the proto package
+const _ = proto.ProtoPackageIsVersion3 // please upgrade the proto package
 
 // ControllerStatus holds basic status for a controller.
 type ControllerStatus int32
@@ -35,6 +37,7 @@ var ControllerStatus_name = map[int32]string{
 	1: "ControllerStatus_CONFIGURING",
 	2: "ControllerStatus_RUNNING",
 }
+
 var ControllerStatus_value = map[string]int32{
 	"ControllerStatus_UNKNOWN":     0,
 	"ControllerStatus_CONFIGURING": 1,
@@ -44,8 +47,9 @@ var ControllerStatus_value = map[string]int32{
 func (x ControllerStatus) String() string {
 	return proto.EnumName(ControllerStatus_name, int32(x))
 }
+
 func (ControllerStatus) EnumDescriptor() ([]byte, []int) {
-	return fileDescriptor_exec_7b033c12135d9b8d, []int{0}
+	return fileDescriptor_979e75fb0350f746, []int{0}
 }
 
 func init() {
@@ -53,10 +57,10 @@ func init() {
 }
 
 func init() {
-	proto.RegisterFile("github.com/aperturerobotics/controllerbus/controller/exec/exec.proto", fileDescriptor_exec_7b033c12135d9b8d)
+	proto.RegisterFile("github.com/aperturerobotics/controllerbus/controller/exec/exec.proto", fileDescriptor_979e75fb0350f746)
 }
 
-var fileDescriptor_exec_7b033c12135d9b8d = []byte{
+var fileDescriptor_979e75fb0350f746 = []byte{
 	// 150 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xe2, 0x72, 0x49, 0xcf, 0x2c, 0xc9,
 	0x28, 0x4d, 0xd2, 0x4b, 0xce, 0xcf, 0xd5, 0x4f, 0x2c, 0x48, 0x2d, 0x2a, 0x29, 0x2d, 0x4a, 0x2d,

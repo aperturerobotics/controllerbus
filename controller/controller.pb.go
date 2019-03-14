@@ -3,9 +3,11 @@
 
 package controller
 
-import proto "github.com/golang/protobuf/proto"
-import fmt "fmt"
-import math "math"
+import (
+	fmt "fmt"
+	proto "github.com/golang/protobuf/proto"
+	math "math"
+)
 
 // Reference imports to suppress errors if they are not otherwise used.
 var _ = proto.Marshal
@@ -16,16 +18,16 @@ var _ = math.Inf
 // is compatible with the proto package it is being compiled against.
 // A compilation error at this line likely means your copy of the
 // proto package needs to be updated.
-const _ = proto.ProtoPackageIsVersion2 // please upgrade the proto package
+const _ = proto.ProtoPackageIsVersion3 // please upgrade the proto package
 
 // Info contains information about a controller.
 type Info struct {
 	// Id contains the identifier of the controller.
-	Id string `protobuf:"bytes,1,opt,name=id" json:"id,omitempty"`
+	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	// Version contains the version string for the controller.
-	Version string `protobuf:"bytes,2,opt,name=version" json:"version,omitempty"`
+	Version string `protobuf:"bytes,2,opt,name=version,proto3" json:"version,omitempty"`
 	// Description contains a descriptive string about the controller.
-	Description          string   `protobuf:"bytes,3,opt,name=description" json:"description,omitempty"`
+	Description          string   `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -35,16 +37,17 @@ func (m *Info) Reset()         { *m = Info{} }
 func (m *Info) String() string { return proto.CompactTextString(m) }
 func (*Info) ProtoMessage()    {}
 func (*Info) Descriptor() ([]byte, []int) {
-	return fileDescriptor_controller_844622f72388c09e, []int{0}
+	return fileDescriptor_8e231c248f32a275, []int{0}
 }
+
 func (m *Info) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_Info.Unmarshal(m, b)
 }
 func (m *Info) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_Info.Marshal(b, m, deterministic)
 }
-func (dst *Info) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_Info.Merge(dst, src)
+func (m *Info) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_Info.Merge(m, src)
 }
 func (m *Info) XXX_Size() int {
 	return xxx_messageInfo_Info.Size(m)
@@ -81,10 +84,10 @@ func init() {
 }
 
 func init() {
-	proto.RegisterFile("github.com/aperturerobotics/controllerbus/controller/controller.proto", fileDescriptor_controller_844622f72388c09e)
+	proto.RegisterFile("github.com/aperturerobotics/controllerbus/controller/controller.proto", fileDescriptor_8e231c248f32a275)
 }
 
-var fileDescriptor_controller_844622f72388c09e = []byte{
+var fileDescriptor_8e231c248f32a275 = []byte{
 	// 144 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xe2, 0x72, 0x4d, 0xcf, 0x2c, 0xc9,
 	0x28, 0x4d, 0xd2, 0x4b, 0xce, 0xcf, 0xd5, 0x4f, 0x2c, 0x48, 0x2d, 0x2a, 0x29, 0x2d, 0x4a, 0x2d,

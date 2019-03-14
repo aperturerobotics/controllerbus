@@ -3,9 +3,11 @@
 
 package configset_proto
 
-import proto "github.com/golang/protobuf/proto"
-import fmt "fmt"
-import math "math"
+import (
+	fmt "fmt"
+	proto "github.com/golang/protobuf/proto"
+	math "math"
+)
 
 // Reference imports to suppress errors if they are not otherwise used.
 var _ = proto.Marshal
@@ -16,12 +18,12 @@ var _ = math.Inf
 // is compatible with the proto package it is being compiled against.
 // A compilation error at this line likely means your copy of the
 // proto package needs to be updated.
-const _ = proto.ProtoPackageIsVersion2 // please upgrade the proto package
+const _ = proto.ProtoPackageIsVersion3 // please upgrade the proto package
 
 // ConfigSet contains a configuration set.
 type ConfigSet struct {
 	// Configurations contains the controller configurations.
-	Configurations       map[string]*ControllerConfig `protobuf:"bytes,1,rep,name=configurations" json:"configurations,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	Configurations       map[string]*ControllerConfig `protobuf:"bytes,1,rep,name=configurations,proto3" json:"configurations,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
 	XXX_NoUnkeyedLiteral struct{}                     `json:"-"`
 	XXX_unrecognized     []byte                       `json:"-"`
 	XXX_sizecache        int32                        `json:"-"`
@@ -31,16 +33,17 @@ func (m *ConfigSet) Reset()         { *m = ConfigSet{} }
 func (m *ConfigSet) String() string { return proto.CompactTextString(m) }
 func (*ConfigSet) ProtoMessage()    {}
 func (*ConfigSet) Descriptor() ([]byte, []int) {
-	return fileDescriptor_configset_b647bdaa01c3c15f, []int{0}
+	return fileDescriptor_ab230962ea467981, []int{0}
 }
+
 func (m *ConfigSet) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ConfigSet.Unmarshal(m, b)
 }
 func (m *ConfigSet) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_ConfigSet.Marshal(b, m, deterministic)
 }
-func (dst *ConfigSet) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_ConfigSet.Merge(dst, src)
+func (m *ConfigSet) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ConfigSet.Merge(m, src)
 }
 func (m *ConfigSet) XXX_Size() int {
 	return xxx_messageInfo_ConfigSet.Size(m)
@@ -61,9 +64,9 @@ func (m *ConfigSet) GetConfigurations() map[string]*ControllerConfig {
 // ControllerConfig contains a controller configuration.
 type ControllerConfig struct {
 	// Id is the config ID.
-	Id string `protobuf:"bytes,1,opt,name=id" json:"id,omitempty"`
+	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	// Revision is the revision number of the configuration.
-	Revision uint64 `protobuf:"varint,2,opt,name=revision" json:"revision,omitempty"`
+	Revision uint64 `protobuf:"varint,2,opt,name=revision,proto3" json:"revision,omitempty"`
 	// Config is the configuration object in protobuf form.
 	Config               []byte   `protobuf:"bytes,3,opt,name=config,proto3" json:"config,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
@@ -75,16 +78,17 @@ func (m *ControllerConfig) Reset()         { *m = ControllerConfig{} }
 func (m *ControllerConfig) String() string { return proto.CompactTextString(m) }
 func (*ControllerConfig) ProtoMessage()    {}
 func (*ControllerConfig) Descriptor() ([]byte, []int) {
-	return fileDescriptor_configset_b647bdaa01c3c15f, []int{1}
+	return fileDescriptor_ab230962ea467981, []int{1}
 }
+
 func (m *ControllerConfig) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ControllerConfig.Unmarshal(m, b)
 }
 func (m *ControllerConfig) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_ControllerConfig.Marshal(b, m, deterministic)
 }
-func (dst *ControllerConfig) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_ControllerConfig.Merge(dst, src)
+func (m *ControllerConfig) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ControllerConfig.Merge(m, src)
 }
 func (m *ControllerConfig) XXX_Size() int {
 	return xxx_messageInfo_ControllerConfig.Size(m)
@@ -123,10 +127,10 @@ func init() {
 }
 
 func init() {
-	proto.RegisterFile("github.com/aperturerobotics/controllerbus/controller/configset/proto/configset.proto", fileDescriptor_configset_b647bdaa01c3c15f)
+	proto.RegisterFile("github.com/aperturerobotics/controllerbus/controller/configset/proto/configset.proto", fileDescriptor_ab230962ea467981)
 }
 
-var fileDescriptor_configset_b647bdaa01c3c15f = []byte{
+var fileDescriptor_ab230962ea467981 = []byte{
 	// 243 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x6c, 0x8f, 0xcf, 0x4a, 0xc3, 0x40,
 	0x10, 0xc6, 0xd9, 0x44, 0x8b, 0x9d, 0x4a, 0x2d, 0x2b, 0x48, 0xe8, 0x29, 0xf6, 0x94, 0xd3, 0x06,
