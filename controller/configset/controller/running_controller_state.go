@@ -7,9 +7,15 @@ import (
 
 // runningControllerState implements configset state
 type runningControllerState struct {
+	id   string
 	err  error
 	conf configset.ControllerConfig
 	ctrl controller.Controller
+}
+
+// GetId returns the controller id.
+func (s *runningControllerState) GetId() string {
+	return s.id
 }
 
 // GetControllerConfig returns the current controller config in use.

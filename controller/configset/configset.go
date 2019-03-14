@@ -78,6 +78,8 @@ type Reference interface {
 
 // State contains controller state.
 type State interface {
+	// GetId returns the controller id.
+	GetId() string
 	// GetControllerConfig returns the current controller config in use.
 	GetControllerConfig() ControllerConfig
 	// GetController returns the controller instance if running.

@@ -38,13 +38,15 @@ func newRunningController(
 	key string,
 	conf configset.ControllerConfig,
 ) *runningController {
-	return &runningController{
+	rc := &runningController{
 		c:             c,
 		le:            c.le.WithField("config-key", key),
 		key:           key,
 		conf:          conf,
 		confRestartCh: make(chan struct{}, 1),
 	}
+	rc.state.id = key
+	return rc
 }
 
 // GetConfigKey returns the configset key for this controller.
