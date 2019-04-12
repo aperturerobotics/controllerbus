@@ -70,7 +70,7 @@ func (c *DirectiveController) AddDirective(
 	for ii := 0; ii < len(c.directives); ii++ {
 		di := c.directives[ii]
 		d := di.GetDirective()
-		if d.IsEquivalent(dir) {
+		if dir.IsEquivalent(d) {
 			if dir.Superceeds(d) {
 				di.Close()
 				break
