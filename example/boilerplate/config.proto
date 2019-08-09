@@ -1,0 +1,8 @@
+syntax = "proto3";
+package boilerplate;
+
+// Config is the boilerplate configuration.
+message Config {
+  // ExampleField is an example configuration field.
+  string example_field = 1;
+}

@@ -9,6 +9,8 @@ import (
 	controller "github.com/aperturerobotics/controllerbus/controller"
 	proto "github.com/golang/protobuf/proto"
 	grpc "google.golang.org/grpc"
+	codes "google.golang.org/grpc/codes"
+	status "google.golang.org/grpc/status"
 	math "math"
 )
 
@@ -277,6 +279,14 @@ func (c *controllerBusServiceClient) GetBusInfo(ctx context.Context, in *GetBusI
 type ControllerBusServiceServer interface {
 	// GetBusInfo requests information about the controller bus.
 	GetBusInfo(context.Context, *GetBusInfoRequest) (*GetBusInfoResponse, error)
+}
+
+// UnimplementedControllerBusServiceServer can be embedded to have forward compatible implementations.
+type UnimplementedControllerBusServiceServer struct {
+}
+
+func (*UnimplementedControllerBusServiceServer) GetBusInfo(ctx context.Context, req *GetBusInfoRequest) (*GetBusInfoResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetBusInfo not implemented")
 }
 
 func RegisterControllerBusServiceServer(s *grpc.Server, srv ControllerBusServiceServer) {
