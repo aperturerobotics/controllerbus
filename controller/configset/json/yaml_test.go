@@ -16,7 +16,7 @@ import (
 
 var basicYAMLOutput = `test:
   config:
-    example_field: test 123
+    exampleField: test 123
   id: controllerbus/example/boilerplate/1
   revision: 1
 `
@@ -50,5 +50,8 @@ func TestUnmarshalConfigSetYAML(t *testing.T) {
 	ocs := make(configset.ConfigSet)
 	if err := UnmarshalYAML(ctx, b, []byte(basicYAMLOutput), ocs, true); err != nil {
 		t.Fatal(err.Error())
+	}
+	if dat := ocs["test"].GetConfig().(*boilerplate.Config).GetExampleField(); dat != "test 123" {
+		t.Fatalf("invalid output: %s", dat)
 	}
 }

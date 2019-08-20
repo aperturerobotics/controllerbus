@@ -2,6 +2,7 @@ package configset_json
 
 import (
 	"context"
+	"encoding/json"
 
 	"github.com/aperturerobotics/controllerbus/bus"
 	"github.com/aperturerobotics/controllerbus/controller/configset"
@@ -12,7 +13,11 @@ import (
 // MarshalYAML marshals a config set to yaml.
 func MarshalYAML(cs configset.ConfigSet) ([]byte, error) {
 	ycs := NewConfigSet(cs)
-	return yaml.Marshal(ycs)
+	jdat, err := json.Marshal(ycs)
+	if err != nil {
+		return nil, err
+	}
+	return yaml.JSONToYAML([]byte(jdat))
 }
 
 // UnmarshalYAML unmarshals a yaml to a config set, optionally overwriting existing.
