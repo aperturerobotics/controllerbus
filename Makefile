@@ -1,15 +1,34 @@
-PROTOWRAP=gobin -run github.com/square/goprotowrap/cmd/protowrap@master
+PROTOWRAP=hack/bin/protowrap
+PROTOC_GEN_GO=hack/bin/protoc-gen-go
 GOLIST=go list -f "{{ .Dir }}" -m
 
 all:
 
-gengo: vendor/bin/gobin
+vendor:
+	export GO111MODULE=on; \
+  go mod vendor
+
+$(PROTOC_GEN_GO):
+	export GO111MODULE=on; \
+  cd ./hack; \
+	go build -v \
+		-o ./bin/protoc-gen-go \
+		github.com/golang/protobuf/protoc-gen-go
+
+$(PROTOWRAP):
+	export GO111MODULE=on; \
+  cd ./hack; \
+	go build -v \
+		-o ./bin/protowrap \
+		github.com/square/goprotowrap/cmd/protowrap
+
+gengo: $(PROTOWRAP) $(PROTOC_GEN_GO) vendor
 	shopt -s globstar; \
 	set -eo pipefail; \
 	export GO111MODULE=on; \
 	export PROJECT=$$(go list -m); \
-	export PATH=$$(pwd)/vendor/bin:$${PATH}; \
-	mkdir -p $$(pwd)/vendor/github.com/aperturerobotics; \
+	export PATH=$$(pwd)/hack/bin:$${PATH}; \
+	mkdir -p $$(pwd)/vendor/$$(dirname $${PROJECT}); \
 	rm $$(pwd)/vendor/$${PROJECT} || true; \
 	ln -s $$(pwd) $$(pwd)/vendor/$${PROJECT} ; \
 	$(PROTOWRAP) \
@@ -24,19 +43,3 @@ gengo: vendor/bin/gobin
 				xargs printf -- \
 				"$$(pwd)/vendor/$${PROJECT}/%s ")
 
-
-vendor/bin/gobin:
-	mkdir -p vendor/bin
-	go mod vendor
-	export GO111MODULE=on ; \
-	cd ./vendor ; touch go.mod ; \
-	go mod tidy -v ; \
-	go build -v \
-		-o ./bin/protoc-gen-go \
-		github.com/golang/protobuf/protoc-gen-go ; \
-	go build -v \
-		-o ./bin/gobin \
-		github.com/myitcv/gobin
-
-test:
-	go test -v ./...
