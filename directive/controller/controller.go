@@ -85,16 +85,18 @@ func (c *DirectiveController) AddDirective(
 	// Build new reference
 	di, ref := NewDirectiveInstance(c.ctx, c.le, dir, cb, func(di *DirectiveInstance) {
 		le.Debug("removed directive")
-		c.mtx.Lock() // lock first
-		for i, d := range c.directives {
-			if d == di {
-				c.directives[i] = c.directives[len(c.directives)-1]
-				c.directives[len(c.directives)-1] = nil
-				c.directives = c.directives[:len(c.directives)-1]
-				break
+		go func() {
+			c.mtx.Lock() // lock first
+			for i, d := range c.directives {
+				if d == di {
+					c.directives[i] = c.directives[len(c.directives)-1]
+					c.directives[len(c.directives)-1] = nil
+					c.directives = c.directives[:len(c.directives)-1]
+					break
+				}
 			}
-		}
-		c.mtx.Unlock()
+			c.mtx.Unlock()
+		}()
 	})
 	le.Debug("added directive")
 	c.directives = append(c.directives, di)

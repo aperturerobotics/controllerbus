@@ -249,14 +249,13 @@ func (r *DirectiveInstance) AddIdleCallback(cb func()) func() {
 
 // Close cancels the directive instance.
 func (r *DirectiveInstance) Close() {
+	r.mtx.Lock()
 	r.callRel()
+	r.mtx.Unlock()
 }
 
 // callRel calls the release callbacks.
 func (r *DirectiveInstance) callRel() {
-	r.mtx.Lock()
-	defer r.mtx.Unlock()
-
 	if r.released {
 		return
 	}
@@ -389,7 +388,7 @@ func (r *DirectiveInstance) markUnreferenced() {
 		if udd == 0 {
 			go r.Close()
 		} else {
-			r.unrefDestroyTimer = time.AfterFunc(udd, r.Close)
+			r.unrefDestroyTimer = time.AfterFunc(udd, func() { go r.Close() })
 		}
 	}
 }
