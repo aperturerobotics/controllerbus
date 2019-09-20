@@ -20,13 +20,10 @@ type DirectiveController struct {
 	// le is the log entry
 	le *logrus.Entry
 
-	// handlersMtx guards handlers
-	handlersMtx sync.Mutex
-	handlers    []*attachedHandler
-
-	// directivesMtx guards directives
-	directivesMtx sync.Mutex
-	directives    []*DirectiveInstance
+	// mtx guards below fields
+	mtx        sync.Mutex
+	handlers   []*attachedHandler
+	directives []*DirectiveInstance
 }
 
 // NewDirectiveController builds a new directive controller.
@@ -64,8 +61,8 @@ func (c *DirectiveController) AddDirective(
 	}
 	le := c.le.WithField("directive", dirNameDebugStr)
 
-	c.directivesMtx.Lock() // lock first
-	defer c.directivesMtx.Unlock()
+	c.mtx.Lock()
+	defer c.mtx.Unlock()
 
 	for ii := 0; ii < len(c.directives); ii++ {
 		di := c.directives[ii]
@@ -88,7 +85,7 @@ func (c *DirectiveController) AddDirective(
 	// Build new reference
 	di, ref := NewDirectiveInstance(c.ctx, c.le, dir, cb, func(di *DirectiveInstance) {
 		le.Debug("removed directive")
-		c.directivesMtx.Lock() // lock first
+		c.mtx.Lock() // lock first
 		for i, d := range c.directives {
 			if d == di {
 				c.directives[i] = c.directives[len(c.directives)-1]
@@ -97,33 +94,28 @@ func (c *DirectiveController) AddDirective(
 				break
 			}
 		}
-		c.directivesMtx.Unlock()
+		c.mtx.Unlock()
 	})
 	le.Debug("added directive")
 	c.directives = append(c.directives, di)
-	c.handlersMtx.Lock()
 	for _, handler := range c.handlers {
 		if err := c.callHandler(handler, di); err != nil {
 			le.WithError(err).Warn("unable to call directive handler")
 		}
 	}
-	c.handlersMtx.Unlock()
 	return di, ref, nil
 }
 
 // AddHandler adds a directive handler.
 // The handler will receive calls for all existing directives (initial set).
 func (c *DirectiveController) AddHandler(hnd directive.Handler) error {
-	c.directivesMtx.Lock() // lock first
-	c.handlersMtx.Lock()
+	c.mtx.Lock() // lock first
+	defer c.mtx.Unlock()
+
 	ahnd := newAttachedHandler(c.ctx, hnd)
 	c.handlers = append(c.handlers, ahnd)
-	c.handlersMtx.Unlock()
-
 	dirs := make([]*DirectiveInstance, len(c.directives))
 	copy(dirs, c.directives)
-	c.directivesMtx.Unlock()
-
 	for _, dir := range dirs {
 		_ = c.callHandler(ahnd, dir)
 	}
@@ -133,7 +125,9 @@ func (c *DirectiveController) AddHandler(hnd directive.Handler) error {
 
 // RemoveHandler removes a directive handler.
 func (c *DirectiveController) RemoveHandler(hnd directive.Handler) {
-	c.handlersMtx.Lock()
+	c.mtx.Lock()
+	defer c.mtx.Unlock()
+
 	for i, h := range c.handlers {
 		if h.Handler == hnd {
 			h.Cancel()
@@ -143,17 +137,16 @@ func (c *DirectiveController) RemoveHandler(hnd directive.Handler) {
 			break
 		}
 	}
-	c.handlersMtx.Unlock()
 }
 
 // GetDirectives returns a list of all currently active directives.
 func (c *DirectiveController) GetDirectives() []directive.Instance {
-	c.directivesMtx.Lock()
+	c.mtx.Lock()
 	d := make([]directive.Instance, len(c.directives))
 	for i := range c.directives {
 		d[i] = c.directives[i]
 	}
-	c.directivesMtx.Unlock()
+	c.mtx.Unlock()
 	return d
 }
 

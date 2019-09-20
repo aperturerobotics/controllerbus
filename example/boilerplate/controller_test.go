@@ -10,8 +10,8 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-// TestChainController tests the chainc ontroller.
-func TestChainController(t *testing.T) {
+// TestBoilerplateController tests the boilerplate ontroller.
+func TestBoilerplateController(t *testing.T) {
 	ctx := context.Background()
 	log := logrus.New()
 	log.SetLevel(logrus.DebugLevel)
