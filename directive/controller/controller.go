@@ -112,12 +112,11 @@ func (c *DirectiveController) AddDirective(
 // The handler will receive calls for all existing directives (initial set).
 func (c *DirectiveController) AddHandler(hnd directive.Handler) error {
 	c.mtx.Lock() // lock first
-	defer c.mtx.Unlock()
-
 	ahnd := newAttachedHandler(c.ctx, hnd)
 	c.handlers = append(c.handlers, ahnd)
 	dirs := make([]*DirectiveInstance, len(c.directives))
 	copy(dirs, c.directives)
+	c.mtx.Unlock()
 	for _, dir := range dirs {
 		_ = c.callHandler(ahnd, dir)
 	}
