@@ -111,8 +111,8 @@ func (c *DirectiveController) AddDirective(
 // AddHandler adds a directive handler.
 // The handler will receive calls for all existing directives (initial set).
 func (c *DirectiveController) AddHandler(hnd directive.Handler) error {
-	c.mtx.Lock() // lock first
 	ahnd := newAttachedHandler(c.ctx, hnd)
+	c.mtx.Lock() // lock first
 	c.handlers = append(c.handlers, ahnd)
 	dirs := make([]*DirectiveInstance, len(c.directives))
 	copy(dirs, c.directives)
@@ -127,8 +127,6 @@ func (c *DirectiveController) AddHandler(hnd directive.Handler) error {
 // RemoveHandler removes a directive handler.
 func (c *DirectiveController) RemoveHandler(hnd directive.Handler) {
 	c.mtx.Lock()
-	defer c.mtx.Unlock()
-
 	for i, h := range c.handlers {
 		if h.Handler == hnd {
 			h.Cancel()
@@ -138,6 +136,7 @@ func (c *DirectiveController) RemoveHandler(hnd directive.Handler) {
 			break
 		}
 	}
+	c.mtx.Unlock()
 }
 
 // GetDirectives returns a list of all currently active directives.

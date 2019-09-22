@@ -98,9 +98,15 @@ func (r *DirectiveInstance) AddReference(
 	r.markReferenced()
 	r.refs = append(r.refs, ref)
 	if cb != nil {
+		valsCpy := make([]*attachedValue, 0, len(r.vals))
 		for _, v := range r.vals {
-			cb.HandleValueAdded(r, v)
+			valsCpy = append(valsCpy, v)
 		}
+		go func() {
+			for _, v := range valsCpy {
+				cb.HandleValueAdded(r, v)
+			}
+		}()
 	}
 	return ref
 }
@@ -137,10 +143,18 @@ func (r *DirectiveInstance) emitValue(v directive.Value) (uint32, bool) {
 	if reject {
 		return 0, false
 	}
+	var cbs []directive.ReferenceHandler
 	for _, ref := range r.refs {
 		if ref != nil && ref.valCb != nil {
-			ref.valCb.HandleValueAdded(r, nav)
+			cbs = append(cbs, ref.valCb)
 		}
+	}
+	if len(cbs) != 0 {
+		go func() {
+			for _, cb := range cbs {
+				cb.HandleValueAdded(r, nav)
+			}
+		}()
 	}
 	if cancelOthers {
 		r.cancelResolvers()
@@ -173,10 +187,18 @@ func (r *DirectiveInstance) purgeEmittedValue(id uint32) (directive.Value, bool)
 	}
 
 	if ok {
+		var cbs []directive.ReferenceHandler
 		for _, ref := range r.refs {
-			if ref.valCb != nil {
-				ref.valCb.HandleValueRemoved(r, val)
+			if ref != nil && ref.valCb != nil {
+				cbs = append(cbs, ref.valCb)
 			}
+		}
+		if len(cbs) != 0 {
+			go func() {
+				for _, cb := range cbs {
+					cb.HandleValueRemoved(r, val)
+				}
+			}()
 		}
 	}
 	return val, true
