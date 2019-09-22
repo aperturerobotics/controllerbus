@@ -98,12 +98,15 @@ type Reference interface {
 type ReferenceHandler interface {
 	// HandleValueAdded is called when a value is added to the directive.
 	// Should not block.
+	// Avoid calling directive functions in this routine.
 	HandleValueAdded(Instance, AttachedValue)
 	// HandleValueRemoved is called when a value is removed from the directive.
 	// Should not block.
+	// Avoid calling directive functions in this routine.
 	HandleValueRemoved(Instance, AttachedValue)
 	// HandleInstanceDisposed is called when a directive instance is disposed.
 	// This will occur if Close() is called on the directive instance.
+	// Avoid calling directive functions in this routine.
 	HandleInstanceDisposed(Instance)
 }
 
