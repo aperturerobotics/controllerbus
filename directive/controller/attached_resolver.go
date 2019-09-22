@@ -10,9 +10,11 @@ import (
 // attachedResolver tracks a resolver and its values.
 // it also manages starting and stopping the resolver.
 type attachedResolver struct {
-	mtx  sync.Mutex
-	di   *DirectiveInstance
-	vals []uint32
+	diMtx sync.Mutex
+	di    *DirectiveInstance
+
+	valsMtx sync.Mutex
+	vals    []uint32
 
 	res             directive.Resolver
 	resolutionCtxCh chan context.Context
@@ -121,34 +123,37 @@ func (r *attachedResolver) execResolver(handlerCtx context.Context) error {
 // canceled (limit reached). It is always safe to call RemoveValue with the
 // ID at any time, even if the resolver is cancelled.
 func (r *attachedResolver) AddValue(val directive.Value) (uint32, bool) {
-	r.mtx.Lock()
-	defer r.mtx.Unlock()
-
+	r.diMtx.Lock()
 	di := r.di
+	r.diMtx.Unlock()
+
 	if di == nil {
 		return 0, false
 	}
 
+	r.valsMtx.Lock()
 	id, accepted := di.emitValue(val)
 	if !accepted {
 		return 0, accepted
 	}
 
 	r.vals = append(r.vals, id)
+	r.valsMtx.Unlock()
 	return id, accepted
 }
 
 // RemoveValue removes a value from the result, returning found.
 // It is safe to call this function even if the resolver is canceled.
 func (r *attachedResolver) RemoveValue(id uint32) (val directive.Value, found bool) {
-	r.mtx.Lock()
-	defer r.mtx.Unlock()
-
+	r.diMtx.Lock()
 	di := r.di
+	r.diMtx.Unlock()
+
 	if di == nil {
 		return nil, false
 	}
 
+	r.valsMtx.Lock()
 	for i, valID := range r.vals {
 		if valID == id {
 			found = true
@@ -158,6 +163,7 @@ func (r *attachedResolver) RemoveValue(id uint32) (val directive.Value, found bo
 			break
 		}
 	}
+	r.valsMtx.Unlock()
 
 	if !found {
 		return
