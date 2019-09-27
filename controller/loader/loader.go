@@ -42,7 +42,6 @@ func (c *Controller) GetControllerInfo() controller.Info {
 // Execute executes the loader controller.
 func (c *Controller) Execute(ctx context.Context) error {
 	// No-op
-	<-ctx.Done()
 	return nil
 }
 
