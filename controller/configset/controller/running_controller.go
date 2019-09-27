@@ -81,28 +81,11 @@ func (c *runningController) Execute(ctx context.Context) (rerr error) {
 		default:
 		}
 
-		// load config constructor by id
-		/*
-			c.le.Debug("loading config constructor")
-			configCtorDir := resolver.NewLoadConfigConstructorByID(conf.GetConfigId())
-			configCtorVal, configCtorRef, err := bus.ExecOneOff(ctx, c.c.bus, configCtorDir, nil)
-			if err != nil {
-				return errors.WithMessage(err, "resolve config object")
-			}
-
-			confObj := configCtorVal.(config.Constructor).ConstructConfig()
-			if err := proto.Unmarshal(conf.GetData(), confObj); err != nil {
-				configCtorRef.Release()
-				return errors.WithMessage(err, "unmarshal config")
-			}
-		*/
-
 		// execute the controller with the current config
 		valCtx, valCtxCancel := context.WithCancel(ctx)
 		execDir := resolver.NewLoadControllerWithConfig(conf.GetConfig())
-		c.le.Debug("executing controller")
+		c.le.Info("executing controller")
 		ev, execRef, err := bus.ExecOneOff(valCtx, c.c.bus, execDir, valCtxCancel)
-		// configCtorRef.Release()
 		if err != nil {
 			valCtxCancel()
 			if err == context.Canceled {
@@ -126,7 +109,7 @@ func (c *runningController) Execute(ctx context.Context) (rerr error) {
 		case <-c.confRestartCh:
 			valCtxCancel()
 			execRef.Release()
-			c.le.Debug("restarting with new config")
+			c.le.Info("restarting with new config")
 			c.mtx.Lock()
 			c.state.ctrl = nil
 			s := c.state
