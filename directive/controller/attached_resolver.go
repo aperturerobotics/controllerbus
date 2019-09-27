@@ -5,6 +5,7 @@ import (
 	"sync"
 
 	"github.com/aperturerobotics/controllerbus/directive"
+	"github.com/pkg/errors"
 )
 
 // attachedResolver tracks a resolver and its values.
@@ -70,13 +71,22 @@ func (r *attachedResolver) execResolver(handlerCtx context.Context) error {
 			default:
 			}
 			if !skipCtx {
-				errCh <- r.res.Resolve(ctx, r)
+				errCh <- func() (eerr error) {
+					defer func() {
+						if ferr := recover(); ferr != nil && eerr == nil {
+							eerr = errors.Errorf("resolver panic: %v", ferr)
+							r.di.le.WithError(eerr).Error("resolver paniced")
+						}
+					}()
+					return r.res.Resolve(ctx, r)
+				}()
 			} else {
 				errCh <- nil
 			}
 			r.di.decrementRunningResolvers()
 		}(nctx)
 
+		// TODO: find a way to exit this goroutine here to lower goroutine count
 		var gerr bool
 		select {
 		case err := <-errCh:
