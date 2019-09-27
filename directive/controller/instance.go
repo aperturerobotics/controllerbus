@@ -110,7 +110,7 @@ func (r *DirectiveInstance) AddReference(
 	r.refs = append(r.refs, ref)
 	if cb != nil {
 		for _, v := range r.vals {
-			cb.HandleValueAdded(r, v)
+			callHandleValueAdded(r.le, r, v, cb.HandleValueAdded)
 		}
 	}
 	r.valsMtx.Unlock()
@@ -157,7 +157,7 @@ func (r *DirectiveInstance) emitValue(v directive.Value) (uint32, bool) {
 	r.refsMtx.Lock()
 	for _, ref := range r.refs {
 		if ref != nil && ref.valCb != nil {
-			ref.valCb.HandleValueAdded(r, nav)
+			callHandleValueAdded(r.le, r, nav, ref.valCb.HandleValueAdded)
 		}
 	}
 	r.refsMtx.Unlock()
@@ -199,7 +199,7 @@ func (r *DirectiveInstance) purgeEmittedValue(id uint32) (directive.Value, bool)
 		r.refsMtx.Lock()
 		for _, ref := range r.refs {
 			if ref.valCb != nil {
-				ref.valCb.HandleValueRemoved(r, val)
+				callHandleValueRemoved(r.le, r, val, ref.valCb.HandleValueRemoved)
 			}
 		}
 		r.refsMtx.Unlock()
@@ -436,6 +436,36 @@ func (r *DirectiveInstance) markReferenced() {
 		r.unrefDestroyTimer.Stop()
 		r.unrefDestroyTimer = nil
 	}
+}
+
+// callHandleValueAdded calls a handle value added function
+func callHandleValueAdded(
+	le *logrus.Entry,
+	r *DirectiveInstance,
+	v *attachedValue,
+	fn func(r directive.Instance, v directive.AttachedValue),
+) {
+	defer func() {
+		if err := recover(); err != nil {
+			r.le.Errorf("handle value added paniced: %v", err)
+		}
+	}()
+	fn(r, v)
+}
+
+// callHandleValueRemoved calls a handle value removed function
+func callHandleValueRemoved(
+	le *logrus.Entry,
+	r *DirectiveInstance,
+	v *attachedValue,
+	fn func(r directive.Instance, v directive.AttachedValue),
+) {
+	defer func() {
+		if err := recover(); err != nil {
+			r.le.Errorf("handle value removed paniced: %v", err)
+		}
+	}()
+	fn(r, v)
 }
 
 // _ is a type assertion
