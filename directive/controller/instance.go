@@ -66,7 +66,11 @@ func NewDirectiveInstance(
 	cb directive.ReferenceHandler,
 	released func(di *DirectiveInstance),
 ) (*DirectiveInstance, directive.Reference) {
-	i := &DirectiveInstance{ctx: ctx, dir: dir, le: le}
+	i := &DirectiveInstance{
+		ctx: ctx,
+		dir: dir,
+		le:  le,
+	}
 	i.attachedResolverCtx, i.attachedResolverCtxCancel = context.WithCancel(ctx)
 	i.vals = make(map[uint32]*attachedValue)
 	i.rel = make(map[uint32]func())

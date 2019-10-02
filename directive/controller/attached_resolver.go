@@ -2,6 +2,7 @@ package controller
 
 import (
 	"context"
+	"runtime/debug"
 	"sync"
 
 	"github.com/aperturerobotics/controllerbus/directive"
@@ -74,8 +75,10 @@ func (r *attachedResolver) execResolver(handlerCtx context.Context) error {
 				errCh <- func() (eerr error) {
 					defer func() {
 						if ferr := recover(); ferr != nil && eerr == nil {
-							eerr = errors.Errorf("resolver panic: %v", ferr)
-							r.di.le.WithError(eerr).Error("resolver paniced")
+							eerr = errors.Errorf("%v", ferr)
+							r.di.le.
+								WithError(eerr).
+								Errorf("resolver panic with stack:\n%s", debug.Stack())
 						}
 					}()
 					return r.res.Resolve(ctx, r)
