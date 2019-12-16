@@ -69,8 +69,11 @@ func (d *ExecControllerSingleton) IsEquivalent(other directive.Directive) bool {
 	f := d.GetExecControllerFactory()
 	otherf := otherExec.GetExecControllerFactory()
 
-	// This is a singleton directive, so they are equiv if their IDs are the same.
-	return otherf.GetControllerID() == f.GetControllerID()
+	if otherf.GetControllerID() != f.GetControllerID() {
+		return false
+	}
+
+	return d.GetExecControllerConfig().EqualsConfig(otherExec.GetExecControllerConfig())
 }
 
 // Superceeds checks if the directive overrides another.
