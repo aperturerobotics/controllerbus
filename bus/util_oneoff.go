@@ -21,7 +21,7 @@ func ExecOneOff(
 			valCb: func(v directive.AttachedValue) {
 				select {
 				case valCh <- v:
-				case <-ctx.Done():
+				default:
 				}
 			},
 		},
