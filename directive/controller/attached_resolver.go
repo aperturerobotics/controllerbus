@@ -18,8 +18,10 @@ type attachedResolver struct {
 	valsMtx sync.Mutex
 	vals    []uint32
 
+	wakeMtx         sync.Mutex
 	res             directive.Resolver
 	resolutionCtxCh chan context.Context
+	wakeResolution  func()
 }
 
 // newAttachedResolver constructs a new attachedResolver.
@@ -37,6 +39,12 @@ PushLoop:
 	for {
 		select {
 		case r.resolutionCtxCh <- ctx:
+			r.wakeMtx.Lock()
+			if r.wakeResolution != nil {
+				go r.wakeResolution()
+				r.wakeResolution = nil
+			}
+			r.wakeMtx.Unlock()
 			break PushLoop
 		default:
 		}
@@ -49,7 +57,7 @@ PushLoop:
 }
 
 // handlerCtx is canceled when the handler is removed or di canceled.
-func (r *attachedResolver) execResolver(handlerCtx context.Context) error {
+func (r *attachedResolver) execResolver(handlerCtx context.Context) {
 	errCh := make(chan error, 1)
 	rctx := <-r.resolutionCtxCh
 
@@ -96,11 +104,12 @@ func (r *attachedResolver) execResolver(handlerCtx context.Context) error {
 			nctxCancel()
 			gerr = true
 			if err != nil && err != context.Canceled {
-				return err
+				// TODO handle resolver fatal error
+				return
 			}
 		case <-handlerCtx.Done():
 			nctxCancel()
-			return handlerCtx.Err()
+			return
 		case <-rctx.Done():
 			nctxCancel()
 		}
@@ -110,18 +119,26 @@ func (r *attachedResolver) execResolver(handlerCtx context.Context) error {
 			select {
 			case _ = <-errCh:
 			case <-handlerCtx.Done():
-				return handlerCtx.Err()
+				return
 			}
 		}
 
 		// wait for signal to restart resolver
 		select {
 		case <-handlerCtx.Done():
-			return handlerCtx.Err()
+			return
 		case rctx = <-r.resolutionCtxCh:
+			r.di.incrementRunningResolvers()
+		default:
+			// allow the routine to exit to avoid goroutine pollution
+			r.wakeMtx.Lock()
+			r.wakeResolution = func() {
+				r.di.incrementRunningResolvers()
+				r.execResolver(handlerCtx)
+			}
+			r.wakeMtx.Unlock()
+			return
 		}
-
-		r.di.incrementRunningResolvers()
 	}
 }
 

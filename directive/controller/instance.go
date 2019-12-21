@@ -302,23 +302,7 @@ func (r *DirectiveInstance) attachResolver(handlerCtx context.Context, res direc
 	r.attachedResolvers = append(r.attachedResolvers, ares)
 	r.runningResolvers++
 	ares.pushHandlerContext(r.attachedResolverCtx)
-	go func() {
-		err := ares.execResolver(handlerCtx)
-		if err != context.Canceled {
-			r.le.WithError(err).Warn("resolver returned with error")
-		}
-		_ = err
-		r.mtx.Lock()
-		defer r.mtx.Unlock()
-		for i, ai := range r.attachedResolvers {
-			if ai == ares {
-				r.attachedResolvers[i] = r.attachedResolvers[len(r.attachedResolvers)-1]
-				r.attachedResolvers[len(r.attachedResolvers)-1] = nil
-				r.attachedResolvers = r.attachedResolvers[:len(r.attachedResolvers)-1]
-				break
-			}
-		}
-	}()
+	go ares.execResolver(handlerCtx)
 }
 
 // cancelResolvers cancels all children resolvers.

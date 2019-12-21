@@ -140,6 +140,7 @@ func (c *DirectiveController) RemoveHandler(hnd directive.Handler) {
 			break
 		}
 	}
+	// TODO: ensure removing resolvers from handler.
 }
 
 // GetDirectives returns a list of all currently active directives.
