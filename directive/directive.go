@@ -58,11 +58,33 @@ type Directive interface {
 	// GetName returns the directive's type name.
 	// This is not necessarily unique, and is primarily intended for display.
 	GetName() string
+}
 
+// Debuggable indicates the directive implements the DebugVals interface.
+type Debuggable interface {
 	// GetDebugVals returns the directive arguments as key/value pairs.
 	// This should be something like param1="test", param2="test".
 	// This is not necessarily unique, and is primarily intended for display.
 	GetDebugVals() DebugValues
+}
+
+// Networked is a directive which can be serialized and uniquely identified
+// across IPC domains.
+type Networked interface {
+	// Directive indicates this is a directive.
+	Directive
+	// GetNetworkedCodec returns the encoder / decoder for this directive.
+	// The same encoder/decoder should also be compatible with the results.
+	GetNetworkedCodec() NetworkedCodec
+}
+
+// NetworkedCodec is the encoder/decoder for a networked directive.
+type NetworkedCodec interface {
+	// Marshal encodes the networked directive.
+	Marshal(Networked) ([]byte, error)
+	// Unmarshal decodes the data to the networked directive.
+	// The type must match the expected type for the codec.
+	Unmarshal([]byte, Networked) error
 }
 
 // Controller manages directives.

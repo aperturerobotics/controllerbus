@@ -1,4 +1,4 @@
-package boilerplate
+package boilerplate_controller
 
 import (
 	"context"
@@ -6,6 +6,7 @@ import (
 	"github.com/aperturerobotics/controllerbus/bus"
 	"github.com/aperturerobotics/controllerbus/controller"
 	"github.com/aperturerobotics/controllerbus/directive"
+	"github.com/aperturerobotics/controllerbus/example/boilerplate"
 
 	"github.com/blang/semver"
 	"github.com/sirupsen/logrus"
@@ -17,7 +18,7 @@ var Version = semver.MustParse("0.0.1")
 // ControllerID is the ID of the controller.
 const ControllerID = "controllerbus/example/boilerplate/1"
 
-// Controller implements the anchor chain controller.
+// Controller implements the boilerplate example controller.
 type Controller struct {
 	// le is the log entry
 	le *logrus.Entry
@@ -57,13 +58,11 @@ func (c *Controller) HandleDirective(
 	ctx context.Context,
 	inst directive.Instance,
 ) (directive.Resolver, error) {
-	/*
-		dir := inst.GetDirective()
-		switch d := dir.(type) {
-		case mything.DoSomething:
-			return c.resolveDoSomething(ctx, inst, d)
-		}
-	*/
+	dir := inst.GetDirective()
+	switch d := dir.(type) {
+	case boilerplate.Boilerplate:
+		return c.resolveBoilerplate(ctx, inst, d)
+	}
 
 	return nil, nil
 }

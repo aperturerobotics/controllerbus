@@ -1,0 +1,16 @@
+syntax = "proto3";
+package boilerplate.v1;
+
+// Boilerplate implements the boilerplate directive.
+message Boilerplate {
+  // MessageText is the message to print with the boilerplate.
+  // This is an example field.
+  // The keyword "message" prevents us from using that as the field name.
+  string message_text = 1;
+}
+
+// BoilerplateResult implements the boilerplate directive result.
+message BoilerplateResult {
+  // PrintedLen is the final length of the printed message.
+  uint32 printed_len = 1; 
+}

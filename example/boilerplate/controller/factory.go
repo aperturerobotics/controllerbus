@@ -1,4 +1,4 @@
-package boilerplate
+package boilerplate_controller
 
 import (
 	"github.com/aperturerobotics/controllerbus/bus"

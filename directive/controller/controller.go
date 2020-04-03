@@ -52,9 +52,12 @@ func (c *DirectiveController) AddDirective(
 	}
 
 	var dirDebugStr string
-	if debugVals := dir.GetDebugVals(); debugVals != nil {
-		dirDebugStr = url.Values(debugVals).Encode()
-		dirDebugStr, _ = url.PathUnescape(dirDebugStr)
+	debuggable, isDebuggable := dir.(directive.Debuggable)
+	if isDebuggable {
+		if debugVals := debuggable.GetDebugVals(); debugVals != nil {
+			dirDebugStr = url.Values(debugVals).Encode()
+			dirDebugStr, _ = url.PathUnescape(dirDebugStr)
+		}
 	}
 	dirNameDebugStr := dir.GetName()
 	if dirDebugStr != "" {

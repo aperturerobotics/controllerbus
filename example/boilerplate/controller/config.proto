@@ -1,5 +1,5 @@
 syntax = "proto3";
-package boilerplate;
+package boilerplate.controller;
 
 // Config is the boilerplate configuration.
 message Config {
