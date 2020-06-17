@@ -105,6 +105,9 @@ func (r *attachedResolver) execResolver(handlerCtx context.Context) {
 			gerr = true
 			if err != nil && err != context.Canceled {
 				// TODO handle resolver fatal error
+				go r.di.le.
+					WithError(err).
+					Warn("resolver exited with error")
 				return
 			}
 		case <-handlerCtx.Done():
