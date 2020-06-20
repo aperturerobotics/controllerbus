@@ -75,7 +75,7 @@ func (r *Resolver) GetConfigCtorByID(
 	for _, f := range r.factories {
 		cid := f.GetConfigID()
 		if cid == id {
-			return newConfigCtor(cid, f), nil
+			return NewConfigCtor(cid, f), nil
 		}
 	}
 
