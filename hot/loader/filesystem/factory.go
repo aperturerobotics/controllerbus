@@ -1,4 +1,4 @@
-package configset_controller
+package hot_loader_filesystem
 
 import (
 	"github.com/aperturerobotics/controllerbus/bus"
@@ -7,7 +7,7 @@ import (
 	"github.com/blang/semver"
 )
 
-// Factory constructs a configset controller.
+// Factory constructs a hot loading from filesystem controller.
 type Factory struct {
 	// bus is the controller bus
 	bus bus.Bus
@@ -41,8 +41,7 @@ func (t *Factory) Construct(
 	le := opts.GetLogger()
 	cc := conf.(*Config)
 
-	_ = cc
-	return NewController(le, t.bus)
+	return NewController(le, t.bus, cc)
 }
 
 // GetVersion returns the version of this controller.

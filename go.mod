@@ -18,4 +18,5 @@ require (
 	google.golang.org/grpc v1.29.1
 	gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 // indirect
 	gopkg.in/yaml.v2 v2.3.0 // indirect
+	github.com/fsnotify/fsnotify v1.4.9
 )

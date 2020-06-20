@@ -1,0 +1,14 @@
+syntax = "proto3";
+package hot.loader.filesystem;
+
+// Config is configuration for the filesystem hot-plugin loader.
+message Config {
+  // Dir is the directory to load from.
+  string dir = 1;
+  // Watch will watch the directory and hot-reload plugins.
+  bool watch = 2;
+}
+
+// Additional features to add:
+// Lazy: the plugins will not be loaded until needed.
+// Recursive:file tree will be recursively checked.

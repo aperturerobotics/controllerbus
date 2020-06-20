@@ -1,0 +1,5 @@
+boilerplate-example-0:
+  config:
+    exampleField: "hello world"
+  id: controllerbus/example/boilerplate/1
+  revision: 1
