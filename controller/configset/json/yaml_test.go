@@ -6,7 +6,7 @@ import (
 
 	"github.com/aperturerobotics/controllerbus/controller/configset"
 	"github.com/aperturerobotics/controllerbus/core"
-	"github.com/aperturerobotics/controllerbus/example/boilerplate"
+	boilerplate "github.com/aperturerobotics/controllerbus/example/boilerplate/controller"
 	"github.com/sirupsen/logrus"
 	// "github.com/aperturerobotics/controllerbus/bus/inmem"
 	// directive_controller "github.com/aperturerobotics/controllerbus/directive/controller"

@@ -5,7 +5,7 @@ import (
 
 	"github.com/aperturerobotics/controllerbus/bus"
 	"github.com/aperturerobotics/controllerbus/controller"
-	"github.com/aperturerobotics/controllerbus/example/boilerplate/controller"
+	boilerplate_controller "github.com/aperturerobotics/controllerbus/example/boilerplate/controller"
 	hot_plugin "github.com/aperturerobotics/controllerbus/hot/plugin"
 )
 
