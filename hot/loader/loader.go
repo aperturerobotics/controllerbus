@@ -12,6 +12,9 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+// HotPluginGlobalVar is the global var to load.
+const HotPluginGlobalVar = "ControllerBusHotPlugin"
+
 // LoadedPlugin contains a loaded Go plugin.
 type LoadedPlugin struct {
 	hot_plugin.HotPlugin
@@ -34,7 +37,7 @@ func LoadPluginSharedLibrary(
 	if err != nil {
 		return nil, err
 	}
-	sym, err := pg.Lookup("ControllerBusHotPlugin")
+	sym, err := pg.Lookup(HotPluginGlobalVar)
 	if err != nil {
 		return nil, err
 	}

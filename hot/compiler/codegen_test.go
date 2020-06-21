@@ -9,11 +9,13 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-const expectedCodegen = `package main
+const expectedCodegen = `//+build controllerbus_hot_plugin
+
+package main
 
 import (
-	"context"
 	"github.com/aperturerobotics/controllerbus/bus"
+	"github.com/aperturerobotics/controllerbus/controller"
 	boilerplate_controller "github.com/aperturerobotics/controllerbus/example/boilerplate/controller"
 	"github.com/aperturerobotics/controllerbus/hot/plugin"
 )
@@ -31,6 +33,8 @@ type Plugin = hot_plugin.StaticPlugin
 func NewPlugin() *Plugin {
 	return hot_plugin.NewStaticPlugin(BinaryID, BinaryVersion, BinaryFactories)
 }
+// ControllerBusHotPlugin is the variable read by the plugin loader.
+var ControllerBusHotPlugin hot_plugin.HotPlugin = NewPlugin()
 // _ is a type assertion
 var _ hot_plugin.HotPlugin = ((*Plugin)(nil))
 `
@@ -41,14 +45,19 @@ func TestCodegen(t *testing.T) {
 	log.SetLevel(logrus.DebugLevel)
 	le := logrus.NewEntry(log)
 
+	packagePaths := []string{
+		"github.com/aperturerobotics/controllerbus/example/boilerplate/controller",
+	}
+	an, err := AnalyzePackages(le, packagePaths)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
 	genFile, err := GeneratePluginWrapper(
 		ctx,
 		le,
+		an,
 		"testingCodegen",
 		"0.0.0",
-		[]string{
-			"github.com/aperturerobotics/controllerbus/example/boilerplate/controller",
-		},
 	)
 	if err != nil {
 		t.Fatal(err.Error())
