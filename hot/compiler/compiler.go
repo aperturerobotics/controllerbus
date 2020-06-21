@@ -1,3 +1,340 @@
 package hot_compiler
 
-// Command: compile a
+import (
+	"bytes"
+	"context"
+	"fmt"
+	gast "go/ast"
+	"go/build"
+	"go/format"
+	"go/parser"
+	"go/token"
+	"go/types"
+	"os"
+	"sort"
+
+	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
+	"golang.org/x/tools/go/loader"
+)
+
+// Analysis contains the result of code analysis.
+type Analysis struct {
+	// fset is the file set
+	fset *token.FileSet
+	// imports contains the set of packages to import
+	// keyed by import path
+	imports map[string]*types.Package
+	// factories contains the set of factories to build
+	factories map[string]struct{}
+}
+
+// AnalyzePackages analyzes code packages using Go module package resolution.
+func AnalyzePackages(le *logrus.Entry, packagePaths []string) (*Analysis, error) {
+	res := &Analysis{
+		imports: map[string]*types.Package{
+			"context": nil,
+			"github.com/aperturerobotics/controllerbus/bus":        nil,
+			"github.com/aperturerobotics/controllerbus/hot/plugin": nil,
+		},
+		factories: make(map[string]struct{}),
+	}
+
+	builderCtx := build.Default
+	builderCtx.BuildTags = append(builderCtx.BuildTags, "magellan_analyze")
+
+	var conf loader.Config
+	conf.Build = &builderCtx
+	conf.ParserMode |= parser.ParseComments | parser.AllErrors
+	for _, pkgPath := range packagePaths {
+		conf.Import(pkgPath)
+	}
+	conf.Cwd, _ = os.Getwd()
+
+	prog, err := conf.Load()
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to load go program")
+	}
+	res.fset = prog.Fset
+
+	initPkgList := prog.InitialPackages()
+	le.Infof("loaded %d init packages to analyze", len(initPkgList))
+	if len(initPkgList) == 0 {
+		return nil, errors.New("expected at least one package to be loaded")
+	}
+	// initPkg := initPkgList[0]
+
+	// Find NewFactory() constructors.
+	// Build a list of packages to import.
+	for _, pkg := range initPkgList {
+		le := le.WithField("pkg", pkg.Pkg.Path())
+		factoryCtorObj := pkg.Pkg.Scope().Lookup("NewFactory")
+		if factoryCtorObj == nil {
+			le.Warn("no factory constructors found")
+			continue
+		}
+		le.Infof("found factory ctor func: %s", factoryCtorObj.Type().String())
+		factoryPkgImportPath := factoryCtorObj.Pkg().Path()
+		if _, ok := res.imports[factoryPkgImportPath]; !ok {
+			le.
+				WithField("import-path", factoryPkgImportPath).
+				WithField("import-name", pkg.Pkg.Name).
+				Infof("added package to imports list: %s", factoryPkgImportPath)
+			res.imports[factoryPkgImportPath] = pkg.Pkg
+		}
+		res.factories[BuildPackageName(pkg.Pkg)] = struct{}{}
+	}
+
+	// TODO
+	return res, nil
+}
+
+// GeneratePluginWrapper generates a wrapper package for a list of packages
+// containing controller factories.
+func GeneratePluginWrapper(
+	ctx context.Context,
+	le *logrus.Entry,
+	binaryName, binaryVersion string,
+	packagePaths []string,
+) (*gast.File, error) {
+	// Load all named packages.
+	an, err := AnalyzePackages(le, packagePaths)
+	if err != nil {
+		return nil, err
+	}
+
+	// Build the plugin main package.
+	return CodegenPluginWrapperFromAnalysis(le, an, binaryName, binaryVersion)
+}
+
+// FormatFile formats the output file.
+func FormatFile(gf *gast.File) ([]byte, error) {
+	var outDat bytes.Buffer
+	// fset := prog.Fset
+	mergeImports(gf)
+	fset := token.NewFileSet()
+	if err := format.Node(&outDat, fset, gf); err != nil {
+		return nil, err
+	}
+	return outDat.Bytes(), nil
+}
+
+// BuildPackageName builds the unique name for the package.
+func BuildPackageName(pkg *types.Package) string {
+	// for now just use package name
+	return pkg.Name()
+}
+
+// CodegenPluginWrapperFromAnalysis codegens a plugin wrapper from analysis.
+func CodegenPluginWrapperFromAnalysis(le *logrus.Entry, a *Analysis, binaryID, binaryVersion string) (*gast.File, error) {
+	var allDecls []gast.Decl
+	importStrs := make([]string, 0, len(a.imports))
+	for impPkg := range a.imports {
+		importStrs = append(importStrs, impPkg)
+	}
+	sort.Strings(importStrs)
+	for _, impPath := range importStrs {
+		impPkg := a.imports[impPath]
+		// impPkg may be nil
+		var impIdent *gast.Ident
+		if impPkg != nil {
+			impIdent = gast.NewIdent(BuildPackageName(impPkg))
+		}
+		allDecls = append(allDecls, &gast.GenDecl{
+			Tok: token.IMPORT,
+			Specs: []gast.Spec{
+				&gast.ImportSpec{
+					Name: impIdent,
+					Path: &gast.BasicLit{
+						Kind:  token.STRING,
+						Value: `"` + impPath + `"`,
+					},
+				},
+			},
+		})
+	}
+
+	// BinaryID const
+	allDecls = append(allDecls, &gast.GenDecl{
+		Doc: &gast.CommentGroup{
+			List: []*gast.Comment{{
+				Text: "// BinaryID is the binary identifier.\n",
+			}},
+		},
+		Tok: token.CONST,
+		Specs: []gast.Spec{
+			&gast.ValueSpec{
+				Names:  []*gast.Ident{gast.NewIdent("BinaryID")},
+				Values: []gast.Expr{&gast.BasicLit{Kind: token.STRING, Value: fmt.Sprintf("%q", binaryID)}},
+			},
+		},
+	})
+
+	// BinaryVersion const
+	allDecls = append(allDecls, &gast.GenDecl{
+		Doc: &gast.CommentGroup{
+			List: []*gast.Comment{{
+				Text: "// BinaryVersion is the binary version string.\n",
+			}},
+		},
+		Tok: token.CONST,
+		Specs: []gast.Spec{
+			&gast.ValueSpec{
+				Names:  []*gast.Ident{gast.NewIdent("BinaryVersion")},
+				Values: []gast.Expr{&gast.BasicLit{Kind: token.STRING, Value: fmt.Sprintf("%q", binaryVersion)}},
+			},
+		},
+	})
+
+	// Construct the elements of the slice to return from BinaryFactories.
+	var buildControllersElts []gast.Expr
+	for fpkg := range a.factories {
+		buildControllersElts = append(buildControllersElts, &gast.CallExpr{
+			Args: []gast.Expr{
+				gast.NewIdent("b"),
+			},
+			Fun: &gast.SelectorExpr{
+				Sel: gast.NewIdent("NewFactory"),
+				X:   gast.NewIdent(fpkg),
+			},
+		})
+	}
+
+	// BinaryFactories are the factories included in the binary.
+	allDecls = append(allDecls, &gast.GenDecl{
+		Doc: &gast.CommentGroup{
+			List: []*gast.Comment{{
+				Text: "// BinaryFactories are the factories included in the binary.\n",
+			}},
+		},
+		Tok: token.VAR,
+		Specs: []gast.Spec{
+			&gast.ValueSpec{
+				Names: []*gast.Ident{gast.NewIdent("BinaryFactories")},
+				Values: []gast.Expr{&gast.FuncLit{
+					Type: &gast.FuncType{
+						Params: &gast.FieldList{
+							List: []*gast.Field{{
+								Names: []*gast.Ident{gast.NewIdent("b")},
+								Type: &gast.SelectorExpr{
+									X:   gast.NewIdent("bus"),
+									Sel: gast.NewIdent("Bus"),
+								},
+							}},
+						},
+						Results: &gast.FieldList{List: []*gast.Field{
+							{Type: &gast.ArrayType{Elt: &gast.SelectorExpr{
+								X:   gast.NewIdent("controller"),
+								Sel: gast.NewIdent("Factory"),
+							}}},
+						}},
+					},
+					Body: &gast.BlockStmt{List: []gast.Stmt{
+						&gast.ReturnStmt{
+							Results: []gast.Expr{
+								&gast.CompositeLit{
+									Elts: buildControllersElts,
+									Type: &gast.ArrayType{Elt: &gast.SelectorExpr{
+										X:   gast.NewIdent("controller"),
+										Sel: gast.NewIdent("Factory"),
+									}},
+								},
+							},
+						},
+					}},
+				}},
+			},
+		},
+	})
+
+	// Plugin is the top-level static plugin container.
+	// type Plugin = hot_plugin.StaticPlugin
+	allDecls = append(allDecls, &gast.GenDecl{
+		Doc: &gast.CommentGroup{
+			List: []*gast.Comment{{
+				Text: "// Plugin is the top-level static plugin container.\n",
+			}},
+		},
+		Tok: token.TYPE,
+		Specs: []gast.Spec{
+			&gast.TypeSpec{
+				Name:   gast.NewIdent("Plugin"),
+				Assign: 789,
+				Type: &gast.SelectorExpr{
+					X:   gast.NewIdent("hot_plugin"),
+					Sel: gast.NewIdent("StaticPlugin"),
+				},
+			},
+		},
+	})
+
+	// NewPlugin constructs the static container plugin.
+	allDecls = append(allDecls, &gast.FuncDecl{
+		Doc: &gast.CommentGroup{
+			List: []*gast.Comment{{
+				Text: "// NewPlugin constructs the static container plugin.\n",
+			}},
+		},
+		Name: gast.NewIdent("NewPlugin"),
+		Body: &gast.BlockStmt{List: []gast.Stmt{
+			&gast.ReturnStmt{
+				Results: []gast.Expr{
+					&gast.CallExpr{
+						Fun: &gast.SelectorExpr{
+							X:   gast.NewIdent("hot_plugin"),
+							Sel: gast.NewIdent("NewStaticPlugin"),
+						},
+						Args: []gast.Expr{
+							gast.NewIdent("BinaryID"),
+							gast.NewIdent("BinaryVersion"),
+							gast.NewIdent("BinaryFactories"),
+						},
+					},
+				},
+			},
+		}},
+		Type: &gast.FuncType{
+			Params: &gast.FieldList{List: []*gast.Field{}},
+			Results: &gast.FieldList{
+				List: []*gast.Field{
+					{
+						Type: &gast.StarExpr{
+							X: gast.NewIdent("Plugin"),
+						},
+					},
+				},
+			},
+		},
+	})
+
+	// _ is a type assertion for HotPlugin
+	allDecls = append(allDecls, &gast.GenDecl{
+		Doc: &gast.CommentGroup{
+			List: []*gast.Comment{{
+				Text: "// _ is a type assertion\n",
+			}},
+		},
+		Tok: token.VAR,
+		Specs: []gast.Spec{
+			&gast.ValueSpec{
+				Names: []*gast.Ident{gast.NewIdent("_")},
+				Type: &gast.SelectorExpr{
+					X:   gast.NewIdent("hot_plugin"),
+					Sel: gast.NewIdent("HotPlugin"),
+				},
+				Values: []gast.Expr{&gast.ParenExpr{X: &gast.CallExpr{
+					Args: []gast.Expr{gast.NewIdent("nil")},
+					Fun: &gast.ParenExpr{
+						X: &gast.StarExpr{X: gast.NewIdent("Plugin")},
+					},
+				}}},
+			},
+		},
+	})
+
+	return &gast.File{
+		Name:    gast.NewIdent("main"),
+		Package: 5, // Force after build tag.
+		Decls:   allDecls,
+	}, nil
+}
