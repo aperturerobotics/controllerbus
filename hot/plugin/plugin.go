@@ -45,17 +45,19 @@ func (e *StaticPlugin) GetBinaryVersion() string {
 // NewHotResolver constructs the resolver and inits the plugin.
 // ctx is canceled when the plugin is about to be unloaded.
 func (e *StaticPlugin) NewHotResolver(ctx context.Context, b bus.Bus) (HotResolver, error) {
-	factories := e.factories(b)
 	return NewResolver(
+		ctx,
+		b,
 		e.GetBinaryID(),
 		e.GetBinaryVersion(),
-		factories...,
+		e.factories(b)...,
 	), nil
 }
 
 // PrePluginUnload is called just before the plugin is unloaded.
 func (e *StaticPlugin) PrePluginUnload() {
 	// noop
+	// most work done in the resolver
 }
 
 // _ is a type assertion

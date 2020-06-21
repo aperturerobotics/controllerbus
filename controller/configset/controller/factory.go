@@ -13,7 +13,7 @@ type Factory struct {
 	bus bus.Bus
 }
 
-// NewFactory builds a websocket transport factory.
+// NewFactory builds a configset controller factory.
 func NewFactory(bus bus.Bus) *Factory {
 	return &Factory{bus: bus}
 }

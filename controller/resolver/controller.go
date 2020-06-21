@@ -19,11 +19,16 @@ type Controller struct {
 	bus bus.Bus
 	// resolver is the factory resolver
 	resolver controller.FactoryResolver
+	// subCtx is the sub-ctx used for signaling close to resolvers
+	subCtx       context.Context
+	subCtxCancel context.CancelFunc
 }
 
 // NewController constructs a new controller with a resolver.
 func NewController(le *logrus.Entry, bus bus.Bus, resolver controller.FactoryResolver) *Controller {
-	return &Controller{le: le, resolver: resolver, bus: bus}
+	c := &Controller{le: le, resolver: resolver, bus: bus}
+	c.subCtx, c.subCtxCancel = context.WithCancel(context.Background())
+	return c
 }
 
 // GetControllerID returns the controller ID.
@@ -71,6 +76,9 @@ func (c *Controller) Execute(ctx context.Context) error {
 // Close releases any resources used by the controller.
 // Error indicates any issue encountered releasing.
 func (c *Controller) Close() error {
+	// When closing resolver controller, we need to cleanup all yielded resources.
+	// At this point we shouldn't have any additional requests being fired.
+	c.subCtxCancel()
 	return nil
 }
 

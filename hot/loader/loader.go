@@ -19,6 +19,7 @@ const HotPluginGlobalVar = "ControllerBusHotPlugin"
 type LoadedPlugin struct {
 	hot_plugin.HotPlugin
 	hot_plugin.HotResolver
+	PluginStat
 
 	closeOnce sync.Once
 	ctx       context.Context
@@ -32,6 +33,12 @@ func LoadPluginSharedLibrary(
 	bus bus.Bus,
 	pluginPath string,
 ) (*LoadedPlugin, error) {
+	// Get info about the file.
+	pluginSt, err := NewPluginStat(pluginPath)
+	if err != nil {
+		return nil, err
+	}
+
 	// Load the plugin.
 	pg, err := plugin.Open(pluginPath)
 	if err != nil {
@@ -54,15 +61,29 @@ func LoadPluginSharedLibrary(
 		return nil, err
 	}
 	subCtx, subCtxCancel := context.WithCancel(ctx)
-	go bus.ExecuteController(
-		subCtx,
-		resolver.NewController(le, bus, hotResolver),
-	)
+	go func() {
+		resolverController := resolver.NewController(le, bus, hotResolver)
+		err := bus.ExecuteController(
+			subCtx,
+			resolverController,
+		)
+		if err != nil {
+			// typically not possible
+			if err != context.Canceled {
+				le.WithError(err).Warn("hot loader controller exited with error")
+			}
+			return
+		}
+		<-subCtx.Done()
+		_ = bus.RemoveController(ctx, resolverController)
+		resolverController.Close()
+	}()
 	return &LoadedPlugin{
 		ctx:         subCtx,
 		ctxCancel:   subCtxCancel,
 		HotPlugin:   hotPlugin,
 		HotResolver: hotResolver,
+		PluginStat:  *pluginSt,
 	}, nil
 }
 

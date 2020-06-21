@@ -70,11 +70,10 @@ func (c *runningController) Execute(ctx context.Context) (rerr error) {
 		}
 	}()
 
+	c.mtx.Lock()
+	conf := c.conf
+	c.mtx.Unlock()
 	for {
-		c.mtx.Lock()
-		conf := c.conf
-		c.mtx.Unlock()
-
 		select {
 		case <-ctx.Done():
 			return ctx.Err()
@@ -101,21 +100,18 @@ func (c *runningController) Execute(ctx context.Context) (rerr error) {
 		c.mtx.Unlock()
 		select {
 		case <-ctx.Done():
-			execRef.Release()
-			return ctx.Err()
 		case <-valCtx.Done():
-			execRef.Release()
-			continue
 		case <-c.confRestartCh:
-			valCtxCancel()
-			execRef.Release()
 			c.le.Info("restarting with new config")
-			c.mtx.Lock()
-			c.state.ctrl = nil
-			s := c.state
-			c.pushState(&s)
-			c.mtx.Unlock()
 		}
+		valCtxCancel()
+		execRef.Release()
+		c.mtx.Lock()
+		c.state.ctrl = nil
+		s = c.state
+		c.pushState(&s)
+		conf = c.conf
+		c.mtx.Unlock()
 	}
 }
 

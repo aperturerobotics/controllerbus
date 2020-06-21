@@ -73,6 +73,10 @@ func (d *ExecControllerSingleton) IsEquivalent(other directive.Directive) bool {
 		return false
 	}
 
+	// This enforces that even with two factories, two controllers with the same
+	// ID and configuration should not be started at the same time. The factory
+	// with the greater version number "wins." If there are multiple sources for
+	// code, the latest version is therefore taken.
 	return d.GetExecControllerConfig().EqualsConfig(otherExec.GetExecControllerConfig())
 }
 

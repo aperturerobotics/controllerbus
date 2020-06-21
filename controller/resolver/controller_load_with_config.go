@@ -13,6 +13,8 @@ import (
 // loadWithConfigResolver implements directive.Resolver for loading a controller
 // with a config.
 type loadWithConfigResolver struct {
+	// c is the controller
+	c *Controller
 	// bus is the controller bus
 	bus bus.Bus
 	// ctx is the directive context
@@ -28,7 +30,7 @@ func (c *Controller) resolveLoadControllerWithConfig(
 	ctx context.Context,
 	dir LoadControllerWithConfig,
 ) (directive.Resolver, error) {
-	return &loadWithConfigResolver{ctx: ctx, res: c.resolver, dir: dir, bus: c.bus}, nil
+	return &loadWithConfigResolver{c: c, ctx: ctx, res: c.resolver, dir: dir, bus: c.bus}, nil
 }
 
 // Resolve resolves the values.
@@ -45,6 +47,12 @@ func (r *loadWithConfigResolver) Resolve(ctx context.Context, vh directive.Resol
 		return nil
 	}
 
+	factoryCtx := context.Background()
+	factoryWithCtx, factoryWithCtxOk := factory.(controller.FactoryWithContext)
+	if factoryWithCtxOk {
+		factoryCtx = factoryWithCtx.GetFactoryContext()
+	}
+
 	valCtx, valCtxCancel := context.WithCancel(r.ctx)
 	execDir := loader.NewExecControllerSingleton(factory, conf)
 	execVal, execRef, err := bus.ExecOneOff(ctx, r.bus, execDir, valCtxCancel)
@@ -59,9 +67,15 @@ func (r *loadWithConfigResolver) Resolve(ctx context.Context, vh directive.Resol
 	}
 
 	// cancel the reference when ctx is canceled
+	// note: it's correct to spawn a new goroutine here; indicate the resolver has exited.
 	go func() {
-		<-valCtx.Done()
+		select {
+		case <-factoryCtx.Done():
+		case <-valCtx.Done():
+		case <-r.c.subCtx.Done():
+		}
 		execRef.Release()
+		valCtxCancel()
 		_, _ = vh.RemoveValue(vid)
 	}()
 

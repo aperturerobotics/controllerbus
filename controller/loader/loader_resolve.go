@@ -49,10 +49,11 @@ func (c *Controller) resolveExecController(
 // When the context is canceled valCh will not be drained anymore.
 func (c *resolver) Resolve(ctx context.Context, vh directive.ResolverHandler) error {
 	// Construct and attach the new controller to the bus.
+	config := c.directive.GetExecControllerConfig()
 	factory := c.directive.GetExecControllerFactory()
+
 	le := c.controller.le.WithField("controller", factory.GetControllerID())
 	bus := c.controller.bus
-	config := c.directive.GetExecControllerConfig()
 
 	ci, err := factory.Construct(config, controller.ConstructOpts{
 		Logger: le,

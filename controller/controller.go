@@ -57,6 +57,13 @@ type Factory interface {
 	GetVersion() semver.Version
 }
 
+// FactoryWithContext is a factory with a cancelation context.
+type FactoryWithContext interface {
+	Factory
+	// GetFactoryContext returns a context that is canceled if the factory is unloaded.
+	GetFactoryContext() context.Context
+}
+
 // FactoryResolver looks up factories that match configurations.
 type FactoryResolver interface {
 	// GetResolverID returns the resolver identifier.

@@ -3,7 +3,9 @@ package hot_plugin
 import (
 	"context"
 	"strings"
+	"sync"
 
+	"github.com/aperturerobotics/controllerbus/bus"
 	"github.com/aperturerobotics/controllerbus/config"
 	"github.com/aperturerobotics/controllerbus/controller"
 	"github.com/aperturerobotics/controllerbus/controller/resolver/static"
@@ -18,12 +20,21 @@ var Version = semver.MustParse("0.0.1")
 //
 // Does not require semantic versioning for binary versions.
 type Resolver struct {
-	id             string
-	staticResolver *static.Resolver
+	ctx                 context.Context
+	id                  string
+	pluginBinaryID      string
+	pluginBinaryVersion string
+	staticResolver      *static.Resolver
+	bus                 bus.Bus
+
+	mtx       sync.Mutex
+	preUnload []func()
 }
 
-// NewResolver constructs a new resolver with a plugin binary..
+// NewResolver constructs a new resolver with a plugin binary.
 func NewResolver(
+	ctx context.Context,
+	bus bus.Bus,
 	pluginBinaryID string,
 	pluginBinaryVersion string,
 	factories ...controller.Factory,
@@ -39,8 +50,12 @@ func NewResolver(
 	}, "/")
 	staticResolver := static.NewResolver(factories...)
 	return &Resolver{
-		id:             id,
-		staticResolver: staticResolver,
+		ctx:                 ctx,
+		bus:                 bus,
+		id:                  id,
+		staticResolver:      staticResolver,
+		pluginBinaryID:      pluginBinaryID,
+		pluginBinaryVersion: pluginBinaryVersion,
 	}
 }
 
@@ -68,13 +83,27 @@ func (r *Resolver) GetConfigCtorByID(
 func (r *Resolver) GetFactoryMatchingConfig(
 	ctx context.Context, c config.Config,
 ) (controller.Factory, error) {
-	return r.staticResolver.GetFactoryMatchingConfig(ctx, c)
+	tfac, err := r.staticResolver.GetFactoryMatchingConfig(ctx, c)
+	if err != nil {
+		return tfac, err
+	}
+
+	// wrap factories with pre-unload hook
+	sf := NewStaticPluginFactory(r.ctx, tfac, r.pluginBinaryID, r.bus)
+	r.mtx.Lock()
+	r.preUnload = append(r.preUnload, sf.Close)
+	r.mtx.Unlock()
+	return sf, nil
 }
 
 // PrePluginUnload is called just before the plugin is unloaded.
 func (r *Resolver) PrePluginUnload() {
-	// noop
-	// TODO kill all attached controllers?
+	r.mtx.Lock()
+	for _, f := range r.preUnload {
+		f()
+	}
+	r.preUnload = nil
+	r.mtx.Unlock()
 }
 
 // _ is a type assertion

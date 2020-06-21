@@ -50,7 +50,11 @@ func (r *LoadConfigConstructorByIDResolver) Resolve(
 		return nil
 	}
 
-	vh.AddValue(ctor)
+	id, accepted := vh.AddValue(ctor)
+	if accepted {
+		<-ctx.Done()
+		vh.RemoveValue(id)
+	}
 	return nil
 }
 

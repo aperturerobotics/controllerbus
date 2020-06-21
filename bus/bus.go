@@ -20,4 +20,8 @@ type Bus interface {
 	// The controller will receive directive callbacks until this returns.
 	// If the controller execute returns nil, waits until context is canceled to return.
 	ExecuteController(context.Context, controller.Controller) error
+	// RemoveController removes the controller from the bus.
+	// The controller will no longer receive callbacks.
+	// Note: this might not cancel the Execute() context automatically.
+	RemoveController(context.Context, controller.Controller) error
 }

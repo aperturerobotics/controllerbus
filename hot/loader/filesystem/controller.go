@@ -13,6 +13,7 @@ import (
 	"github.com/aperturerobotics/controllerbus/directive"
 	hot_loader "github.com/aperturerobotics/controllerbus/hot/loader"
 	hot_plugin "github.com/aperturerobotics/controllerbus/hot/plugin"
+	debounce_fswatcher "github.com/aperturerobotics/controllerbus/util/debounce-fswatcher"
 	"github.com/blang/semver"
 	"github.com/fsnotify/fsnotify"
 	"github.com/pkg/errors"
@@ -80,20 +81,18 @@ func (c *Controller) Execute(ctx context.Context) error {
 		c.le.
 			WithField("plugin-path", plugPath).
 			Info("loading plugin")
-		plugActPath := path.Join(c.dir, plugPath)
 		lp, err := hot_loader.LoadPluginSharedLibrary(
 			ctx,
 			c.le.WithField("plugin-id", plugPath),
 			c.bus,
-			plugActPath,
+			plugPath,
 		)
 		if err != nil {
 			return err
 		}
 		loadedPlugins[plugPath] = lp
 		c.le.
-			WithField("plugin-id", plugPath).
-			WithField("plugin-path", plugActPath).
+			WithField("plugin-path", plugPath).
 			WithField("plugin-binary-id", lp.GetBinaryID()).
 			WithField("plugin-binary-version", lp.GetBinaryVersion()).
 			Info("successfully loaded plugin")
@@ -105,7 +104,7 @@ func (c *Controller) Execute(ctx context.Context) error {
 		if err != nil {
 			return err
 		}
-		foundNames := make(map[string]struct{})
+		foundNames := make(map[string]*hot_loader.PluginStat)
 		for _, df := range dirContents {
 			if df.IsDir() || !df.Mode().IsRegular() {
 				continue
@@ -114,12 +113,38 @@ func (c *Controller) Execute(ctx context.Context) error {
 			if !strings.HasSuffix(dfName, pluginSuffix) {
 				continue
 			}
-			foundNames[dfName] = struct{}{}
-		}
-		for loadedID := range loadedPlugins {
-			if _, ok := foundNames[loadedID]; !ok {
-				unloadPlugin(loadedID)
+			plugPath := path.Join(c.dir, dfName)
+			dfStat, err := hot_loader.NewPluginStat(plugPath)
+			if err != nil {
+				c.le.
+					WithError(err).
+					WithField("plugin-path", plugPath).
+					Warn("cannot stat plugin path")
+				continue
 			}
+			foundNames[plugPath] = dfStat
+		}
+		for loadedID, loadedInfo := range loadedPlugins {
+			foundPlugin, ok := foundNames[loadedID]
+			if !ok {
+				// plugin no longer exists.
+				unloadPlugin(loadedID)
+				continue
+			}
+
+			plugsEqual := foundPlugin.Equal(&loadedInfo.PluginStat)
+			if plugsEqual {
+				continue
+			}
+			c.le.Debugf(
+				"%s: reloading plugin, discovered(%d){%s} != loaded(%d){%s}",
+				loadedID,
+				foundPlugin.GetBinarySize(),
+				foundPlugin.GetModificationTime().String(),
+				loadedInfo.GetBinarySize(),
+				loadedInfo.GetModificationTime().String(),
+			)
+			unloadPlugin(loadedID)
 		}
 		for plugFile := range foundNames {
 			if _, ok := loadedPlugins[plugFile]; !ok {
@@ -159,46 +184,15 @@ func (c *Controller) Execute(ctx context.Context) error {
 		return err
 	}
 
-	var nextSyncTicker *time.Timer
-	var nextSyncC <-chan time.Time
-	defer func() {
-		if nextSyncTicker != nil {
-			nextSyncTicker.Stop()
-		}
-	}()
 	for {
-		select {
-		case <-ctx.Done():
-			return ctx.Err()
-		case event, ok := <-watcher.Events:
-			if !ok {
-				return nil
-			}
-			switch event.Op {
-			case fsnotify.Create:
-			case fsnotify.Rename:
-			case fsnotify.Write:
-			case fsnotify.Remove:
-			default:
-				continue
-			}
-			if nextSyncTicker != nil {
-				nextSyncTicker.Stop()
-			}
-			nextSyncTicker = time.NewTimer(debounceTime)
-			nextSyncC = nextSyncTicker.C
-		case err, ok := <-watcher.Errors:
-			if !ok || err == context.Canceled {
-				return nil
-			}
-			return errors.Wrap(err, "watcher error")
-		case <-nextSyncC:
-			nextSyncTicker = nil
-			nextSyncC = nil
-			c.le.Debug("re-syncing plugins list")
-			if err := syncPlugins(); err != nil {
-				return err
-			}
+		happened, err := debounce_fswatcher.DebounceFSWatcherEvents(ctx, watcher, debounceTime)
+		if err != nil {
+			return err
+		}
+
+		c.le.Debugf("re-syncing plugins after %d filesystem events", len(happened))
+		if err := syncPlugins(); err != nil {
+			return err
 		}
 	}
 }
