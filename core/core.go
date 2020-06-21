@@ -39,5 +39,6 @@ func NewCoreBus(
 	)
 
 	sr.AddFactory(configset_controller.NewFactory(b))
+	addNativeFactories(b, sr)
 	return b, sr, nil
 }
