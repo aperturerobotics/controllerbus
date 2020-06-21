@@ -6,7 +6,4 @@ import (
 )
 
 // ControllerBusHotPlugin is the root hot plugin that is loaded.
-var ControllerBusHotPlugin hot_plugin.HotPlugin = &demo.ExamplePlugin{}
-
-// plugin
-// func main() {}
+var ControllerBusHotPlugin hot_plugin.HotPlugin = demo.NewExamplePlugin()

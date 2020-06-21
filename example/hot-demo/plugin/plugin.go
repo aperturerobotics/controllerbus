@@ -1,8 +1,6 @@
 package example_hot_plugin
 
 import (
-	"context"
-
 	"github.com/aperturerobotics/controllerbus/bus"
 	"github.com/aperturerobotics/controllerbus/controller"
 	boilerplate_controller "github.com/aperturerobotics/controllerbus/example/boilerplate/controller"
@@ -23,34 +21,15 @@ var BinaryFactories = func(b bus.Bus) []controller.Factory {
 }
 
 // ExamplePlugin is the top-level example plugin.
-type ExamplePlugin struct {
-}
+type ExamplePlugin = hot_plugin.StaticPlugin
 
-// GetBinaryID returns the plugin binary ID.
-// Usually the go.mod package name.
-func (e *ExamplePlugin) GetBinaryID() string {
-	return BinaryID
-}
-
-// GetBinaryVersion returns the plugin binary version
-// Does not need to be semver (usually uses Go.mod versioning)
-func (e *ExamplePlugin) GetBinaryVersion() string {
-	return BinaryVersion
-}
-
-// NewHotResolver constructs the resolver and inits the plugin.
-// ctx is canceled when the plugin is about to be unloaded.
-func (e *ExamplePlugin) NewHotResolver(ctx context.Context, b bus.Bus) (hot_plugin.HotResolver, error) {
-	return hot_plugin.NewResolver(
-		e.GetBinaryID(),
-		e.GetBinaryVersion(),
-		BinaryFactories(b)...,
-	), nil
-}
-
-// PrePluginUnload is called just before the plugin is unloaded.
-func (e *ExamplePlugin) PrePluginUnload() {
-	// noop
+// NewExamplePlugin constructs a new example plugin.
+func NewExamplePlugin() *ExamplePlugin {
+	return hot_plugin.NewStaticPlugin(
+		BinaryID,
+		BinaryVersion,
+		BinaryFactories,
+	)
 }
 
 // _ is a type assertion
