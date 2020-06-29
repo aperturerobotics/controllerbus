@@ -1,0 +1,4 @@
+compile-module
+hot-demo.cbus.so
+codegen-main.go
+codegen-module

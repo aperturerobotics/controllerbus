@@ -1,33 +1,41 @@
 package hot_compiler
 
 import (
+	"context"
 	"go/build"
 	// "go/parser"
 	"go/token"
 	"go/types"
-	"os"
 	"strings"
 
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-	"golang.org/x/tools/go/loader"
+	"golang.org/x/tools/go/packages"
 )
 
 // Analysis contains the result of code analysis.
 type Analysis struct {
 	// fset is the file set
 	fset *token.FileSet
-	// prog is the program
-	prog *loader.Program
+	// packages are the imported packages
+	// keyed by package path
+	packages map[string]*packages.Package
 	// imports contains the set of packages to import
 	// keyed by import path
 	imports map[string]*types.Package
 	// factories contains the set of factories to build
-	factories map[string]struct{}
+	factories map[string]*packages.Package
+	// module contains all factory modules
+	module map[string]*packages.Module
 }
 
 // AnalyzePackages analyzes code packages using Go module package resolution.
-func AnalyzePackages(le *logrus.Entry, packagePaths []string) (*Analysis, error) {
+func AnalyzePackages(
+	ctx context.Context,
+	le *logrus.Entry,
+	workDir string,
+	packagePaths []string,
+) (*Analysis, error) {
 	res := &Analysis{
 		imports: map[string]*types.Package{
 			// "context": nil,
@@ -35,40 +43,71 @@ func AnalyzePackages(le *logrus.Entry, packagePaths []string) (*Analysis, error)
 			"github.com/aperturerobotics/controllerbus/controller": nil,
 			"github.com/aperturerobotics/controllerbus/hot/plugin": nil,
 		},
-		factories: make(map[string]struct{}),
+		factories: make(map[string]*packages.Package),
+		packages:  make(map[string]*packages.Package),
+		module:    make(map[string]*packages.Module),
 	}
 
 	builderCtx := build.Default
 	builderCtx.BuildTags = append(builderCtx.BuildTags, "controllerbus_hot_analyze")
 
-	var conf loader.Config
-	conf.Build = &builderCtx
-	// conf.ParserMode |= parser.ParseComments | parser.AllErrors
-	// conf.ParserMode |= parser.DeclarationErrors
-	for _, pkgPath := range packagePaths {
-		conf.Import(pkgPath)
-	}
-	conf.Cwd, _ = os.Getwd()
+	var conf packages.Config
+	conf.Context = ctx
 
-	prog, err := conf.Load()
+	// NeedCompiledGoFiles adds CompiledGoFiles.
+	// packages.NeedCompiledGoFiles |
+	// NeedTypesSizes adds TypesSizes.
+	// packages.NeedTypesSizes |
+
+	conf.Fset = token.NewFileSet()
+	conf.Mode = conf.Mode |
+		// NeedName adds Name and PkgPath.
+		packages.NeedName |
+		// NeedFiles adds GoFiles and OtherFiles.
+		packages.NeedFiles |
+		// NeedImports adds Imports. If NeedDeps is not set, the Imports field will contain
+		// "placeholder" Packages with only the ID set.
+		packages.NeedImports |
+		// NeedDeps adds the fields requested by the LoadMode in the packages in Imports.
+		packages.NeedDeps |
+		// NeedExportsFile adds ExportFile.
+		packages.NeedExportsFile |
+		// NeedTypes adds Types, Fset, and IllTyped.
+		packages.NeedTypes |
+		// NeedSyntax adds Syntax.
+		packages.NeedSyntax |
+		// NeedTypesInfo adds TypesInfo.
+		packages.NeedTypesInfo |
+		// NeedModule adds Module.
+		packages.NeedModule
+
+	conf.Dir = workDir
+	conf.Logf = func(format string, args ...interface{}) {
+		le.Debugf(format, args...)
+	}
+
+	loadedPackages, err := packages.Load(&conf, packagePaths...)
 	if err != nil {
-		return nil, errors.Wrap(err, "unable to load go program")
+		return nil, err
 	}
-	res.fset = prog.Fset
-	res.prog = prog
+	res.fset = conf.Fset
+	for _, pkg := range loadedPackages {
+		res.packages[pkg.PkgPath] = pkg
+	}
 
-	initPkgList := prog.InitialPackages()
-	le.Infof("loaded %d init packages to analyze", len(initPkgList))
-	if len(initPkgList) == 0 {
+	le.Debugf("loaded %d init packages to analyze", len(loadedPackages))
+	if len(loadedPackages) == 0 {
 		return nil, errors.New("expected at least one package to be loaded")
 	}
-	// initPkg := initPkgList[0]
+	// initPkg := loadedPackages[0]
+
+	factoryModules := res.module
 
 	// Find NewFactory() constructors.
 	// Build a list of packages to import.
-	for _, pkg := range initPkgList {
-		le := le.WithField("pkg", pkg.Pkg.Path())
-		factoryCtorObj := pkg.Pkg.Scope().Lookup("NewFactory")
+	for _, pkg := range loadedPackages {
+		le := le.WithField("pkg", pkg.Types.Path())
+		factoryCtorObj := pkg.Types.Scope().Lookup("NewFactory")
 		if factoryCtorObj == nil {
 			le.Warn("no factory constructors found")
 			continue
@@ -78,25 +117,34 @@ func AnalyzePackages(le *logrus.Entry, packagePaths []string) (*Analysis, error)
 		if _, ok := res.imports[factoryPkgImportPath]; !ok {
 			le.
 				WithField("import-path", factoryPkgImportPath).
-				WithField("import-name", pkg.Pkg.Name).
-				Infof("added package to imports list: %s", factoryPkgImportPath)
-			res.imports[factoryPkgImportPath] = pkg.Pkg
+				WithField("import-name", pkg.Types.Name).
+				Debug("added package to imports list")
+			res.imports[factoryPkgImportPath] = pkg.Types
 		}
-		res.factories[BuildPackageName(pkg.Pkg)] = struct{}{}
+		res.factories[BuildPackageName(pkg.Types)] = pkg
+
+		factoryMod := pkg.Module
+		if _, ok := factoryModules[factoryMod.Path]; !ok {
+			le.
+				WithField("import-path", factoryPkgImportPath).
+				WithField("module-path", factoryMod.Path).
+				WithField("module-version", factoryMod.Version).
+				Debug("added module to modules list")
+			factoryModules[factoryMod.Path] = factoryMod
+		}
 	}
 
-	// TODO
 	return res, nil
 }
 
-// GetProgram returns the program.
-func (a *Analysis) GetProgram() *loader.Program {
-	return a.prog
+// GetLoadedPackages returns the loaded packages.
+func (a *Analysis) GetLoadedPackages() map[string]*packages.Package {
+	return a.packages
 }
 
 // GetProgramCodeFiles returns file paths for packages in the program.
 // exactMatchFilter and importPathPrefixFilter are optional.
-func (an *Analysis) GetProgramCodeFiles(
+func (a *Analysis) GetProgramCodeFiles(
 	exactMatchFilter []string,
 	importPathPrefixFilter string,
 ) map[string][]string {
@@ -106,9 +154,10 @@ func (an *Analysis) GetProgramCodeFiles(
 	}
 
 	// collect go files to watch
-	for pakInfo, pak := range an.prog.AllPackages {
-		for i := range pak.Files {
-			pakImportPath := pakInfo.Path()
+	for pakInfo, pak := range a.packages {
+		_ = pakInfo
+		for i := range pak.Syntax {
+			pakImportPath := pak.PkgPath
 			if importPathPrefixFilter != "" &&
 				!strings.HasSuffix(pakImportPath, importPathPrefixFilter) {
 				continue
@@ -125,10 +174,15 @@ func (an *Analysis) GetProgramCodeFiles(
 					continue
 				}
 			}
-			fsetFile := an.fset.File(pak.Files[i].Pos())
+			fsetFile := a.fset.File(pak.Syntax[i].Pos())
 			watchFile(pakImportPath, fsetFile.Name())
 		}
 	}
 
 	return res
+}
+
+// GetImportedModules returns the list of modules imported in the packages.
+func (a *Analysis) GetImportedModules() map[string]*packages.Module {
+	return a.module
 }

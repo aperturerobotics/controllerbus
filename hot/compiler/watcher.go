@@ -19,17 +19,19 @@ import (
 // Watcher watches a set of packages and re-generates an output plugin codegen
 // and binary when the code files change.
 type Watcher struct {
-	le               *logrus.Entry
-	packagePaths     []string
-	analyzeEveryTime bool
+	le                *logrus.Entry
+	packageLookupPath string
+	packagePaths      []string
+	analyzeEveryTime  bool
 }
 
 // NewWatcher constructs a new watcher.
-func NewWatcher(le *logrus.Entry, packagePaths []string, analyzeEveryTime bool) *Watcher {
+func NewWatcher(le *logrus.Entry, packageLookupPath string, packagePaths []string, analyzeEveryTime bool) *Watcher {
 	return &Watcher{
-		le:               le,
-		packagePaths:     packagePaths,
-		analyzeEveryTime: analyzeEveryTime,
+		le:                le,
+		packagePaths:      packagePaths,
+		packageLookupPath: packageLookupPath,
+		analyzeEveryTime:  analyzeEveryTime,
 	}
 }
 
@@ -40,7 +42,7 @@ func CompilePlugin(
 	ctx context.Context,
 	le *logrus.Entry,
 	an *Analysis,
-	pluginCodegenFilePath string,
+	pluginCodegenPath string,
 	pluginOutputPath string,
 	pluginBinaryID string,
 	pluginBinaryVersion string,
@@ -60,7 +62,7 @@ func CompilePlugin(
 	err = CompilePluginFromFile(
 		le,
 		wr,
-		pluginCodegenFilePath,
+		pluginCodegenPath,
 		pluginOutputPath,
 		preWriteOutFileHook,
 	)
@@ -73,7 +75,7 @@ func CompilePlugin(
 // WatchCompilePlugin watches and compiles package.
 func (w *Watcher) WatchCompilePlugin(
 	ctx context.Context,
-	pluginCodegenFilePath string,
+	pluginCodegenPath string,
 	pluginOutputPath string,
 	pluginBinaryID string,
 	pluginBinaryVersion string,
@@ -83,13 +85,13 @@ func (w *Watcher) WatchCompilePlugin(
 	le.
 		WithField("plugin-output-filename", path.Base(pluginOutputPath)).
 		Debugf("analyzing packages: %v", w.packagePaths)
-	an, err := AnalyzePackages(w.le, w.packagePaths)
+	an, err := AnalyzePackages(ctx, w.le, w.packageLookupPath, w.packagePaths)
 	if err != nil {
 		return err
 	}
 
 	le.
-		WithField("codegen-file-path", pluginCodegenFilePath).
+		WithField("codegen-path", pluginCodegenPath).
 		Info("hot: starting to build/watch plugin")
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
@@ -102,7 +104,7 @@ func (w *Watcher) WatchCompilePlugin(
 			ctx,
 			le,
 			an,
-			pluginCodegenFilePath,
+			pluginCodegenPath,
 			pluginOutputPath,
 			pluginBinaryID,
 			pluginBinaryVersion,
