@@ -26,6 +26,9 @@ type Watcher struct {
 }
 
 // NewWatcher constructs a new watcher.
+//
+// Recognizes and replaces {buildHash} in the output filename.
+// The output path should be output-plugin-dir/output-plugin-{buildHash}.cbus.so
 func NewWatcher(le *logrus.Entry, packageLookupPath string, packagePaths []string) *Watcher {
 	return &Watcher{
 		le:                le,
@@ -56,7 +59,7 @@ func (w *Watcher) WatchCompilePlugin(
 	}
 	defer watcher.Close()
 
-	// hhBaseKey is the seed key to use for highwayhash
+	// hhBaseKey is the seed key to use for highwayhash, (32 bytes)
 	var hhBaseKey []byte
 	{
 		hs := sha256.New()

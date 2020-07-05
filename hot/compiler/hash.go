@@ -10,6 +10,7 @@ import (
 
 // HashPluginForBuildID hashes a plugin to use for build id.
 // hhBaseKey should be unique for the plugin.
+// hhBaseKey should be 32 bytes long
 func HashPluginForBuildID(hhBaseKey []byte, filePath string) (string, error) {
 	// hash pass 1 to determine build prefix
 	hasher, err := highwayhash.New128(hhBaseKey)

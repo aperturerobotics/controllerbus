@@ -38,9 +38,6 @@ type ModuleCompiler struct {
 
 // NewModuleCompiler constructs a new module compiler with paths.
 //
-// Recognizes and replaces {buildHash} in the output filename.
-// The output path should be output-plugin-dir/output-plugin-{buildHash}.cbus.so
-//
 // packagesLookupPath is the working directory for "go build."
 func NewModuleCompiler(
 	ctx context.Context,
@@ -452,19 +449,23 @@ func (m *ModuleCompiler) CompilePlugin(outFile string) error {
 	)
 	ecmd.Stderr = os.Stderr
 	ecmd.Stdout = os.Stdout
-	le.Debugf("running go compiler: %s", ecmd.String())
+	le.
+		WithField("work-dir", ecmd.Dir).
+		Debugf("running go compiler: %s", ecmd.String())
 	return ecmd.Run()
 }
 
 // Cleanup removes the codegen files, optionally with a build hash.
 func (m *ModuleCompiler) Cleanup() {
-	buildPrefix := m.buildPrefix
-	codegenModulesBaseDir := m.pluginCodegenPath
-	if codegenModulesBaseDir == "" {
-		return
-	}
-	if buildPrefix != "" {
-		codegenModulesBaseDir = filepath.Join(codegenModulesBaseDir, buildPrefix)
-	}
-	_ = os.RemoveAll(codegenModulesBaseDir)
+	/*
+		buildPrefix := m.buildPrefix
+		codegenModulesBaseDir := m.pluginCodegenPath
+		if codegenModulesBaseDir == "" {
+			return
+		}
+		if buildPrefix != "" {
+			codegenModulesBaseDir = filepath.Join(codegenModulesBaseDir, buildPrefix)
+		}
+		_ = os.RemoveAll(codegenModulesBaseDir)
+	*/
 }
