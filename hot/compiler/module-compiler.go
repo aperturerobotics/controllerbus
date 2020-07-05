@@ -24,6 +24,8 @@ import (
 	"mvdan.cc/gofumpt/format"
 )
 
+const codegenModulesPluginName = "plugin"
+
 // ModuleCompiler assembles a series of Go module files on disk to orchestrate
 // "go build" commands and produce a plugin with unique import paths for the
 // changed packages.
@@ -85,17 +87,18 @@ func (m *ModuleCompiler) GenerateModules(analysis *Analysis, pluginBinaryVersion
 	// Create the base plugin dir.
 	codegenModulesBaseDir := filepath.Join(m.pluginCodegenPath, buildPrefix)
 
-	codegenModulesPluginPath := filepath.Join(codegenModulesBaseDir, "plugin")
-	if err := os.MkdirAll(codegenModulesPluginPath, 0755); err != nil {
+	codegenModulesPluginPath := filepath.Join(codegenModulesBaseDir, codegenModulesPluginName)
+	codegenModulesPluginPathBin := filepath.Join(codegenModulesPluginPath, "bin")
+	if err := os.MkdirAll(codegenModulesPluginPathBin, 0755); err != nil {
 		return err
 	}
 
 	// Create the output code plugin go.mod.
 	outPluginModDir := codegenModulesPluginPath
 	outPluginModFilePath := path.Join(outPluginModDir, "go.mod")
-	outPluginCodeFilePath := path.Join(outPluginModDir, "plugin.go")
+	outPluginCodeFilePath := path.Join(codegenModulesPluginPathBin, "plugin.go")
 	outPluginGoMod := &modfile.File{}
-	err = outPluginGoMod.AddModuleStmt(path.Join(buildPrefix, "plugin"))
+	err = outPluginGoMod.AddModuleStmt(path.Join(buildPrefix, codegenModulesPluginName))
 	if err != nil {
 		return err
 	}
@@ -434,7 +437,7 @@ func (m *ModuleCompiler) CompilePlugin(outFile string) error {
 	if buildPrefix != "" {
 		codegenModulesBaseDir = filepath.Join(codegenModulesBaseDir, buildPrefix)
 	}
-	pluginDir := filepath.Join(codegenModulesBaseDir, "plugin")
+	pluginDir := filepath.Join(codegenModulesBaseDir, codegenModulesPluginName, "bin")
 	pluginDirAbs, err := filepath.Abs(pluginDir)
 	if err != nil {
 		return err
@@ -473,15 +476,13 @@ func (m *ModuleCompiler) CompilePlugin(outFile string) error {
 
 // Cleanup removes the codegen files, optionally with a build hash.
 func (m *ModuleCompiler) Cleanup() {
-	/*
-		buildPrefix := m.buildPrefix
-		codegenModulesBaseDir := m.pluginCodegenPath
-		if codegenModulesBaseDir == "" {
-			return
-		}
-		if buildPrefix != "" {
-			codegenModulesBaseDir = filepath.Join(codegenModulesBaseDir, buildPrefix)
-		}
-		_ = os.RemoveAll(codegenModulesBaseDir)
-	*/
+	buildPrefix := m.buildPrefix
+	codegenModulesBaseDir := m.pluginCodegenPath
+	if codegenModulesBaseDir == "" {
+		return
+	}
+	if buildPrefix != "" {
+		codegenModulesBaseDir = filepath.Join(codegenModulesBaseDir, buildPrefix)
+	}
+	_ = os.RemoveAll(codegenModulesBaseDir)
 }
