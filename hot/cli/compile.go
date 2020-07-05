@@ -4,7 +4,6 @@ import (
 	"context"
 	"crypto/sha256"
 	"errors"
-	"io/ioutil"
 	"os"
 	"path"
 	"path/filepath"
@@ -21,28 +20,6 @@ func (c *CompilerArgs) setupCompiler(ctx context.Context, le *logrus.Entry, paks
 	args := paks
 	err := c.Validate()
 	if err != nil {
-		return nil, nil, rel, err
-	}
-
-	if c.CodegenDir == "" {
-		c.CodegenDir, err = ioutil.TempDir("", "cbus-codegen")
-		if err != nil {
-			return nil, nil, rel, err
-		}
-		le.Debugf("created tmpdir for code-gen process: %s", c.CodegenDir)
-		f := rel
-		rel = func() {
-			defer os.RemoveAll(c.CodegenDir)
-			f()
-		}
-	}
-
-	codegenDirPath, err := filepath.Abs(c.CodegenDir)
-	if err != nil {
-		return nil, nil, rel, err
-	}
-
-	if err := os.MkdirAll(codegenDirPath, 0755); err != nil {
 		return nil, nil, rel, err
 	}
 
@@ -63,6 +40,31 @@ func (c *CompilerArgs) setupCompiler(ctx context.Context, le *logrus.Entry, paks
 			_, _ = hs.Write([]byte(p))
 		}
 		buildUid = b58.Encode(hs.Sum(nil))
+	}
+
+	if c.CodegenDir == "" {
+		// cannot use /tmp for this, need ~/.cache dir
+		// c.CodegenDir, err = ioutil.TempDir("", "cbus-codegen")
+		userCacheDir, err := os.UserCacheDir()
+		if err != nil {
+			return nil, nil, rel, err
+		}
+		c.CodegenDir = filepath.Join(userCacheDir, "cbus-codegen-"+buildUid)
+		le.Debugf("created tmpdir for code-gen process: %s", c.CodegenDir)
+		f := rel
+		rel = func() {
+			defer os.RemoveAll(c.CodegenDir)
+			f()
+		}
+	}
+
+	codegenDirPath, err := filepath.Abs(c.CodegenDir)
+	if err != nil {
+		return nil, nil, rel, err
+	}
+
+	if err := os.MkdirAll(codegenDirPath, 0755); err != nil {
+		return nil, nil, rel, err
 	}
 
 	buildPrefix := c.BuildPrefix
