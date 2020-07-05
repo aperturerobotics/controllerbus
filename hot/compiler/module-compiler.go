@@ -46,6 +46,9 @@ func NewModuleCompiler(
 	pluginCodegenPath string,
 	pluginBinaryID string,
 ) (*ModuleCompiler, error) {
+	if pluginCodegenPath == "" {
+		return nil, errors.New("codegen path cannot be empty")
+	}
 	pluginCodegenPath, err := filepath.Abs(pluginCodegenPath)
 	if err != nil {
 		return nil, err
@@ -81,11 +84,6 @@ func (m *ModuleCompiler) GenerateModules(analysis *Analysis, pluginBinaryVersion
 
 	// Create the base plugin dir.
 	codegenModulesBaseDir := filepath.Join(m.pluginCodegenPath, buildPrefix)
-	/*
-		if err := os.MkdirAll(codegenModulesBaseDir, 0755); err != nil {
-			return err
-		}
-	*/
 
 	codegenModulesPluginPath := filepath.Join(codegenModulesBaseDir, "plugin")
 	if err := os.MkdirAll(codegenModulesPluginPath, 0755); err != nil {
