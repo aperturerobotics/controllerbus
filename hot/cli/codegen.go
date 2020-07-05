@@ -19,10 +19,11 @@ func (c *CompilerArgs) runCodegenOnce(cctx *cli.Context) error {
 		return errors.New("specify list of packages as arguments")
 	}
 
-	an, modCompiler, err := c.setupCompiler(ctx, le, args)
+	an, modCompiler, cleanup, err := c.setupCompiler(ctx, le, args)
 	if err != nil {
 		return err
 	}
+	defer cleanup()
 
 	pluginBinaryVersion := c.PluginBinaryVersion
 	if pluginBinaryVersion == "" {

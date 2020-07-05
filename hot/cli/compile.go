@@ -16,29 +16,34 @@ import (
 )
 
 // setupCompiler setups and creates the compiler.
-func (c *CompilerArgs) setupCompiler(ctx context.Context, le *logrus.Entry, paks []string) (*hot_compiler.Analysis, *hot_compiler.ModuleCompiler, error) {
+func (c *CompilerArgs) setupCompiler(ctx context.Context, le *logrus.Entry, paks []string) (*hot_compiler.Analysis, *hot_compiler.ModuleCompiler, func(), error) {
+	rel := func() {}
 	args := paks
 	err := c.Validate()
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, rel, err
 	}
 
 	if c.CodegenDir == "" {
 		c.CodegenDir, err = ioutil.TempDir("", "cbus-codegen")
 		if err != nil {
-			return nil, nil, err
+			return nil, nil, rel, err
 		}
 		le.Debugf("created tmpdir for code-gen process: %s", c.CodegenDir)
-		defer os.RemoveAll(c.CodegenDir)
+		f := rel
+		rel = func() {
+			defer os.RemoveAll(c.CodegenDir)
+			f()
+		}
 	}
 
 	codegenDirPath, err := filepath.Abs(c.CodegenDir)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, rel, err
 	}
 
 	if err := os.MkdirAll(codegenDirPath, 0755); err != nil {
-		return nil, nil, err
+		return nil, nil, rel, err
 	}
 
 	packageSearchPath, err := os.Getwd()
@@ -46,7 +51,7 @@ func (c *CompilerArgs) setupCompiler(ctx context.Context, le *logrus.Entry, paks
 		packageSearchPath, err = filepath.Abs(packageSearchPath)
 	}
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, rel, err
 	}
 
 	// deterministic prefix gen
@@ -76,16 +81,16 @@ func (c *CompilerArgs) setupCompiler(ctx context.Context, le *logrus.Entry, paks
 		Infof("creating compiler for plugin with packages: %v", args)
 	hc, err := hot_compiler.NewModuleCompiler(ctx, le, c.BuildPrefix, codegenDirPath, c.PluginBinaryID)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, rel, err
 	}
 
 	le.Infof("analyzing %d packages for plugin", len(args))
 	an, err := hot_compiler.AnalyzePackages(ctx, le, packageSearchPath, args)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, rel, err
 	}
 
-	return an, hc, nil
+	return an, hc, rel, nil
 }
 
 func (c *CompilerArgs) runCompileOnce(cctx *cli.Context) error {
@@ -99,10 +104,11 @@ func (c *CompilerArgs) runCompileOnce(cctx *cli.Context) error {
 		return errors.New("specify list of packages as arguments")
 	}
 
-	an, modCompiler, err := c.setupCompiler(ctx, le, args)
+	an, modCompiler, cleanup, err := c.setupCompiler(ctx, le, args)
 	if err != nil {
 		return err
 	}
+	defer cleanup()
 	defer modCompiler.Cleanup()
 
 	pluginBinaryVersion := c.PluginBinaryVersion
