@@ -1,4 +1,4 @@
-module compile-module
+module github.com/aperturerobotics/controllerbus/example/hot-demo
 
 go 1.14
 
