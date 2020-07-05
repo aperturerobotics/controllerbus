@@ -73,7 +73,7 @@ func (b *Bus) addController(c controller.Controller) {
 	b.controllers = append(b.controllers, c)
 	b.controllersMtx.Unlock()
 
-	b.Controller.AddHandler(c)
+	_ = b.Controller.AddHandler(c)
 }
 
 // removeController removes a controller from the bus

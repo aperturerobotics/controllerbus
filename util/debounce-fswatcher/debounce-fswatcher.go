@@ -67,7 +67,6 @@ FlushLoop:
 			return nil, errors.Wrap(err, "watcher error")
 		case <-nextSyncC:
 			nextSyncTicker = nil
-			nextSyncC = nil
 			return happened, nil
 		}
 	}

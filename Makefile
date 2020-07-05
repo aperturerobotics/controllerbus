@@ -1,6 +1,10 @@
+SHELL := /bin/bash
+export GO111MODULE=on
+GOLIST=go list -f "{{ .Dir }}" -m
+
 PROTOWRAP=hack/bin/protowrap
 PROTOC_GEN_GO=hack/bin/protoc-gen-go
-GOLIST=go list -f "{{ .Dir }}" -m
+GOLANGCI_LINT=hack/bin/golangci-lint
 
 all:
 
@@ -14,6 +18,12 @@ $(PROTOC_GEN_GO):
 	go build -v \
 		-o ./bin/protoc-gen-go \
 		github.com/golang/protobuf/protoc-gen-go
+
+$(GOLANGCI_LINT):
+	cd ./hack; \
+	go build -v \
+		-o ./bin/golangci-lint \
+		github.com/golangci/golangci-lint/cmd/golangci-lint
 
 $(PROTOWRAP):
 	export GO111MODULE=on; \
@@ -43,3 +53,8 @@ gengo: $(PROTOWRAP) $(PROTOC_GEN_GO) vendor
 				xargs printf -- \
 				"$$(pwd)/vendor/$${PROJECT}/%s ")
 
+lint: $(GOLANGCI_LINT)
+	$(GOLANGCI_LINT) run ./...
+
+test:
+	go test -v ./...

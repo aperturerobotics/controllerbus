@@ -106,7 +106,7 @@ func CompilePluginFromFile(
 	if err != nil {
 		return err
 	}
-	interFile.Write([]byte("\nvar HotPluginBuildUUID = `" + hashStr + "`\n"))
+	_, _ = interFile.Write([]byte("\nvar HotPluginBuildUUID = `" + hashStr + "`\n"))
 	if err := ioutil.WriteFile(intermediateGoFile, dat, 0644); err != nil {
 		return err
 	}

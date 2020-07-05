@@ -120,7 +120,7 @@ func (r *attachedResolver) execResolver(handlerCtx context.Context) {
 		// ensure we wait for resolve to return
 		if !gerr {
 			select {
-			case _ = <-errCh:
+			case <-errCh:
 			case <-handlerCtx.Done():
 				return
 			}

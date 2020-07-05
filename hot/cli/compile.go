@@ -108,8 +108,10 @@ func (c *CompilerArgs) runCompileOnce(cctx *cli.Context) error {
 	if err != nil {
 		return err
 	}
-	defer cleanup()
-	defer modCompiler.Cleanup()
+	if !c.NoCleanup {
+		defer cleanup()
+		defer modCompiler.Cleanup()
+	}
 
 	pluginBinaryVersion := c.PluginBinaryVersion
 	if pluginBinaryVersion == "" {

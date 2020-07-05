@@ -95,7 +95,10 @@ func (m *ModuleCompiler) GenerateModules(analysis *Analysis, pluginBinaryVersion
 	outPluginModFilePath := path.Join(outPluginModDir, "go.mod")
 	outPluginCodeFilePath := path.Join(outPluginModDir, "plugin.go")
 	outPluginGoMod := &modfile.File{}
-	outPluginGoMod.AddModuleStmt(path.Join(buildPrefix, "plugin"))
+	err = outPluginGoMod.AddModuleStmt(path.Join(buildPrefix, "plugin"))
+	if err != nil {
+		return err
+	}
 	// replace statements are added for all modules below.
 
 	// For each module, create a codegen module directory.
@@ -209,8 +212,14 @@ func (m *ModuleCompiler) GenerateModules(analysis *Analysis, pluginBinaryVersion
 		// Note: HasPrefix is deprecated but OK for this use case.
 		isThirdPartyModule := filepath.HasPrefix(modPathAbs, goModCachePath)
 		if !isThirdPartyModule {
-			srcModFile.AddReplace(srcMod.Path, "", modPathAbs, "")
-			outPluginGoMod.AddReplace(srcMod.Path, "", modPathAbs, "")
+			err = srcModFile.AddReplace(srcMod.Path, "", modPathAbs, "")
+			if err != nil {
+				return err
+			}
+			err = outPluginGoMod.AddReplace(srcMod.Path, "", modPathAbs, "")
+			if err != nil {
+				return err
+			}
 		} else {
 			m.le.WithField("module-path", mod.Path).Debug("detected an out-of-tree module")
 		}
@@ -229,14 +238,20 @@ func (m *ModuleCompiler) GenerateModules(analysis *Analysis, pluginBinaryVersion
 			peerModRelativePath = ensureStartsWithDotSlash(peerModRelativePath)
 
 			prefixPeerModPath := path.Join(buildPrefix, peerMod.Path)
-			srcModFile.AddReplace(prefixPeerModPath, "", peerModRelativePath, "")
+			err = srcModFile.AddReplace(prefixPeerModPath, "", peerModRelativePath, "")
+			if err != nil {
+				return err
+			}
 
 			peerModRelativePathToPlugin, err := filepath.Rel(outPluginModDir, peerModCodegenDir)
 			if err != nil {
 				return err
 			}
 			peerModRelativePathToPlugin = ensureStartsWithDotSlash(peerModRelativePathToPlugin)
-			outPluginGoMod.AddReplace(prefixPeerModPath, "", peerModRelativePathToPlugin, "")
+			err = outPluginGoMod.AddReplace(prefixPeerModPath, "", peerModRelativePathToPlugin, "")
+			if err != nil {
+				return err
+			}
 		}
 
 		patchedModPath := path.Join(buildPrefix, srcMod.Path)
@@ -347,7 +362,10 @@ func (m *ModuleCompiler) GenerateModules(analysis *Analysis, pluginBinaryVersion
 	if err != nil {
 		return err
 	}
-	ioutil.WriteFile(outPluginModFilePath, pluginGoMod, 0644)
+	err = ioutil.WriteFile(outPluginModFilePath, pluginGoMod, 0644)
+	if err != nil {
+		return err
+	}
 
 	// Build the actual plugin file itself.
 	gfile, err := CodegenPluginWrapperFromAnalysis(

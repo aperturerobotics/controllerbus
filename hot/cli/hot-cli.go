@@ -26,6 +26,8 @@ type CompilerArgs struct {
 
 	// BuildPrefix sets the build prefix if compiling once
 	BuildPrefix string
+	// NoCleanup indicates we should not cleanup after we are done.
+	NoCleanup bool
 }
 
 // BuildFlags attaches the flags to a flag set.
@@ -58,6 +60,12 @@ func (a *CompilerArgs) BuildFlags() []cli.Flag {
 			EnvVar:      "CONTROLLER_BUS_PLUGIN_BINARY_VERSION",
 			Value:       a.PluginBinaryVersion,
 			Destination: &a.PluginBinaryVersion,
+		},
+		cli.BoolFlag{
+			Name:        "no-cleanup",
+			Usage:       "disable cleaning up the codegen dirs",
+			EnvVar:      "CONTROLLER_BUS_NO_CLEANUP",
+			Destination: &a.NoCleanup,
 		},
 	}
 }

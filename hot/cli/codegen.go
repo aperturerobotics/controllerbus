@@ -23,7 +23,10 @@ func (c *CompilerArgs) runCodegenOnce(cctx *cli.Context) error {
 	if err != nil {
 		return err
 	}
-	defer cleanup()
+	if !c.NoCleanup {
+		defer cleanup()
+		defer modCompiler.Cleanup()
+	}
 
 	pluginBinaryVersion := c.PluginBinaryVersion
 	if pluginBinaryVersion == "" {
