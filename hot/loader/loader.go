@@ -2,13 +2,14 @@ package hot_loader
 
 import (
 	"context"
-	"errors"
 	"plugin"
+	"reflect"
 	"sync"
 
 	"github.com/aperturerobotics/controllerbus/bus"
 	"github.com/aperturerobotics/controllerbus/controller/resolver"
 	hot_plugin "github.com/aperturerobotics/controllerbus/hot/plugin"
+	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 )
 
@@ -48,11 +49,24 @@ func LoadPluginSharedLibrary(
 	if err != nil {
 		return nil, err
 	}
+	var hotPlugin hot_plugin.HotPlugin
 	hotPluginPtr, hotPluginOk := sym.(*hot_plugin.HotPlugin)
 	if !hotPluginOk {
-		return nil, errors.New("could not load hot plugin, invalid type")
+		// It's possible the interface type is different:
+		// Dereference first with introspection.
+		symVal := reflect.ValueOf(sym)
+		if symVal.Kind() != reflect.Ptr {
+			return nil, errInvalidPluginType(sym)
+		}
+
+		sym = symVal.Elem().Interface()
+		hotPlugin, hotPluginOk = sym.(hot_plugin.HotPlugin)
+		if !hotPluginOk {
+			return nil, errInvalidPluginType(sym)
+		}
+	} else {
+		hotPlugin = *hotPluginPtr
 	}
-	hotPlugin := *hotPluginPtr
 	if hotPlugin == nil {
 		return nil, errors.New("could not load hot plugin, nil plugin global")
 	}

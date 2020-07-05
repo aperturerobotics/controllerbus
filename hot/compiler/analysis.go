@@ -23,8 +23,8 @@ type Analysis struct {
 	// imports contains the set of packages to import
 	// keyed by import path
 	imports map[string]*types.Package
-	// factories contains the set of factories to build
-	factories map[string]*packages.Package
+	// controllerFactories contains the set of packages containing controllers
+	controllerFactories map[string]*packages.Package
 	// module contains all factory modules
 	module map[string]*packages.Module
 }
@@ -43,9 +43,9 @@ func AnalyzePackages(
 			"github.com/aperturerobotics/controllerbus/controller": nil,
 			"github.com/aperturerobotics/controllerbus/hot/plugin": nil,
 		},
-		factories: make(map[string]*packages.Package),
-		packages:  make(map[string]*packages.Package),
-		module:    make(map[string]*packages.Module),
+		controllerFactories: make(map[string]*packages.Package),
+		packages:            make(map[string]*packages.Package),
+		module:              make(map[string]*packages.Module),
 	}
 
 	builderCtx := build.Default
@@ -108,20 +108,20 @@ func AnalyzePackages(
 	for _, pkg := range loadedPackages {
 		le := le.WithField("pkg", pkg.Types.Path())
 		factoryCtorObj := pkg.Types.Scope().Lookup("NewFactory")
-		if factoryCtorObj == nil {
+		factoryPkgImportPath := pkg.Types.Path()
+		if factoryCtorObj != nil {
+			le.Debugf("found factory ctor func: %s", factoryCtorObj.Type().String())
+			res.controllerFactories[BuildPackageName(pkg.Types)] = pkg
+			if _, ok := res.imports[factoryPkgImportPath]; !ok {
+				le.
+					WithField("import-path", factoryPkgImportPath).
+					WithField("import-name", pkg.Types.Name).
+					Debug("added package to plugin-file imports list")
+				res.imports[factoryPkgImportPath] = pkg.Types
+			}
+		} else {
 			le.Warn("no factory constructors found")
-			continue
 		}
-		le.Debugf("found factory ctor func: %s", factoryCtorObj.Type().String())
-		factoryPkgImportPath := factoryCtorObj.Pkg().Path()
-		if _, ok := res.imports[factoryPkgImportPath]; !ok {
-			le.
-				WithField("import-path", factoryPkgImportPath).
-				WithField("import-name", pkg.Types.Name).
-				Debug("added package to imports list")
-			res.imports[factoryPkgImportPath] = pkg.Types
-		}
-		res.factories[BuildPackageName(pkg.Types)] = pkg
 
 		factoryMod := pkg.Module
 		if _, ok := factoryModules[factoryMod.Path]; !ok {

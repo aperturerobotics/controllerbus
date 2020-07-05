@@ -12,6 +12,7 @@ fi
 
 echo "Building plugin binary..."
 go build \
+   -trimpath \
    -o ./plugins/boilerplate-example.cbus.so \
    -v -buildmode=plugin \
    github.com/aperturerobotics/controllerbus/example/hot-demo/plugin/plugin-bin

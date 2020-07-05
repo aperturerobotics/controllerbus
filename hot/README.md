@@ -4,7 +4,9 @@ This is a **experimental** prototype of Hot Reload for controllerbus.
 
 Features:
 
+ - Automatically codegen and compile overlay modules for a target
  - Load + resolve controllerbus controllers from plugins
+ - Full support for Go modules and module replacements
  - Manifest of all currently loaded plugins
  - Detect Go module code changes and hot-reload
 
@@ -12,9 +14,13 @@ Cavets:
 
  - Go plugin system cannot fully unload memory, making a mem leak.
  - Plugins only work on Linux.
-
+ - Fails if any of the packages shared w/ host process are changed.
+ - All builds must use the "-trimpath" flag.
+ 
 These are acceptable for development environments. Memory leak issue could be
 addressed with ControllerBus IPC using cross-process controllers.
+
+Reference: https://github.com/golang/go/issues/27751
 
 ## Known Bugs
 

@@ -2,14 +2,18 @@ package hot_compile_demo_controller
 
 import (
 	"context"
+	"os"
+	"time"
 
 	"github.com/aperturerobotics/controllerbus/bus"
 	"github.com/aperturerobotics/controllerbus/controller"
 	"github.com/aperturerobotics/controllerbus/directive"
-	"github.com/aperturerobotics/controllerbus/example/boilerplate"
 
 	"github.com/blang/semver"
 	"github.com/sirupsen/logrus"
+
+	// The following import should be correctly transformed.
+	_ "github.com/aperturerobotics/controllerbus/hot/plugin"
 )
 
 // Version is the version of the controller implementation.
@@ -18,14 +22,14 @@ var Version = semver.MustParse("0.0.1")
 // ControllerID is the ID of the controller.
 const ControllerID = "controllerbus/example/hot-demo/compile-module/demo-controller/1"
 
-// Controller implements the boilerplate example controller.
+// Controller implements the demo controller.
 type Controller struct {
 	// le is the log entry
 	le *logrus.Entry
 	// bus is the controller bus
 	bus bus.Bus
-	// conf is the configuration
-	conf *Config
+	// exitAfter exits after a period of time
+	exitAfter time.Duration
 }
 
 // NewController constructs a new entity graph controller.
@@ -34,10 +38,11 @@ func NewController(
 	bus bus.Bus,
 	conf *Config,
 ) *Controller {
+	exitAfter, _ := conf.ParseExitAfterDur()
 	return &Controller{
-		le:   le,
-		bus:  bus,
-		conf: conf,
+		le:        le,
+		bus:       bus,
+		exitAfter: exitAfter,
 	}
 }
 
@@ -58,12 +63,6 @@ func (c *Controller) HandleDirective(
 	ctx context.Context,
 	inst directive.Instance,
 ) (directive.Resolver, error) {
-	dir := inst.GetDirective()
-	switch d := dir.(type) {
-	case boilerplate.Boilerplate:
-		return c.resolveBoilerplate(ctx, inst, d)
-	}
-
 	return nil, nil
 }
 
@@ -71,10 +70,18 @@ func (c *Controller) HandleDirective(
 // Returning nil ends execution.
 // Returning an error triggers a retry with backoff.
 func (c *Controller) Execute(ctx context.Context) error {
-	c.le.Infof(
-		"hello from hot compile demo boilerplate controller 1: %s",
-		c.conf.GetExampleField(),
-	)
+	c.le.Info("hello from hot compile demo controller")
+
+	if c.exitAfter != 0 {
+		c.le.Infof("exiting after %s as configured", c.exitAfter.String())
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case <-time.After(c.exitAfter):
+			os.Exit(0)
+		}
+	}
+
 	return nil
 }
 

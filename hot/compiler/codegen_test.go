@@ -2,6 +2,7 @@ package hot_compiler
 
 import (
 	"context"
+	"os"
 	"strings"
 	"testing"
 
@@ -48,7 +49,8 @@ func TestCodegen(t *testing.T) {
 	packagePaths := []string{
 		"github.com/aperturerobotics/controllerbus/example/boilerplate/controller",
 	}
-	an, err := AnalyzePackages(le, packagePaths)
+	workDir, _ := os.Getwd()
+	an, err := AnalyzePackages(ctx, le, workDir, packagePaths)
 	if err != nil {
 		t.Fatal(err.Error())
 	}

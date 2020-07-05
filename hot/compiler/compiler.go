@@ -115,7 +115,7 @@ func CompilePluginFromFile(
 	intermediateOutFile2 := path.Join(tmpName, "pass-2.cbus.so")
 	ecmd = exec.Command(
 		"go", "build",
-		"-v",
+		"-v", "-trimpath",
 		"-buildmode=plugin",
 		"-tags",
 		buildTag,

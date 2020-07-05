@@ -112,7 +112,7 @@ func CodegenPluginWrapperFromAnalysis(
 
 	// Construct the elements of the slice to return from BinaryFactories.
 	var buildControllersElts []gast.Expr
-	for fpkg := range a.factories {
+	for fpkg := range a.controllerFactories {
 		buildControllersElts = append(buildControllersElts, &gast.CallExpr{
 			Args: []gast.Expr{
 				gast.NewIdent("b"),

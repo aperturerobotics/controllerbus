@@ -3,6 +3,6 @@ package hot.compile.demo.controller;
 
 // Config is the boilerplate configuration.
 message Config {
-  // ExampleField is an example configuration field.
-  string example_field = 1;
+  // ExitAfterDur requests an os.Exit(0) after a duration.
+  string exit_after_dur = 1;
 }

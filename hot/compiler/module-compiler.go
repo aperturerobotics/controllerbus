@@ -6,10 +6,14 @@ import (
 	"crypto/sha1"
 	"fmt"
 	"go/ast"
+	"go/build"
 	"go/parser"
 	"go/printer"
+	"go/token"
+	"io"
 	"io/ioutil"
 	"os"
+	"os/exec"
 	"path"
 	"path/filepath"
 
@@ -27,10 +31,10 @@ type ModuleCompiler struct {
 	ctx context.Context
 	le  *logrus.Entry
 
+	buildPrefix         string
 	packagePaths        []string
 	packagesLookupPath  string
 	pluginCodegenPath   string
-	pluginOutputPath    string
 	pluginBinaryID      string
 	preWriteOutFileHook func(nextOutFilePath, nextOutFileContentsPath string) error
 }
@@ -45,10 +49,10 @@ type ModuleCompiler struct {
 func NewModuleCompiler(
 	ctx context.Context,
 	le *logrus.Entry,
+	buildPrefix string,
 	packagePaths []string,
 	packagesLookupPath string,
 	pluginCodegenPath string,
-	pluginOutputPath string,
 	pluginBinaryID string,
 	preWriteOutFileHook func(nextOutFilePath, nextOutFileContentsPath string) error,
 ) (*ModuleCompiler, error) {
@@ -60,10 +64,10 @@ func NewModuleCompiler(
 		ctx: ctx,
 		le:  le,
 
+		buildPrefix:         buildPrefix,
 		packagePaths:        packagePaths,
 		packagesLookupPath:  packagesLookupPath,
 		pluginCodegenPath:   pluginCodegenPath,
-		pluginOutputPath:    pluginOutputPath,
 		pluginBinaryID:      pluginBinaryID,
 		preWriteOutFileHook: preWriteOutFileHook,
 	}, nil
@@ -72,10 +76,21 @@ func NewModuleCompiler(
 // GenerateModules builds the modules files in the codegen path.
 //
 // buildPrefix should be something like cbus-hot-abcdef (no slash)
-func (m *ModuleCompiler) GenerateModules(analysis *Analysis, buildPrefix string, cleanup bool) error {
+func (m *ModuleCompiler) GenerateModules(analysis *Analysis, cleanup bool) error {
+	buildPrefix := m.buildPrefix
 	if _, err := os.Stat(m.pluginCodegenPath); err != nil {
 		return err
 	}
+
+	goPackageContainerDirPath := build.Default.GOPATH
+	if _, err := os.Stat(goPackageContainerDirPath); err != nil {
+		return errors.Wrap(err, "check GOPATH exists")
+	}
+	goModCachePath, err := filepath.Abs(filepath.Join(goPackageContainerDirPath, "pkg"))
+	if err != nil {
+		return errors.Wrap(err, "determine go mod cache path")
+	}
+	// goModCachePathPattern := path.Join(goModCachePath, "*")
 
 	// Create the base plugin dir.
 	codegenModulesBaseDir := filepath.Join(m.pluginCodegenPath, buildPrefix)
@@ -192,9 +207,17 @@ func (m *ModuleCompiler) GenerateModules(analysis *Analysis, buildPrefix string,
 			}
 		}
 
-		// Add a reference to the old module path.
-		srcModFile.AddReplace(srcMod.Path, "", modPathAbs, "")
-		outPluginGoMod.AddReplace(srcMod.Path, "", modPathAbs, "")
+		// Add a reference to the old module path, if the old module path was
+		// not within the Go module cache path.
+		//
+		// Note: HasPrefix is deprecated but OK for this use case.
+		isThirdPartyModule := filepath.HasPrefix(modPathAbs, goModCachePath)
+		if !isThirdPartyModule {
+			srcModFile.AddReplace(srcMod.Path, "", modPathAbs, "")
+			outPluginGoMod.AddReplace(srcMod.Path, "", modPathAbs, "")
+		} else {
+			m.le.WithField("module-path", mod.Path).Debug("detected an out-of-tree module")
+		}
 
 		// For each peer module that will be code-gen, add a replace statement.
 		// Note: replace statements /could/ be added on-demand, but more work.
@@ -337,6 +360,20 @@ func (m *ModuleCompiler) GenerateModules(analysis *Analysis, buildPrefix string,
 	if err != nil {
 		return err
 	}
+	if buildPrefix != "" {
+		gfile.Decls = append(gfile.Decls, &ast.GenDecl{
+			Tok: token.VAR,
+			Specs: []ast.Spec{
+				&ast.ValueSpec{
+					Names: []*ast.Ident{ast.NewIdent("HotPluginBuildPrefix")},
+					Values: []ast.Expr{&ast.BasicLit{
+						Kind:  token.STRING,
+						Value: fmt.Sprintf("%q", buildPrefix),
+					}},
+				},
+			},
+		})
+	}
 	// Format to output pass #1
 	pluginCodeData, err := formatCodeFile(gfile)
 	if err != nil {
@@ -359,6 +396,11 @@ func (m *ModuleCompiler) GenerateModules(analysis *Analysis, buildPrefix string,
 	if err != nil {
 		return err
 	}
+	if buildPrefix != "" {
+		pluginCodeData = append(pluginCodeData, []byte(
+			"\nvar HotPluginBuildUUID = `"+buildPrefix+"`\n",
+		)...)
+	}
 	if err := ioutil.WriteFile(outPluginCodeFilePath, pluginCodeData, 0644); err != nil {
 		return err
 	}
@@ -366,8 +408,73 @@ func (m *ModuleCompiler) GenerateModules(analysis *Analysis, buildPrefix string,
 	return nil
 }
 
+// CompilePlugin compiles the plugin once.
+// The module structure should have been built already.
+func (m *ModuleCompiler) CompilePlugin(outFile string) error {
+	le := m.le
+	buildPrefix := m.buildPrefix
+	codegenModulesBaseDir := m.pluginCodegenPath
+	if buildPrefix != "" {
+		codegenModulesBaseDir = filepath.Join(codegenModulesBaseDir, buildPrefix)
+	}
+	pluginDir := filepath.Join(codegenModulesBaseDir, "plugin")
+	pluginDirAbs, err := filepath.Abs(pluginDir)
+	if err != nil {
+		return err
+	}
+
+	// build the intermediate output dir
+	tmpName, err := ioutil.TempDir("", "controllerbus-hot-compiler-tmpdir")
+	if err != nil {
+		return err
+	}
+	defer os.RemoveAll(tmpName)
+
+	// start the go compiler execution
+	intermediateOutFile := path.Join(tmpName, "plugin.cbus.so")
+	ecmd := exec.Command(
+		"go", "build",
+		"-v", "-trimpath",
+		"-buildmode=plugin",
+		"-tags",
+		buildTag,
+		"-o",
+		intermediateOutFile,
+		".",
+	)
+	ecmd.Dir = pluginDirAbs
+	ecmd.Env = append(
+		os.Environ(),
+		"GO111MODULE=on",
+	)
+	ecmd.Stderr = os.Stderr
+	ecmd.Stdout = os.Stdout
+	le.Debugf("running go compiler: %s", ecmd.String())
+	err = ecmd.Run()
+	if err != nil {
+		return err
+	}
+
+	ofile, oerr := os.Open(intermediateOutFile)
+	if oerr != nil {
+		return oerr
+	}
+	defer ofile.Close()
+
+	outFileFd, err := os.OpenFile(outFile, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
+	if err != nil {
+		return err
+	}
+	defer outFileFd.Close()
+	defer outFileFd.Sync()
+
+	_, err = io.Copy(outFileFd, ofile)
+	return err
+}
+
 // Cleanup removes the codegen files, optionally with a build hash.
-func (m *ModuleCompiler) Cleanup(buildPrefix string) {
+func (m *ModuleCompiler) Cleanup() {
+	buildPrefix := m.buildPrefix
 	codegenModulesBaseDir := m.pluginCodegenPath
 	if codegenModulesBaseDir == "" {
 		return
@@ -376,15 +483,6 @@ func (m *ModuleCompiler) Cleanup(buildPrefix string) {
 		codegenModulesBaseDir = filepath.Join(codegenModulesBaseDir, buildPrefix)
 	}
 	_ = os.RemoveAll(codegenModulesBaseDir)
-}
-
-// CompilePlugin compiles the plugin once.
-// The module structure should have been built already.
-func (m *ModuleCompiler) CompilePlugin() error {
-	le := m.le
-
-	_ = le
-	return nil
 }
 
 // BuildAnalysis performs analysis of packages.
