@@ -17,4 +17,5 @@ require (
 	golang.org/x/tools v0.0.0-20200626171337-aa94e735be7f
 	google.golang.org/grpc v1.29.1
 	mvdan.cc/gofumpt v0.0.0-20200627213337-90206bd98491
+	github.com/minio/highwayhash v1.0.0
 )

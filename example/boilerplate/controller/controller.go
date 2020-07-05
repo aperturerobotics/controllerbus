@@ -72,7 +72,7 @@ func (c *Controller) HandleDirective(
 // Returning an error triggers a retry with backoff.
 func (c *Controller) Execute(ctx context.Context) error {
 	c.le.Infof(
-		"hello from boilerplate controller: %s",
+		"hello from boilerplate controller 1: %s",
 		c.conf.GetExampleField(),
 	)
 	return nil

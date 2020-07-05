@@ -143,19 +143,5 @@ func CompilePluginFromFile(
 		}
 	}
 
-	ofile, oerr = os.Open(intermediateOutFile2)
-	if oerr != nil {
-		return oerr
-	}
-	defer ofile.Close()
-
-	outFileFd, err := os.OpenFile(outFile, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
-	if err != nil {
-		return err
-	}
-	defer outFileFd.Close()
-	defer outFileFd.Sync()
-
-	_, err = io.Copy(outFileFd, ofile)
-	return err
+	return copyFileFromTo(intermediateOutFile2, outFile)
 }

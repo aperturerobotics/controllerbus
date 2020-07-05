@@ -10,7 +10,6 @@ import (
 	"go/parser"
 	"go/printer"
 	"go/token"
-	"io"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -31,30 +30,23 @@ type ModuleCompiler struct {
 	ctx context.Context
 	le  *logrus.Entry
 
-	buildPrefix         string
-	packagePaths        []string
-	packagesLookupPath  string
-	pluginCodegenPath   string
-	pluginBinaryID      string
-	preWriteOutFileHook func(nextOutFilePath, nextOutFileContentsPath string) error
+	buildPrefix       string
+	pluginCodegenPath string
+	pluginBinaryID    string
 }
 
 // NewModuleCompiler constructs a new module compiler with paths.
 //
-// Internally manages the directories and analyzers.
 // Recognizes and replaces {buildHash} in the output filename.
 // The output path should be output-plugin-dir/output-plugin-{buildHash}.cbus.so
 //
-// packagesLookupPath should be a path where "go build" can find the packages.
+// packagesLookupPath is the working directory for "go build."
 func NewModuleCompiler(
 	ctx context.Context,
 	le *logrus.Entry,
 	buildPrefix string,
-	packagePaths []string,
-	packagesLookupPath string,
 	pluginCodegenPath string,
 	pluginBinaryID string,
-	preWriteOutFileHook func(nextOutFilePath, nextOutFileContentsPath string) error,
 ) (*ModuleCompiler, error) {
 	pluginCodegenPath, err := filepath.Abs(pluginCodegenPath)
 	if err != nil {
@@ -64,19 +56,16 @@ func NewModuleCompiler(
 		ctx: ctx,
 		le:  le,
 
-		buildPrefix:         buildPrefix,
-		packagePaths:        packagePaths,
-		packagesLookupPath:  packagesLookupPath,
-		pluginCodegenPath:   pluginCodegenPath,
-		pluginBinaryID:      pluginBinaryID,
-		preWriteOutFileHook: preWriteOutFileHook,
+		buildPrefix:       buildPrefix,
+		pluginCodegenPath: pluginCodegenPath,
+		pluginBinaryID:    pluginBinaryID,
 	}, nil
 }
 
 // GenerateModules builds the modules files in the codegen path.
 //
 // buildPrefix should be something like cbus-hot-abcdef (no slash)
-func (m *ModuleCompiler) GenerateModules(analysis *Analysis, cleanup bool) error {
+func (m *ModuleCompiler) GenerateModules(analysis *Analysis, pluginBinaryVersion string) error {
 	buildPrefix := m.buildPrefix
 	if _, err := os.Stat(m.pluginCodegenPath); err != nil {
 		return err
@@ -355,7 +344,7 @@ func (m *ModuleCompiler) GenerateModules(analysis *Analysis, cleanup bool) error
 		m.le,
 		analysis,
 		m.pluginBinaryID,
-		"cbus-hot-unknown",
+		pluginBinaryVersion,
 	)
 	if err != nil {
 		return err
@@ -431,7 +420,6 @@ func (m *ModuleCompiler) CompilePlugin(outFile string) error {
 	defer os.RemoveAll(tmpName)
 
 	// start the go compiler execution
-	intermediateOutFile := path.Join(tmpName, "plugin.cbus.so")
 	ecmd := exec.Command(
 		"go", "build",
 		"-v", "-trimpath",
@@ -439,7 +427,7 @@ func (m *ModuleCompiler) CompilePlugin(outFile string) error {
 		"-tags",
 		buildTag,
 		"-o",
-		intermediateOutFile,
+		outFile,
 		".",
 	)
 	ecmd.Dir = pluginDirAbs
@@ -450,26 +438,7 @@ func (m *ModuleCompiler) CompilePlugin(outFile string) error {
 	ecmd.Stderr = os.Stderr
 	ecmd.Stdout = os.Stdout
 	le.Debugf("running go compiler: %s", ecmd.String())
-	err = ecmd.Run()
-	if err != nil {
-		return err
-	}
-
-	ofile, oerr := os.Open(intermediateOutFile)
-	if oerr != nil {
-		return oerr
-	}
-	defer ofile.Close()
-
-	outFileFd, err := os.OpenFile(outFile, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
-	if err != nil {
-		return err
-	}
-	defer outFileFd.Close()
-	defer outFileFd.Sync()
-
-	_, err = io.Copy(outFileFd, ofile)
-	return err
+	return ecmd.Run()
 }
 
 // Cleanup removes the codegen files, optionally with a build hash.
@@ -483,9 +452,4 @@ func (m *ModuleCompiler) Cleanup() {
 		codegenModulesBaseDir = filepath.Join(codegenModulesBaseDir, buildPrefix)
 	}
 	_ = os.RemoveAll(codegenModulesBaseDir)
-}
-
-// BuildAnalysis performs analysis of packages.
-func (m *ModuleCompiler) BuildAnalysis() (*Analysis, error) {
-	return AnalyzePackages(m.ctx, m.le, m.packagesLookupPath, m.packagePaths)
 }

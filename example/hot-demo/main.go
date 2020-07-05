@@ -73,17 +73,6 @@ func run(ctx context.Context, le *logrus.Entry) error {
 	}
 
 	le.Info("compiling example package")
-	/*
-		hotWatcher := hot_compiler.NewWatcher(le, packagesList, false)
-		return hotWatcher.WatchCompilePlugin(
-			ctx,
-			codegenDirPath,
-			outPath,
-			binaryID,
-			binaryVersion,
-			nil,
-		)
-	*/
 	if err := os.MkdirAll(codegenDirPath, 0755); err != nil {
 		return err
 	}
@@ -94,16 +83,13 @@ func run(ctx context.Context, le *logrus.Entry) error {
 		ctx,
 		le,
 		buildPrefix,
-		packagesList,
-		packagesLookupPath,
 		codegenDirPath,
 		"hot-demo-module",
-		nil, // preWriteOutFileHook func(nextOutFilePath, nextOutFileContentsPath string) error)
 	)
 	if err != nil {
 		return err
 	}
-	analysis, err := moduleCompiler.BuildAnalysis()
+	analysis, err := moduleCompiler.BuildAnalysis(packagesList, packagesLookupPath)
 	if err != nil {
 		return err
 	}
@@ -122,7 +108,6 @@ func run(ctx context.Context, le *logrus.Entry) error {
 		return err
 	}
 	outPath := filepath.Join(outPluginsPath, fmt.Sprintf("example.%s.cbus.so", buildPrefix))
-	// outPathWithHash := strings.Replace(outPath, "{buildHash}", buildPrefix, -1)
 	if err := moduleCompiler.CompilePlugin(outPath); err != nil {
 		return err
 	}

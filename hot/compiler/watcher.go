@@ -2,10 +2,11 @@ package hot_compiler
 
 import (
 	"context"
-	gast "go/ast"
+	"crypto/sha256"
 	"io/ioutil"
 	"os"
 	"path"
+	"path/filepath"
 	"regexp"
 	"strings"
 	"time"
@@ -22,57 +23,20 @@ type Watcher struct {
 	le                *logrus.Entry
 	packageLookupPath string
 	packagePaths      []string
-	analyzeEveryTime  bool
 }
 
 // NewWatcher constructs a new watcher.
-func NewWatcher(le *logrus.Entry, packageLookupPath string, packagePaths []string, analyzeEveryTime bool) *Watcher {
+func NewWatcher(le *logrus.Entry, packageLookupPath string, packagePaths []string) *Watcher {
 	return &Watcher{
 		le:                le,
 		packagePaths:      packagePaths,
 		packageLookupPath: packageLookupPath,
-		analyzeEveryTime:  analyzeEveryTime,
 	}
-}
-
-// CompilePlugin analyzes and compiles a plugin.
-//
-// Recognizes and replaces {buildHash} in the output filename.
-func CompilePlugin(
-	ctx context.Context,
-	le *logrus.Entry,
-	an *Analysis,
-	pluginCodegenPath string,
-	pluginOutputPath string,
-	pluginBinaryID string,
-	pluginBinaryVersion string,
-	preWriteOutFileHook func(nextOutFilePath, nextOutFileContentsPath string) error,
-) (*gast.File, error) {
-	le.Debug("compiling plugin")
-	wr, err := GeneratePluginWrapper(
-		ctx,
-		le,
-		an,
-		pluginBinaryID,
-		pluginBinaryVersion,
-	)
-	if err != nil {
-		return nil, err
-	}
-	err = CompilePluginFromFile(
-		le,
-		wr,
-		pluginCodegenPath,
-		pluginOutputPath,
-		preWriteOutFileHook,
-	)
-	if err != nil {
-		return nil, err
-	}
-	return wr, err
 }
 
 // WatchCompilePlugin watches and compiles package.
+// Detects if the output with the same {buildHash} already exists.
+// Replaces {buildHash} in output filename and in plugin binary version.
 func (w *Watcher) WatchCompilePlugin(
 	ctx context.Context,
 	pluginCodegenPath string,
@@ -82,13 +46,6 @@ func (w *Watcher) WatchCompilePlugin(
 	compiledCb func(packages []string, outpPath string) error,
 ) error {
 	le := w.le
-	le.
-		WithField("plugin-output-filename", path.Base(pluginOutputPath)).
-		Debugf("analyzing packages: %v", w.packagePaths)
-	an, err := AnalyzePackages(ctx, w.le, w.packageLookupPath, w.packagePaths)
-	if err != nil {
-		return err
-	}
 
 	le.
 		WithField("codegen-path", pluginCodegenPath).
@@ -99,31 +56,103 @@ func (w *Watcher) WatchCompilePlugin(
 	}
 	defer watcher.Close()
 
-	compilePlugin := func() error {
-		_, err := CompilePlugin(
+	// hhBaseKey is the seed key to use for highwayhash
+	var hhBaseKey []byte
+	{
+		hs := sha256.New()
+		_, _ = hs.Write([]byte(pluginBinaryID))
+		_, _ = hs.Write([]byte(pluginOutputPath))
+		hhBaseKey = hs.Sum(nil)
+	}
+
+	// passOutputPath may or may not contain {buildHash}
+	compilePluginOnce := func(
+		ctx context.Context,
+		an *Analysis,
+		buildPrefix string,
+		passOutputPath string,
+		pluginBinaryVersion string,
+	) error {
+		moduleCompiler, err := NewModuleCompiler(
 			ctx,
-			le,
-			an,
+			w.le,
+			buildPrefix,
 			pluginCodegenPath,
-			pluginOutputPath,
 			pluginBinaryID,
-			pluginBinaryVersion,
-			func(nextOutFilePath, nextOutFileContentsPath string) error {
-				if err := CleanupOldVersions(le, pluginOutputPath); err != nil {
-					return err
-				}
-				return nil
-			},
 		)
-		if err == nil && compiledCb != nil {
-			err = compiledCb(w.packagePaths, pluginOutputPath)
+		if err != nil {
+			return err
 		}
+		if err := moduleCompiler.GenerateModules(an, pluginBinaryVersion); err != nil {
+			return err
+		}
+		err = moduleCompiler.CompilePlugin(passOutputPath)
+		moduleCompiler.Cleanup()
 		return err
+	}
+
+	compilePlugin := func() (*Analysis, error) {
+		rctx := ctx
+		ctx, compileCtxCancel := context.WithCancel(rctx)
+		defer compileCtxCancel()
+
+		le.
+			WithField("plugin-output-filename", path.Base(pluginOutputPath)).
+			Debugf("analyzing packages: %v", w.packagePaths)
+		an, err := AnalyzePackages(ctx, w.le, w.packageLookupPath, w.packagePaths)
+		if err != nil {
+			return nil, err
+		}
+
+		// pass 1: codegen + build with static build prefix.
+		passBinDir := filepath.Join(pluginCodegenPath, "bin")
+		if err := os.MkdirAll(passBinDir, 0755); err != nil {
+			return nil, err
+		}
+
+		pass1OutputPath := filepath.Join(passBinDir, "pass1.cbus.so")
+		if err := compilePluginOnce(ctx, an, "pass1", pass1OutputPath, pluginBinaryVersion); err != nil {
+			return nil, err
+		}
+
+		buildHash, err := HashPluginForBuildID(hhBaseKey, pass1OutputPath)
+		if err != nil {
+			return nil, err
+		}
+		buildHashShort := buildHash[:16]
+		passBuildPluginVersion := strings.ReplaceAll(pluginBinaryVersion, buildHashConstTag, buildHashShort)
+
+		targetOutputPath := pluginOutputPath
+		if strings.Contains(targetOutputPath, buildHashConstTag) {
+			targetOutputPath = strings.ReplaceAll(targetOutputPath, buildHashConstTag, buildHashShort)
+			if _, err := os.Stat(targetOutputPath); !os.IsNotExist(err) {
+				le.Info("detected that output would be identical, skipping")
+				return an, nil
+			}
+			if err := CleanupOldVersions(le, pluginOutputPath); err != nil {
+				return an, err
+			}
+		}
+
+		// pass 2: codegen + build with the build hash
+		pass2OutputPath := filepath.Join(passBinDir, "pass2.cbus.so")
+		buildPrefix := "cbus-hot-" + buildHashShort
+		if err := compilePluginOnce(ctx, an, buildPrefix, pass2OutputPath, passBuildPluginVersion); err != nil {
+			return an, err
+		}
+		if err := copyFileFromTo(pass2OutputPath, targetOutputPath); err != nil {
+			return an, err
+		}
+		if err == nil && compiledCb != nil {
+			err = compiledCb(w.packagePaths, targetOutputPath)
+		}
+
+		return an, err
 	}
 
 	watchedFiles := make(map[string]struct{})
 	for {
-		err = compilePlugin()
+		an, err := compilePlugin()
 		if err != nil {
 			return err
 		}
@@ -161,24 +190,15 @@ func (w *Watcher) WatchCompilePlugin(
 		)
 
 		// wait for a file change
-		for {
-			happened, err := debounce_fswatcher.DebounceFSWatcherEvents(
-				ctx,
-				watcher,
-				time.Second,
-			)
-			if err != nil {
-				return err
-			}
-			le.Infof("re-analyzing packages after %d filesystem events", len(happened))
-			if w.analyzeEveryTime {
-				break
-			}
-			// re-sync without re-analyzing
-			if err := compilePlugin(); err != nil {
-				return err
-			}
+		happened, err := debounce_fswatcher.DebounceFSWatcherEvents(
+			ctx,
+			watcher,
+			time.Second,
+		)
+		if err != nil {
+			return err
 		}
+		le.Infof("re-analyzing packages after %d filesystem events", len(happened))
 	}
 }
 
