@@ -15,6 +15,7 @@ import (
 	"os/exec"
 	"path"
 	"path/filepath"
+	"strings"
 
 	"github.com/mr-tron/base58/base58"
 	"github.com/pkg/errors"
@@ -164,6 +165,15 @@ func (m *ModuleCompiler) GenerateModules(analysis *Analysis, pluginBinaryVersion
 			return err
 		}
 
+		dotSlash := string([]rune{'.', os.PathSeparator})
+		ensureStartsWithDotSlash := func(p string) string {
+			// ensure starts with ./ or ../ - check simply for '.'
+			if !strings.HasPrefix(p, dotSlash[:1]) {
+				p = dotSlash + p
+			}
+			return p
+		}
+
 		// Check for any relative "replace" directives and adjust them accordingly.
 		var adjOps [](func() error)
 		for _, srcReplace := range srcModFile.Replace {
@@ -175,6 +185,8 @@ func (m *ModuleCompiler) GenerateModules(analysis *Analysis, pluginBinaryVersion
 				if err != nil {
 					return err
 				}
+				// ensure starts with ./
+				newPathRelative = ensureStartsWithDotSlash(newPathRelative)
 				// add a new replacement to override the old
 				oldSrcReplacePath := srcReplace.Old.Path
 				oldSrcReplaceVersion := srcReplace.Old.Version
@@ -219,6 +231,8 @@ func (m *ModuleCompiler) GenerateModules(analysis *Analysis, pluginBinaryVersion
 			if err != nil {
 				return err
 			}
+			peerModRelativePath = ensureStartsWithDotSlash(peerModRelativePath)
+
 			prefixPeerModPath := path.Join(buildPrefix, peerMod.Path)
 			srcModFile.AddReplace(prefixPeerModPath, "", peerModRelativePath, "")
 
@@ -226,6 +240,7 @@ func (m *ModuleCompiler) GenerateModules(analysis *Analysis, pluginBinaryVersion
 			if err != nil {
 				return err
 			}
+			peerModRelativePathToPlugin = ensureStartsWithDotSlash(peerModRelativePathToPlugin)
 			outPluginGoMod.AddReplace(prefixPeerModPath, "", peerModRelativePathToPlugin, "")
 		}
 

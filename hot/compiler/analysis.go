@@ -123,6 +123,11 @@ func AnalyzePackages(
 			le.Warn("no factory constructors found")
 		}
 
+		if pkg.Module == nil {
+			le.Warn("no module was resolved for package")
+			continue
+		}
+
 		factoryMod := pkg.Module
 		if _, ok := factoryModules[factoryMod.Path]; !ok {
 			le.

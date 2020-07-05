@@ -24,7 +24,7 @@ var packagesList = []string{
 	// usual demo boilerplate controller
 	"github.com/aperturerobotics/controllerbus/example/boilerplate/controller",
 	// example of a basic demo controller package with a non-trivial relative module reference.
-	"compile-module/demo-controller",
+	"./demo-controller",
 	// example of a cross-module reference to a package that does not contain a
 	// factory, but rather is a indirect dependency. "lifting" packages like
 	// this is necessary for hot-loading packages which reference newer versions
@@ -45,7 +45,7 @@ boilerplate-demo-0:
 loader-demo:
   config:
     exitAfterDur: 3s
-  id: controllerbus/example/hot-demo/compile-module/demo-controller/1
+  id: controllerbus/example/hot-demo/demo-controller/1
   revision: 1
 `
 
@@ -89,12 +89,12 @@ func run(ctx context.Context, le *logrus.Entry) error {
 	if err != nil {
 		return err
 	}
-	analysis, err := moduleCompiler.BuildAnalysis(packagesList, packagesLookupPath)
+	analysis, err := hot_compiler.AnalyzePackages(ctx, le, packagesLookupPath, packagesList)
 	if err != nil {
 		return err
 	}
-	cleanupFiles := false
-	if err := moduleCompiler.GenerateModules(analysis, cleanupFiles); err != nil {
+	pluginBinaryVersion := buildPrefix
+	if err := moduleCompiler.GenerateModules(analysis, pluginBinaryVersion); err != nil {
 		return err
 	}
 

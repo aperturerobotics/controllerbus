@@ -21,7 +21,7 @@ var packagesList = []string{
 	// usual demo boilerplate controller
 	"github.com/aperturerobotics/controllerbus/example/boilerplate/controller",
 	// example of a basic demo controller package with a non-trivial relative module reference.
-	"compile-module/demo-controller",
+	"./demo-controller",
 }
 
 func main() {
