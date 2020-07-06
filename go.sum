@@ -1,5 +1,7 @@
 cloud.google.com/go v0.26.0/go.mod h1:aQUYkXzVsufM+DwF1aE+0xfcU+56JwCaLick0ClmMTw=
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
+github.com/aperturerobotics/go-protobuf-1.3.x v0.0.0-20200705233748-404297258551 h1:sTOxbjgV58k2Uyvhku6dibWvM8qLM3MoiPw6BIaHU+k=
+github.com/aperturerobotics/go-protobuf-1.3.x v0.0.0-20200705233748-404297258551/go.mod h1:nKsjlNGNvnm2dB+eJ6xcZ7mtfehEbJbGFlytXZINgUQ=
 github.com/blang/semver v3.5.1+incompatible h1:cQNTCjp13qL8KC3Nbxr/y2Bqb63oX6wdnnjpJbkM4JQ=
 github.com/blang/semver v3.5.1+incompatible/go.mod h1:kRBLl5iJ+tD4TcOOxsy/0fnwebNt5EWlYSAyrTnjyyk=
 github.com/cenkalti/backoff v2.2.1+incompatible h1:tNowT99t7UNflLxfYYSlKYsBpXdEet03Pg2g16Swow4=
