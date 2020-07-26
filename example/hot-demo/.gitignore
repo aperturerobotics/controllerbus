@@ -4,3 +4,4 @@ hot-demo.cbus.so
 codegen-main.go
 codegen-module
 plugins/
+output/

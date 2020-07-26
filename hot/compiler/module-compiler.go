@@ -70,6 +70,10 @@ func NewModuleCompiler(
 // buildPrefix should be something like cbus-hot-abcdef (no slash)
 func (m *ModuleCompiler) GenerateModules(analysis *Analysis, pluginBinaryVersion string) error {
 	buildPrefix := m.buildPrefix
+	if buildPrefix == "" {
+		return errors.New("build prefix must be specified")
+	}
+
 	if _, err := os.Stat(m.pluginCodegenPath); err != nil {
 		return err
 	}
@@ -179,7 +183,7 @@ func (m *ModuleCompiler) GenerateModules(analysis *Analysis, pluginBinaryVersion
 		var adjOps [](func() error)
 		for _, srcReplace := range srcModFile.Replace {
 			newPath := srcReplace.New.Path
-			if !path.IsAbs(newPath) {
+			if strings.HasPrefix(newPath, "./") || strings.HasPrefix(newPath, "../") {
 				// join old absolute path with ../../..
 				prevNewPathAbs := filepath.Join(modPathAbs, newPath)
 				newPathRelative, err := filepath.Rel(codegenModDir, prevNewPathAbs)

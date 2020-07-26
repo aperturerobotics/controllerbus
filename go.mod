@@ -5,6 +5,13 @@ go 1.13
 // aperture: use 1.3.x based fork for compatibility
 replace github.com/golang/protobuf => github.com/aperturerobotics/go-protobuf-1.3.x v0.0.0-20200705233748-404297258551 // aperture-1.3.x
 
+// aperture: use older grpc with 1.3.5 compat
+replace (
+	google.golang.org/genproto => google.golang.org/genproto v0.0.0-20190819201941-24fa4b261c55
+	google.golang.org/grpc => google.golang.org/grpc v1.26.0
+)
+
+
 require (
 	github.com/blang/semver v3.5.1+incompatible
 	github.com/cenkalti/backoff v2.2.1+incompatible
