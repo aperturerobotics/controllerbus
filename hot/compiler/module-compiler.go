@@ -15,7 +15,6 @@ import (
 	"os/exec"
 	"path"
 	"path/filepath"
-	"strings"
 
 	"github.com/mr-tron/base58/base58"
 	"github.com/pkg/errors"
@@ -101,14 +100,17 @@ func (m *ModuleCompiler) GenerateModules(analysis *Analysis, pluginBinaryVersion
 	outPluginModDir := codegenModulesPluginPath
 	outPluginModFilePath := path.Join(outPluginModDir, "go.mod")
 	outPluginCodeFilePath := path.Join(codegenModulesPluginPathBin, "plugin.go")
+
+	// outPluginGoMod will contain the go.mod for the container plugin.
+	// Add the first line "module plugin"
 	outPluginGoMod := &modfile.File{}
 	err = outPluginGoMod.AddModuleStmt(path.Join(buildPrefix, codegenModulesPluginName))
 	if err != nil {
 		return err
 	}
-	// replace statements are added for all modules below.
 
 	// For each module, create a codegen module directory.
+	// Add a replace statement to outPluginGoMod for each.
 	genCodegenModulePath := func(modPath string) string {
 		return path.Join(codegenModulesBaseDir, modPath)
 	}
@@ -129,8 +131,10 @@ func (m *ModuleCompiler) GenerateModules(analysis *Analysis, pluginBinaryVersion
 		// if this is ../../, then we need to use a hash instead.
 		if os.PathSeparator != '/' {
 			// this is sort of hacky but we expect to use this on linux.
+			// of course, windows support is desirable, and a fix will need to be added here.
 			return errors.New("can only work on systems where / is the path separator")
 		}
+
 		moduleOutpPath := path.Clean("/" + srcMod.Path)[1:]
 		if moduleOutpPath == "" {
 			shaSum := sha1.Sum([]byte(srcMod.GoMod))
@@ -146,8 +150,8 @@ func (m *ModuleCompiler) GenerateModules(analysis *Analysis, pluginBinaryVersion
 			WithField("build-prefix", buildPrefix).
 			Debug("creating module in code-gen directory")
 		codegenModDir := genCodegenModulePath(srcMod.Path)
-		// delete if it exists already
 		if _, err := os.Stat(codegenModDir); !os.IsNotExist(err) {
+			// delete if it exists already
 			err = os.RemoveAll(codegenModDir)
 			if err != nil {
 				return err
@@ -157,60 +161,21 @@ func (m *ModuleCompiler) GenerateModules(analysis *Analysis, pluginBinaryVersion
 			return err
 		}
 		moduleCodegenPaths[srcMod.Path] = codegenModDir
+		codegenModFile := path.Join(codegenModDir, "go.mod")
 
-		// Create the initial go.mod by copying the old one.
-		srcGoMod, err := ioutil.ReadFile(mod.GoMod)
+		// New function: relocateGoModFile - which loads, analyzes, and
+		// transforms a go.mod file into a new AST structure which is based in a
+		// different working directory with a different module name.
+
+		// Create the go.mod by parsing the old one.
+		outpModFile, err := parseGoModFile(mod.GoMod)
 		if err != nil {
 			return err
 		}
 
-		// Adjust the module path by adding a prefix.
-		srcModFile, err := modfile.Parse(mod.GoMod, srcGoMod, nil)
-		if err != nil {
+		// Relocate the go.mod references to the new go.mod path.
+		if err := relocateGoModFile(outpModFile, codegenModFile); err != nil {
 			return err
-		}
-
-		dotSlash := string([]rune{'.', os.PathSeparator})
-		ensureStartsWithDotSlash := func(p string) string {
-			// ensure starts with ./ or ../ - check simply for '.'
-			if !strings.HasPrefix(p, dotSlash[:1]) {
-				p = dotSlash + p
-			}
-			return p
-		}
-
-		// Check for any relative "replace" directives and adjust them accordingly.
-		var adjOps [](func() error)
-		for _, srcReplace := range srcModFile.Replace {
-			newPath := srcReplace.New.Path
-			if strings.HasPrefix(newPath, "./") || strings.HasPrefix(newPath, "../") {
-				// join old absolute path with ../../..
-				prevNewPathAbs := filepath.Join(modPathAbs, newPath)
-				newPathRelative, err := filepath.Rel(codegenModDir, prevNewPathAbs)
-				if err != nil {
-					return err
-				}
-				// ensure starts with ./
-				newPathRelative = ensureStartsWithDotSlash(newPathRelative)
-				// add a new replacement to override the old
-				oldSrcReplacePath := srcReplace.Old.Path
-				oldSrcReplaceVersion := srcReplace.Old.Version
-				oldSrcReplaceNewVersion := srcReplace.New.Version
-				adjOps = append(adjOps, func() error {
-					return srcModFile.AddReplace(
-						oldSrcReplacePath,
-						oldSrcReplaceVersion,
-						newPathRelative,
-						oldSrcReplaceNewVersion,
-					)
-				})
-			}
-		}
-
-		for _, op := range adjOps {
-			if err := op(); err != nil {
-				return err
-			}
 		}
 
 		// Add a reference to the old module path, if the old module path was
@@ -219,14 +184,50 @@ func (m *ModuleCompiler) GenerateModules(analysis *Analysis, pluginBinaryVersion
 		// Note: HasPrefix is deprecated but OK for this use case.
 		isThirdPartyModule := filepath.HasPrefix(modPathAbs, goModCachePath)
 		if !isThirdPartyModule {
-			err = srcModFile.AddReplace(srcMod.Path, "", modPathAbs, "")
+			// Add a replace to the absolute path of the containing repo.
+			//
+			// Ex: github.com/aperturerobotics/controllerbus =>
+			// /home/myhome/repos/controllerbus/...
+			err = outpModFile.AddReplace(srcMod.Path, "", modPathAbs, "")
 			if err != nil {
 				return err
 			}
+
+			// Also add the replacement to the final plugin go.mod.
 			err = outPluginGoMod.AddReplace(srcMod.Path, "", modPathAbs, "")
 			if err != nil {
 				return err
 			}
+
+			// The outpModFile was created by first copying the go.mod from the
+			// containing module repository, so it contains all require and
+			// replace statements as necessary. The output plugin container
+			// module also needs to have the same blocks copied in order to
+			// ensure the correct module dependency versions are resolved.
+			//
+			// Transform+copy the contents of the original module's go.mod file
+			// into the target plugin go.mod file.
+			xformSrcModFile, err := parseGoModFile(mod.GoMod)
+			if err != nil {
+				return err
+			}
+			relocateGoModFile(xformSrcModFile, outPluginModFilePath)
+			for _, def := range xformSrcModFile.Replace {
+				err = outPluginGoMod.AddReplace(
+					def.Old.Path, def.Old.Version,
+					def.New.Path, def.New.Version,
+				)
+				if err != nil {
+					return err
+				}
+			}
+			for _, def := range xformSrcModFile.Require {
+				err = outPluginGoMod.AddRequire(def.Mod.Path, def.Mod.Version)
+				if err != nil {
+					return err
+				}
+			}
+			outPluginGoMod.Cleanup()
 		} else {
 			m.le.WithField("module-path", mod.Path).Debug("detected an out-of-tree module")
 		}
@@ -245,7 +246,7 @@ func (m *ModuleCompiler) GenerateModules(analysis *Analysis, pluginBinaryVersion
 			peerModRelativePath = ensureStartsWithDotSlash(peerModRelativePath)
 
 			prefixPeerModPath := path.Join(buildPrefix, peerMod.Path)
-			err = srcModFile.AddReplace(prefixPeerModPath, "", peerModRelativePath, "")
+			err = outpModFile.AddReplace(prefixPeerModPath, "", peerModRelativePath, "")
 			if err != nil {
 				return err
 			}
@@ -262,16 +263,16 @@ func (m *ModuleCompiler) GenerateModules(analysis *Analysis, pluginBinaryVersion
 		}
 
 		patchedModPath := path.Join(buildPrefix, srcMod.Path)
-		_ = srcModFile.AddModuleStmt(patchedModPath)
+		_ = outpModFile.AddModuleStmt(patchedModPath)
 
-		srcModFile.SortBlocks()
-		srcModFile.Cleanup()
-		destGoMod, err := srcModFile.Format()
+		outpModFile.SortBlocks()
+		outpModFile.Cleanup()
+		destGoMod, err := outpModFile.Format()
 		if err != nil {
 			return err
 		}
 		if err := ioutil.WriteFile(
-			path.Join(codegenModDir, "go.mod"),
+			codegenModFile,
 			destGoMod,
 			0644,
 		); err != nil {
