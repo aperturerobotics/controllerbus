@@ -162,9 +162,7 @@ func (m *ModuleCompiler) GenerateModules(analysis *Analysis, pluginBinaryVersion
 		moduleCodegenPaths[srcMod.Path] = codegenModDir
 		codegenModFile := path.Join(codegenModDir, "go.mod")
 
-		// New function: relocateGoModFile - which loads, analyzes, and
-		// transforms a go.mod file into a new AST structure which is based in a
-		// different working directory with a different module name.
+		// Add a reference to the container plugin
 
 		// Create the go.mod by parsing the old one.
 		outpModFile, err := parseGoModFile(mod.GoMod)
@@ -201,6 +199,18 @@ func (m *ModuleCompiler) GenerateModules(analysis *Analysis, pluginBinaryVersion
 			m.le.WithField("module-path", mod.Path).Debug("detected an out-of-tree module")
 		}
 
+		// Add a reference to outPluginGoMod with a relative path to the prefixed module.
+		peerModRelativePathToPlugin, err := filepath.Rel(outPluginModDir, codegenModDir)
+		if err != nil {
+			return err
+		}
+		peerModRelativePathToPlugin = ensureStartsWithDotSlash(peerModRelativePathToPlugin)
+		prefixCodegenModPath := path.Join(buildPrefix, srcMod.Path)
+		err = outPluginGoMod.AddReplace(prefixCodegenModPath, "", peerModRelativePathToPlugin, "")
+		if err != nil {
+			return err
+		}
+
 		// The outpModFile was created by first copying the go.mod from the
 		// containing module repository, so it contains all require and
 		// replace statements as necessary. The output plugin container
@@ -232,7 +242,7 @@ func (m *ModuleCompiler) GenerateModules(analysis *Analysis, pluginBinaryVersion
 		outPluginGoMod.Cleanup()
 
 		// For each peer module that will be code-gen, add a replace statement.
-		// Note: replace statements /could/ be added on-demand, but more work.
+		// Note: replace statements /could/ be added on-demand
 		for _, peerMod := range loadedModules {
 			if peerMod == mod || peerMod.Path == srcMod.Path {
 				continue
@@ -246,16 +256,6 @@ func (m *ModuleCompiler) GenerateModules(analysis *Analysis, pluginBinaryVersion
 
 			prefixPeerModPath := path.Join(buildPrefix, peerMod.Path)
 			err = outpModFile.AddReplace(prefixPeerModPath, "", peerModRelativePath, "")
-			if err != nil {
-				return err
-			}
-
-			peerModRelativePathToPlugin, err := filepath.Rel(outPluginModDir, peerModCodegenDir)
-			if err != nil {
-				return err
-			}
-			peerModRelativePathToPlugin = ensureStartsWithDotSlash(peerModRelativePathToPlugin)
-			err = outPluginGoMod.AddReplace(prefixPeerModPath, "", peerModRelativePathToPlugin, "")
 			if err != nil {
 				return err
 			}
