@@ -26,9 +26,7 @@ replace google.golang.org/genproto => google.golang.org/genproto v0.0.0-20190819
 
 replace github.com/relative-module => ../../relative-module
 
-require (
-	github.com/blang/semver v3.5.1+incompatible
-)
+require github.com/blang/semver v3.5.1+incompatible
 `
 
 // TestRelocateGoModFile tests relocating a sample go.mod file.

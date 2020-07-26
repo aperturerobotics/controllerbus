@@ -15,7 +15,11 @@ import (
 )
 
 // setupCompiler setups and creates the compiler.
-func (c *CompilerArgs) setupCompiler(ctx context.Context, le *logrus.Entry, paks []string) (*hot_compiler.Analysis, *hot_compiler.ModuleCompiler, func(), error) {
+func (c *CompilerArgs) setupCompiler(
+	ctx context.Context,
+	le *logrus.Entry,
+	paks []string,
+) (*hot_compiler.Analysis, *hot_compiler.ModuleCompiler, func(), error) {
 	rel := func() {}
 	args := paks
 	err := c.Validate()

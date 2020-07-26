@@ -50,6 +50,9 @@ func NewModuleCompiler(
 	if pluginCodegenPath == "" {
 		return nil, errors.New("codegen path cannot be empty")
 	}
+	if buildPrefix == "" {
+		return nil, errors.New("build prefix must be specified")
+	}
 	pluginCodegenPath, err := filepath.Abs(pluginCodegenPath)
 	if err != nil {
 		return nil, err
@@ -69,10 +72,6 @@ func NewModuleCompiler(
 // buildPrefix should be something like cbus-hot-abcdef (no slash)
 func (m *ModuleCompiler) GenerateModules(analysis *Analysis, pluginBinaryVersion string) error {
 	buildPrefix := m.buildPrefix
-	if buildPrefix == "" {
-		return errors.New("build prefix must be specified")
-	}
-
 	if _, err := os.Stat(m.pluginCodegenPath); err != nil {
 		return err
 	}
@@ -198,39 +197,39 @@ func (m *ModuleCompiler) GenerateModules(analysis *Analysis, pluginBinaryVersion
 			if err != nil {
 				return err
 			}
-
-			// The outpModFile was created by first copying the go.mod from the
-			// containing module repository, so it contains all require and
-			// replace statements as necessary. The output plugin container
-			// module also needs to have the same blocks copied in order to
-			// ensure the correct module dependency versions are resolved.
-			//
-			// Transform+copy the contents of the original module's go.mod file
-			// into the target plugin go.mod file.
-			xformSrcModFile, err := parseGoModFile(mod.GoMod)
-			if err != nil {
-				return err
-			}
-			relocateGoModFile(xformSrcModFile, outPluginModFilePath)
-			for _, def := range xformSrcModFile.Replace {
-				err = outPluginGoMod.AddReplace(
-					def.Old.Path, def.Old.Version,
-					def.New.Path, def.New.Version,
-				)
-				if err != nil {
-					return err
-				}
-			}
-			for _, def := range xformSrcModFile.Require {
-				err = outPluginGoMod.AddRequire(def.Mod.Path, def.Mod.Version)
-				if err != nil {
-					return err
-				}
-			}
-			outPluginGoMod.Cleanup()
 		} else {
 			m.le.WithField("module-path", mod.Path).Debug("detected an out-of-tree module")
 		}
+
+		// The outpModFile was created by first copying the go.mod from the
+		// containing module repository, so it contains all require and
+		// replace statements as necessary. The output plugin container
+		// module also needs to have the same blocks copied in order to
+		// ensure the correct module dependency versions are resolved.
+		//
+		// Transform+copy the contents of the original module's go.mod file
+		// into the target plugin go.mod file.
+		xformSrcModFile, err := parseGoModFile(mod.GoMod)
+		if err != nil {
+			return err
+		}
+		relocateGoModFile(xformSrcModFile, outPluginModFilePath)
+		for _, def := range xformSrcModFile.Replace {
+			err = outPluginGoMod.AddReplace(
+				def.Old.Path, def.Old.Version,
+				def.New.Path, def.New.Version,
+			)
+			if err != nil {
+				return err
+			}
+		}
+		for _, def := range xformSrcModFile.Require {
+			err = outPluginGoMod.AddRequire(def.Mod.Path, def.Mod.Version)
+			if err != nil {
+				return err
+			}
+		}
+		outPluginGoMod.Cleanup()
 
 		// For each peer module that will be code-gen, add a replace statement.
 		// Note: replace statements /could/ be added on-demand, but more work.
