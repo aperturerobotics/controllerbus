@@ -2,7 +2,7 @@ package resolver
 
 import (
 	"context"
-	"errors"
+	"time"
 
 	"github.com/aperturerobotics/controllerbus/bus"
 	"github.com/aperturerobotics/controllerbus/controller"
@@ -55,15 +55,20 @@ func (r *loadWithConfigResolver) Resolve(ctx context.Context, vh directive.Resol
 
 	valCtx, valCtxCancel := context.WithCancel(r.ctx)
 	execDir := loader.NewExecControllerSingleton(factory, conf)
-	execVal, execRef, err := bus.ExecOneOff(ctx, r.bus, execDir, valCtxCancel)
-	if err != nil {
-		return err
-	}
 
-	vid, added := vh.AddValue(execVal.GetValue())
-	if !added {
-		execRef.Release()
-		return errors.New("exec controller value rejected, likely due to duplicate controller load")
+	// pass through all values.
+	_, execRef, err := r.bus.AddDirective(execDir, bus.NewPassThruHandler(vh, valCtxCancel))
+	if err != nil {
+		_, _ = vh.AddValue(loader.NewExecControllerValue(
+			time.Now(),
+			time.Time{},
+			nil,
+			err,
+		))
+		// config has to be invalid for it to have failed here.
+		// give up permanently
+		// return err
+		return nil
 	}
 
 	// cancel the reference when ctx is canceled
@@ -76,7 +81,6 @@ func (r *loadWithConfigResolver) Resolve(ctx context.Context, vh directive.Resol
 		}
 		execRef.Release()
 		valCtxCancel()
-		_, _ = vh.RemoveValue(vid)
 	}()
 
 	return nil

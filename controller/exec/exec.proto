@@ -1,6 +1,9 @@
 syntax = "proto3";
 package controller.exec;
 
+import "github.com/aperturerobotics/controllerbus/controller/controller.proto";
+import "github.com/aperturerobotics/controllerbus/controller/configset/proto/configset.proto";
+
 // ControllerStatus holds basic status for a controller.
 enum ControllerStatus {
   // ControllerStatus_UNKNOWN is unrecognized.
@@ -9,4 +12,24 @@ enum ControllerStatus {
   ControllerStatus_CONFIGURING = 1;
   // ControllerStatus_RUNNING indicates the controller is running.
   ControllerStatus_RUNNING = 2;
+  // ControllerStatus_ERROR indicates the controller is terminated with an error.
+  ControllerStatus_ERROR = 3;
+}
+
+// ExecControllerRequest is a protobuf request to execute a controller.
+message ExecControllerRequest {
+  // ConfigSet is the controller config set to execute.
+  configset.proto.ConfigSet config_set = 1;
+}
+
+// ExecControllerResponse is a protobuf response stream.
+message ExecControllerResponse {
+  // Id is the configset identifier for this status report.
+  string id = 1;
+  // Status is the controller execution status.
+  ControllerStatus status = 2;
+  // ControllerInfo may contain the running controller info.
+  controller.Info controller_info = 3;
+  // ErrorInfo may contain the error information.
+  string error_info = 4;
 }

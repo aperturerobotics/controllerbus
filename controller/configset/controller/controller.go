@@ -28,8 +28,10 @@ type Controller struct {
 	wakeCh chan struct{}
 
 	// mtx guards the controllers map
-	mtx         sync.Mutex
-	controllers map[string]*runningController
+	mtx                  sync.Mutex
+	controllers          map[string]*runningController
+	persistentRefCounter uint32
+	persistentRefs       map[uint32]*runningControllerRef
 }
 
 // NewController constructs a new peer controller.
@@ -61,7 +63,7 @@ ExecLoop:
 			cv, ok := c.controllers[k]
 			if ok {
 				cv.mtx.Lock()
-				if len(cv.refs) == 0 {
+				if len(cv.refs) == 0 { // garbage collect
 					delete(c.controllers, k)
 					ok = false
 				}
@@ -139,11 +141,43 @@ func (c *Controller) PushControllerConfig(
 		existing = newRunningController(c, key, conf)
 		c.controllers[key] = existing
 		c.wake()
+		for _, pref := range c.persistentRefs {
+			if pref.id == key {
+				existing.ApplyReference(pref)
+			}
+		}
 	}
 
-	ref := newRunningControllerRef(existing)
+	ref := newRunningControllerRef(key, existing)
 	existing.AddReference(ref)
 	return ref, nil
+}
+
+// AddConfigSetReference adds a persistent reference to a config set which will
+// be re-applied across iterations. This reference type will wait until a
+// ApplyConfigSet specifies the configuration for the controller, and will add
+// to the reference count for the controller such that the controller will
+// continue to execute after the ApplyConfigSet call exits.
+func (c *Controller) AddConfigSetReference(
+	ctx context.Context,
+	key string,
+) (configset.Reference, error) {
+	c.mtx.Lock()
+	id := c.persistentRefCounter
+	c.persistentRefCounter++
+	rcRef := newRunningControllerRef(key, nil)
+	rcRef.relInternalCallback = func() {
+		c.mtx.Lock()
+		delete(c.persistentRefs, id)
+		c.mtx.Unlock()
+	}
+	c.persistentRefs[id] = rcRef // rc may be nil
+	rc := c.controllers[key]
+	if rc != nil {
+		rc.ApplyReference(rcRef)
+	}
+	c.mtx.Unlock()
+	return rcRef, nil
 }
 
 // resolveApplyConfigSet resolves the ApplyConfigSet directive

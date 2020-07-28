@@ -14,6 +14,8 @@ type Controller interface {
 
 	// PushControllerConfig pushes a controller configuration for a given key, if
 	// the version is newer. Returns a reference to the configset, or an error.
+	//
+	// Ctx is used for the context of the function call only.
 	PushControllerConfig(
 		ctx context.Context,
 		key string,

@@ -80,19 +80,37 @@ func (c *resolver) Resolve(ctx context.Context, vh directive.ResolverHandler) er
 		boTimer := time.NewTimer(execNextBo)
 		defer boTimer.Stop()
 
+		// emit the value
+		now := time.Now()
+		vid, ok := vh.AddValue(NewExecControllerValue(
+			now,
+			now.Add(execNextBo),
+			nil,
+			c.lastErr,
+		))
+
 		select {
 		case <-ctx.Done():
 			return ctx.Err()
 		case <-boTimer.C:
+			if ok {
+				vh.RemoveValue(vid)
+			}
 		}
 	}
+	c.lastErr = nil
 
 	go func() {
 		// type assertion
-		var civ ExecControllerValue = ci
+		t1 := time.Now()
 
 		// emit the value
-		vid, ok := vh.AddValue(civ)
+		vid, ok := vh.AddValue(NewExecControllerValue(
+			t1,
+			time.Time{},
+			ci,
+			nil,
+		))
 		if !ok {
 			// value rejected, drop the controller on the floor.
 			ci.Close()
@@ -100,14 +118,14 @@ func (c *resolver) Resolve(ctx context.Context, vh directive.ResolverHandler) er
 		}
 
 		le.Debug("starting controller")
-		t1 := time.Now()
 		err := bus.ExecuteController(c.ctx, ci)
-		c.lastErr = err
 		le := le.WithField("exec-time", time.Since(t1).String())
 		if err != nil && err != context.Canceled {
 			le.WithError(err).Warn("controller exited with error")
+			c.lastErr = err
 		} else {
 			le.Debug("controller exited normally")
+			err = nil // if context canceled, leave value there
 		}
 		if err != nil {
 			vh.RemoveValue(vid)

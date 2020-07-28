@@ -5,9 +5,9 @@ import (
 	"sync"
 
 	"github.com/aperturerobotics/controllerbus/bus"
-	"github.com/aperturerobotics/controllerbus/controller"
 	"github.com/aperturerobotics/controllerbus/controller/configset"
 	"github.com/aperturerobotics/controllerbus/controller/resolver"
+	"github.com/aperturerobotics/controllerbus/directive"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 )
@@ -56,20 +56,6 @@ func (c *runningController) GetConfigKey() string {
 
 // Execute actuates the running controller.
 func (c *runningController) Execute(ctx context.Context) (rerr error) {
-	defer func() {
-		if rerr != nil {
-			if rerr != context.Canceled {
-				c.le.WithError(rerr).Warn("controller exited with error")
-			}
-			c.mtx.Lock()
-			c.state.ctrl = nil
-			c.state.err = rerr
-			s := c.state
-			c.pushState(&s)
-			c.mtx.Unlock()
-		}
-	}()
-
 	c.mtx.Lock()
 	conf := c.conf
 	c.mtx.Unlock()
@@ -80,37 +66,78 @@ func (c *runningController) Execute(ctx context.Context) (rerr error) {
 		default:
 		}
 
+		ctrlConf := conf.GetConfig()
+
 		// execute the controller with the current config
 		valCtx, valCtxCancel := context.WithCancel(ctx)
-		execDir := resolver.NewLoadControllerWithConfig(conf.GetConfig())
+		execDir := resolver.NewLoadControllerWithConfig(ctrlConf)
 		c.le.Info("executing controller")
-		ev, execRef, err := bus.ExecOneOff(valCtx, c.c.bus, execDir, valCtxCancel)
+		updValCh := make(chan resolver.LoadControllerWithConfigValue, 1)
+		_, execRef, err := c.c.bus.AddDirective(execDir, bus.NewCallbackHandler(
+			func(av directive.AttachedValue) {
+				// state was updated
+				updVal, _ := av.GetValue().(resolver.LoadControllerWithConfigValue)
+				if updVal == nil {
+					return
+				}
+				select {
+				case <-updValCh:
+				default:
+				}
+				select {
+				case updValCh <- updVal:
+				default:
+				}
+			},
+			nil, // noop on removed
+			valCtxCancel,
+		))
 		if err != nil {
-			valCtxCancel()
 			if err == context.Canceled {
 				return err
 			}
 
-			return errors.WithMessage(err, "exec controller")
+			err = errors.Wrap(err, "exec controller")
 		}
+
 		c.mtx.Lock()
-		c.state.ctrl, _ = ev.GetValue().(controller.Controller)
+		c.state.ctrl = nil
+		c.state.err = err
+		c.state.conf = conf
 		s := c.state
 		c.pushState(&s)
 		c.mtx.Unlock()
-		select {
-		case <-ctx.Done():
-		case <-valCtx.Done():
-		case <-c.confRestartCh:
-			c.le.Info("restarting with new config")
+
+	RecheckStateLoop:
+		for {
+			select {
+			case <-ctx.Done():
+				break RecheckStateLoop
+			case <-valCtx.Done():
+				break RecheckStateLoop
+			case <-c.confRestartCh:
+				c.le.Info("restarting with new config")
+				break RecheckStateLoop
+			case uval := <-updValCh:
+				c.mtx.Lock()
+				c.state.ctrl = uval.GetController()
+				c.state.err = uval.GetError()
+				c.state.conf = conf
+				st := c.state
+				c.pushState(&st)
+				c.mtx.Unlock()
+			}
 		}
 		valCtxCancel()
 		execRef.Release()
 		c.mtx.Lock()
-		c.state.ctrl = nil
-		s = c.state
-		c.pushState(&s)
 		conf = c.conf
+		if c.state.ctrl != nil || c.state.conf != conf {
+			c.state.ctrl = nil
+			c.state.conf = conf
+			s := c.state
+			c.pushState(&s)
+		}
 		c.mtx.Unlock()
 	}
 }
@@ -131,6 +158,21 @@ func (c *runningController) AddReference(ref *runningControllerRef) {
 	c.mtx.Lock()
 	c.refs = append(c.refs, ref)
 	c.mtx.Unlock()
+}
+
+// ApplyReference applies an existing reference to the running controller.
+func (c *runningController) ApplyReference(ref *runningControllerRef) {
+	if ref.GetRunningController() == c {
+		return
+	}
+	c.mtx.Lock()
+	st := c.state
+	c.mtx.Unlock()
+	if ref.setRunningController(c, &st) {
+		c.mtx.Lock()
+		c.refs = append(c.refs, ref)
+		c.mtx.Unlock()
+	}
 }
 
 // DelReference removes a reference from the running controller.

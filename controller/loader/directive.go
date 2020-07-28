@@ -1,6 +1,8 @@
 package loader
 
 import (
+	"time"
+
 	"github.com/aperturerobotics/controllerbus/config"
 	"github.com/aperturerobotics/controllerbus/controller"
 	"github.com/aperturerobotics/controllerbus/directive"
@@ -22,7 +24,17 @@ type ExecController interface {
 
 // ExecControllerValue is the value emitted to satisfy the ExecController
 // directive.
-type ExecControllerValue = controller.Controller
+type ExecControllerValue interface {
+	// GetUpdatedTimestamp returns the last time this info changed.
+	GetUpdatedTimestamp() time.Time
+	// GetNextRetryTimestamp returns the next time this controller will be attempted.
+	GetNextRetryTimestamp() time.Time
+	// GetController returns the current controller object.
+	GetController() controller.Controller
+	// GetError returns the error running the controller.
+	// Controller may still be set in this case.
+	GetError() error
+}
 
 // _ is a type assertion
 var _ directive.Value = ((ExecControllerValue)(nil))

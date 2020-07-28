@@ -45,8 +45,8 @@ func (d *loadControllerWithConfig) GetDesiredControllerConfig() config.Config {
 // GetValueOptions returns options relating to value handling.
 func (d *loadControllerWithConfig) GetValueOptions() directive.ValueOptions {
 	return directive.ValueOptions{
-		MaxValueCount:   1,
-		MaxValueHardCap: true,
+		// MaxValueCount:   1,
+		// MaxValueHardCap: true,
 	}
 }
 
