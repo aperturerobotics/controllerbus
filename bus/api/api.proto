@@ -1,7 +1,9 @@
 syntax = "proto3";
-package controllerbus.grpc;
+package bus.api;
 
 import "github.com/aperturerobotics/controllerbus/controller/controller.proto";
+import "github.com/aperturerobotics/controllerbus/controller/exec/exec.proto";
+import "github.com/aperturerobotics/controllerbus/directive/directive.proto";
 
 // GetBusInfoRequest is the request type for GetBusInfo.
 message GetBusInfoRequest {
@@ -12,27 +14,13 @@ message GetBusInfoResponse {
   // RunningControllers is the list of running controllers.
   repeated controller.Info running_controllers = 1;
   // RunningDirectives is the list of running directives.
-  repeated DirectiveInfo running_directives = 2;
-}
-
-// DirectiveInfo contains directive information.
-message DirectiveInfo {
-  // Name is the directive name.
-  string name = 1;
-  // DebugVals contains the directive debug values.
-  repeated DebugValue debug_vals = 2;
-}
-
-// DebugValue is a debug value.
-message DebugValue {
-  // Key is the debug value key.
-  string key = 1;
-  // Values are the debug value values.
-  repeated string values = 2;
+  repeated directive.DirectiveState running_directives = 2;
 }
 
 // ControllerBusService is a generic controller bus lookup api.
 service ControllerBusService {
   // GetBusInfo requests information about the controller bus.
   rpc GetBusInfo(GetBusInfoRequest) returns (GetBusInfoResponse) {}
+  // ExecController executes a controller configuration on the bus.
+  rpc ExecController(controller.exec.ExecControllerRequest) returns (stream controller.exec.ExecControllerResponse) {}
 }

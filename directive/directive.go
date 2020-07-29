@@ -6,6 +6,7 @@ package directive
 
 import (
 	"context"
+	"sort"
 	"time"
 	// 	"github.com/golang/protobuf/proto"
 )
@@ -17,6 +18,43 @@ type DebugValues map[string][]string
 // NewDebugValues constructs a new DebugValues.
 func NewDebugValues() DebugValues {
 	return DebugValues{}
+}
+
+// NewProtoDebugValues constructs a new ProtoDebugValue set.
+func NewProtoDebugValues(dv DebugValues) []*ProtoDebugValue {
+	res := make([]*ProtoDebugValue, 0, len(dv))
+	for k, v := range dv {
+		res = append(res, &ProtoDebugValue{
+			Key:    k,
+			Values: v,
+		})
+	}
+	sort.Slice(res, func(i int, j int) bool {
+		return res[i].GetKey() < res[j].GetKey()
+	})
+	return res
+}
+
+// NewDirectiveInfo constructs a new DirectiveInfo from a directive.
+func NewDirectiveInfo(dir Directive) *DirectiveInfo {
+	var debugVals []*ProtoDebugValue
+	debugDir, debugDirOk := dir.(Debuggable)
+	if debugDirOk {
+		debugVals = NewProtoDebugValues(debugDir.GetDebugVals())
+	}
+
+	return &DirectiveInfo{
+		Name:      dir.GetName(),
+		DebugVals: debugVals,
+	}
+}
+
+// NewDirectiveState constructs a new DirectiveState from a running directive.
+func NewDirectiveState(di Instance) *DirectiveState {
+	return &DirectiveState{
+		Info: NewDirectiveInfo(di.GetDirective()),
+		// TODO state
+	}
 }
 
 // ValueOptions are options related to value handling.

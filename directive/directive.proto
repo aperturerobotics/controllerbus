@@ -1,0 +1,25 @@
+syntax = "proto3";
+package directive;
+
+// DirectiveInfo contains directive information in protobuf form.
+message DirectiveInfo {
+  // Name is the directive name.
+  string name = 1;
+  // DebugVals contains the directive debug values.
+  repeated ProtoDebugValue debug_vals = 2;
+}
+
+// DirectiveState contains directive info and state info in protobuf form.
+message DirectiveState {
+  // Info is the directive info.
+  DirectiveInfo info = 1;
+  // TODO result info
+}
+
+// ProtoDebugValue is a debug value.
+message ProtoDebugValue {
+  // Key is the debug value key.
+  string key = 1;
+  // Values are the debug value values.
+  repeated string values = 2;
+}

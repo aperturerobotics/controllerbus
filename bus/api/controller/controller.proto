@@ -1,0 +1,11 @@
+syntax = "proto3";
+package controllerbus.grpc.controller;
+
+// Config configures the GRPC API.
+message Config {
+  // ListenAddr is the address to listen on for connections.
+  string listen_addr = 1;
+
+  // EnableExecController enables the exec controller API.
+  bool enable_exec_controller = 2;
+}
