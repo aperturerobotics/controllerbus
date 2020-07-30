@@ -48,7 +48,7 @@ func TestUnmarshalConfigSetYAML(t *testing.T) {
 	sr.AddFactory(boilerplate.NewFactory(b))
 
 	ocs := make(configset.ConfigSet)
-	if err := UnmarshalYAML(ctx, b, []byte(basicYAMLOutput), ocs, true); err != nil {
+	if _, err := UnmarshalYAML(ctx, b, []byte(basicYAMLOutput), ocs, true); err != nil {
 		t.Fatal(err.Error())
 	}
 	if dat := ocs["test"].GetConfig().(*boilerplate.Config).GetExampleField(); dat != "test 123" {

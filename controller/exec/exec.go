@@ -2,10 +2,14 @@ package controller_exec
 
 import (
 	"context"
+	"errors"
+	"sort"
 
 	"github.com/aperturerobotics/controllerbus/bus"
 	"github.com/aperturerobotics/controllerbus/config"
 	"github.com/aperturerobotics/controllerbus/controller/configset"
+	configset_json "github.com/aperturerobotics/controllerbus/controller/configset/json"
+	configset_proto "github.com/aperturerobotics/controllerbus/controller/configset/proto"
 	"github.com/aperturerobotics/controllerbus/controller/resolver"
 	"github.com/aperturerobotics/controllerbus/directive"
 )
@@ -52,21 +56,54 @@ func (r *ExecControllerRequest) Execute(
 		return nil
 	}
 
-	confsList := r.GetConfigSet().GetConfigurations()
 	var confSet configset.ConfigSet
+
+	rConfSet := r.GetConfigSet() // proto.Clone(r.GetConfigSet()).(*configset_proto.ConfigSet)
+	if rConfSet == nil {
+		return errors.New("at least one config must be specified")
+	}
+	confsList := rConfSet.GetConfigurations()
 	prevStates := make(map[string]ControllerStatus, len(confsList))
-	if !allowPartialSuccess {
-		confSet, err = r.GetConfigSet().Resolve(ctx, cbus)
+	if !allowPartialSuccess && len(rConfSet.GetConfigurations()) != 0 {
+		confSet, err = rConfSet.Resolve(ctx, cbus)
 	}
 	if err != nil {
 		return err
 	}
-
 	if confSet == nil {
 		confSet = make(configset.ConfigSet, len(confsList))
 	}
+	if confsList == nil {
+		confsList = make(map[string]*configset_proto.ControllerConfig)
+	}
+
+	confsYAML := r.GetConfigSetYaml()
+	if confsYAML != "" {
+		addedConfs, err := configset_json.UnmarshalYAML(
+			ctx,
+			cbus,
+			[]byte(confsYAML),
+			confSet,
+			r.GetConfigSetYamlOverwrite(),
+		)
+		if err != nil {
+			return err
+		}
+		sort.Strings(addedConfs)
+		for _, id := range addedConfs {
+			resp.Id = id
+			resp.Status = ControllerStatus_ControllerStatus_CONFIGURING
+			prevStates[id] = resp.Status
+			if err := callCb(); err != nil {
+				return err
+			}
+			resp.Reset()
+		}
+	}
+
 	niniterr := 0
 	var lastniniterr error
+	// TODO: sort and send sorted
 	for csID, conf := range confsList {
 		if csID == "" {
 			continue
@@ -187,28 +224,4 @@ func (r *ExecControllerRequest) Execute(
 			resp.Reset()
 		}
 	}
-}
-
-// DoExecControllerRequest executes a controller via a ExecControllerRequest.
-func DoExecControllerRequest(
-	ctx context.Context,
-	cbus bus.Bus,
-	conf config.Config,
-	cb func(ControllerStatus),
-) error {
-	if cb == nil {
-		cb = func(ControllerStatus) {}
-	}
-	dir := resolver.NewLoadControllerWithConfig(conf)
-
-	cb(ControllerStatus_ControllerStatus_CONFIGURING)
-	_, valRef, err := bus.ExecOneOff(ctx, cbus, dir, nil)
-	if err != nil {
-		return err
-	}
-	defer valRef.Release()
-
-	cb(ControllerStatus_ControllerStatus_RUNNING)
-	<-ctx.Done()
-	return nil
 }

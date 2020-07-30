@@ -20,6 +20,11 @@ enum ControllerStatus {
 message ExecControllerRequest {
   // ConfigSet is the controller config set to execute.
   configset.proto.ConfigSet config_set = 1;
+  // ConfigSetYaml is optionally the YAML form of config_set to parse.
+  // Merged with config_set.
+  string config_set_yaml = 2;
+  // ConfigSetYamlOverwrite sets if the yaml portion overwrites the proto portion.
+  bool config_set_yaml_overwrite = 3;
 }
 
 // ExecControllerResponse is a protobuf response stream.

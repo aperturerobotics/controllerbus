@@ -21,18 +21,21 @@ func MarshalYAML(cs configset.ConfigSet) ([]byte, error) {
 }
 
 // UnmarshalYAML unmarshals a yaml to a config set, optionally overwriting existing.
+//
+// Returns all added configs.
 func UnmarshalYAML(
 	ctx context.Context,
 	b bus.Bus,
 	data []byte,
 	ocs configset.ConfigSet,
 	overwriteExisting bool,
-) error {
+) ([]string, error) {
 	cs := make(ConfigSet)
 	if err := yaml.Unmarshal(data, &cs); err != nil {
-		return err
+		return nil, err
 	}
 
+	var added []string
 	for id, cconf := range cs {
 		_, exists := ocs[id]
 		if exists && !overwriteExisting {
@@ -40,10 +43,11 @@ func UnmarshalYAML(
 		}
 		cfg, err := cconf.Resolve(ctx, b)
 		if err != nil {
-			return errors.Wrapf(err, "unmarshal config %q", id)
+			return added, errors.Wrapf(err, "unmarshal config %q", id)
 		}
 		ocs[id] = cfg
+		added = append(added, id)
 	}
 
-	return nil
+	return added, nil
 }

@@ -53,7 +53,7 @@ func run() error {
 		// looks up the controller by ID
 		// dynamically loaded from the plugin
 		confSetSrc := configset.ConfigSet{}
-		err := configset_json.UnmarshalYAML(
+		_, err := configset_json.UnmarshalYAML(
 			ctx,
 			cb,
 			[]byte(configSetYaml),
