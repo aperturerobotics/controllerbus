@@ -90,15 +90,6 @@ func (r *ExecControllerRequest) Execute(
 			return err
 		}
 		sort.Strings(addedConfs)
-		for _, id := range addedConfs {
-			resp.Id = id
-			resp.Status = ControllerStatus_ControllerStatus_CONFIGURING
-			prevStates[id] = resp.Status
-			if err := callCb(); err != nil {
-				return err
-			}
-			resp.Reset()
-		}
 	}
 
 	niniterr := 0
@@ -109,28 +100,22 @@ func (r *ExecControllerRequest) Execute(
 			continue
 		}
 
-		ns := ControllerStatus_ControllerStatus_CONFIGURING
 		if _, ok := confSet[csID]; !ok {
 			confSet[csID], err = conf.Resolve(ctx, cbus)
 			if err != nil {
-				ns = ControllerStatus_ControllerStatus_ERROR
+				resp.Id = csID
+				resp.Status = ControllerStatus_ControllerStatus_ERROR
+				resp.ErrorInfo = err.Error()
+				prevStates[csID] = resp.Status
+				if err := callCb(); err != nil {
+					return err
+				}
+				resp.Reset()
 				niniterr++
 				lastniniterr = err
 				delete(confSet, csID)
-				resp.ErrorInfo = err.Error()
-			} else {
-				resp.ErrorInfo = ""
 			}
-		} else {
-			resp.ErrorInfo = ""
 		}
-
-		resp.Id = csID
-		resp.Status = ns
-		if err := callCb(); err != nil {
-			return err
-		}
-		prevStates[csID] = ns
 	}
 	if niniterr == len(confsList) && len(confsList) != 0 {
 		if len(confsList) == 1 && lastniniterr != nil {
