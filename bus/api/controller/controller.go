@@ -1,12 +1,13 @@
 //+build !js
 
-package controllerbus_grpc_controller
+package bus_api_controller
 
 import (
 	"context"
 	"net"
 
 	"github.com/aperturerobotics/controllerbus/bus"
+	api "github.com/aperturerobotics/controllerbus/bus/api"
 	"github.com/aperturerobotics/controllerbus/controller"
 	"github.com/aperturerobotics/controllerbus/directive"
 	"github.com/blang/semver"
@@ -27,9 +28,8 @@ type Controller struct {
 	bus bus.Bus
 	// listenAddr is the listen address
 	listenAddr string
-
-	// enableExecController enables the ExecController API
-	enableExecController bool
+	// conf is the config
+	conf *Config
 }
 
 // NewController constructs a new API controller.
@@ -37,13 +37,13 @@ func NewController(
 	le *logrus.Entry,
 	listenAddr string,
 	bus bus.Bus,
-	enableExecController bool,
+	conf *Config,
 ) *Controller {
 	return &Controller{
-		le:                   le,
-		bus:                  bus,
-		listenAddr:           listenAddr,
-		enableExecController: enableExecController,
+		le:         le,
+		bus:        bus,
+		listenAddr: listenAddr,
+		conf:       conf,
 	}
 }
 
@@ -61,7 +61,7 @@ func (c *Controller) GetControllerInfo() controller.Info {
 // Returning an error triggers a retry with backoff.
 func (c *Controller) Execute(ctx context.Context) error {
 	// Construct the API
-	api, err := NewAPI(c.bus, c.enableExecController)
+	api, err := api.NewAPI(c.bus, c.conf.GetBusApiConfig())
 	if err != nil {
 		return err
 	}

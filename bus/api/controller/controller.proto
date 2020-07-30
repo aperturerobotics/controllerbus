@@ -1,11 +1,12 @@
 syntax = "proto3";
-package controllerbus.grpc.controller;
+package bus.api.controller;
+
+import "github.com/aperturerobotics/controllerbus/bus/api/api.proto";
 
 // Config configures the GRPC API.
 message Config {
   // ListenAddr is the address to listen on for connections.
   string listen_addr = 1;
-
-  // EnableExecController enables the exec controller API.
-  bool enable_exec_controller = 2;
+  // BusApiConfig are options for controller bus api.
+  bus.api.Config bus_api_config = 2;
 }

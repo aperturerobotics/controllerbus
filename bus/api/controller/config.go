@@ -1,6 +1,6 @@
 //+build !js
 
-package controllerbus_grpc_controller
+package bus_api_controller
 
 import (
 	"github.com/aperturerobotics/controllerbus/config"

@@ -5,6 +5,12 @@ import "github.com/aperturerobotics/controllerbus/controller/controller.proto";
 import "github.com/aperturerobotics/controllerbus/controller/exec/exec.proto";
 import "github.com/aperturerobotics/controllerbus/directive/directive.proto";
 
+// Config are configuration arguments.
+message Config {
+  // EnableExecController enables the exec controller API.
+  bool enable_exec_controller = 1;
+}
+
 // GetBusInfoRequest is the request type for GetBusInfo.
 message GetBusInfoRequest {
 }

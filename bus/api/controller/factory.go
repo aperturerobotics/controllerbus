@@ -1,4 +1,4 @@
-package controllerbus_grpc_controller
+package bus_api_controller
 
 import (
 	"github.com/aperturerobotics/controllerbus/bus"
@@ -50,7 +50,7 @@ func (t *Factory) Construct(
 		le,
 		cc.GetListenAddr(),
 		t.bus,
-		cc.GetEnableExecController(),
+		cc,
 	), nil
 }
 
