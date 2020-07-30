@@ -59,7 +59,7 @@ func (r *ExecControllerRequest) Execute(
 	var confSet configset.ConfigSet
 
 	rConfSet := r.GetConfigSet() // proto.Clone(r.GetConfigSet()).(*configset_proto.ConfigSet)
-	if rConfSet == nil {
+	if rConfSet == nil && r.GetConfigSetYaml() == "" {
 		return errors.New("at least one config must be specified")
 	}
 	confsList := rConfSet.GetConfigurations()
