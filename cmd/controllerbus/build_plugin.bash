@@ -1,21 +1,16 @@
 #!/bin/bash
 set -eo pipefail
+set -x
 
-export GO111MODULE=on
-export $(go env | grep GOOS)
-GOOS="${GOOS%\"}"
-GOOS="${GOOS#\"}"
-if [[ "$GOOS" != "linux" ]]; then
-    echo "This only works on GOOS=linux."
-    exit 1
-fi
+# export CONTROLLER_BUS_CODEGEN_DIR="./codegen-module/"
+export CONTROLLER_BUS_PLUGIN_BINARY_ID="controllerbus/examples/hot-demo/1"
+export CONTROLLER_BUS_OUTPUT="./plugins/demo-plugin.cbus.so"
+export CONTROLLER_BUS_PLUGIN_BUILD_PREFIX="cbus-demo"
 
-echo "Building plugin binary..."
-go build \
+mkdir -p ./plugins
+go run -v \
    -trimpath \
-   -o ./plugins/boilerplate-example.cbus.so \
-   -v -buildmode=plugin \
-   github.com/aperturerobotics/controllerbus/example/hot-demo/plugin/plugin-bin
-
-echo "Compiled boilerplate.cbus.so successfully."
-
+   github.com/aperturerobotics/controllerbus/cmd/controllerbus -- \
+   hot compile \
+  "github.com/aperturerobotics/controllerbus/example/boilerplate/controller"
+rm -r ./codegen-module || true
