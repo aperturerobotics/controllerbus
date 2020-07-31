@@ -1,5 +1,5 @@
-boilerplate-demo-0:
+hold-open:
   config:
-    exampleField: testing
+    exampleField: Hello from YAML exec-controller!
   id: controllerbus/example/boilerplate/1
   revision: 1

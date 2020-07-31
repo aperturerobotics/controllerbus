@@ -8,6 +8,7 @@ import (
 type DaemonArgs struct {
 	WriteConfig bool
 	ConfigPath  string
+	APIListen   string
 }
 
 // BuildFlags attaches the flags to a flag set.
@@ -25,6 +26,13 @@ func (a *DaemonArgs) BuildFlags() []cli.Flag {
 			Usage:       "write the daemon config file on startup",
 			EnvVar:      "CONTROLLER_BUS_WRITE_CONFIG",
 			Destination: &a.WriteConfig,
+		},
+		cli.StringFlag{
+			Name:        "api-listen",
+			Usage:       "if set, will listen on address for API grpc connections, ex :5110",
+			EnvVar:      "CONTROLLER_BUS_API_LISTEN",
+			Value:       ":5110",
+			Destination: &a.APIListen,
 		},
 	}
 }

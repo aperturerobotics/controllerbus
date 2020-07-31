@@ -5,12 +5,16 @@ import (
 	"io/ioutil"
 	"os"
 
+	bus_api "github.com/aperturerobotics/controllerbus/bus/api"
+	api_controller "github.com/aperturerobotics/controllerbus/bus/api/controller"
 	cbcli "github.com/aperturerobotics/controllerbus/cli"
 	"github.com/aperturerobotics/controllerbus/controller/configset"
 	configset_controller "github.com/aperturerobotics/controllerbus/controller/configset/controller"
 	configset_json "github.com/aperturerobotics/controllerbus/controller/configset/json"
+	"github.com/aperturerobotics/controllerbus/controller/loader"
 	"github.com/aperturerobotics/controllerbus/controller/resolver"
 	"github.com/aperturerobotics/controllerbus/core"
+	"github.com/aperturerobotics/controllerbus/example/boilerplate/controller"
 	hot_loader_filesystem "github.com/aperturerobotics/controllerbus/hot/loader/filesystem"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
@@ -23,7 +27,7 @@ var pluginDir string
 
 func init() {
 	var dflags []cli.Flag
-	dflags = append(dflags, daemonFlags.BuildFlags()...)
+	dflags = append(dflags, (&daemonFlags).BuildFlags()...)
 	dflags = append(dflags, &cli.StringFlag{
 		Name:        "hot-load-dir",
 		Usage:       "directory to hot-load plugins from, default `DIR`",
@@ -54,6 +58,8 @@ func runDaemon(c *cli.Context) error {
 		return err
 	}
 	sr.AddFactory(hot_loader_filesystem.NewFactory(b))
+	sr.AddFactory(api_controller.NewFactory(b))
+	sr.AddFactory(boilerplate_controller.NewFactory(b))
 
 	// Construct hot loader
 	_, hlRef, err := b.AddDirective(
@@ -126,6 +132,26 @@ func runDaemon(c *cli.Context) error {
 		return err
 	}
 	defer configSetRef.Release()
+
+	// Daemon API
+	if daemonFlags.APIListen != "" {
+		_, _, apiRef, err := loader.WaitExecControllerRunning(
+			ctx,
+			b,
+			resolver.NewLoadControllerWithConfig(&api_controller.Config{
+				ListenAddr: daemonFlags.APIListen,
+				BusApiConfig: &bus_api.Config{
+					EnableExecController: true,
+				},
+			}),
+			nil,
+		)
+		if err != nil {
+			return errors.Wrap(err, "listen on grpc api")
+		}
+		defer apiRef.Release()
+		le.Infof("grpc api listening on: %s", daemonFlags.APIListen)
+	}
 
 	/* TODO profiling plugin
 	if daemonFlags.ProfListen != "" {
