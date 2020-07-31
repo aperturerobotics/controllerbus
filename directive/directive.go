@@ -129,9 +129,12 @@ type NetworkedCodec interface {
 type Controller interface {
 	// AddDirective adds a directive to the controller.
 	// This call de-duplicates equivalent directives.
+	//
 	// cb receives values in order as they are emitted.
 	// cb can be nil.
 	// cb should not block.
+	// cb will receive the initial value set as part of the AddDirective
+	//   call, so be careful to not block.
 	// Returns the instance, new reference, and any error.
 	AddDirective(Directive, ReferenceHandler) (Instance, Reference, error)
 
