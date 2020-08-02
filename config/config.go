@@ -27,3 +27,17 @@ type Constructor interface {
 	// ConstructConfig constructs a new configuration object.
 	ConstructConfig() Config
 }
+
+// DebugValues maps string key to a list of values.
+// It is used for debug visualizations.
+type DebugValues map[string][]string
+
+// Debuggable is a configuration with debug values.
+//
+// These debug values are sometimes combined with Exec or Load directives.
+type Debuggable interface {
+	// GetDebugVals returns the directive arguments as key/value pairs.
+	// This should be something like param1="test", param2="test".
+	// This is not necessarily unique, and is primarily intended for display.
+	GetDebugVals() DebugValues
+}

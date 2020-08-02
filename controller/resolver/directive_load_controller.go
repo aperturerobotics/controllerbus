@@ -90,8 +90,22 @@ func (d *loadControllerWithConfig) GetDebugVals() directive.DebugValues {
 	vals := directive.NewDebugValues()
 	confID := d.GetDesiredControllerConfig().GetConfigID()
 	vals["config-id"] = []string{confID}
+	dbg, dbgOk := d.GetDesiredControllerConfig().(config.Debuggable)
+	if dbgOk {
+		dbgVals := dbg.GetDebugVals()
+		if dbgVals != nil {
+			for k, v := range dbg.GetDebugVals() {
+				if _, ok := vals[k]; !ok {
+					vals[k] = v
+				}
+			}
+		}
+	}
 	return vals
 }
 
 // _ is a type assertion
 var _ LoadControllerWithConfig = ((*loadControllerWithConfig)(nil))
+
+// _ is a type assertion
+var _ directive.Debuggable = ((*loadControllerWithConfig)(nil))
