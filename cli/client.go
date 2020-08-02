@@ -59,6 +59,17 @@ func (a *ClientArgs) BuildCommands() []cli.Command {
 	}
 }
 
+// BuildControllerBusCommand returns the controller-bus sub-command set.
+func (a *ClientArgs) BuildControllerBusCommand() cli.Command {
+	cbusCmds := a.BuildCommands()
+	return cli.Command{
+		Name:        "controller-bus",
+		Aliases:     []string{"cbus"},
+		Usage:       "Controller Bus sub-commands.",
+		Subcommands: cbusCmds,
+	}
+}
+
 // SetClient sets the client instance.
 func (a *ClientArgs) SetClient(client bus_api.ControllerBusServiceClient) {
 	a.client = client
