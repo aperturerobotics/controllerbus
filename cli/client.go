@@ -16,6 +16,9 @@ type ClientArgs struct {
 	// client is the client instance
 	client bus_api.ControllerBusServiceClient
 
+	// Interactive indicates we will pretty-print outputs.
+	Interactive bool
+
 	// DialAddr is the address to dial.
 	DialAddr string
 
@@ -42,6 +45,14 @@ func (a *ClientArgs) BuildCommands() []cli.Command {
 			Name:   "bus-info",
 			Usage:  "returns bus information",
 			Action: a.RunBusInfo,
+			Flags: []cli.Flag{
+				cli.BoolTFlag{
+					Name:        "interactive",
+					Usage:       "print interactive (pretty print) output",
+					Destination: &a.Interactive,
+					EnvVar:      "CONTROLLER_BUS_INTERACTIVE",
+				},
+			},
 		},
 		{
 			Name:   "exec",

@@ -21,12 +21,17 @@ func (a *ClientArgs) RunBusInfo(_ *cli.Context) error {
 		return err
 	}
 
-	dat, err := json.MarshalIndent(ni, "", "\t")
-	if err != nil {
-		return err
-	}
+	if a.Interactive {
+		_, _ = os.Stdout.Write(ni.PrintPrettyStatus())
+		return nil
+	} else {
+		dat, err := json.MarshalIndent(ni, "", "\t")
+		if err != nil {
+			return err
+		}
 
-	os.Stdout.WriteString(string(dat))
-	os.Stdout.WriteString("\n")
+		os.Stdout.WriteString(string(dat))
+		os.Stdout.WriteString("\n")
+	}
 	return nil
 }
