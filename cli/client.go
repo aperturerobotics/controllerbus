@@ -76,7 +76,7 @@ func (a *ClientArgs) BuildControllerBusCommand() cli.Command {
 	return cli.Command{
 		Name:        "controller-bus",
 		Aliases:     []string{"cbus"},
-		Usage:       "Controller Bus sub-commands.",
+		Usage:       "ControllerBus system sub-commands.",
 		Subcommands: cbusCmds,
 	}
 }
