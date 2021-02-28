@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"os/exec"
 	"path/filepath"
 
 	hot_compiler "github.com/aperturerobotics/controllerbus/hot/compiler"
@@ -125,20 +124,21 @@ func run(ctx context.Context, le *logrus.Entry) error {
 		return err
 	}
 
-	ecmd := exec.Command(
-		// go run args
-		"go", "run", "-v", "-trimpath", "./", "--",
+	ecmd := hot_compiler.ExecGoTidyModules()
+	ecmd.Dir = outCliPath
+	le.Debugf("running go mod tidy: %s", ecmd.String())
+	err = ecmd.Run()
+	if err != nil {
+		return err
+	}
+
+	ecmd = hot_compiler.ExecGoCompiler(
+		"run", "-v", "-trimpath", "./", "--",
 		// controllerbus daemon args
 		"daemon", "--hot-load-dir=./plugins",
 		"--config=config.yaml",
 	)
 	ecmd.Dir = outCliPath
-	ecmd.Env = append(
-		os.Environ(),
-		"GO111MODULE=on",
-	)
-	ecmd.Stderr = os.Stderr
-	ecmd.Stdout = os.Stdout
 	le.Debugf("running go compiler: %s", ecmd.String())
 	err = ecmd.Run()
 	if err != nil {

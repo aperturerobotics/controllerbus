@@ -12,7 +12,6 @@ import (
 	"go/token"
 	"io/ioutil"
 	"os"
-	"os/exec"
 	"path"
 	"path/filepath"
 
@@ -454,10 +453,19 @@ func (m *ModuleCompiler) CompilePlugin(outFile string) error {
 	}
 	defer os.RemoveAll(tmpName)
 
+	// go 1.16: to generate go.sum files, it's now necessary to run this explicitly
+	ecmd := ExecGoTidyModules()
+	ecmd.Dir = pluginDirAbs
+	le.
+		WithField("work-dir", ecmd.Dir).
+		Debugf("running go mod tidy: %s", ecmd.String())
+	if err := ecmd.Run(); err != nil {
+		return err
+	}
+
 	// start the go compiler execution
-	ecmd := exec.Command(
-		"go", "build",
-		"-v", "-trimpath",
+	ecmd = ExecGoCompiler(
+		"build", "-v", "-trimpath",
 		"-buildmode=plugin",
 		"-tags",
 		buildTag,
@@ -466,12 +474,6 @@ func (m *ModuleCompiler) CompilePlugin(outFile string) error {
 		".",
 	)
 	ecmd.Dir = pluginDirAbs
-	ecmd.Env = append(
-		os.Environ(),
-		"GO111MODULE=on",
-	)
-	ecmd.Stderr = os.Stderr
-	ecmd.Stdout = os.Stdout
 	le.
 		WithField("work-dir", ecmd.Dir).
 		Debugf("running go compiler: %s", ecmd.String())

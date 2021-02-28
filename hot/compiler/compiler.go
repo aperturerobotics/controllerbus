@@ -7,7 +7,6 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
-	"os/exec"
 	"path"
 	"strings"
 
@@ -54,11 +53,19 @@ func CompilePluginFromFile(
 	// hash included does not already exist, then the go compiler is invoked a
 	// second time with the plugin path including the hash.
 
+	// go 1.16: to generate go.sum files, it's now necessary to run this explicitly
+	ecmd := ExecGoTidyModules()
+	le.
+		WithField("work-dir", ecmd.Dir).
+		Debugf("running go mod tidy: %s", ecmd.String())
+	if err := ecmd.Run(); err != nil {
+		return err
+	}
+
 	// start the go compiler excecution #1
 	intermediateOutFile1 := path.Join(tmpName, "pass-1.cbus.so")
-	ecmd := exec.Command(
-		"go", "build",
-		"-v",
+	ecmd = ExecGoCompiler(
+		"build", "-v",
 		"-buildmode=plugin",
 		"-tags",
 		buildTag,
@@ -66,14 +73,6 @@ func CompilePluginFromFile(
 		intermediateOutFile1,
 		intermediateGoFile,
 	)
-	ecmd.Env = make([]string, len(os.Environ()))
-	copy(ecmd.Env, os.Environ())
-	ecmd.Env = append(
-		ecmd.Env,
-		"GO111MODULE=on",
-	)
-	ecmd.Stderr = os.Stderr
-	ecmd.Stdout = os.Stdout
 	le.Debugf("running go compiler to detect changes: %s", ecmd.String())
 	err = ecmd.Run()
 	if err != nil {
@@ -113,9 +112,8 @@ func CompilePluginFromFile(
 
 	// start the go compiler execution #2
 	intermediateOutFile2 := path.Join(tmpName, "pass-2.cbus.so")
-	ecmd = exec.Command(
-		"go", "build",
-		"-v", "-trimpath",
+	ecmd = ExecGoCompiler(
+		"build", "-v", "-trimpath",
 		"-buildmode=plugin",
 		"-tags",
 		buildTag,
@@ -123,14 +121,6 @@ func CompilePluginFromFile(
 		intermediateOutFile2,
 		intermediateGoFile,
 	)
-	ecmd.Env = make([]string, len(os.Environ()))
-	copy(ecmd.Env, os.Environ())
-	ecmd.Env = append(
-		ecmd.Env,
-		"GO111MODULE=on",
-	)
-	ecmd.Stderr = os.Stderr
-	ecmd.Stdout = os.Stdout
 	le.Infof("running go compiler with updated unique build id: %s", ecmd.String())
 	err = ecmd.Run()
 	if err != nil {
