@@ -12,22 +12,22 @@ replace (
 
 require (
 	github.com/blang/semver v3.5.1+incompatible
-	github.com/cenkalti/backoff v2.2.1+incompatible
+	github.com/cenkalti/backoff v1.1.1-0.20190506075156-2146c9339422
 	github.com/fsnotify/fsnotify v1.4.9
 	github.com/ghodss/yaml v1.0.0
 	github.com/golang/protobuf v1.4.2
 	github.com/kr/pretty v0.2.0 // indirect
-	github.com/minio/highwayhash v1.0.0
+	github.com/minio/highwayhash v1.0.2
 	github.com/mr-tron/base58 v1.2.0
 	github.com/pkg/errors v0.9.1
 	github.com/sergi/go-diff v1.1.0
-	github.com/sirupsen/logrus v1.6.0
-	github.com/stretchr/testify v1.5.1 // indirect
-	github.com/urfave/cli v1.22.4
-	golang.org/x/mod v0.3.0
-	golang.org/x/sys v0.0.0-20201204225414-ed752295db88 // indirect
-	golang.org/x/text v0.3.2 // indirect
-	golang.org/x/tools v0.0.0-20200626171337-aa94e735be7f
+	github.com/sirupsen/logrus v1.8.0
+	github.com/stretchr/testify v1.7.0 // indirect
+	github.com/urfave/cli v1.22.5
+	golang.org/x/mod v0.4.2
+	golang.org/x/sys v0.0.0-20210423185535-09eb48e85fd7 // indirect
+	golang.org/x/text v0.3.7-0.20210411120140-c2d28a6ddf6c // indirect
+	golang.org/x/tools v0.1.1-0.20210423211518-f74a6698e3f9
 	google.golang.org/grpc v1.30.0
-	mvdan.cc/gofumpt v0.0.0-20200627213337-90206bd98491
+	mvdan.cc/gofumpt v0.1.1-0.20210401090014-0952458e3d6b
 )

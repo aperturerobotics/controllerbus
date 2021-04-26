@@ -26,10 +26,18 @@ func NewControllerConfig(c configset.ControllerConfig) (*ControllerConfig, error
 	}, nil
 }
 
+// Validate performs cursory validation of the controller config.
+func (c *ControllerConfig) Validate() error {
+	if len(c.GetId()) == 0 {
+		return ErrControllerConfigIdEmpty
+	}
+	return nil
+}
+
 // Resolve resolves the config into a configset.ControllerConfig
 func (c *ControllerConfig) Resolve(ctx context.Context, b bus.Bus) (configset.ControllerConfig, error) {
 	if len(c.GetId()) == 0 {
-		return nil, errors.New("config id was not specified")
+		return nil, ErrControllerConfigIdEmpty
 	}
 
 	configCtorDir := resolver.NewLoadConfigConstructorByID(c.GetId())
