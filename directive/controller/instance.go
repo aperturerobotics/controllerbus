@@ -263,18 +263,17 @@ func (r *DirectiveInstance) AddIdleCallback(cb func()) func() {
 
 // Close cancels the directive instance.
 func (r *DirectiveInstance) Close() {
+	r.mtx.Lock()
 	r.callRel()
+	r.mtx.Unlock()
 }
 
 // callRel calls the release callbacks.
+// caller should lock mtx.
 func (r *DirectiveInstance) callRel() {
-	r.mtx.Lock()
-	defer r.mtx.Unlock()
-
 	if r.released {
 		return
 	}
-
 	r.released = true
 
 	for _, ref := range r.refs {
@@ -384,11 +383,13 @@ func (r *DirectiveInstance) releaseReference(dr *directiveInstanceReference) {
 }
 
 // markUnreferenced requires refsMtx is locked, and starts the Close() timer
+// caller should lock r.mtx
 func (r *DirectiveInstance) markUnreferenced() {
 	if r.unrefDestroyTimer == nil {
 		udd := r.valueOpts.UnrefDisposeDur
 		if udd == 0 {
-			go r.Close()
+			// release immediately
+			r.callRel()
 		} else {
 			r.unrefDestroyTimer = time.AfterFunc(udd, r.Close)
 		}
