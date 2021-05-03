@@ -61,6 +61,8 @@ func (c *Controller) HandleDirective(ctx context.Context, di directive.Instance)
 		return c.resolveLoadControllerWithConfig(ctx, d)
 	case LoadConfigConstructorByID:
 		return c.resolveLoadConfigConstructorByID(ctx, d)
+	case LoadFactoryByConfig:
+		return c.resolveLoadFactoryByConfig(ctx, d)
 	}
 
 	return nil, nil
