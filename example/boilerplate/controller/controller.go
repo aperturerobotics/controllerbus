@@ -28,7 +28,7 @@ type Controller struct {
 	conf *Config
 }
 
-// NewController constructs a new entity graph controller.
+// NewController constructs a new boilerplate example controller.
 func NewController(
 	le *logrus.Entry,
 	bus bus.Bus,

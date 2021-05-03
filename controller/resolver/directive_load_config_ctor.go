@@ -3,6 +3,7 @@ package resolver
 import (
 	"errors"
 
+	"github.com/aperturerobotics/controllerbus/config"
 	"github.com/aperturerobotics/controllerbus/directive"
 )
 
@@ -20,6 +21,9 @@ type LoadConfigConstructorByID interface {
 	// LoadConfigConstructorByIDConfigID is the configuration ID to use.
 	LoadConfigConstructorByIDConfigID() string
 }
+
+// LoadConfigConstructorByIDValue is the value type for LoadConfigConstructorByID.
+type LoadConfigConstructorByIDValue = config.Constructor
 
 // loadConfigConstructorByID is an LoadConfigConstructorByID directive.
 type loadConfigConstructorByID struct {

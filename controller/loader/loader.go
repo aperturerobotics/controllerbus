@@ -55,7 +55,8 @@ func (c *Controller) HandleDirective(
 	di directive.Instance,
 ) (directive.Resolver, error) {
 	dir := di.GetDirective()
-	if d, ok := dir.(ExecController); ok {
+	switch d := dir.(type) {
+	case ExecController:
 		return c.resolveExecController(ctx, d)
 	}
 

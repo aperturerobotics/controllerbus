@@ -9,7 +9,7 @@ import (
 )
 
 // LoadControllerWithConfig is a directive indicating a controller should be
-// loaded given a configuration.
+// loaded and executed (in one action) given a configuration.
 type LoadControllerWithConfig interface {
 	// Directive indicates this is a directive.
 	directive.Directive
