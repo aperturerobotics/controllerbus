@@ -26,7 +26,7 @@ Reference: https://github.com/golang/go/issues/27751
 
 [![asciicast](https://asciinema.org/a/418277.svg)](https://asciinema.org/a/418277)
 
-You can run this with `go run github.com/aperturerobotics/controllerbus/hot/demo`:
+You can run this with `go run github.com/aperturerobotics/example/hot-demo`:
 
  - Runs the module-compiler on the boilerplate, demo, and CLI controllers.
  - Executes the CLI pre-configured to load the demo plugins + controllers.
