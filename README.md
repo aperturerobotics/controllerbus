@@ -4,16 +4,115 @@
 
 ## Introduction
 
+[![asciicast](https://asciinema.org/a/418275.svg)](https://asciinema.org/a/418275)
+
 Controller Bus is a framework for declarative configuration, dynamic linking,
-and separation of concerns between application components. Concurrent execution
-of communicating components allows for improved multi-threading. Decoupling the
-implementations of the components from the API surfaces, even within a monolitic
-application, makes it trivial to "swap-in" new implementations later on.
+and separation of concerns between application components. 
 
 Applications are built with concurrently executing Controllers that communicate
-over a shared bus (either in-memory or networked** using Directive requests. The
-Directives can be deduplicated and their outputs cached to optimize multiple
-controllers requesting the same thing simultaneously.
+over a shared bus (either in-memory or **networked** with IPC) using Directive
+requests. The Directives can be deduplicated and their outputs cached to
+optimize multiple controllers requesting the same thing simultaneously.
+
+Config objects are Protobuf messages with attached validation functions and
+controller IDs. On startup, a configuration object is passed to a Factory which
+constructs the associated Controller, which is then attached to the Bus. When
+attaching, all ongoing Directives are passed to the Controller, which can
+optionally return a Resolver object to concurrently fetch results.
+
+Controllers can be attached and detached on-demand. There is an associated
+example daemon and GRPC API for remotely starting Controllers over a network.
+
+Concurrent execution of communicating components allows for improved
+multi-threading and faster startup time. Decoupling the implementations of the
+components from the API surfaces makes it trivial to swap-in new
+implementations, even without restarting the program.
+
+## Example
+
+The [boilerplate](./example/boilerplate/controller/config.proto) example has the
+following configuration proto:
+
+```protobuf
+// Config is the boilerplate configuration.
+message Config {
+  // ExampleField is an example configuration field.
+  string example_field = 1;
+}
+```
+
+This is an example YAML configuration for this controller:
+
+```yaml
+exampleField: "Hello world!"
+```
+
+Using the **LoadControllerWithConfig** directive, we can instruct the system to
+resolve the configuration type to a controller factory & exec the controller:
+
+```go
+	bus.ExecOneOff(
+		ctx,
+		cb,
+		resolver.NewLoadControllerWithConfig(&boilerplate_controller.Config{
+			ExampleField: "Hello World!",
+		}),
+		nil,
+	)
+```
+
+You can also run this demo by:
+
+```sh
+cd ./cmd/controllerbus
+go build -v 
+./controllerbus daemon
+```
+
+This will load `controllerbus_daemon.yaml` and execute the boilerplate demo:
+
+```
+added directive                               directive="LoadControllerWithConfig<config-id=controllerbus/hot/loader/filesystem/1>"
+added directive                               directive="LoadControllerWithConfig<config-id=controllerbus/configset/1>"
+added directive                               directive="ExecController<config-id=controllerbus/configset/1>"
+added directive                               directive="ExecController<config-id=controllerbus/hot/loader/filesystem/1>"
+added directive                               directive="LoadConfigConstructorByID<config-id=controllerbus/example/boilerplate/1>"
+starting controller                           controller=controllerbus/configset/1
+added directive                               directive="ApplyConfigSet<controller-keys=boilerplate-example-0@1>"
+added directive                               directive="LoadControllerWithConfig<config-id=controllerbus/bus/api/1>"
+starting controller                           controller=controllerbus/hot/loader/filesystem/1
+removed directive                             directive="LoadConfigConstructorByID<config-id=controllerbus/example/boilerplate/1>"
+added directive                               directive="ExecController<config-id=controllerbus/bus/api/1>"
+executing controller                          config-key=boilerplate-example-0 controller=controllerbus/configset/1
+added directive                               directive="LoadControllerWithConfig<config-id=controllerbus/example/boilerplate/1>"
+added directive                               directive="ExecController<config-id=controllerbus/example/boilerplate/1>"
+starting controller                           controller=controllerbus/bus/api/1
+grpc api listening on: :5110                 
+starting controller                           controller=controllerbus/example/boilerplate/1
+hello from boilerplate controller 1: hello world  controller=controllerbus/example/boilerplate/1
+controller exited normally                    controller=controllerbus/example/boilerplate/1 exec-time="136.268µs"
+```
+
+### ConfigSet
+
+**ConfigSet** is a key/value set of controller configurations to load.
+
+The following is an example ConfigSet in YAML format for a program:
+
+```yaml
+example-1:
+  # configuration object
+  config:
+    exampleField: "Hello world 1!"
+  # ID of the configuration type
+  id: controllerbus/example/boilerplate/1
+  # revision # for overriding previous configs
+  revision: 1
+```
+
+In this case, `example-1` is the ID of the controller. If multiple ConfigSet are
+applied with the same ID, the latest revision wins. The ConfigSet controller
+will automatically start and stop controllers as ConfigSets are changed.
 
 ## Overview
 
