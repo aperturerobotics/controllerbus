@@ -236,6 +236,34 @@ which are intended to be copied to other projects, which reference the core
 This provides logging, context cancelation. A single Factory is attached which
 provides support for the Config type, (see the boilerplate example).
 
+## Hot Loading
+
+There is a [hot loading plugin](./hot) system for dynamically loading libraries
+of controller factories, with an associated AST analyzer and compiler CLI for
+building the plugin .so files automatically. 
+
+```
+USAGE:
+   controllerbus hot compile - compile packages specified as arguments once
+
+OPTIONS:
+   --build-prefix value           prefix to prepend to import paths, generated on default [$CONTROLLER_BUS_PLUGIN_BUILD_PREFIX]
+   --codegen-dir value            path to directory to create/use for codegen, if empty uses tmpdir [$CONTROLLER_BUS_CODEGEN_DIR]
+   --output PATH, -o PATH         write the output plugin to PATH - accepts {buildHash} [$CONTROLLER_BUS_OUTPUT]
+   --plugin-binary-id value       binary id for the output plugin [$CONTROLLER_BUS_PLUGIN_BINARY_ID]
+   --plugin-binary-version value  binary version for the output plugin, accepts {buildHash} [$CONTROLLER_BUS_PLUGIN_BINARY_VERSION]
+   --no-cleanup                   disable cleaning up the codegen dirs [$CONTROLLER_BUS_NO_CLEANUP]
+   --help, -h                     show help
+```
+
+The CLI will analyze a list of Go package paths, discover all Factories
+available in the packages, generate a Go module for importing all of the
+factories into a single Plugin, and compile that package to a .so library.
+
+This will most likely be used in the future to automatically bundle the daemon,
+API, and provided packages with controller factories into a daemon similar to
+the [controllerbus cli](./cmd/controllerbus) for an application.
+
 ## Testing
 
 An in-memory Bus can be created for testing, an
