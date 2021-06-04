@@ -159,3 +159,85 @@ supporting statically linked, dynamically linked (plugin), or networked
 (distributed) controller implementations and execution models. In practice, it
 declares a common format for controller configuration, construction, and
 execution in Go projects.
+
+## Daemon and API
+
+The [example daemon](./cmd/controllerbus) is an associated client and CLI for
+the [Bus GRPC API](./bus/api), for example:
+
+```sh
+$ controllerbus client exec -f controllerbus_daemon.yaml 
+```
+
+```json
+  {
+    "controllerInfo": {
+      "version": "0.0.1",
+      "id": "controllerbus/example/boilerplate/1"
+    },
+    "status": "ControllerStatus_RUNNING",
+    "id": "boilerplate-example-0"
+  }
+```
+
+The bus service has the following API:
+
+```protobuf
+// ControllerBusService is a generic controller bus lookup api.
+service ControllerBusService {
+  // GetBusInfo requests information about the controller bus.
+  rpc GetBusInfo(GetBusInfoRequest) returns (GetBusInfoResponse) {}
+  // ExecController executes a controller configuration on the bus.
+  rpc ExecController(controller.exec.ExecControllerRequest) returns (stream controller.exec.ExecControllerResponse) {}
+}
+```
+
+The GRPC API is itself implemented as a controller, which can be configured:
+
+```yaml
+grpc-api:
+  config:
+    listenAddr: ":5000"
+    busApiConfig:
+      enableExecController: true
+  id: controllerbus/bus/api/1
+  revision: 1
+```
+
+For security, the default value of `enableExecController` is `false` to disallow
+executing controllers via the API.
+
+The structure under `cmd/controllerbus` and `example/boilerplate` are examples
+which are intended to be copied to other projects, which reference the core
+`controllerbus` controllers. A minimal program is as follows:
+
+```go
+	ctx := context.Background()
+	log := logrus.New()
+	log.SetLevel(logrus.DebugLevel)
+	le := logrus.NewEntry(log)
+
+	b, sr, err := core.NewCoreBus(ctx, le)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+	sr.AddFactory(NewFactory(b))
+
+	execDir := resolver.NewLoadControllerWithConfig(&Config{
+		ExampleField: "testing",
+	})
+	_, ctrlRef, err := bus.ExecOneOff(ctx, b, execDir, nil)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+	defer ctrlRef.Release()
+```
+
+This provides logging, context cancelation. A single Factory is attached which
+provides support for the Config type, (see the boilerplate example).
+
+## Testing
+
+An in-memory Bus can be created for testing, an
+[example](./example/boilerplate/controller/controller_test.go) is provided in
+the boilerplate package.
