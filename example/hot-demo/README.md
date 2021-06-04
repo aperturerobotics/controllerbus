@@ -1,5 +1,7 @@
 # Hot Loader Demo
 
+[![asciicast](https://asciinema.org/a/418277.svg)](https://asciinema.org/a/418277)
+
 You can run this with `go run main.go`:
 
  - Runs the module-compiler on the boilerplate, demo, and CLI controllers.
