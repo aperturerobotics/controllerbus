@@ -32,6 +32,16 @@ type CompilerArgs struct {
 	NoCleanup bool
 }
 
+// BuildDevtoolCommand returns the devtool sub-command set.
+func (a *CompilerArgs) BuildDevtoolCommand() cli.Command {
+	return cli.Command{
+		Name:        "plugin",
+		Usage:       "plugin compiler utilities",
+		Flags:       a.BuildFlags(),
+		Subcommands: a.BuildSubCommands(),
+	}
+}
+
 // BuildFlags attaches the flags to a flag set.
 func (a *CompilerArgs) BuildFlags() []cli.Flag {
 	return []cli.Flag{
