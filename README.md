@@ -1,13 +1,12 @@
 # Controller Bus
 
-> Declarative configuration for concurrently executing controllers.
+> Modular Go application framework with concurrent control loops.
 
 ## Introduction
 
 [![asciicast](https://asciinema.org/a/418275.svg)](https://asciinema.org/a/418275)
 
-Controller Bus is a framework for declarative configuration, dynamic linking,
-and separation of concerns between application components. 
+ControllerBus is a framework for modular Go applications.
 
 Applications are built with concurrently executing Controllers that communicate
 over a shared bus (either in-memory or **networked** with IPC) using Directive
