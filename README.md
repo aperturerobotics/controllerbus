@@ -72,25 +72,22 @@ go build -v
 This will load `controllerbus_daemon.yaml` and execute the boilerplate demo:
 
 ```
-added directive                               directive="LoadControllerWithConfig<config-id=controllerbus/hot/loader/filesystem/1>"
 added directive                               directive="LoadControllerWithConfig<config-id=controllerbus/configset/1>"
 added directive                               directive="ExecController<config-id=controllerbus/configset/1>"
-added directive                               directive="ExecController<config-id=controllerbus/hot/loader/filesystem/1>"
 added directive                               directive="LoadConfigConstructorByID<config-id=controllerbus/example/boilerplate/1>"
 starting controller                           controller=controllerbus/configset/1
 added directive                               directive="ApplyConfigSet<controller-keys=boilerplate-example-0@1>"
 added directive                               directive="LoadControllerWithConfig<config-id=controllerbus/bus/api/1>"
-starting controller                           controller=controllerbus/hot/loader/filesystem/1
 removed directive                             directive="LoadConfigConstructorByID<config-id=controllerbus/example/boilerplate/1>"
 added directive                               directive="ExecController<config-id=controllerbus/bus/api/1>"
 executing controller                          config-key=boilerplate-example-0 controller=controllerbus/configset/1
-added directive                               directive="LoadControllerWithConfig<config-id=controllerbus/example/boilerplate/1>"
-added directive                               directive="ExecController<config-id=controllerbus/example/boilerplate/1>"
 starting controller                           controller=controllerbus/bus/api/1
 grpc api listening on: :5110                 
+added directive                               directive="LoadControllerWithConfig<config-id=controllerbus/example/boilerplate/1>"
+added directive                               directive="ExecController<config-id=controllerbus/example/boilerplate/1>"
 starting controller                           controller=controllerbus/example/boilerplate/1
 hello from boilerplate controller 1: hello world  controller=controllerbus/example/boilerplate/1
-controller exited normally                    controller=controllerbus/example/boilerplate/1 exec-time="136.268µs"
+controller exited normally                    controller=controllerbus/example/boilerplate/1 exec-time="31.053µs"
 ```
 
 ### ConfigSet
@@ -236,11 +233,12 @@ which are intended to be copied to other projects, which reference the core
 This provides logging, context cancelation. A single Factory is attached which
 provides support for the Config type, (see the boilerplate example).
 
-## Hot Loading
+## Plugins
 
-There is a [hot loading plugin](./hot) system for dynamically loading libraries
-of controller factories, with an associated AST analyzer and compiler CLI for
-building the plugin .so files automatically. 
+The [plugin](./plugin) system and compiler scans a set of Go packages for
+ControllerBus factories and bundles them together into a hashed Plugin bundle.
+The compiler CLI can watch code files for changes and re-build automatically.
+Multiple plugin loaders and binary formats are supported.
 
 ```
 USAGE:
@@ -260,9 +258,11 @@ The CLI will analyze a list of Go package paths, discover all Factories
 available in the packages, generate a Go module for importing all of the
 factories into a single Plugin, and compile that package to a .so library.
 
-This will most likely be used in the future to automatically bundle the daemon,
-API, and provided packages with controller factories into a daemon similar to
-the [controllerbus cli](./cmd/controllerbus) for an application.
+## Daemon and Client CLIs
+
+Plugins can be bundled together with a set of root configurations into a CLI.
+This can be used to bundle modules into a daemon and/or client for an
+application - similar to the [controllerbus cli](./cmd/controllerbus).
 
 ## Testing
 

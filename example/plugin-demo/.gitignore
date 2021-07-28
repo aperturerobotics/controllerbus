@@ -1,0 +1,7 @@
+compile-module
+plugin-demo
+plugin-demo.cbus.so
+codegen-main.go
+codegen-module
+plugins/
+output/

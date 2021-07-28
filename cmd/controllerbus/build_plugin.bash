@@ -11,6 +11,5 @@ mkdir -p ./plugins
 go run -v \
    -trimpath \
    github.com/aperturerobotics/controllerbus/cmd/controllerbus -- \
-   hot compile \
+   plugin compile \
   "github.com/aperturerobotics/controllerbus/example/boilerplate/controller"
-rm -r ./codegen-module || true

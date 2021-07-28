@@ -15,7 +15,6 @@ import (
 	"github.com/aperturerobotics/controllerbus/controller/resolver"
 	"github.com/aperturerobotics/controllerbus/core"
 	"github.com/aperturerobotics/controllerbus/example/boilerplate/controller"
-	hot_loader_filesystem "github.com/aperturerobotics/controllerbus/hot/loader/filesystem"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
@@ -23,17 +22,9 @@ import (
 
 var daemonFlags cbcli.DaemonArgs
 
-var pluginDir string
-
 func init() {
 	var dflags []cli.Flag
 	dflags = append(dflags, (&daemonFlags).BuildFlags()...)
-	dflags = append(dflags, &cli.StringFlag{
-		Name:        "hot-load-dir",
-		Usage:       "directory to hot-load plugins from, default `DIR`",
-		Value:       "./plugins",
-		Destination: &pluginDir,
-	})
 	commands = append(
 		commands,
 		cli.Command{
@@ -57,22 +48,8 @@ func runDaemon(c *cli.Context) error {
 	if err != nil {
 		return err
 	}
-	sr.AddFactory(hot_loader_filesystem.NewFactory(b))
 	sr.AddFactory(api_controller.NewFactory(b))
 	sr.AddFactory(boilerplate_controller.NewFactory(b))
-
-	// Construct hot loader
-	_, hlRef, err := b.AddDirective(
-		resolver.NewLoadControllerWithConfig(&hot_loader_filesystem.Config{
-			Dir:   pluginDir,
-			Watch: true,
-		}),
-		nil,
-	)
-	if err != nil {
-		return errors.Wrap(err, "construct hot loading controller")
-	}
-	defer hlRef.Release()
 
 	// ConfigSet controller
 	_, csRef, err := b.AddDirective(
