@@ -1,4 +1,5 @@
-//+build linux
+// +build linux
+// +build !js
 
 package core
 
