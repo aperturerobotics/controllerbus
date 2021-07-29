@@ -1,4 +1,4 @@
-package hot_compiler
+package plugin_compiler
 
 import (
 	"context"
