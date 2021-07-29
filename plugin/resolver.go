@@ -84,7 +84,7 @@ func (r *Resolver) GetFactoryMatchingConfig(
 	ctx context.Context, c config.Config,
 ) (controller.Factory, error) {
 	tfac, err := r.staticResolver.GetFactoryMatchingConfig(ctx, c)
-	if err != nil {
+	if err != nil || tfac == nil {
 		return tfac, err
 	}
 

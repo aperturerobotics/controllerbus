@@ -146,7 +146,7 @@ func run(ctx context.Context, le *logrus.Entry) error {
 	}
 	sr.AddFactory(plugin_shared.NewFactory(bus))
 
-	le.Warn("You will most likely see an error, see: https://github.com/golang/go/issues/27751")
+	le.Warn("If you see an error, run with -trimpath, see: https://github.com/golang/go/issues/27751")
 	_, _, loaderRef, err := loader.WaitExecControllerRunning(
 		ctx,
 		bus,
