@@ -1,6 +1,6 @@
 module github.com/aperturerobotics/controllerbus/example/plugin-demo
 
-go 1.14
+go 1.16
 
 replace github.com/aperturerobotics/controllerbus => ../..
 

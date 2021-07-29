@@ -1,6 +1,6 @@
 module github.com/aperturerobotics/controllerbus
 
-go 1.15
+go 1.16
 
 // aperture: use protobuf 1.3.x based fork for compatibility
 replace (
