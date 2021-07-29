@@ -2,8 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
-	"io/ioutil"
 	"os"
 	"os/signal"
 	"path/filepath"
@@ -83,58 +81,11 @@ func run(ctx context.Context, le *logrus.Entry) error {
 		return err
 	}
 
-	packagesLookupPath, _ := os.Getwd()
-	buildPrefix := "cbus-plugin-abcdef"
-	moduleCompiler, err := plugin_compiler.NewModuleCompiler(
-		ctx,
-		le,
-		buildPrefix,
-		codegenDirPath,
-		"hot-demo-module",
-	)
-	if err != nil {
-		return err
-	}
-	analysis, err := plugin_compiler.AnalyzePackages(ctx, le, packagesLookupPath, packagesList)
-	if err != nil {
-		return err
-	}
-	pluginBinaryVersion := buildPrefix
-	if err := moduleCompiler.GenerateModules(analysis, pluginBinaryVersion); err != nil {
-		return err
-	}
+	outPluginsPath := "./output"
+	outPluginPath := filepath.Join(outPluginsPath, "demo-plugin.{buildHash}.cbus.so")
 
-	outCliPath := filepath.Join(
-		codegenDirPath,
-		buildPrefix,
-		"github.com/aperturerobotics/controllerbus/cmd/controllerbus",
-	)
-	outPluginsPath := filepath.Join(outCliPath, "plugins")
-	if err := os.MkdirAll(outPluginsPath, 0755); err != nil {
-		return err
-	}
-	outPath := filepath.Join(outPluginsPath, fmt.Sprintf("example.%s.cbus.so", buildPrefix))
-	if err := moduleCompiler.CompilePlugin(outPath); err != nil {
-		return err
-	}
-
-	relToTarget, err := filepath.Rel(packagesLookupPath, filepath.Join(outPluginsPath, ".."))
-	if err != nil {
-		return err
-	}
-
-	le.Infof("package compiled, starting: %s", relToTarget)
-
-	// write the config file
-	outConfigPath := filepath.Join(outCliPath, "config.yaml")
-	if err := ioutil.WriteFile(outConfigPath, []byte(configSetYaml), 0755); err != nil {
-		return err
-	}
-
-	ecmd := plugin_compiler.ExecGoTidyModules()
-	ecmd.Dir = outCliPath
-	le.Debugf("running go mod tidy: %s", ecmd.String())
-	err = ecmd.Run()
+	// compile the plugin with the packages listed
+	err = plugin_compiler.BuildPlugin(ctx, le, "./", outPluginPath, packagesList)
 	if err != nil {
 		return err
 	}

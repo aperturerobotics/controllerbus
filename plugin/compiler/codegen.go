@@ -3,14 +3,19 @@ package hot_compiler
 import (
 	"bytes"
 	"context"
+	"crypto/sha256"
 	"fmt"
 	gast "go/ast"
 	"go/format"
 	"go/token"
 	"go/types"
+	"os"
+	"path"
+	"path/filepath"
 	"sort"
 
 	"github.com/aperturerobotics/controllerbus/plugin"
+	b58 "github.com/mr-tron/base58/base58"
 	"github.com/sirupsen/logrus"
 )
 
@@ -283,4 +288,78 @@ func CodegenPluginWrapperFromAnalysis(
 		Package: 5, // Force after build tag.
 		Decls:   allDecls,
 	}, nil
+}
+
+// BuildPlugin builds a plugin using a temporary code-gen path.
+//
+// Automates the end-to-end build process with reasonable defaults.
+func BuildPlugin(ctx context.Context, le *logrus.Entry, packageSearchPath, outputPath string, packages []string) error {
+	var err error
+	packageSearchPath, err = filepath.Abs(packageSearchPath)
+	if err != nil {
+		return err
+	}
+
+	le.Infof("analyzing %d packages for plugin", len(packages))
+	an, err := AnalyzePackages(ctx, le, packageSearchPath, packages)
+	if err != nil {
+		return err
+	}
+
+	// deterministic prefix gen
+	var buildUid string
+	{
+		hs := sha256.New()
+		for _, p := range packages {
+			_, _ = hs.Write([]byte(p))
+		}
+		buildUid = b58.Encode(hs.Sum(nil))
+	}
+
+	// cannot use /tmp for this, need ~/.cache dir
+	// c.CodegenDir, err = ioutil.TempDir("", "cbus-codegen")
+	userCacheDir, err := os.UserCacheDir()
+	if err != nil {
+		return err
+	}
+	codegenDir := filepath.Join(userCacheDir, "cbus-codegen-"+buildUid)
+	le.Debugf("created tmpdir for code-gen process: %s", codegenDir)
+
+	codegenDir, err = filepath.Abs(codegenDir)
+	if err != nil {
+		return err
+	}
+
+	// remove codegen dir on exit
+	defer func() {
+		_ = os.RemoveAll(codegenDir)
+	}()
+	if err := os.MkdirAll(codegenDir, 0755); err != nil {
+		return err
+	}
+
+	buildPrefix := "cbus-plugin-" + (buildUid[:8])
+	pluginBinaryID := buildPrefix
+	le.
+		WithField("build-prefix", buildPrefix).
+		Infof("creating compiler for plugin with packages: %v", packages)
+	mc, err := NewModuleCompiler(ctx, le, buildPrefix, codegenDir, pluginBinaryID)
+	if err != nil {
+		return err
+	}
+
+	pluginBinaryVersion := buildPrefix + "-{buildHash}"
+	err = mc.GenerateModules(an, pluginBinaryVersion)
+	if err != nil {
+		return err
+	}
+
+	outputPath, err = filepath.Abs(outputPath)
+	if err == nil {
+		err = os.MkdirAll(path.Dir(outputPath), 0755)
+	}
+	if err != nil {
+		return err
+	}
+	return mc.CompilePlugin(outputPath)
 }
