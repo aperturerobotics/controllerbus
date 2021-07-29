@@ -12,12 +12,9 @@ go mod tidy
 go run -v \
    -trimpath \
    github.com/aperturerobotics/controllerbus/cmd/controllerbus -- \
-   plugin compile \
+   hot compile \
+  "github.com/aperturerobotics/controllerbus/example/boilerplate/controller" \
   "./demo-controller" \
-  "github.com/pkg/errors"
+  "github.com/pkg/errors" \
+  "github.com/aperturerobotics/controllerbus/cmd/controllerbus"
 
-go run -v \
-   -trimpath \
-   github.com/aperturerobotics/controllerbus/cmd/controllerbus -- \
-   daemon \
-   --hot-load-dir ./output
