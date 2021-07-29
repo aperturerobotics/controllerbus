@@ -15,6 +15,7 @@ import (
 	"path"
 	"path/filepath"
 
+	"github.com/aperturerobotics/controllerbus/util/exec"
 	"github.com/mr-tron/base58/base58"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
@@ -346,10 +347,12 @@ func (m *ModuleCompiler) GenerateModules(analysis *Analysis, pluginBinaryVersion
 			// write the new formatted file to the output
 			pkgCodeOutPath := filepath.Join(factoryPkgCodegenPath, codeFileRelativeToModule)
 			pkgCodeOutDirPath := filepath.Dir(pkgCodeOutPath)
-			m.le.
-				WithField("orig-path", pkgCodeFilePath).
-				WithField("target-path", pkgCodeOutPath).
-				Debug("formatting code file")
+			/*
+				m.le.
+					WithField("orig-path", pkgCodeFilePath).
+					WithField("target-path", pkgCodeOutPath).
+					Debug("formatting code file")
+			*/
 			outData, err := formatCodeFile(pkgCodeFile)
 			if err != nil {
 				return err
@@ -454,7 +457,7 @@ func (m *ModuleCompiler) CompilePlugin(outFile string) error {
 	defer os.RemoveAll(tmpName)
 
 	// go 1.16: to generate go.sum files, it's now necessary to run this explicitly
-	ecmd := ExecGoTidyModules()
+	ecmd := exec.ExecGoTidyModules()
 	ecmd.Dir = pluginDirAbs
 	le.
 		WithField("work-dir", ecmd.Dir).
@@ -464,7 +467,7 @@ func (m *ModuleCompiler) CompilePlugin(outFile string) error {
 	}
 
 	// start the go compiler execution
-	ecmd = ExecGoCompiler(
+	ecmd = exec.ExecGoCompiler(
 		"build", "-v", "-trimpath",
 		"-buildmode=plugin",
 		"-tags",

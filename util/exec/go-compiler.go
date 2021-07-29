@@ -1,22 +1,16 @@
-package plugin_compiler
+package exec
 
 import (
-	"os"
 	"os/exec"
 )
 
 // ExecGoCompiler runs the Go compiler with a given command.
 func ExecGoCompiler(args ...string) *exec.Cmd {
-	ecmd := exec.Command("go", args...)
-	ecmd.Dir, _ = os.Getwd()
-	ecmd.Env = make([]string, len(os.Environ()))
-	copy(ecmd.Env, os.Environ())
+	ecmd := NewCmd("go", args...)
 	ecmd.Env = append(
 		ecmd.Env,
 		"GO111MODULE=on",
 	)
-	ecmd.Stderr = os.Stderr
-	ecmd.Stdout = os.Stdout
 	return ecmd
 }
 

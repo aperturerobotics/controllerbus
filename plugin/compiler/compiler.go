@@ -10,6 +10,7 @@ import (
 	"path"
 	"strings"
 
+	"github.com/aperturerobotics/controllerbus/util/exec"
 	b58 "github.com/mr-tron/base58/base58"
 	"github.com/sirupsen/logrus"
 )
@@ -54,7 +55,7 @@ func CompilePluginFromFile(
 	// second time with the plugin path including the hash.
 
 	// go 1.16: to generate go.sum files, it's now necessary to run this explicitly
-	ecmd := ExecGoTidyModules()
+	ecmd := exec.ExecGoTidyModules()
 	le.
 		WithField("work-dir", ecmd.Dir).
 		Debugf("running go mod tidy: %s", ecmd.String())
@@ -64,7 +65,7 @@ func CompilePluginFromFile(
 
 	// start the go compiler excecution #1
 	intermediateOutFile1 := path.Join(tmpName, "pass-1.cbus.so")
-	ecmd = ExecGoCompiler(
+	ecmd = exec.ExecGoCompiler(
 		"build", "-v",
 		"-buildmode=plugin",
 		"-tags",
@@ -112,7 +113,7 @@ func CompilePluginFromFile(
 
 	// start the go compiler execution #2
 	intermediateOutFile2 := path.Join(tmpName, "pass-2.cbus.so")
-	ecmd = ExecGoCompiler(
+	ecmd = exec.ExecGoCompiler(
 		"build", "-v", "-trimpath",
 		"-buildmode=plugin",
 		"-tags",
