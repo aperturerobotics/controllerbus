@@ -1,13 +1,8 @@
 # Plugin Demo
 
-[![asciicast](https://asciinema.org/a/418277.svg)](https://asciinema.org/a/418277)
+[![asciicast](https://asciinema.org/a/I4LOCViLwzRlztYc1rytgAxWp.svg)](https://asciinema.org/a/I4LOCViLwzRlztYc1rytgAxWp)
 
 ## Demo
-
-Note: Go plugins do not support unloading, and have other limitations at the
-moment, see: https://github.com/golang/go/issues/27751
-
-[![asciicast](https://asciinema.org/a/418277.svg)](https://asciinema.org/a/418277)
 
 You can run this with `go run -v -trimpath ./` in this directory:
 
