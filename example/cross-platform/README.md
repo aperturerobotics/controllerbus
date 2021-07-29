@@ -17,7 +17,6 @@ go run ./
 Build the WebAssembly payload and run the server:
 
 ```sh
-./build.bash
 ./wasm.bash
 ```
 
