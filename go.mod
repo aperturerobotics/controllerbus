@@ -12,7 +12,7 @@ replace (
 require (
 	github.com/blang/semver v3.5.1+incompatible
 	github.com/cenkalti/backoff v1.1.1-0.20190506075156-2146c9339422
-	github.com/fsnotify/fsnotify v1.4.9
+	github.com/fsnotify/fsnotify v1.5.0
 	github.com/ghodss/yaml v1.0.0
 	github.com/golang/protobuf v1.4.2
 	github.com/kr/pretty v0.2.0 // indirect
@@ -24,7 +24,6 @@ require (
 	github.com/stretchr/testify v1.7.0 // indirect
 	github.com/urfave/cli v1.22.5
 	golang.org/x/mod v0.4.2
-	golang.org/x/sys v0.0.0-20210423185535-09eb48e85fd7 // indirect
 	golang.org/x/text v0.3.7-0.20210411120140-c2d28a6ddf6c // indirect
 	golang.org/x/tools v0.1.1-0.20210423211518-f74a6698e3f9
 	google.golang.org/grpc v1.30.0
