@@ -6,11 +6,13 @@ Features:
 
  - Scan packages for ControllerBus factories to include
  - Automatically codegen and compile modules for all targets
- - Load + resolve controllerbus controllers from bundles
  - Full support for Go modules and module replacements
  - Manifest of all currently loaded plugins
  - Detect Go module code changes and hot-reload
  - Multiple bundling and plugin loading approaches
+
+Using the IPC system, a plugin can also be loaded as a sub-process communicating
+over stdin/stdout (or named pipes on Windows).
  
 ## Codegen Output Example
 
