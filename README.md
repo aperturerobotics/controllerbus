@@ -2,8 +2,6 @@
 
 ## Introduction
 
-[![asciicast](https://asciinema.org/a/418275.svg)](https://asciinema.org/a/418275)
-
 ControllerBus is a framework for Go applications using modular components which
 communicate over a shared bus with "Directives" to other controllers. Directives
 can be de-duplicated to share a single instance (& result) of a task.
@@ -44,6 +42,8 @@ declares a common format for controller configuration, construction, and
 execution in Go projects.
 
 ## Examples
+
+[![asciicast](https://asciinema.org/a/418275.svg)](https://asciinema.org/a/418275)
 
 The [boilerplate](./example/boilerplate/controller/config.proto) example has the
 following configuration proto:
