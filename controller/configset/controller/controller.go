@@ -118,7 +118,7 @@ func (c *Controller) GetControllerInfo() controller.Info {
 	return controller.NewInfo(
 		ControllerID,
 		Version,
-		"configset actuation controller",
+		"configset controller",
 	)
 }
 

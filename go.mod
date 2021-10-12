@@ -24,8 +24,8 @@ require (
 	github.com/stretchr/testify v1.7.0 // indirect
 	github.com/urfave/cli v1.22.5
 	golang.org/x/mod v0.4.2
-	golang.org/x/text v0.3.7-0.20210411120140-c2d28a6ddf6c // indirect
-	golang.org/x/tools v0.1.1-0.20210423211518-f74a6698e3f9
+	golang.org/x/text v0.3.7 // indirect
+	golang.org/x/tools v0.1.7
 	google.golang.org/grpc v1.30.0
-	mvdan.cc/gofumpt v0.1.1-0.20210401090014-0952458e3d6b
+	mvdan.cc/gofumpt v0.1.1-0.20210908155448-1727efedc3ad
 )

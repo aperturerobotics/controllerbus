@@ -150,7 +150,10 @@ func (c *runningController) GetControllerConfig() configset.ControllerConfig {
 
 // GetState returns the current state object.
 func (c *runningController) GetState() configset.State {
-	return nil
+	c.mtx.Lock()
+	st := c.state
+	c.mtx.Unlock()
+	return &st
 }
 
 // AddReference adds a reference to the running controller.
