@@ -12,6 +12,30 @@ import (
 	"github.com/aperturerobotics/controllerbus/directive"
 )
 
+// ExecControllerYAMLFromConfigSet converts a config set to a ExecControllerRequest w/ YAML.
+func ExecControllerYAMLFromConfigSet(cs configset.ConfigSet) (*ExecControllerRequest, error) {
+	// encode to yaml
+	dat, err := configset_json.MarshalYAML(cs)
+	if err != nil {
+		return nil, err
+	}
+	return &ExecControllerRequest{
+		ConfigSetYaml: string(dat),
+	}, nil
+}
+
+// ExecControllerProtoFromConfigSet converts a config set to a ExecControllerRequest w/ proto.
+func ExecControllerProtoFromConfigSet(cs configset.ConfigSet) (*ExecControllerRequest, error) {
+	// encode to proto
+	pcs, err := configset_proto.NewConfigSet(cs)
+	if err != nil {
+		return nil, err
+	}
+	return &ExecControllerRequest{
+		ConfigSet: pcs,
+	}, nil
+}
+
 // Execute executes the request to apply a config set.
 // Cb should not hold ExecControllerResponse after returning.
 func (r *ExecControllerRequest) Execute(
