@@ -20,6 +20,8 @@ var Version = semver.MustParse("0.0.1")
 type BusBridge struct {
 	// target is the target bus
 	target bus.Bus
+	// filterFn is the filter function
+	filterFn FilterFn
 
 	// mtx guards below fields
 	mtx sync.Mutex
@@ -27,11 +29,15 @@ type BusBridge struct {
 	seenDi map[directive.Directive]struct{}
 }
 
+// FilterFn filters directive instances for the bus bridge.
+type FilterFn = func(di directive.Instance) (bool, error)
+
 // NewBusBridge constructs a new bus bridge.
-func NewBusBridge(target bus.Bus) *BusBridge {
+func NewBusBridge(target bus.Bus, filterFn FilterFn) *BusBridge {
 	return &BusBridge{
-		target: target,
-		seenDi: make(map[directive.Directive]struct{}),
+		target:   target,
+		filterFn: filterFn,
+		seenDi:   make(map[directive.Directive]struct{}),
 	}
 }
 
@@ -55,6 +61,13 @@ func (b *BusBridge) Execute(ctx context.Context) error {
 func (b *BusBridge) HandleDirective(ctx context.Context, di directive.Instance) (directive.Resolver, error) {
 	if b.target == nil {
 		return nil, nil
+	}
+
+	if b.filterFn != nil {
+		process, err := b.filterFn(di)
+		if err != nil || !process {
+			return nil, err
+		}
 	}
 
 	dir := di.GetDirective()
