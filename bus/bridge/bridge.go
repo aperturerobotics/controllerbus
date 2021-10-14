@@ -2,6 +2,7 @@ package bus_bridge
 
 import (
 	"context"
+	"sync"
 
 	"github.com/aperturerobotics/controllerbus/bus"
 	"github.com/aperturerobotics/controllerbus/controller"
@@ -19,12 +20,18 @@ var Version = semver.MustParse("0.0.1")
 type BusBridge struct {
 	// target is the target bus
 	target bus.Bus
+
+	// mtx guards below fields
+	mtx sync.Mutex
+	// seenDi is the list of seen ongoing directive instances
+	seenDi map[directive.Directive]struct{}
 }
 
 // NewBusBridge constructs a new bus bridge.
 func NewBusBridge(target bus.Bus) *BusBridge {
 	return &BusBridge{
 		target: target,
+		seenDi: make(map[directive.Directive]struct{}),
 	}
 }
 
@@ -50,7 +57,28 @@ func (b *BusBridge) HandleDirective(ctx context.Context, di directive.Instance) 
 		return nil, nil
 	}
 
-	return NewBusBridgeResolver(b.target, di.GetDirective()), nil
+	dir := di.GetDirective()
+	b.mtx.Lock()
+	_, seen := b.seenDi[dir]
+	if !seen {
+		b.seenDi[dir] = struct{}{}
+	}
+	b.mtx.Unlock()
+
+	// avoid infinite loop
+	if seen {
+		return nil, nil
+	}
+
+	// add callback to remove when necessary
+	// use separate goroutine to avoid mutex contention
+	go di.AddDisposeCallback(func() {
+		b.mtx.Lock()
+		delete(b.seenDi, dir)
+		b.mtx.Unlock()
+	})
+
+	return NewBusBridgeResolver(b.target, dir), nil
 }
 
 // Close releases any resources used by the controller.
