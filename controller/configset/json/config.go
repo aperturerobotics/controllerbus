@@ -20,6 +20,16 @@ type Config struct {
 	underlying       config.Config
 }
 
+// NewConfig constructs a new Config for JSON marshaling.
+func NewConfig(c config.Config) *Config {
+	return &Config{underlying: c}
+}
+
+// NewConfigWithJSON returns a Config object for JSON parsing.
+func NewConfigWithJSON(data string) *Config {
+	return &Config{pendingParseData: data}
+}
+
 // Resolve constructs the underlying config from the pending parse data.
 func (c *Config) Resolve(ctx context.Context, configID string, b bus.Bus) error {
 	configCtorDir := resolver.NewLoadConfigConstructorByID(configID)
