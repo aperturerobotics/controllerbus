@@ -1,8 +1,10 @@
 package resolver
 
 import (
+	"context"
 	"errors"
 
+	"github.com/aperturerobotics/controllerbus/bus"
 	"github.com/aperturerobotics/controllerbus/config"
 	"github.com/aperturerobotics/controllerbus/controller"
 	"github.com/aperturerobotics/controllerbus/directive"
@@ -23,6 +25,25 @@ type LoadFactoryByConfig interface {
 
 // LoadFactoryByConfigValue is the value type for LoadFactoryByConfig.
 type LoadFactoryByConfigValue = controller.Factory
+
+// ExLoadFactoryByConfig executes the LoadFactoryByConfig directive.
+// the directive should be released after the Factory is no longer needed.
+func ExLoadFactoryByConfig(
+	ctx context.Context,
+	b bus.Bus,
+	conf config.Config,
+) (controller.Factory, directive.Reference, error) {
+	av, avRef, err := bus.ExecOneOff(ctx, b, NewLoadFactoryByConfig(conf), nil)
+	if err != nil {
+		return nil, nil, err
+	}
+	v, vOk := av.GetValue().(controller.Factory)
+	if !vOk {
+		avRef.Release()
+		return nil, nil, errors.New("load factory by config returned unexpected type")
+	}
+	return v, avRef, nil
+}
 
 // loadFactoryByConfig is an LoadFactoryByConfig directive.
 type loadFactoryByConfig struct {
