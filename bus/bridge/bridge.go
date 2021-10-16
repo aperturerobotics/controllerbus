@@ -41,6 +41,12 @@ func NewBusBridge(target bus.Bus, filterFn FilterFn) *BusBridge {
 	}
 }
 
+// SetDirectiveBridgeTarget sets the target bus.
+// must be called before HandleDirective and Execute (just after construct).
+func (b *BusBridge) SetDirectiveBridgeTarget(target bus.Bus) {
+	b.target = target
+}
+
 // GetControllerInfo returns information about the controller.
 func (b *BusBridge) GetControllerInfo() controller.Info {
 	return controller.NewInfo(ControllerID, Version, "forwards directives to bus")
