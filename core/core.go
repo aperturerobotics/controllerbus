@@ -13,14 +13,52 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+// FactoryResolverCtor constructs a Factory resolver.
+type FactoryResolverCtor func(b bus.Bus, sr *static.Resolver) (controller.FactoryResolver, error)
+
+// CoreBusConfig configures NewCoreBus.
+type CoreBusConfig struct {
+	// FactoryResolver overrides the static resolver.
+	FactoryResolverCtor FactoryResolverCtor
+	// BuiltInFactories is the list of built in controller factories.
+	BuiltInFactories []controller.Factory
+}
+
+// Option is a core config option.
+type Option func(c *CoreBusConfig) error
+
+// WithControllerFactories adds built-in factories.
+func WithControllerFactories(factories ...controller.Factory) Option {
+	return func(c *CoreBusConfig) error {
+		c.BuiltInFactories = append(c.BuiltInFactories, factories...)
+		return nil
+	}
+}
+
+// WithFactoryResolverCtor sets the Factory resolver constructor.
+func WithFactoryResolverCtor(ctor FactoryResolverCtor) Option {
+	return func(c *CoreBusConfig) error {
+		c.FactoryResolverCtor = ctor
+		return nil
+	}
+}
+
 // NewCoreBus constructs a standard in-memory bus stack.
 func NewCoreBus(
 	ctx context.Context,
 	le *logrus.Entry,
-	builtInFactories ...controller.Factory,
+	opts ...Option,
 ) (bus.Bus, *static.Resolver, error) {
 	dc := cdc.NewDirectiveController(ctx, le)
 	b := inmem.NewBus(dc)
+
+	// Process options
+	conf := &CoreBusConfig{}
+	for _, opt := range opts {
+		if err := opt(conf); err != nil {
+			return nil, nil, err
+		}
+	}
 
 	// Loader controller constructs and executes controllers
 	cl, err := loader.NewController(le, b)
@@ -32,13 +70,22 @@ func NewCoreBus(
 	go b.ExecuteController(ctx, cl)
 
 	// If there are any built in factories append them.
-	sr := static.NewResolver(builtInFactories...)
+	sr := static.NewResolver(conf.BuiltInFactories...)
+	sr.AddFactory(configset_controller.NewFactory(b))
+
+	// Add a custom factory resolver wrapper if configured.
+	var fres controller.FactoryResolver = sr
+	if fctor := conf.FactoryResolverCtor; fctor != nil {
+		fres, err = fctor(b, sr)
+		if err != nil {
+			return nil, nil, err
+		}
+	}
+
 	go b.ExecuteController(
 		ctx,
-		resolver.NewController(le, b, sr),
+		resolver.NewController(le, b, fres),
 	)
 
-	sr.AddFactory(configset_controller.NewFactory(b))
-	addNativeFactories(b, sr)
 	return b, sr, nil
 }
