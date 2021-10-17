@@ -42,7 +42,7 @@ func (r *BusBridgeResolver) Resolve(ctx context.Context, handler directive.Resol
 		bus.NewCallbackHandler(
 			func(av directive.AttachedValue) {
 				// value added
-				id, accepted := handler.AddValue(av)
+				id, accepted := handler.AddValue(av.GetValue())
 				if accepted {
 					parentID := av.GetValueID()
 					mtx.Lock()
