@@ -38,13 +38,22 @@ func (c *Controller) resolveLoadControllerWithConfig(
 // When the context is canceled valCh will not be drained anymore.
 func (r *loadWithConfigResolver) Resolve(ctx context.Context, vh directive.ResolverHandler) error {
 	conf := r.dir.GetDesiredControllerConfig()
+	var factoryRef directive.Reference
 	factory, err := r.res.GetFactoryMatchingConfig(ctx, conf)
 	if err != nil {
 		return err
 	}
 
 	if factory == nil {
-		return nil
+		// create a directive to lookup the factory.
+		factory, factoryRef, err = ExLoadFactoryByConfig(ctx, r.bus, conf)
+		if err != nil {
+			return err
+		}
+		if factory == nil {
+			factoryRef.Release()
+			return nil
+		}
 	}
 
 	factoryCtx := context.Background()
@@ -68,6 +77,7 @@ func (r *loadWithConfigResolver) Resolve(ctx context.Context, vh directive.Resol
 		// config has to be invalid for it to have failed here.
 		// give up permanently
 		// return err
+		factoryRef.Release()
 		return nil
 	}
 
@@ -80,6 +90,7 @@ func (r *loadWithConfigResolver) Resolve(ctx context.Context, vh directive.Resol
 		case <-r.c.subCtx.Done():
 		}
 		execRef.Release()
+		factoryRef.Release()
 		valCtxCancel()
 	}()
 
