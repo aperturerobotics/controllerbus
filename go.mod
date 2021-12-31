@@ -21,11 +21,10 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/sergi/go-diff v1.1.0
 	github.com/sirupsen/logrus v1.8.0
-	github.com/stretchr/testify v1.7.0 // indirect
 	github.com/urfave/cli v1.22.5
 	golang.org/x/mod v0.5.1
-	golang.org/x/text v0.3.7 // indirect
 	golang.org/x/tools v0.1.8
 	google.golang.org/grpc v1.30.0
+	gopkg.in/yaml.v2 v2.4.0 // indirect
 	mvdan.cc/gofumpt v0.2.1
 )
