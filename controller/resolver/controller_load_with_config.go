@@ -51,7 +51,9 @@ func (r *loadWithConfigResolver) Resolve(ctx context.Context, vh directive.Resol
 			return err
 		}
 		if factory == nil {
-			factoryRef.Release()
+			if factoryRef != nil {
+				factoryRef.Release()
+			}
 			return nil
 		}
 	}
@@ -77,7 +79,9 @@ func (r *loadWithConfigResolver) Resolve(ctx context.Context, vh directive.Resol
 		// config has to be invalid for it to have failed here.
 		// give up permanently
 		// return err
-		factoryRef.Release()
+		if factoryRef != nil {
+			factoryRef.Release()
+		}
 		return nil
 	}
 
@@ -89,9 +93,11 @@ func (r *loadWithConfigResolver) Resolve(ctx context.Context, vh directive.Resol
 		case <-valCtx.Done():
 		case <-r.c.subCtx.Done():
 		}
-		execRef.Release()
-		factoryRef.Release()
 		valCtxCancel()
+		execRef.Release()
+		if factoryRef != nil {
+			factoryRef.Release()
+		}
 	}()
 
 	return nil
