@@ -120,6 +120,9 @@ func (c *runningController) Execute(ctx context.Context) (rerr error) {
 				break RecheckStateLoop
 			case uval := <-updValCh:
 				c.mtx.Lock()
+				if uerr := uval.GetError(); uerr != nil && uerr != c.state.err {
+					c.le.WithError(err).Warn("controller error")
+				}
 				c.state.ctrl = uval.GetController()
 				c.state.err = uval.GetError()
 				c.state.conf = conf
