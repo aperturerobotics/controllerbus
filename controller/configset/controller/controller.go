@@ -108,6 +108,8 @@ func (c *Controller) HandleDirective(
 	switch d := dir.(type) {
 	case configset.ApplyConfigSet:
 		return c.resolveApplyConfigSet(ctx, di, d), nil
+	case configset.LookupConfigSet:
+		return c.resolveLookupConfigSet(ctx, di, d), nil
 	}
 
 	return nil, nil
@@ -187,6 +189,15 @@ func (c *Controller) resolveApplyConfigSet(
 	dir configset.ApplyConfigSet,
 ) directive.Resolver {
 	return newApplyConfigSetResolver(c, ctx, di, dir)
+}
+
+// resolveLookupConfigSet resolves the LookupConfigSet directive
+func (c *Controller) resolveLookupConfigSet(
+	ctx context.Context,
+	di directive.Instance,
+	dir configset.LookupConfigSet,
+) directive.Resolver {
+	return newLookupConfigSetResolver(c, ctx, di, dir)
 }
 
 // wake wakes the controller
