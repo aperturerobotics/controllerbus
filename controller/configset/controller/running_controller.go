@@ -7,7 +7,6 @@ import (
 	"github.com/aperturerobotics/controllerbus/bus"
 	"github.com/aperturerobotics/controllerbus/controller/configset"
 	"github.com/aperturerobotics/controllerbus/controller/resolver"
-	"github.com/aperturerobotics/controllerbus/directive"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 )
@@ -69,29 +68,9 @@ func (c *runningController) Execute(ctx context.Context) (rerr error) {
 		ctrlConf := conf.GetConfig()
 
 		// execute the controller with the current config
-		valCtx, valCtxCancel := context.WithCancel(ctx)
 		execDir := resolver.NewLoadControllerWithConfig(ctrlConf)
 		c.le.Info("executing controller")
-		updValCh := make(chan resolver.LoadControllerWithConfigValue, 1)
-		_, execRef, err := c.c.bus.AddDirective(execDir, bus.NewCallbackHandler(
-			func(av directive.AttachedValue) {
-				// state was updated
-				updVal, _ := av.GetValue().(resolver.LoadControllerWithConfigValue)
-				if updVal == nil {
-					return
-				}
-				select {
-				case <-updValCh:
-				default:
-				}
-				select {
-				case updValCh <- updVal:
-				default:
-				}
-			},
-			nil, // noop on removed
-			valCtxCancel,
-		))
+		updValCh, execRef, err := bus.ExecOneOffWatchCh(c.c.bus, execDir)
 		if err != nil {
 			if err == context.Canceled {
 				return err
@@ -113,12 +92,18 @@ func (c *runningController) Execute(ctx context.Context) (rerr error) {
 			select {
 			case <-ctx.Done():
 				break RecheckStateLoop
-			case <-valCtx.Done():
-				break RecheckStateLoop
 			case <-c.confRestartCh:
 				c.le.Info("restarting with new config")
 				break RecheckStateLoop
-			case uval := <-updValCh:
+			case aval, avalOk := <-updValCh:
+				if !avalOk {
+					break RecheckStateLoop
+				}
+				uval, ok := aval.GetValue().(resolver.LoadControllerWithConfigValue)
+				if !ok {
+					c.le.Warn("received load controller with config value of unknown type")
+					continue
+				}
 				c.mtx.Lock()
 				uerr := uval.GetError()
 				if uerr != nil && uerr != c.state.err {
@@ -132,7 +117,6 @@ func (c *runningController) Execute(ctx context.Context) (rerr error) {
 				c.mtx.Unlock()
 			}
 		}
-		valCtxCancel()
 		execRef.Release()
 		c.mtx.Lock()
 		conf = c.conf
