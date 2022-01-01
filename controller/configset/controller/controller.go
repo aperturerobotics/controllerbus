@@ -38,10 +38,11 @@ type Controller struct {
 // If privKey is nil, one will be generated.
 func NewController(le *logrus.Entry, bus bus.Bus) (*Controller, error) {
 	return &Controller{
-		le:          le,
-		bus:         bus,
-		wakeCh:      make(chan struct{}, 1),
-		controllers: make(map[string]*runningController),
+		le:             le,
+		bus:            bus,
+		wakeCh:         make(chan struct{}, 1),
+		controllers:    make(map[string]*runningController),
+		persistentRefs: make(map[uint32]*runningControllerRef),
 	}, nil
 }
 
