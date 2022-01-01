@@ -176,16 +176,16 @@ func (r *DirectiveInstance) purgeEmittedValue(id uint32) (directive.Value, bool)
 		return 0, false
 	}
 	val, ok := r.vals[id]
-	delete(r.vals, id)
-	valCount := len(r.vals)
-
-	if maxCount := r.valueOpts.MaxValueCount; maxCount != 0 {
-		if valCount+1 == maxCount {
+	if ok {
+		delete(r.vals, id)
+		valCount := len(r.vals)
+		if maxCount := r.valueOpts.MaxValueCount; maxCount != 0 {
+			if valCount < maxCount {
+				r.restartResolvers()
+			}
+		} else {
 			r.restartResolvers()
 		}
-	}
-
-	if ok {
 		for _, ref := range r.refs {
 			if ref.valCb != nil {
 				callHandleValueRemoved(r.le, r, val, ref.valCb.HandleValueRemoved)
@@ -311,16 +311,20 @@ func (r *DirectiveInstance) cancelResolvers() {
 }
 
 // restartResolvers pushes a fresh resolver context to child resolvers.
+// restarts any resolvers that exited before the call.
 // expects caller to lock mtx
 func (r *DirectiveInstance) restartResolvers() {
+	// re-use ctx if not canceled
+	nextCtx := r.attachedResolverCtx
 	select {
+	case <-nextCtx.Done():
+		r.attachedResolverCtx, r.attachedResolverCtxCancel = context.WithCancel(r.ctx)
+		nextCtx = r.attachedResolverCtx
 	default:
-		return
-	case <-r.attachedResolverCtx.Done():
 	}
-	r.attachedResolverCtx, r.attachedResolverCtxCancel = context.WithCancel(r.ctx)
+	// re-start any canceled resolvers
 	for _, re := range r.attachedResolvers {
-		re.pushHandlerContext(r.attachedResolverCtx)
+		re.pushHandlerContext(nextCtx)
 	}
 }
 
