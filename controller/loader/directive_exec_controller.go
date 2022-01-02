@@ -69,7 +69,7 @@ func (d *ExecControllerSingleton) IsEquivalent(other directive.Directive) bool {
 	f := d.GetExecControllerFactory()
 	otherf := otherExec.GetExecControllerFactory()
 
-	if otherf.GetControllerID() != f.GetControllerID() {
+	if otherf.GetConfigID() != f.GetConfigID() {
 		return false
 	}
 

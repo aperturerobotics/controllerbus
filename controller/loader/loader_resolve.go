@@ -52,7 +52,7 @@ func (c *resolver) Resolve(ctx context.Context, vh directive.ResolverHandler) er
 	config := c.directive.GetExecControllerConfig()
 	factory := c.directive.GetExecControllerFactory()
 
-	le := c.controller.le.WithField("controller", factory.GetControllerID())
+	le := c.controller.le.WithField("config", factory.GetConfigID())
 	bus := c.controller.bus
 
 	ci, err := factory.Construct(config, controller.ConstructOpts{

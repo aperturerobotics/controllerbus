@@ -45,8 +45,6 @@ func (c *ConstructOpts) GetLogger() *logrus.Entry {
 // Factory represents an available controller implementation.
 // The factory can construct instances of the controller given configuration.
 type Factory interface {
-	// GetControllerID returns the unique ID for the controller.
-	GetControllerID() string
 	// GetConfigID returns the unique config ID for the controller.
 	GetConfigID() string
 	// ConstructConfig constructs an instance of the controller configuration.

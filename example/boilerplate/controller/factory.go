@@ -23,11 +23,6 @@ func (t *Factory) GetConfigID() string {
 	return ConfigID
 }
 
-// GetControllerID returns the unique ID for the controller.
-func (t *Factory) GetControllerID() string {
-	return ControllerID
-}
-
 // ConstructConfig constructs an instance of the controller configuration.
 func (t *Factory) ConstructConfig() config.Config {
 	return &Config{}
