@@ -34,5 +34,18 @@ func (s *runningControllerState) GetError() error {
 	return s.err
 }
 
+// Equals checks if the two states are equal.
+func (s *runningControllerState) Equals(other *runningControllerState) bool {
+	switch {
+	case s.id != other.id:
+	case s.err != other.err:
+	case s.conf != other.conf:
+	case s.ctrl != other.ctrl:
+	default:
+		return true
+	}
+	return false
+}
+
 // _ is a type assertion
 var _ configset.State = ((*runningControllerState)(nil))

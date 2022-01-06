@@ -30,6 +30,8 @@ type runningController struct {
 	state runningControllerState
 	// refs contains references
 	refs []*runningControllerRef
+	// prevEmittedState is the previously emitted state
+	prevEmittedState runningControllerState
 }
 
 func newRunningController(
@@ -203,7 +205,12 @@ func (c *runningController) ApplyConfig(conf configset.ControllerConfig) bool {
 
 // pushState pushes the new state to all references
 // mtx should be locked by caller
-func (c *runningController) pushState(st configset.State) {
+func (c *runningController) pushState(st *runningControllerState) {
+	// push only if changed
+	if c.prevEmittedState.Equals(st) {
+		return
+	}
+	c.prevEmittedState = *st
 	for _, ref := range c.refs {
 		ref.pushState(st)
 	}
