@@ -179,17 +179,17 @@ func (r *DirectiveInstance) purgeEmittedValue(id uint32) (directive.Value, bool)
 	if ok {
 		delete(r.vals, id)
 		valCount := len(r.vals)
+		for _, ref := range r.refs {
+			if ref.valCb != nil {
+				callHandleValueRemoved(r.le, r, val, ref.valCb.HandleValueRemoved)
+			}
+		}
 		if maxCount := r.valueOpts.MaxValueCount; maxCount != 0 {
 			if valCount < maxCount {
 				r.restartResolvers()
 			}
 		} else {
 			r.restartResolvers()
-		}
-		for _, ref := range r.refs {
-			if ref.valCb != nil {
-				callHandleValueRemoved(r.le, r, val, ref.valCb.HandleValueRemoved)
-			}
 		}
 	}
 
@@ -322,7 +322,7 @@ func (r *DirectiveInstance) restartResolvers() {
 		nextCtx = r.attachedResolverCtx
 	default:
 	}
-	// re-start any canceled resolvers
+	// restart any canceled resolvers
 	for _, re := range r.attachedResolvers {
 		re.pushHandlerContext(nextCtx)
 	}

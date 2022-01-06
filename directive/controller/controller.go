@@ -119,12 +119,11 @@ func (c *DirectiveController) AddHandler(hnd directive.Handler) error {
 	ahnd := newAttachedHandler(c.ctx, hnd)
 	c.handlers = append(c.handlers, ahnd)
 
-	/*
-		dirs := make([]*DirectiveInstance, len(c.directives))
-		copy(dirs, c.directives)
-	*/
 	for _, dir := range c.directives {
-		_ = c.callHandler(ahnd, dir)
+		err := c.callHandler(ahnd, dir)
+		if err != nil {
+			c.le.WithError(err).Warn("handler returned error")
+		}
 	}
 
 	return nil
@@ -165,14 +164,15 @@ func (c *DirectiveController) callHandler(ahnd *attachedHandler, inst *Directive
 	// It is safe to add a reference to the directive during this call.
 	hnd := ahnd.Handler
 	handleCtx, handleCtxCancel := context.WithCancel(ahnd.Context)
+
 	// go is needed here due to relMtx being locked
 	go inst.AddDisposeCallback(handleCtxCancel)
 	// inst.AddDisposeCallback(handleCtxCancel)
+
 	resolver, err := hnd.HandleDirective(handleCtx, inst)
 	if err != nil {
 		return err
 	}
-
 	if resolver != nil {
 		// attach resolver
 		inst.attachResolver(handleCtx, resolver)

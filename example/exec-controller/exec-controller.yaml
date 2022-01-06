@@ -1,5 +1,6 @@
 hold-open:
   config:
+    failWithErr: Testing error
     exampleField: Hello from YAML exec-controller!
   id: controllerbus/example/boilerplate/1
   revision: 1

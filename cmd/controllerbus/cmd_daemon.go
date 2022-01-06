@@ -30,8 +30,8 @@ func init() {
 	dflags = append(dflags, (&daemonFlags).BuildFlags()...)
 	dflags = append(dflags, &cli.StringFlag{
 		Name:        "hot-load-dir",
-		Usage:       "directory to hot-load plugins from, default `DIR`",
-		Value:       "./plugins",
+		Usage:       "path to dir to hot-load shared-object plugins",
+		Value:       pluginDir,
 		Destination: &pluginDir,
 	})
 	commands = append(
@@ -62,17 +62,19 @@ func runDaemon(c *cli.Context) error {
 	sr.AddFactory(boilerplate_controller.NewFactory(b))
 
 	// Construct hot loader
-	_, hlRef, err := b.AddDirective(
-		resolver.NewLoadControllerWithConfig(&hot_loader_filesystem.Config{
-			Dir:   pluginDir,
-			Watch: true,
-		}),
-		nil,
-	)
-	if err != nil {
-		return errors.Wrap(err, "construct hot loading controller")
+	if pluginDir != "" {
+		_, hlRef, err := b.AddDirective(
+			resolver.NewLoadControllerWithConfig(&hot_loader_filesystem.Config{
+				Dir:   pluginDir,
+				Watch: true,
+			}),
+			nil,
+		)
+		if err != nil {
+			return errors.Wrap(err, "construct plugin loading controller")
+		}
+		defer hlRef.Release()
 	}
-	defer hlRef.Release()
 
 	// ConfigSet controller
 	_, csRef, err := b.AddDirective(

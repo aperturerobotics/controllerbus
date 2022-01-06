@@ -2,6 +2,7 @@ package boilerplate_controller
 
 import (
 	"context"
+	"errors"
 
 	"github.com/aperturerobotics/controllerbus/bus"
 	"github.com/aperturerobotics/controllerbus/controller"
@@ -71,6 +72,14 @@ func (c *Controller) HandleDirective(
 // Returning nil ends execution.
 // Returning an error triggers a retry with backoff.
 func (c *Controller) Execute(ctx context.Context) error {
+	if errStr := c.conf.GetFailWithErr(); errStr != "" {
+		err := errors.New(errStr)
+		c.le.
+			WithError(err).
+			Warn("boilerplate controller returning configured error")
+		return err
+	}
+
 	c.le.Infof(
 		"hello from boilerplate controller: %s",
 		c.conf.GetExampleField(),

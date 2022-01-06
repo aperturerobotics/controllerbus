@@ -5,4 +5,6 @@ package boilerplate.controller;
 message Config {
   // ExampleField is an example configuration field.
   string example_field = 1;
+  // FailWithErr indicates the controller should fail with the given error.
+  string fail_with_err = 2;
 }

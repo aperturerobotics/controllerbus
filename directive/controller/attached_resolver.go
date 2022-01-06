@@ -35,20 +35,25 @@ func newAttachedResolver(di *DirectiveInstance, res directive.Resolver) *attache
 
 // pushHandlerContext pushes the next handler context.
 func (r *attachedResolver) pushHandlerContext(ctx context.Context) {
-PushLoop:
+	r.wakeMtx.Lock()
+	defer r.wakeMtx.Unlock()
+
+	select {
+	case <-ctx.Done():
+		return
+	default:
+	}
+
 	for {
 		select {
 		case r.resolutionCtxCh <- ctx:
-			r.wakeMtx.Lock()
 			if r.wakeResolution != nil {
 				go r.wakeResolution()
 				r.wakeResolution = nil
 			}
-			r.wakeMtx.Unlock()
-			break PushLoop
+			return
 		default:
 		}
-
 		select {
 		case <-r.resolutionCtxCh:
 		default:
@@ -58,8 +63,14 @@ PushLoop:
 
 // handlerCtx is canceled when the handler is removed or di canceled.
 func (r *attachedResolver) execResolver(handlerCtx context.Context) {
-	errCh := make(chan error, 1)
+	le := r.di.le
+
 	rctx := <-r.resolutionCtxCh
+	select {
+	case <-rctx.Done():
+		return
+	default:
+	}
 
 	// the running resolver count is incremented before execResolver is called.
 	// rctx is the context for all currently running resolvers, may be canceled
@@ -68,57 +79,55 @@ func (r *attachedResolver) execResolver(handlerCtx context.Context) {
 
 	// Resolve() needs to exit if either rctx or handlerCtx is canceled.
 	// Create a new sub-context and cancel it when execOnce returns.
-
+	errCh := make(chan error, 1)
 	for {
 		nctx, nctxCancel := context.WithCancel(handlerCtx)
-		go func(ctx context.Context) {
-			// if skipCtx then rctx was already canceled
-			var skipCtx bool
+
+		// Run the Resolve() function in a separate goroutine.
+		go func(ctx context.Context) (rerr error) {
+			defer func() {
+				r.di.decrementRunningResolvers()
+				errCh <- rerr
+			}()
+
 			select {
 			case <-ctx.Done():
-				skipCtx = true
+				return nil
 			default:
 			}
-			if !skipCtx {
-				errCh <- func() (eerr error) {
-					defer func() {
-						if ferr := recover(); ferr != nil && eerr == nil {
-							eerr = errors.Errorf("%v", ferr)
-							r.di.le.
-								WithError(eerr).
-								Errorf("resolver panic with stack:\n%s", debug.Stack())
-						}
-					}()
-					return r.res.Resolve(ctx, r)
-				}()
-			} else {
-				errCh <- nil
-			}
-			r.di.decrementRunningResolvers()
+			defer func() {
+				if ferr := recover(); ferr != nil && rerr == nil {
+					rerr = errors.Errorf("%v", ferr)
+					le.
+						WithError(rerr).
+						Errorf("resolver panic with stack:\n%s", debug.Stack())
+				}
+			}()
+			return r.res.Resolve(ctx, r)
 		}(nctx)
 
-		// TODO: find a way to exit this goroutine here to lower goroutine count
-		var gerr bool
+		var recvErr bool
 		select {
-		case err := <-errCh:
+		case <-handlerCtx.Done():
 			nctxCancel()
-			gerr = true
+			return
+		case err := <-errCh:
+			recvErr = true
+			nctxCancel()
 			if err != nil && err != context.Canceled {
 				// TODO handle resolver fatal error
-				go r.di.le.
+				go le.
 					WithError(err).
 					Warn("resolver exited with error")
 				return
 			}
-		case <-handlerCtx.Done():
-			nctxCancel()
-			return
 		case <-rctx.Done():
 			nctxCancel()
 		}
 
 		// ensure we wait for resolve to return
-		if !gerr {
+		// ... unless the goroutine returned an error already.
+		if !recvErr {
 			select {
 			case <-errCh:
 			case <-handlerCtx.Done():
@@ -126,28 +135,34 @@ func (r *attachedResolver) execResolver(handlerCtx context.Context) {
 			}
 		}
 
-		// wait for signal to restart resolver
+		// immediately restart if a new resolution context has been pushed.
+		// otherwise, exit the goroutine.
+		var exit bool
+		r.wakeMtx.Lock()
 		select {
 		case <-handlerCtx.Done():
-			return
+			exit = true
 		case rctx = <-r.resolutionCtxCh:
-			r.di.incrementRunningResolvers()
+			select {
+			case <-rctx.Done():
+				exit = true
+			default:
+				r.di.incrementRunningResolvers()
+			}
 		default:
 			// allow the routine to exit to avoid goroutine pollution
-			r.wakeMtx.Lock()
+			exit = true
 			r.wakeResolution = func() {
 				r.di.incrementRunningResolvers()
 				r.execResolver(handlerCtx)
 			}
-			r.wakeMtx.Unlock()
+		}
+		r.wakeMtx.Unlock()
+		if exit {
 			return
 		}
 	}
 }
-
-// Constructed: when resolver is returned from a handler.
-//
-// When DI destroyed:
 
 // AddValue adds a value to the result, returning success and an ID. If
 // AddValue returns false, value was rejected. A rejected value should be
