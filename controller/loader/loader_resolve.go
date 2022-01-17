@@ -29,10 +29,10 @@ func newResolver(ctx context.Context, directive ExecController, controller *Cont
 // newExecBackoff constructs the default exec backoff.
 func newExecBackoff() backoff.BackOff {
 	ebo := backoff.NewExponentialBackOff()
-	ebo.InitialInterval = time.Millisecond * 500
-	ebo.MaxInterval = time.Second * 30
-	ebo.Multiplier = 2
-	ebo.MaxElapsedTime = time.Minute
+	ebo.InitialInterval = time.Millisecond * 100
+	ebo.Multiplier = 1.8
+	ebo.MaxInterval = time.Second * 2
+	// ebo.MaxElapsedTime = time.Minute
 	return ebo
 }
 
@@ -72,7 +72,7 @@ func (c *resolver) Resolve(ctx context.Context, vh directive.ResolverHandler) er
 		// if lastErr == nil: first run
 		if lastErr != nil {
 			execNextBo = execBackoff.NextBackOff()
-			if execNextBo == -1 {
+			if execNextBo == backoff.Stop {
 				return errors.Wrap(lastErr, "backoff timeout exceeded")
 			}
 		} else {
