@@ -356,11 +356,11 @@ func (r *DirectiveInstance) decrementRunningResolvers() {
 		if r.runningResolvers == 0 {
 			// call idle callbacks
 			errs := r.getResolverErrs()
-			for id, idleCb := range r.idleCallbacks {
+			for _, idleCb := range r.idleCallbacks {
 				if idleCb != nil {
 					go idleCb(errs)
 				}
-				delete(r.idleCallbacks, id)
+				// delete(r.idleCallbacks, id)
 			}
 		}
 	}
