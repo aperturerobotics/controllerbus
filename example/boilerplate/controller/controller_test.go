@@ -28,7 +28,7 @@ func TestBoilerplateController(t *testing.T) {
 	execDir := resolver.NewLoadControllerWithConfig(&Config{
 		ExampleField: "testing",
 	})
-	_, ctrlRef, err := bus.ExecOneOff(ctx, b, execDir, nil)
+	_, ctrlRef, err := bus.ExecOneOff(ctx, b, execDir, false, nil)
 	if err != nil {
 		t.Fatal(err.Error())
 	}
@@ -36,7 +36,7 @@ func TestBoilerplateController(t *testing.T) {
 
 	res, resRef, err := bus.ExecOneOff(ctx, b, &boilerplate_v1.Boilerplate{
 		MessageText: "hello world",
-	}, nil)
+	}, false, nil)
 	if err != nil {
 		t.Fatal(err.Error())
 	}

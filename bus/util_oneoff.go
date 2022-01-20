@@ -6,11 +6,12 @@ import (
 )
 
 // ExecOneOff executes a one-off directive.
-// Returns nil if the directive is canceled for some reason during the execution.
+// If returnIfIdle is set, returns nil, nil, nil if idle.
 func ExecOneOff(
 	ctx context.Context,
 	bus Bus,
 	dir directive.Directive,
+	returnIfIdle bool,
 	valDisposeCallback func(),
 ) (directive.AttachedValue, directive.Reference, error) {
 	valCh := make(chan directive.AttachedValue, 1)
@@ -38,6 +39,9 @@ func ExecOneOff(
 		var err error
 		if len(errs) != 0 {
 			err = errs[0]
+		}
+		if !returnIfIdle && err == nil {
+			return
 		}
 		select {
 		case errCh <- err:

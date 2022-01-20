@@ -33,7 +33,7 @@ func ExLoadFactoryByConfig(
 	b bus.Bus,
 	conf config.Config,
 ) (controller.Factory, directive.Reference, error) {
-	av, avRef, err := bus.ExecOneOff(ctx, b, NewLoadFactoryByConfig(conf), nil)
+	av, avRef, err := bus.ExecOneOff(ctx, b, NewLoadFactoryByConfig(conf), false, nil)
 	if err != nil {
 		return nil, nil, err
 	}

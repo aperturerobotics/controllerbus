@@ -24,7 +24,7 @@ func Run(ctx context.Context, le *logrus.Entry) error {
 	execDir := resolver.NewLoadControllerWithConfig(&boilerplate_controller.Config{
 		ExampleField: "hello cross-platform",
 	})
-	_, ctrlRef, err := bus.ExecOneOff(ctx, b, execDir, nil)
+	_, ctrlRef, err := bus.ExecOneOff(ctx, b, execDir, false, nil)
 	if err != nil {
 		return err
 	}
@@ -32,7 +32,7 @@ func Run(ctx context.Context, le *logrus.Entry) error {
 
 	res, resRef, err := bus.ExecOneOff(ctx, b, &boilerplate_v1.Boilerplate{
 		MessageText: "hello from a directive",
-	}, nil)
+	}, false, nil)
 	if err != nil {
 		return err
 	}
