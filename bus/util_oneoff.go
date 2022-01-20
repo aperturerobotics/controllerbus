@@ -35,12 +35,13 @@ func ExecOneOff(
 
 	errCh := make(chan error, 1)
 	defer di.AddIdleCallback(func(errs []error) {
-		for _, err := range errs {
-			select {
-			case errCh <- err:
-			default:
-				return
-			}
+		var err error
+		if len(errs) != 0 {
+			err = errs[0]
+		}
+		select {
+		case errCh <- err:
+		default:
 		}
 	})()
 

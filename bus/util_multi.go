@@ -46,13 +46,14 @@ func ExecCollectValues(
 
 	errCh := make(chan error, 1)
 	defer di.AddIdleCallback(func(errs []error) {
-		for _, err := range errs {
+		if len(errs) != 0 {
 			select {
-			case errCh <- err:
-			default:
+			case errCh <- errs[0]:
 				return
+			default:
 			}
 		}
+		subCtxCancel()
 	})()
 
 	var vals []directive.Value
