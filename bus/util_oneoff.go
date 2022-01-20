@@ -14,7 +14,7 @@ func ExecOneOff(
 	valDisposeCallback func(),
 ) (directive.AttachedValue, directive.Reference, error) {
 	valCh := make(chan directive.AttachedValue, 1)
-	_, ref, err := bus.AddDirective(
+	di, ref, err := bus.AddDirective(
 		dir,
 		&CallbackHandler{
 			disposeCb: valDisposeCallback,
@@ -33,11 +33,24 @@ func ExecOneOff(
 		return nil, nil, err
 	}
 
+	errCh := make(chan error, 1)
+	defer di.AddIdleCallback(func(errs []error) {
+		for _, err := range errs {
+			select {
+			case errCh <- err:
+			default:
+				return
+			}
+		}
+	})()
+
 	select {
 	case <-ctx.Done():
 		ref.Release()
 		return nil, nil, ctx.Err()
 	case n := <-valCh:
 		return n, ref, nil
+	case err := <-errCh:
+		return nil, nil, err
 	}
 }

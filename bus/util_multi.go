@@ -8,6 +8,7 @@ import (
 // ExecCollectValues collects one or more values while ctx is active and
 // directive is not idle.
 //
+// Returns err if the directive is idle and a resolver returned an error.
 // Does not return an error if ctx was canceled.
 // Does not release ref if err == nil.
 func ExecCollectValues(
@@ -42,7 +43,17 @@ func ExecCollectValues(
 		}
 		return nil, nil, err
 	}
-	defer di.AddIdleCallback(subCtxCancel)()
+
+	errCh := make(chan error, 1)
+	defer di.AddIdleCallback(func(errs []error) {
+		for _, err := range errs {
+			select {
+			case errCh <- err:
+			default:
+				return
+			}
+		}
+	})()
 
 	var vals []directive.Value
 	for {
@@ -51,6 +62,8 @@ func ExecCollectValues(
 			return vals, ref, nil
 		case n := <-valCh:
 			vals = append(vals, n)
+		case err := <-errCh:
+			return nil, nil, err
 		}
 	}
 }

@@ -173,10 +173,17 @@ type ReferenceHandler interface {
 	HandleInstanceDisposed(Instance)
 }
 
+// IdleCallback is called when the directive becomes idle.
+// Errs is the list of non-nil resolver errors.
+type IdleCallback func(errs []error)
+
 // Instance tracks a directive with reference counts and resolution state.
 type Instance interface {
 	// GetDirective returns the underlying directive object.
 	GetDirective() Directive
+
+	// GetResolverErrors returns a snapshot of any errors returned by resolvers.
+	GetResolverErrors() []error
 
 	// AddReference adds a reference to the directive.
 	// cb is called for each value.
@@ -195,7 +202,7 @@ type Instance interface {
 	// AddIdleCallback adds a callback that will be called when idle.
 	// The callback is called exactly once.
 	// Returns a callback release function.
-	AddIdleCallback(cb func()) func()
+	AddIdleCallback(cb IdleCallback) func()
 
 	// Close cancels the directive instance.
 	Close()

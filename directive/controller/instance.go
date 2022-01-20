@@ -50,7 +50,7 @@ type DirectiveInstance struct {
 	// nidleID is the next callback id
 	nidleID uint32
 	// idleCallbacks are the list of idle callback functions
-	idleCallbacks map[uint32]func()
+	idleCallbacks map[uint32]func(errs []error)
 }
 
 // NewDirectiveInstance constructs a new directive instance with an initial reference.
@@ -69,7 +69,7 @@ func NewDirectiveInstance(
 	i.attachedResolverCtx, i.attachedResolverCtxCancel = context.WithCancel(ctx)
 	i.vals = make(map[uint32]*attachedValue)
 	i.rel = make(map[uint32]func())
-	i.idleCallbacks = make(map[uint32]func())
+	i.idleCallbacks = make(map[uint32]func(errs []error))
 	if released != nil {
 		i.rel[0] = func() {
 			released(i)
@@ -205,6 +205,14 @@ func (r *DirectiveInstance) GetDirective() directive.Directive {
 	return r.dir
 }
 
+// GetResolverErrors returns a snapshot of any errors returned by resolvers.
+func (r *DirectiveInstance) GetResolverErrors() []error {
+	r.mtx.Lock()
+	defer r.mtx.Unlock()
+
+	return r.getResolverErrs()
+}
+
 // AddDisposeCallback adds a callback that will be called when the instance
 // is disposed, either when Close() is called, or when the reference count
 // drops to zero. The callback may occur immediately if the instance is
@@ -233,18 +241,21 @@ func (r *DirectiveInstance) AddDisposeCallback(cb func()) func() {
 
 // AddIdleCallback adds a callback that will be called when idle.
 // The callback is called exactly once.
+// Errs is the list of non-nil resolver errors.
 // Returns a callback release function.
-func (r *DirectiveInstance) AddIdleCallback(cb func()) func() {
+func (r *DirectiveInstance) AddIdleCallback(cb directive.IdleCallback) func() {
 	r.mtx.Lock()
 	defer r.mtx.Unlock()
 
+	errs := r.getResolverErrs()
+
 	if r.released {
-		cb()
+		cb(errs)
 		return func() {}
 	}
 
 	if r.runningResolvers == 0 {
-		cb()
+		cb(errs)
 		return func() {}
 	}
 
@@ -343,9 +354,11 @@ func (r *DirectiveInstance) decrementRunningResolvers() {
 	if r.runningResolvers != 0 {
 		r.runningResolvers--
 		if r.runningResolvers == 0 {
+			// call idle callbacks
+			errs := r.getResolverErrs()
 			for id, idleCb := range r.idleCallbacks {
 				if idleCb != nil {
-					go idleCb()
+					go idleCb(errs)
 				}
 				delete(r.idleCallbacks, id)
 			}
@@ -398,6 +411,17 @@ func (r *DirectiveInstance) markUnreferenced() {
 			r.unrefDestroyTimer = time.AfterFunc(udd, r.Close)
 		}
 	}
+}
+
+// getResolverErrs lists resolver errs while caller has mtx locked.
+func (r *DirectiveInstance) getResolverErrs() []error {
+	errs := make([]error, 0, len(r.attachedResolvers))
+	for _, res := range r.attachedResolvers {
+		if err := res.valErr; err != nil && err != context.Canceled {
+			errs = append(errs, err)
+		}
+	}
+	return errs
 }
 
 // markReferenced requires refsMtx is locked, and stops the Close() timer

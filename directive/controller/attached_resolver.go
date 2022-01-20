@@ -17,6 +17,7 @@ type attachedResolver struct {
 
 	valsMtx sync.Mutex
 	vals    []uint32
+	valErr  error
 
 	wakeMtx         sync.Mutex
 	res             directive.Resolver
@@ -115,11 +116,10 @@ func (r *attachedResolver) execResolver(handlerCtx context.Context) {
 			recvErr = true
 			nctxCancel()
 			if err != nil && err != context.Canceled {
-				// TODO handle resolver fatal error
 				go le.
 					WithError(err).
 					Warn("resolver exited with error")
-				return
+				r.valErr = err
 			}
 		case <-rctx.Done():
 			nctxCancel()
