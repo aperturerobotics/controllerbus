@@ -56,6 +56,6 @@ func ExecOneOff(
 	case n := <-valCh:
 		return n, ref, nil
 	case err := <-errCh:
-		return nil, nil, err
+		return nil, ref, err
 	}
 }
