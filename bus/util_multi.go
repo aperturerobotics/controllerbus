@@ -19,6 +19,7 @@ func ExecCollectValues(
 ) ([]directive.Value, directive.Reference, error) {
 	subCtx, subCtxCancel := context.WithCancel(ctx)
 	defer subCtxCancel()
+
 	valCh := make(chan directive.Value, 1)
 	di, ref, err := bus.AddDirective(
 		dir,
@@ -52,8 +53,9 @@ func ExecCollectValues(
 				return
 			default:
 			}
+		} else {
+			subCtxCancel()
 		}
-		subCtxCancel()
 	})()
 
 	var vals []directive.Value
