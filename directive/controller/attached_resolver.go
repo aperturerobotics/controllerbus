@@ -87,6 +87,12 @@ func (r *attachedResolver) execResolver(handlerCtx context.Context) {
 		// Run the Resolve() function in a separate goroutine.
 		go func(ctx context.Context) (rerr error) {
 			defer func() {
+				if rerr != nil && rerr != context.Canceled {
+					go le.
+						WithError(rerr).
+						Warn("resolver exited with error")
+					r.valErr = rerr
+				}
 				r.di.decrementRunningResolvers()
 				errCh <- rerr
 			}()
@@ -112,15 +118,9 @@ func (r *attachedResolver) execResolver(handlerCtx context.Context) {
 		case <-handlerCtx.Done():
 			nctxCancel()
 			return
-		case err := <-errCh:
+		case _ = <-errCh:
 			recvErr = true
 			nctxCancel()
-			if err != nil && err != context.Canceled {
-				go le.
-					WithError(err).
-					Warn("resolver exited with error")
-				r.valErr = err
-			}
 		case <-rctx.Done():
 			nctxCancel()
 		}
