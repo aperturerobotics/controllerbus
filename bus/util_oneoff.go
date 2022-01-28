@@ -38,7 +38,12 @@ func ExecOneOff(
 	defer di.AddIdleCallback(func(errs []error) {
 		var err error
 		if len(errs) != 0 {
-			err = errs[0]
+			for _, rerr := range errs {
+				if rerr != nil {
+					err = rerr
+					break
+				}
+			}
 		}
 		if !returnIfIdle && err == nil {
 			return
@@ -51,11 +56,16 @@ func ExecOneOff(
 
 	select {
 	case <-ctx.Done():
-		ref.Release()
-		return nil, nil, ctx.Err()
+		if ref != nil {
+			ref.Release()
+		}
+		return nil, nil, context.Canceled
 	case n := <-valCh:
 		return n, ref, nil
 	case err := <-errCh:
-		return nil, ref, err
+		if ref != nil {
+			ref.Release()
+		}
+		return nil, nil, err
 	}
 }

@@ -45,28 +45,40 @@ func ExecCollectValues(
 		return nil, nil, err
 	}
 
-	errCh := make(chan error, 1)
+	errCh := make(chan error, 2)
 	defer di.AddIdleCallback(func(errs []error) {
 		if len(errs) != 0 {
-			select {
-			case errCh <- errs[0]:
-				return
-			default:
+			for _, err := range errs {
+				if err == nil {
+					continue
+				}
+
+				select {
+				case errCh <- err:
+				default:
+					return
+				}
 			}
-		} else {
-			subCtxCancel()
 		}
+
+		subCtxCancel()
 	})()
 
 	var vals []directive.Value
 	for {
 		select {
 		case <-subCtx.Done():
-			return vals, ref, nil
+			if ref != nil {
+				ref.Release()
+			}
+			return vals, nil, nil
+		case err := <-errCh:
+			if ref != nil {
+				ref.Release()
+			}
+			return nil, nil, err
 		case n := <-valCh:
 			vals = append(vals, n)
-		case err := <-errCh:
-			return nil, nil, err
 		}
 	}
 }
