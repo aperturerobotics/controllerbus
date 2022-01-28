@@ -67,11 +67,13 @@ func ExecCollectValues(
 	var vals []directive.Value
 	for {
 		select {
-		case <-subCtx.Done():
+		case <-ctx.Done():
 			if ref != nil {
 				ref.Release()
 			}
-			return vals, nil, nil
+			return vals, nil, context.Canceled
+		case <-subCtx.Done():
+			return vals, ref, nil
 		case err := <-errCh:
 			if ref != nil {
 				ref.Release()
