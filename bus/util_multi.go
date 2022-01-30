@@ -20,7 +20,7 @@ func ExecCollectValues(
 	subCtx, subCtxCancel := context.WithCancel(ctx)
 	defer subCtxCancel()
 
-	valCh := make(chan directive.Value, 1)
+	valCh := make(chan directive.Value)
 	di, ref, err := bus.AddDirective(
 		dir,
 		&CallbackHandler{
