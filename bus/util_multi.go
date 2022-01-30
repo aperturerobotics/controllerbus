@@ -20,7 +20,7 @@ func ExecCollectValues(
 	subCtx, subCtxCancel := context.WithCancel(ctx)
 	defer subCtxCancel()
 
-	valCh := make(chan directive.Value)
+	valCh := make(chan directive.Value, 1)
 	di, ref, err := bus.AddDirective(
 		dir,
 		&CallbackHandler{
@@ -59,9 +59,13 @@ func ExecCollectValues(
 					return
 				}
 			}
+		} else {
+			// idle
+			select {
+			case <-subCtx.Done():
+			case valCh <- nil:
+			}
 		}
-
-		subCtxCancel()
 	})()
 
 	var vals []directive.Value
@@ -80,6 +84,9 @@ func ExecCollectValues(
 			}
 			return nil, nil, err
 		case n := <-valCh:
+			if n == nil {
+				return vals, ref, nil
+			}
 			vals = append(vals, n)
 		}
 	}
