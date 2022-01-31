@@ -23,5 +23,5 @@ type Bus interface {
 	// RemoveController removes the controller from the bus.
 	// The controller will no longer receive callbacks.
 	// Note: this might not cancel the Execute() context automatically.
-	RemoveController(context.Context, controller.Controller) error
+	RemoveController(controller.Controller)
 }

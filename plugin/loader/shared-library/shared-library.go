@@ -89,7 +89,7 @@ func LoadPluginSharedLibrary(
 			return
 		}
 		<-subCtx.Done()
-		_ = bus.RemoveController(ctx, resolverController)
+		bus.RemoveController(resolverController)
 		resolverController.Close()
 	}()
 	return &LoadedPlugin{

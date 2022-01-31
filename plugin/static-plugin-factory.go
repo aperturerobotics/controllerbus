@@ -58,7 +58,7 @@ func (s *StaticPluginFactory) Construct(
 	// Ensure that the controller is removed just before we unload.
 	s.mtx.Lock()
 	s.preUnload = append(s.preUnload, func() {
-		_ = s.bus.RemoveController(context.Background(), subController)
+		s.bus.RemoveController(subController)
 	})
 	s.mtx.Unlock()
 	return subController, err

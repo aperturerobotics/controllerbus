@@ -62,9 +62,8 @@ func (b *Bus) ExecuteController(ctx context.Context, c controller.Controller) (e
 }
 
 // RemoveController removes the controller from the bus.
-func (b *Bus) RemoveController(ctx context.Context, c controller.Controller) error {
+func (b *Bus) RemoveController(c controller.Controller) {
 	b.removeController(c)
-	return nil
 }
 
 // addController adds a controller to the bus
