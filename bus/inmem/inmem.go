@@ -39,7 +39,7 @@ func (b *Bus) GetControllers() []controller.Controller {
 // ExecuteController adds a controller to the bus and calls Execute().
 // Any fatal error in the controller is returned.
 // The controller will receive directive callbacks.
-// If the controller returns nil, will not be removed automatically.
+// If the controller returns nil, call RemoveController to remove the controller.
 func (b *Bus) ExecuteController(ctx context.Context, c controller.Controller) (err error) {
 	b.addController(c)
 
