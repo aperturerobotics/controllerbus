@@ -4,8 +4,8 @@ import (
 	"io"
 	"os"
 
-	"github.com/minio/highwayhash"
 	b58 "github.com/mr-tron/base58/base58"
+	"github.com/zeebo/blake3"
 )
 
 // HashPluginForBuildID hashes a plugin to use for build id.
@@ -13,7 +13,7 @@ import (
 // hhBaseKey should be 32 bytes long
 func HashPluginForBuildID(hhBaseKey []byte, filePath string) (string, error) {
 	// hash pass 1 to determine build prefix
-	hasher, err := highwayhash.New128(hhBaseKey)
+	hasher, err := blake3.NewKeyed(hhBaseKey)
 	if err != nil {
 		return "", err
 	}

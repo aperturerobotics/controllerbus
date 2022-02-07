@@ -16,12 +16,12 @@ require (
 	github.com/fsnotify/fsnotify v1.5.0
 	github.com/ghodss/yaml v1.0.0
 	github.com/golang/protobuf v1.4.2
-	github.com/minio/highwayhash v1.0.2
 	github.com/mr-tron/base58 v1.2.0
 	github.com/pkg/errors v0.9.1
 	github.com/sergi/go-diff v1.1.0
 	github.com/sirupsen/logrus v1.8.0
 	github.com/urfave/cli v1.22.5
+	github.com/zeebo/blake3 v0.2.2
 	golang.org/x/mod v0.5.1
 	golang.org/x/tools v0.1.8
 	google.golang.org/grpc v1.30.0

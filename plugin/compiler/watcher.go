@@ -59,7 +59,7 @@ func (w *Watcher) WatchCompilePlugin(
 	}
 	defer watcher.Close()
 
-	// hhBaseKey is the seed key to use for highwayhash, (32 bytes)
+	// hhBaseKey is the seed key to use for blake3 (32 bytes)
 	var hhBaseKey []byte
 	{
 		hs := sha256.New()
