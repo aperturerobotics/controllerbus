@@ -246,3 +246,8 @@ ControllerBus is built & supported by Aperture Robotics, LLC.
 Please open a [GitHub issue] with any questions / issues.
 
 [GitHub issue]: https://github.com/aperturerobotics/controllerbus/issues/new
+
+... or feel free to reach out on [Matrix Chat] or [Discord].
+
+[Discord]: https://discord.gg/EmeEENhKkg
+[Matrix Chat]: https://matrix.to/#/#aperture-robotics:matrix.org
