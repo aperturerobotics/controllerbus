@@ -4,13 +4,14 @@ import (
 	"context"
 	"strconv"
 	"testing"
+	"time"
 )
 
 // TestKeyed tests the keyed goroutine manager.
 func TestKeyed(t *testing.T) {
 	ctx := context.Background()
 	vals := make(chan string, 10)
-	k := NewKeyed(ctx, func(key string) Routine {
+	k := NewKeyed(func(key string) Routine {
 		return func(ctx context.Context) error {
 			select {
 			case <-ctx.Done():
@@ -28,6 +29,17 @@ func TestKeyed(t *testing.T) {
 		keys[i] = key
 	}
 	k.SyncKeys(keys, false)
+
+	// expect nothing to have been pushed to vals yet
+	<-time.After(time.Millisecond * 10)
+	select {
+	case val := <-vals:
+		t.Fatalf("unexpected value before set context: %s", val)
+	default:
+	}
+
+	// start execution
+	k.SetContext(ctx, false)
 
 	seen := make(map[string]struct{})
 	for {

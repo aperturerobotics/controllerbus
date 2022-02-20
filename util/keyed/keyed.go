@@ -16,28 +16,54 @@ type Constructor func(key string) Routine
 
 // Keyed manages a set of goroutines with associated Keys.
 type Keyed struct {
-	// ctx is the keyed root context
-	ctx context.Context
 	// ctorCb is the constructor callback
 	ctorCb Constructor
 
 	// mtx guards below fields
 	mtx sync.Mutex
+	// ctx is the current root context
+	ctx context.Context
 	// routines is the set of running routines
 	routines map[string]*runningRoutine
 }
 
 // NewKeyed constructs a new Keyed execution manager.
-func NewKeyed(ctx context.Context, ctorCb Constructor) *Keyed {
+// Note: routines won't start until SetContext is called.
+func NewKeyed(ctorCb Constructor) *Keyed {
 	if ctorCb == nil {
 		ctorCb = func(key string) Routine {
 			return nil
 		}
 	}
 	return &Keyed{
-		ctx:      ctx,
 		ctorCb:   ctorCb,
 		routines: make(map[string]*runningRoutine, 1),
+	}
+}
+
+// SetContext updates the root context, restarting all running routines.
+// if restart is true, all errored routines also restart
+func (k *Keyed) SetContext(ctx context.Context, restart bool) {
+	k.mtx.Lock()
+	defer k.mtx.Unlock()
+
+	sameCtx := k.ctx == ctx
+	if sameCtx && !restart {
+		return
+	}
+
+	k.ctx = ctx
+	for _, rr := range k.routines {
+		if sameCtx && rr.err == nil {
+			continue
+		}
+		if rr.err == nil || restart {
+			if rr.ctxCancel != nil {
+				rr.ctxCancel()
+				rr.ctx, rr.ctxCancel = nil, nil
+			}
+			rr.start(ctx)
+		}
 	}
 }
 
@@ -46,6 +72,14 @@ func NewKeyed(ctx context.Context, ctorCb Constructor) *Keyed {
 func (k *Keyed) SyncKeys(keys []string, restart bool) {
 	k.mtx.Lock()
 	defer k.mtx.Unlock()
+
+	if k.ctx != nil {
+		select {
+		case <-k.ctx.Done():
+			k.ctx = nil
+		default:
+		}
+	}
 
 	routines := make(map[string]*runningRoutine, len(keys))
 	for _, key := range keys {
@@ -60,7 +94,9 @@ func (k *Keyed) SyncKeys(keys []string, restart bool) {
 		}
 		routines[key] = v
 		if !existed || restart {
-			v.start(k.ctx)
+			if k.ctx != nil {
+				v.start(k.ctx)
+			}
 		}
 	}
 	for key, rr := range k.routines {
