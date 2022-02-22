@@ -1,8 +1,9 @@
 package configset_controller
 
 import (
-	"github.com/aperturerobotics/controllerbus/controller/configset"
 	"sync"
+
+	"github.com/aperturerobotics/controllerbus/controller/configset"
 )
 
 // runningControllerRef implements the reference directive.

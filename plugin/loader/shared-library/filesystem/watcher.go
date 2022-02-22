@@ -42,7 +42,6 @@ func NewWatcher(le *logrus.Entry, bus bus.Bus) *Watcher {
 // UnloadPlugin unloads a loaded plugin by ID.
 func (w *Watcher) UnloadPlugin(id string) {
 	w.mtx.Lock()
-	w.mtx.Unlock()
 	plug, plugOk := w.loadedPlugins[id]
 	if !plugOk {
 		w.mtx.Unlock()

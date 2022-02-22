@@ -1,9 +1,10 @@
 package configset
 
 import (
-	"github.com/aperturerobotics/controllerbus/directive"
 	"strconv"
 	"strings"
+
+	"github.com/aperturerobotics/controllerbus/directive"
 )
 
 // ApplyConfigSet is a directive to apply a controllerbus config set.

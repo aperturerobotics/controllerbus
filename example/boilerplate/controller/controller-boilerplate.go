@@ -6,7 +6,7 @@ import (
 
 	"github.com/aperturerobotics/controllerbus/directive"
 	"github.com/aperturerobotics/controllerbus/example/boilerplate"
-	"github.com/aperturerobotics/controllerbus/example/boilerplate/v1"
+	boilerplate_v1 "github.com/aperturerobotics/controllerbus/example/boilerplate/v1"
 )
 
 // boilerplateResolver resolves Boilerplate against the controller.

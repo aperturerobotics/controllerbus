@@ -2,10 +2,11 @@ package core
 
 import (
 	"context"
+
 	"github.com/aperturerobotics/controllerbus/bus"
 	"github.com/aperturerobotics/controllerbus/bus/inmem"
 	"github.com/aperturerobotics/controllerbus/controller"
-	"github.com/aperturerobotics/controllerbus/controller/configset/controller"
+	configset_controller "github.com/aperturerobotics/controllerbus/controller/configset/controller"
 	"github.com/aperturerobotics/controllerbus/controller/loader"
 	"github.com/aperturerobotics/controllerbus/controller/resolver"
 	"github.com/aperturerobotics/controllerbus/controller/resolver/static"
@@ -67,14 +68,18 @@ func NewCoreBus(
 	}
 
 	// Execute the loader controller.
-	go b.ExecuteController(ctx, cl)
+	go func() {
+		_ = b.ExecuteController(ctx, cl)
+	}()
 
 	// If there are any built in factories append them.
 	sr := static.NewResolver(conf.BuiltInFactories...)
 	sr.AddFactory(configset_controller.NewFactory(b))
 
-	// Add a custom factory resolver wrapper if configured.
+	// fres is the factory resolver controller
 	var fres controller.FactoryResolver = sr
+
+	// Add a custom factory resolver wrapper if configured.
 	if fctor := conf.FactoryResolverCtor; fctor != nil {
 		fres, err = fctor(b, sr)
 		if err != nil {
@@ -82,10 +87,13 @@ func NewCoreBus(
 		}
 	}
 
-	go b.ExecuteController(
-		ctx,
-		resolver.NewController(le, b, fres),
-	)
+	// execute the factory resolver
+	go func() {
+		_ = b.ExecuteController(
+			ctx,
+			resolver.NewController(le, b, fres),
+		)
+	}()
 
 	return b, sr, nil
 }

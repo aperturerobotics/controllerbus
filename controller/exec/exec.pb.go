@@ -5,10 +5,11 @@ package controller_exec
 
 import (
 	fmt "fmt"
+	math "math"
+
 	controller "github.com/aperturerobotics/controllerbus/controller"
 	proto1 "github.com/aperturerobotics/controllerbus/controller/configset/proto"
 	proto "github.com/golang/protobuf/proto"
-	math "math"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.

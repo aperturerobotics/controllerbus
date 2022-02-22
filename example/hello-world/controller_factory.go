@@ -11,6 +11,9 @@ import (
 // toyFactoryVersion is the compiled-in version
 var toyFactoryVersion = semver.MustParse("0.1.0")
 
+// toyControllerID is the controller id
+const toyControllerID = "hello-world"
+
 // ToyFactory implements the toy controller factory.
 type ToyFactory struct{}
 
@@ -21,7 +24,7 @@ func NewToyFactory() *ToyFactory {
 
 // GetControllerID returns the unique ID for the controller.
 func (f *ToyFactory) GetControllerID() string {
-	return "toy"
+	return toyControllerID
 }
 
 // GetConfigID returns the unique ID for the controller config.

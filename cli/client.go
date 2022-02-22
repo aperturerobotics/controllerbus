@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 
-	"github.com/aperturerobotics/controllerbus/bus/api"
+	bus_api "github.com/aperturerobotics/controllerbus/bus/api"
 	"github.com/urfave/cli"
 	"google.golang.org/grpc"
 )

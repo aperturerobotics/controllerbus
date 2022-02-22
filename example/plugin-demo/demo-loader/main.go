@@ -7,7 +7,7 @@ import (
 
 	"github.com/aperturerobotics/controllerbus/bus"
 	"github.com/aperturerobotics/controllerbus/controller/configset"
-	"github.com/aperturerobotics/controllerbus/controller/configset/json"
+	configset_json "github.com/aperturerobotics/controllerbus/controller/configset/json"
 	"github.com/aperturerobotics/controllerbus/controller/resolver"
 	"github.com/aperturerobotics/controllerbus/core"
 	"github.com/aperturerobotics/controllerbus/directive"

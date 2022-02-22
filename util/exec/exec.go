@@ -34,7 +34,7 @@ func StartAndWait(ctx context.Context, le *logrus.Entry, ecmd *exec.Cmd) error {
 	select {
 	case <-ctx.Done():
 		_ = ecmd.Process.Kill()
-		_ = <-outErr
+		<-outErr
 		return ctx.Err()
 	case err := <-outErr:
 		if err != nil {

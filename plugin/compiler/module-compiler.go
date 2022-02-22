@@ -177,9 +177,7 @@ func (m *ModuleCompiler) GenerateModules(analysis *Analysis, pluginBinaryVersion
 
 		// Add a reference to the old module path, if the old module path was
 		// not within the Go module cache path.
-		//
-		// Note: HasPrefix is deprecated but OK for this use case.
-		isThirdPartyModule := filepath.HasPrefix(modPathAbs, goModCachePath)
+		isThirdPartyModule := filepathHasPrefix(modPathAbs, goModCachePath)
 		if !isThirdPartyModule {
 			// Add a replace to the absolute path of the containing repo.
 			//
@@ -223,7 +221,10 @@ func (m *ModuleCompiler) GenerateModules(analysis *Analysis, pluginBinaryVersion
 		if err != nil {
 			return err
 		}
-		relocateGoModFile(xformSrcModFile, outPluginModFilePath)
+		err = relocateGoModFile(xformSrcModFile, outPluginModFilePath)
+		if err != nil {
+			return err
+		}
 		for _, def := range xformSrcModFile.Replace {
 			err = outPluginGoMod.AddReplace(
 				def.Old.Path, def.Old.Version,

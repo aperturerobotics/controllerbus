@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/aperturerobotics/controllerbus/directive"
-	"github.com/aperturerobotics/controllerbus/directive/proto"
+	directive_proto "github.com/aperturerobotics/controllerbus/directive/proto"
 	"github.com/aperturerobotics/controllerbus/example/boilerplate"
 )
 

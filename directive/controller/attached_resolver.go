@@ -84,19 +84,8 @@ func (r *attachedResolver) execResolver(handlerCtx context.Context) {
 	for {
 		nctx, nctxCancel := context.WithCancel(handlerCtx)
 
-		// Run the Resolve() function in a separate goroutine.
-		go func(ctx context.Context) (rerr error) {
-			defer func() {
-				if rerr != nil && rerr != context.Canceled {
-					go le.
-						WithError(rerr).
-						Warn("resolver exited with error")
-					r.valErr = rerr
-				}
-				r.di.decrementRunningResolvers()
-				errCh <- rerr
-			}()
-
+		// execResolve executes the Resolve function with panic handling
+		execResolve := func(ctx context.Context) (rerr error) {
 			select {
 			case <-ctx.Done():
 				return nil
@@ -111,6 +100,19 @@ func (r *attachedResolver) execResolver(handlerCtx context.Context) {
 				}
 			}()
 			return r.res.Resolve(ctx, r)
+		}
+
+		// Run execResolve in a separate goroutine.
+		go func(ctx context.Context) {
+			rerr := execResolve(ctx)
+			if rerr != nil && rerr != context.Canceled {
+				le.
+					WithError(rerr).
+					Warn("resolver exited with error")
+				r.valErr = rerr
+			}
+			r.di.decrementRunningResolvers()
+			errCh <- rerr
 		}(nctx)
 
 		var recvErr bool
@@ -118,7 +120,7 @@ func (r *attachedResolver) execResolver(handlerCtx context.Context) {
 		case <-handlerCtx.Done():
 			nctxCancel()
 			return
-		case _ = <-errCh:
+		case <-errCh:
 			recvErr = true
 			nctxCancel()
 		case <-rctx.Done():

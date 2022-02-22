@@ -2,6 +2,7 @@ package bus
 
 import (
 	"context"
+
 	"github.com/aperturerobotics/controllerbus/controller"
 	"github.com/aperturerobotics/controllerbus/directive"
 )

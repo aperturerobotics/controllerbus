@@ -14,7 +14,7 @@ import (
 	"github.com/aperturerobotics/controllerbus/controller/loader"
 	"github.com/aperturerobotics/controllerbus/controller/resolver"
 	"github.com/aperturerobotics/controllerbus/core"
-	"github.com/aperturerobotics/controllerbus/example/boilerplate/controller"
+	boilerplate_controller "github.com/aperturerobotics/controllerbus/example/boilerplate/controller"
 	hot_loader_filesystem "github.com/aperturerobotics/controllerbus/plugin/loader/shared-library/filesystem"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"

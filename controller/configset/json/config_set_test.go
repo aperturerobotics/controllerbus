@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/aperturerobotics/controllerbus/controller/configset"
-	"github.com/aperturerobotics/controllerbus/controller/configset/controller"
+	configset_controller "github.com/aperturerobotics/controllerbus/controller/configset/controller"
 	"github.com/aperturerobotics/controllerbus/core"
 	"github.com/sirupsen/logrus"
 	// "github.com/aperturerobotics/controllerbus/bus/inmem"
