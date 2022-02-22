@@ -79,9 +79,9 @@ ExecLoop:
 			if _, ok := execControllers[k]; !ok {
 				nctx, nctxCancel := context.WithCancel(ctx)
 				execControllers[k] = nctxCancel
-				go func() {
-					_ = c.Execute(nctx)
-				}()
+				go func(nctx context.Context, ctrl *runningController) {
+					_ = ctrl.Execute(nctx)
+				}(nctx, c)
 			}
 		}
 		c.mtx.Unlock()
