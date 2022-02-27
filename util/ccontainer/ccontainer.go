@@ -7,25 +7,22 @@ import (
 
 // CContainer is a concurrent container.
 type CContainer struct {
-	ctx  context.Context // may be nil
 	mtx  sync.Mutex
 	val  interface{}
 	wake chan struct{}
 }
 
-// NewCContainer builds a CContainer with a context.
-// Note: context can be nil
-func NewCContainer(ctx context.Context, val interface{}) *CContainer {
-	if ctx == nil {
-		ctx = context.Background()
-	}
-	return &CContainer{ctx: ctx, val: val, wake: make(chan struct{})}
+// NewCContainer builds a CContainer with an initial value.
+func NewCContainer(val interface{}) *CContainer {
+	return &CContainer{val: val, wake: make(chan struct{})}
 }
 
 // WaitValueWithValidator waits for any value that matches the validator in the container.
+// errCh is an optional channel to read an error from.
 func (c *CContainer) WaitValueWithValidator(
 	ctx context.Context,
 	valid func(v interface{}) (bool, error),
+	errCh <-chan error,
 ) (interface{}, error) {
 	var ok bool
 	var err error
@@ -49,8 +46,10 @@ func (c *CContainer) WaitValueWithValidator(
 		select {
 		case <-ctx.Done():
 			return nil, ctx.Err()
-		case <-c.ctx.Done():
-			return nil, context.Canceled
+		case err := <-errCh:
+			if err != nil {
+				return nil, err
+			}
 		case c.wake <- struct{}{}:
 			// woken, value changed
 		}
@@ -58,26 +57,29 @@ func (c *CContainer) WaitValueWithValidator(
 }
 
 // WaitValue waits for any non-nil value in the container.
-func (c *CContainer) WaitValue(ctx context.Context) (interface{}, error) {
+// errCh is an optional channel to read an error from.
+func (c *CContainer) WaitValue(ctx context.Context, errCh <-chan error) (interface{}, error) {
 	return c.WaitValueWithValidator(ctx, func(v interface{}) (bool, error) {
 		// untyped nil == no value or type
 		// no checking for typed nil (typed nil != nil)
 		return v != nil, nil
-	})
+	}, errCh)
 }
 
 // WaitValueChange waits for a value that is different than the given.
-func (c *CContainer) WaitValueChange(ctx context.Context, old interface{}) (interface{}, error) {
+// errCh is an optional channel to read an error from.
+func (c *CContainer) WaitValueChange(ctx context.Context, old interface{}, errCh <-chan error) (interface{}, error) {
 	return c.WaitValueWithValidator(ctx, func(v interface{}) (bool, error) {
 		return v != old, nil
-	})
+	}, errCh)
 }
 
 // WaitValueEmpty waits for a untyped nil value.
-func (c *CContainer) WaitValueEmpty(ctx context.Context) error {
+// errCh is an optional channel to read an error from.
+func (c *CContainer) WaitValueEmpty(ctx context.Context, errCh <-chan error) error {
 	_, err := c.WaitValueWithValidator(ctx, func(v interface{}) (bool, error) {
 		return v == nil, nil
-	})
+	}, errCh)
 	return err
 }
 
