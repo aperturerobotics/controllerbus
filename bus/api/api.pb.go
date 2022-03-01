@@ -4,17 +4,13 @@
 package bus_api
 
 import (
-	context "context"
 	fmt "fmt"
 	math "math"
 
 	controller "github.com/aperturerobotics/controllerbus/controller"
-	exec "github.com/aperturerobotics/controllerbus/controller/exec"
+	_ "github.com/aperturerobotics/controllerbus/controller/exec"
 	directive "github.com/aperturerobotics/controllerbus/directive"
 	proto "github.com/golang/protobuf/proto"
-	grpc "google.golang.org/grpc"
-	codes "google.golang.org/grpc/codes"
-	status "google.golang.org/grpc/status"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -184,152 +180,4 @@ var fileDescriptor_cb9fbbe4e64990f1 = []byte{
 	0xb3, 0xdd, 0x65, 0xb1, 0xeb, 0xaa, 0xc6, 0xec, 0x92, 0xbb, 0x05, 0x25, 0xf8, 0xe6, 0xcf, 0xba,
 	0x72, 0xc8, 0x2d, 0x11, 0xb5, 0xec, 0x90, 0x77, 0xdf, 0x01, 0x00, 0x00, 0xff, 0xff, 0x0b, 0xfa,
 	0xbf, 0x49, 0xe2, 0x02, 0x00, 0x00,
-}
-
-// Reference imports to suppress errors if they are not otherwise used.
-var _ context.Context
-var _ grpc.ClientConnInterface
-
-// This is a compile-time assertion to ensure that this generated file
-// is compatible with the grpc package it is being compiled against.
-const _ = grpc.SupportPackageIsVersion6
-
-// ControllerBusServiceClient is the client API for ControllerBusService service.
-//
-// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
-type ControllerBusServiceClient interface {
-	// GetBusInfo requests information about the controller bus.
-	GetBusInfo(ctx context.Context, in *GetBusInfoRequest, opts ...grpc.CallOption) (*GetBusInfoResponse, error)
-	// ExecController executes a controller configuration on the bus.
-	ExecController(ctx context.Context, in *exec.ExecControllerRequest, opts ...grpc.CallOption) (ControllerBusService_ExecControllerClient, error)
-}
-
-type controllerBusServiceClient struct {
-	cc grpc.ClientConnInterface
-}
-
-func NewControllerBusServiceClient(cc grpc.ClientConnInterface) ControllerBusServiceClient {
-	return &controllerBusServiceClient{cc}
-}
-
-func (c *controllerBusServiceClient) GetBusInfo(ctx context.Context, in *GetBusInfoRequest, opts ...grpc.CallOption) (*GetBusInfoResponse, error) {
-	out := new(GetBusInfoResponse)
-	err := c.cc.Invoke(ctx, "/bus.api.ControllerBusService/GetBusInfo", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *controllerBusServiceClient) ExecController(ctx context.Context, in *exec.ExecControllerRequest, opts ...grpc.CallOption) (ControllerBusService_ExecControllerClient, error) {
-	stream, err := c.cc.NewStream(ctx, &_ControllerBusService_serviceDesc.Streams[0], "/bus.api.ControllerBusService/ExecController", opts...)
-	if err != nil {
-		return nil, err
-	}
-	x := &controllerBusServiceExecControllerClient{stream}
-	if err := x.ClientStream.SendMsg(in); err != nil {
-		return nil, err
-	}
-	if err := x.ClientStream.CloseSend(); err != nil {
-		return nil, err
-	}
-	return x, nil
-}
-
-type ControllerBusService_ExecControllerClient interface {
-	Recv() (*exec.ExecControllerResponse, error)
-	grpc.ClientStream
-}
-
-type controllerBusServiceExecControllerClient struct {
-	grpc.ClientStream
-}
-
-func (x *controllerBusServiceExecControllerClient) Recv() (*exec.ExecControllerResponse, error) {
-	m := new(exec.ExecControllerResponse)
-	if err := x.ClientStream.RecvMsg(m); err != nil {
-		return nil, err
-	}
-	return m, nil
-}
-
-// ControllerBusServiceServer is the server API for ControllerBusService service.
-type ControllerBusServiceServer interface {
-	// GetBusInfo requests information about the controller bus.
-	GetBusInfo(context.Context, *GetBusInfoRequest) (*GetBusInfoResponse, error)
-	// ExecController executes a controller configuration on the bus.
-	ExecController(*exec.ExecControllerRequest, ControllerBusService_ExecControllerServer) error
-}
-
-// UnimplementedControllerBusServiceServer can be embedded to have forward compatible implementations.
-type UnimplementedControllerBusServiceServer struct {
-}
-
-func (*UnimplementedControllerBusServiceServer) GetBusInfo(ctx context.Context, req *GetBusInfoRequest) (*GetBusInfoResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetBusInfo not implemented")
-}
-func (*UnimplementedControllerBusServiceServer) ExecController(req *exec.ExecControllerRequest, srv ControllerBusService_ExecControllerServer) error {
-	return status.Errorf(codes.Unimplemented, "method ExecController not implemented")
-}
-
-func RegisterControllerBusServiceServer(s *grpc.Server, srv ControllerBusServiceServer) {
-	s.RegisterService(&_ControllerBusService_serviceDesc, srv)
-}
-
-func _ControllerBusService_GetBusInfo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetBusInfoRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(ControllerBusServiceServer).GetBusInfo(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/bus.api.ControllerBusService/GetBusInfo",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ControllerBusServiceServer).GetBusInfo(ctx, req.(*GetBusInfoRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _ControllerBusService_ExecController_Handler(srv interface{}, stream grpc.ServerStream) error {
-	m := new(exec.ExecControllerRequest)
-	if err := stream.RecvMsg(m); err != nil {
-		return err
-	}
-	return srv.(ControllerBusServiceServer).ExecController(m, &controllerBusServiceExecControllerServer{stream})
-}
-
-type ControllerBusService_ExecControllerServer interface {
-	Send(*exec.ExecControllerResponse) error
-	grpc.ServerStream
-}
-
-type controllerBusServiceExecControllerServer struct {
-	grpc.ServerStream
-}
-
-func (x *controllerBusServiceExecControllerServer) Send(m *exec.ExecControllerResponse) error {
-	return x.ServerStream.SendMsg(m)
-}
-
-var _ControllerBusService_serviceDesc = grpc.ServiceDesc{
-	ServiceName: "bus.api.ControllerBusService",
-	HandlerType: (*ControllerBusServiceServer)(nil),
-	Methods: []grpc.MethodDesc{
-		{
-			MethodName: "GetBusInfo",
-			Handler:    _ControllerBusService_GetBusInfo_Handler,
-		},
-	},
-	Streams: []grpc.StreamDesc{
-		{
-			StreamName:    "ExecController",
-			Handler:       _ControllerBusService_ExecController_Handler,
-			ServerStreams: true,
-		},
-	},
-	Metadata: "github.com/aperturerobotics/controllerbus/bus/api/api.proto",
 }

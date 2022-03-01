@@ -3,18 +3,21 @@ package cli
 import (
 	"context"
 	"errors"
+	"net"
 
 	bus_api "github.com/aperturerobotics/controllerbus/bus/api"
 	"github.com/urfave/cli"
-	"google.golang.org/grpc"
+	"storj.io/drpc/drpcconn"
 )
 
 // ClientArgs contains the client arguments and functions.
 type ClientArgs struct {
 	// ctx is the context
 	ctx context.Context
+	// conn is the connection instance
+	conn *drpcconn.Conn
 	// client is the client instance
-	client bus_api.ControllerBusServiceClient
+	client bus_api.DRPCControllerBusServiceClient
 
 	// Interactive indicates we will pretty-print outputs.
 	Interactive bool
@@ -82,12 +85,12 @@ func (a *ClientArgs) BuildControllerBusCommand() cli.Command {
 }
 
 // SetClient sets the client instance.
-func (a *ClientArgs) SetClient(client bus_api.ControllerBusServiceClient) {
+func (a *ClientArgs) SetClient(client bus_api.DRPCControllerBusServiceClient) {
 	a.client = client
 }
 
 // BuildClient builds the client or returns it if it has been set.
-func (a *ClientArgs) BuildClient() (bus_api.ControllerBusServiceClient, error) {
+func (a *ClientArgs) BuildClient() (bus_api.DRPCControllerBusServiceClient, error) {
 	if a.client != nil {
 		return a.client, nil
 	}
@@ -96,11 +99,16 @@ func (a *ClientArgs) BuildClient() (bus_api.ControllerBusServiceClient, error) {
 		return nil, errors.New("dial address is not set")
 	}
 
-	clientConn, err := grpc.Dial(a.DialAddr, grpc.WithInsecure())
+	nconn, err := net.Dial("tcp", a.DialAddr)
 	if err != nil {
 		return nil, err
 	}
-	a.client = bus_api.NewControllerBusServiceClient(clientConn)
+	// N.B.: If you want TLS, you need to wrap the net.Conn with TLS before
+	// making a DRPC conn.
+
+	// convert the net.Conn to a drpc.Conn
+	a.conn = drpcconn.New(nconn)
+	a.client = bus_api.NewDRPCControllerBusServiceClient(a.conn)
 	return a.client, nil
 }
 

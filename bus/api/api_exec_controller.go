@@ -12,7 +12,7 @@ var ErrExecControllerDisabled = errors.New("exec controller is disabled on this 
 // ExecController executes a controller configuration on the bus.
 func (a *API) ExecController(
 	req *ce.ExecControllerRequest,
-	server ControllerBusService_ExecControllerServer,
+	server DRPCControllerBusService_ExecControllerStream,
 ) error {
 	if !a.conf.GetEnableExecController() {
 		return ErrExecControllerDisabled

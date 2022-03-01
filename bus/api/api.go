@@ -2,7 +2,7 @@ package bus_api
 
 import (
 	"github.com/aperturerobotics/controllerbus/bus"
-	"google.golang.org/grpc"
+	"storj.io/drpc"
 )
 
 // API implements the GRPC API.
@@ -16,10 +16,10 @@ func NewAPI(bus bus.Bus, conf *Config) (*API, error) {
 	return &API{bus: bus, conf: conf}, nil
 }
 
-// RegisterAsGRPCServer registers the API to the GRPC instance.
-func (a *API) RegisterAsGRPCServer(grpcServer *grpc.Server) {
-	RegisterControllerBusServiceServer(grpcServer, a)
+// RegisterAsDRPCServer registers the API to the DRPC mux.
+func (a *API) RegisterAsDRPCServer(mux drpc.Mux) {
+	DRPCRegisterControllerBusService(mux, a)
 }
 
 // _ is a type assertion
-var _ ControllerBusServiceServer = ((*API)(nil))
+var _ DRPCControllerBusServiceServer = ((*API)(nil))

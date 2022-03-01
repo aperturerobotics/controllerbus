@@ -13,7 +13,8 @@ import (
 	"github.com/aperturerobotics/controllerbus/directive"
 	"github.com/blang/semver"
 	"github.com/sirupsen/logrus"
-	"google.golang.org/grpc"
+	"storj.io/drpc/drpcmux"
+	"storj.io/drpc/drpcserver"
 )
 
 // Version is the API version.
@@ -67,8 +68,10 @@ func (c *Controller) Execute(ctx context.Context) error {
 		return err
 	}
 
-	server := grpc.NewServer()
-	api.RegisterAsGRPCServer(server)
+	mux := drpcmux.New()
+	api.RegisterAsDRPCServer(mux)
+
+	srv := drpcserver.New(mux)
 
 	lis, err := net.Listen("tcp", c.listenAddr)
 	if err != nil {
@@ -77,12 +80,12 @@ func (c *Controller) Execute(ctx context.Context) error {
 
 	errCh := make(chan error, 1)
 	go func() {
-		errCh <- server.Serve(lis)
+		errCh <- srv.Serve(ctx, lis)
+		_ = lis.Close()
 	}()
 
 	select {
 	case <-ctx.Done():
-		server.Stop()
 		return nil
 	case err := <-errCh:
 		return err
