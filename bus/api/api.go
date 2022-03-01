@@ -12,8 +12,8 @@ type API struct {
 }
 
 // NewAPI constructs a new instance of the API.
-func NewAPI(bus bus.Bus, conf *Config) (*API, error) {
-	return &API{bus: bus, conf: conf}, nil
+func NewAPI(bus bus.Bus, conf *Config) *API {
+	return &API{bus: bus, conf: conf}
 }
 
 // RegisterAsDRPCServer registers the API to the DRPC mux.

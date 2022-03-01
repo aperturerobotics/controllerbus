@@ -63,12 +63,9 @@ func (c *Controller) GetControllerInfo() controller.Info {
 // Returning an error triggers a retry with backoff.
 func (c *Controller) Execute(ctx context.Context) error {
 	// Construct the API
-	api, err := api.NewAPI(c.bus, c.conf.GetBusApiConfig())
-	if err != nil {
-		return err
-	}
-
 	mux := drpcmux.New()
+
+	api := api.NewAPI(c.bus, c.conf.GetBusApiConfig())
 	api.RegisterAsDRPCServer(mux)
 
 	srv := drpcserver.New(mux)
