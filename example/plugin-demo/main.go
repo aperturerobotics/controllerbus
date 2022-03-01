@@ -108,7 +108,7 @@ func run(ctx context.Context, le *logrus.Entry) error {
 		nil,
 	)
 	if err != nil {
-		return errors.Wrap(err, "listen on grpc api")
+		return errors.Wrap(err, "listen on api")
 	}
 	defer loaderRef.Release()
 

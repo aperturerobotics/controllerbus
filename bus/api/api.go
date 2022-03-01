@@ -5,7 +5,7 @@ import (
 	"storj.io/drpc"
 )
 
-// API implements the GRPC API.
+// API implements the rpc API.
 type API struct {
 	bus  bus.Bus
 	conf *Config

@@ -6,8 +6,8 @@ go 1.13
 replace (
 	github.com/golang/protobuf => github.com/aperturerobotics/go-protobuf-1.3.x v0.0.0-20200706003739-05fb54d407a9 // aperture-1.3.x
 	google.golang.org/genproto => google.golang.org/genproto v0.0.0-20190819201941-24fa4b261c55
-	google.golang.org/grpc => google.golang.org/grpc v1.30.0
 	google.golang.org/protobuf => github.com/paralin/protobuf-go v1.27.2-0.20220104043425-56bf363d0a34 // aperture
+	storj.io/drpc => github.com/paralin/drpc v0.0.30-0.20220301023015-b1e9d6bd9478 // aperture
 )
 
 require (

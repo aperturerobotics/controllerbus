@@ -149,10 +149,10 @@ func runDaemon(c *cli.Context) error {
 			nil,
 		)
 		if err != nil {
-			return errors.Wrap(err, "listen on grpc api")
+			return errors.Wrap(err, "listen on api")
 		}
 		defer apiRef.Release()
-		le.Infof("grpc api listening on: %s", daemonFlags.APIListen)
+		le.Infof("api listening on: %s", daemonFlags.APIListen)
 	}
 
 	/* TODO profiling plugin

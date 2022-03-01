@@ -3,10 +3,10 @@ package bus.api.controller;
 
 import "github.com/aperturerobotics/controllerbus/bus/api/api.proto";
 
-// Config configures the GRPC API.
+// Config configures the API.
 message Config {
   // ListenAddr is the address to listen on for connections.
   string listen_addr = 1;
   // BusApiConfig are options for controller bus api.
-  bus.api.Config bus_api_config = 2;
+  .bus.api.Config bus_api_config = 2;
 }

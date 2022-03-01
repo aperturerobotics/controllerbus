@@ -21,8 +21,7 @@ import (
 var Version = semver.MustParse("0.0.1")
 
 // Controller implements the API controller. The controller looks up the Node,
-// acquires its identity, constructs the GRPC listener, and responds to incoming
-// API calls.
+// acquires its identity, listens, and responds to incoming API calls.
 type Controller struct {
 	// le is the logger
 	le *logrus.Entry
@@ -54,7 +53,7 @@ func (c *Controller) GetControllerInfo() controller.Info {
 	return controller.NewInfo(
 		ControllerID,
 		Version,
-		"grpc api controller",
+		"api controller",
 	)
 }
 

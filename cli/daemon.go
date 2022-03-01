@@ -29,7 +29,7 @@ func (a *DaemonArgs) BuildFlags() []cli.Flag {
 		},
 		cli.StringFlag{
 			Name:        "api-listen",
-			Usage:       "if set, will listen on address for API grpc connections, ex :5110",
+			Usage:       "if set, will listen on address for API connections, ex :5110",
 			EnvVar:      "CONTROLLER_BUS_API_LISTEN",
 			Value:       ":5110",
 			Destination: &a.APIListen,

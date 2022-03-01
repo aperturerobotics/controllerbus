@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"os"
 
-	controllerbus_grpc "github.com/aperturerobotics/controllerbus/bus/api"
+	bus_api "github.com/aperturerobotics/controllerbus/bus/api"
 	"github.com/urfave/cli"
 )
 
@@ -16,7 +16,7 @@ func (a *ClientArgs) RunBusInfo(_ *cli.Context) error {
 		return err
 	}
 
-	ni, err := c.GetBusInfo(ctx, &controllerbus_grpc.GetBusInfoRequest{})
+	ni, err := c.GetBusInfo(ctx, &bus_api.GetBusInfoRequest{})
 	if err != nil {
 		return err
 	}
