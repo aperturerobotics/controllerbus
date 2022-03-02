@@ -2,46 +2,24 @@
 
 ## Introduction
 
-ControllerBus is a framework for Go applications using modular components which
-communicate over a shared bus with "Directives" to other controllers. Directives
-can be de-duplicated to share a single instance (& result) of a task.
+**ControllerBus** is a framework for **communicating control loops**:
 
-The controller implementations operate concurrently and synchronize with each
-other only when necessary. This results in extremely fast and lightweight
-programs which operate with maximum possible parallelism (with Goroutines).
+ - **Configurable**: flexible self-documenting config with Protobuf and YAML.
+ - **Cross-platform**: supports web browsers, servers, desktop, mobile, ...
+ - **Hot-loadable**: plugins and IPC dynamically add controllers at runtime.
+ - **Modular**: easily combine together application components w/o glue code.
+ - **Declarative**: de-duplicated declarative requests between controllers.
 
-Config objects are Protobuf messages with attached validation functions and
-controller IDs. Config objects can be passed to the loader controller, which
-resolves and starts the corresponding Controller.  
+Controllers communicate over a Bus using Directives: declarative requests for
+system target state, like a de-duplicated API call. Controllers are unaware of
+the implementations of the other components responding to the Directives.
 
-When attaching to the bus, all ongoing Directives are passed to the Controller,
-Controllers can return Resolver objects to concurrently fetch results in a
-separate Goroutine. Decoupling the implementations of the components from the
-APIs and configurations makes it easy to hot-load new implementations without
-even restarting the program.
-
-Controllers can be attached and detached on-demand. There is an associated
-example daemon and GRPC API for remotely starting Controllers over a network and
-issuing directives from a command-line interface.
-
-The Plugin system implements hot-loading and dynamic linking of components.
-
-### Similar to Microservices
-
-The controller model is similar to the microservices model:
-
- - Declare a contract for a component as an API (Rest, gRPC)
- - Other components link against the client for that API
- - Communication between components occurs in-process over network.
- - Subroutines concurrently process requests (distributed model).
-
-The goal of this project is to find a happy medium between the two approaches,
-supporting statically linked, dynamically linked (plugin), or networked
-(distributed) controller implementations and execution models. In practice, it
-declares a common format for controller configuration, construction, and
-execution in Go projects.
+Controller Bus provides a common pattern for structuring large Go projects as
+independent dynamically linked modules, optionally communicating over a network.
 
 ## Examples
+
+[![Support Server](https://img.shields.io/discord/803825858599059487.svg?label=Discord&logo=Discord&colorB=7289da&style=for-the-badge)](https://discord.gg/ZAZSt8CweP)
 
 [![asciicast](https://asciinema.org/a/418275.svg)](https://asciinema.org/a/418275)
 
@@ -232,6 +210,28 @@ factories into a single Plugin, and compile that package to a .so library.
 Plugins can be bundled together with a set of root configurations into a CLI.
 This can be used to bundle modules into a daemon and/or client for an
 application - similar to the [controllerbus cli](./cmd/controllerbus).
+
+## How does it work?
+
+Config objects are Protobuf messages with attached validation functions. They
+can be hand written in YAML and parsed to Protobuf or be created as Go objects.
+
+Controllers are executed by attaching them to a Bus. When attaching to a Bus,
+all ongoing Directives are passed to the new Controller. The Controllers can
+return Resolver objects to concurrently resolve results for Directives.
+
+The Plugin system implements hot-loading and dynamic linking of components.
+
+The controller model is similar to the microservices model:
+
+ - Declare a contract for a component as an API (Rest, gRPC)
+ - Other components link against the client for that API
+ - Communication between components occurs in-process over network.
+ - Subroutines concurrently process requests (distributed model).
+
+The goal of this project is to find a happy medium between the two approaches,
+supporting statically linked, dynamically linked (plugin), or networked
+(distributed) controller implementations and execution models.
 
 ## Testing
 
