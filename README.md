@@ -250,4 +250,4 @@ Please open a [GitHub issue] with any questions / issues.
 ... or feel free to reach out on [Matrix Chat] or [Discord].
 
 [Discord]: https://discord.gg/EmeEENhKkg
-[Matrix Chat]: https://matrix.to/#/#aperture-robotics:matrix.org
+[Matrix Chat]: https://matrix.to/#/#aperturerobotics:matrix.org
