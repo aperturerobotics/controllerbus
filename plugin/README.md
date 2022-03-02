@@ -1,5 +1,9 @@
 # Plugins
 
+[![asciicast](https://asciinema.org/a/I4LOCViLwzRlztYc1rytgAxWp.svg)](../example/plugin-demo)
+
+Check out the [plugin demos](../example/plugin-demo).
+
 Analyze Go code to bundle controller factories into Plugin modules.
 
 Features:

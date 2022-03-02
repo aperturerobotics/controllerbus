@@ -182,6 +182,8 @@ provides support for the Config type, (see the boilerplate example).
 
 ## Plugins
 
+[![asciicast](https://asciinema.org/a/I4LOCViLwzRlztYc1rytgAxWp.svg)](./example/plugin-demo)
+
 The [plugin](./plugin) system and compiler scans a set of Go packages for
 ControllerBus factories and bundles them together into a hashed Plugin bundle.
 The compiler CLI can watch code files for changes and re-build automatically.
