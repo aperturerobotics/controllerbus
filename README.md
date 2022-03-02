@@ -239,9 +239,21 @@ An in-memory Bus can be created for testing, an
 [example](./example/boilerplate/controller/controller_test.go) is provided in
 the boilerplate package.
 
+## Use Cases
+
+List of projects known to use Controller Bus:
+
+ - [Bifrost]: modular p2p networking and messaging library & daemon
+
+[Bifrost]: https://github.com/aperturerobotics/bifrost
+
+Open a PR to add your project to this list!
+
 ## Support
 
 ControllerBus is built & supported by Aperture Robotics, LLC.
+
+Community contributions and discussion are welcomed!
 
 Please open a [GitHub issue] with any questions / issues.
 
