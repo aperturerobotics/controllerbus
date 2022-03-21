@@ -65,7 +65,9 @@ func (c *Controller) Execute(ctx context.Context) error {
 	mux := drpcmux.New()
 
 	api := api.NewAPI(c.bus, c.conf.GetBusApiConfig())
-	api.RegisterAsDRPCServer(mux)
+	if err := api.RegisterAsDRPCServer(mux); err != nil {
+		return err
+	}
 
 	srv := drpcserver.New(mux)
 

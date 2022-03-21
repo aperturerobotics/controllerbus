@@ -17,8 +17,8 @@ func NewAPI(bus bus.Bus, conf *Config) *API {
 }
 
 // RegisterAsDRPCServer registers the API to the DRPC mux.
-func (a *API) RegisterAsDRPCServer(mux drpc.Mux) {
-	DRPCRegisterControllerBusService(mux, a)
+func (a *API) RegisterAsDRPCServer(mux drpc.Mux) error {
+	return DRPCRegisterControllerBusService(mux, a)
 }
 
 // _ is a type assertion
