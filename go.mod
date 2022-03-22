@@ -21,7 +21,7 @@ require (
 	github.com/sergi/go-diff v1.1.0
 	github.com/sirupsen/logrus v1.8.0
 	github.com/urfave/cli v1.22.5
-	github.com/zeebo/blake3 v0.2.2
+	github.com/zeebo/blake3 v0.2.3
 	golang.org/x/mod v0.5.1
 	golang.org/x/tools v0.1.8
 	gopkg.in/yaml.v2 v2.4.0 // indirect
