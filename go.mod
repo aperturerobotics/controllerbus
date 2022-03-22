@@ -12,19 +12,19 @@ replace (
 
 require (
 	github.com/blang/semver v3.5.1+incompatible
-	github.com/cenkalti/backoff v1.1.1-0.20190506075156-2146c9339422
-	github.com/fsnotify/fsnotify v1.5.0
+	github.com/cenkalti/backoff v2.2.1+incompatible
+	github.com/fsnotify/fsnotify v1.5.1
 	github.com/ghodss/yaml v1.0.0
 	github.com/golang/protobuf v1.5.0
 	github.com/mr-tron/base58 v1.2.0
 	github.com/pkg/errors v0.9.1
-	github.com/sergi/go-diff v1.1.0
+	github.com/sergi/go-diff v1.2.0
 	github.com/sirupsen/logrus v1.8.0
 	github.com/urfave/cli v1.22.5
 	github.com/zeebo/blake3 v0.2.3
-	golang.org/x/mod v0.5.1
-	golang.org/x/tools v0.1.8
+	golang.org/x/mod v0.6.0-dev.0.20220106191415-9b9b3d81d5e3
+	golang.org/x/tools v0.1.10
 	gopkg.in/yaml.v2 v2.4.0 // indirect
-	mvdan.cc/gofumpt v0.2.1
+	mvdan.cc/gofumpt v0.3.1
 	storj.io/drpc v0.0.29
 )
