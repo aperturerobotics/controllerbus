@@ -17,7 +17,7 @@ $(PROTOC_GEN_GO):
 	cd ./hack; \
 	go build -v \
 		-o ./bin/protoc-gen-go \
-		google.golang.org/protobufc-gen-go
+		github.com/golang/protobuf/protoc-gen-go
 
 $(PROTOC_GEN_VTPROTO):
 	cd ./hack; \
