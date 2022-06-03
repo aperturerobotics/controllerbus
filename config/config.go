@@ -1,7 +1,7 @@
 package config
 
 import (
-	"github.com/golang/protobuf/proto"
+	"google.golang.org/protobuf/proto"
 )
 
 // Config is an object specifying configuration for a component of the system.

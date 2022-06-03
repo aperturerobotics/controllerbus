@@ -11,8 +11,8 @@ import (
 	"github.com/aperturerobotics/controllerbus/controller/resolver"
 	"github.com/aperturerobotics/controllerbus/core"
 	boilerplate "github.com/aperturerobotics/controllerbus/example/boilerplate/controller"
-	"github.com/golang/protobuf/proto"
 	"github.com/sirupsen/logrus"
+	"google.golang.org/protobuf/proto"
 )
 
 // TestExecControllerRequest tests the ExecControllerRequest.

@@ -2,7 +2,7 @@ package plugin_loader_filesystem
 
 import (
 	"github.com/aperturerobotics/controllerbus/config"
-	"github.com/golang/protobuf/proto"
+	"google.golang.org/protobuf/proto"
 )
 
 // ConfigID is the identifier for the config type.

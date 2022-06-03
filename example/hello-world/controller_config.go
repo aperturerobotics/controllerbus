@@ -4,7 +4,7 @@ import (
 	"errors"
 
 	"github.com/aperturerobotics/controllerbus/config"
-	"github.com/golang/protobuf/proto"
+	"google.golang.org/protobuf/proto"
 )
 
 // Validate validates the configuration.

@@ -4,7 +4,7 @@ import (
 	"errors"
 
 	"github.com/aperturerobotics/controllerbus/directive"
-	"github.com/golang/protobuf/proto"
+	"google.golang.org/protobuf/proto"
 )
 
 // ErrNotProtobuf is returned when using a protobuf codec on a non-protobuf message.

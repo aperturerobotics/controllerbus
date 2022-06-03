@@ -2,7 +2,10 @@ module github.com/aperturerobotics/controllerbus
 
 go 1.16
 
-replace github.com/sirupsen/logrus => github.com/paralin/logrus v1.8.2-0.20211213222417-cf58d81385c7 // aperture
+replace (
+	github.com/sirupsen/logrus => github.com/aperturerobotics/logrus v1.8.2-0.20220322010420-77ab346a2cf8 // aperture
+	google.golang.org/protobuf => github.com/aperturerobotics/protobuf-go v1.27.2-0.20220603060022-78b627edc1c2 // aperture
+)
 
 require (
 	github.com/blang/semver v3.5.1+incompatible
@@ -12,7 +15,7 @@ require (
 	github.com/golang/protobuf v1.5.2
 	github.com/mr-tron/base58 v1.2.0
 	github.com/pkg/errors v0.9.1
-	github.com/planetscale/vtprotobuf v0.3.0 // indirect
+	github.com/planetscale/vtprotobuf v0.3.0
 	github.com/sergi/go-diff v1.2.0
 	github.com/sirupsen/logrus v1.8.0
 	github.com/urfave/cli v1.22.5

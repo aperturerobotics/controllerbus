@@ -1,15 +1,14 @@
 package configset_json
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 
 	"github.com/aperturerobotics/controllerbus/bus"
 	"github.com/aperturerobotics/controllerbus/config"
 	"github.com/aperturerobotics/controllerbus/controller/resolver"
-	"github.com/golang/protobuf/jsonpb"
 	"github.com/pkg/errors"
+	jsonpb "google.golang.org/protobuf/encoding/protojson"
 	// "github.com/aperturerobotics/controllerbus/controller/configset"
 )
 
@@ -44,7 +43,7 @@ func (c *Config) Resolve(ctx context.Context, configID string, b bus.Bus) error 
 		return errors.New("load config constructor directive returned invalid object")
 	}
 	c.underlying = ctor.ConstructConfig()
-	if err := jsonpb.UnmarshalString(c.pendingParseData, c.underlying); err != nil {
+	if err := jsonpb.Unmarshal([]byte(c.pendingParseData), c.underlying); err != nil {
 		return err
 	}
 	c.pendingParseData = ""
@@ -66,12 +65,8 @@ func (c *Config) UnmarshalJSON(data []byte) error {
 
 // MarshalJSON marshals a controller config JSON blob.
 func (c *Config) MarshalJSON() ([]byte, error) {
-	m := &jsonpb.Marshaler{}
-	var b bytes.Buffer
-	if err := m.Marshal(&b, c.underlying); err != nil {
-		return nil, err
-	}
-	return b.Bytes(), nil
+	m := &jsonpb.MarshalOptions{}
+	return m.Marshal(c.underlying)
 }
 
 // GetConfig returns the underlying config after Resolve.

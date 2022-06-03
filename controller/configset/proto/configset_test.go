@@ -7,8 +7,8 @@ import (
 	"github.com/aperturerobotics/controllerbus/controller/configset"
 	configset_controller "github.com/aperturerobotics/controllerbus/controller/configset/controller"
 	"github.com/aperturerobotics/controllerbus/core"
-	"github.com/golang/protobuf/proto"
 	"github.com/sirupsen/logrus"
+	"google.golang.org/protobuf/proto"
 )
 
 // TestE2E tests configset proto end to end.

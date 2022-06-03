@@ -7,8 +7,8 @@ import (
 	"github.com/aperturerobotics/controllerbus/config"
 	"github.com/aperturerobotics/controllerbus/controller/configset"
 	"github.com/aperturerobotics/controllerbus/controller/resolver"
-	"github.com/golang/protobuf/proto"
 	"github.com/pkg/errors"
+	"google.golang.org/protobuf/proto"
 )
 
 // NewControllerConfig constructs a new controller config.

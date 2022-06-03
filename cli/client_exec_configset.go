@@ -8,9 +8,9 @@ import (
 
 	controller_exec "github.com/aperturerobotics/controllerbus/controller/exec"
 	"github.com/ghodss/yaml"
-	"github.com/golang/protobuf/jsonpb"
 	"github.com/pkg/errors"
 	"github.com/urfave/cli"
+	jsonpb "google.golang.org/protobuf/encoding/protojson"
 )
 
 // RunExecController runs the execute configset command.
@@ -49,10 +49,12 @@ func (a *ClientArgs) RunExecController(_ *cli.Context) error {
 			return err
 		}
 
-		msh := &jsonpb.Marshaler{}
-		if err := msh.Marshal(os.Stdout, resp); err != nil {
+		msh := &jsonpb.MarshalOptions{}
+		data, err := msh.Marshal(resp)
+		if err != nil {
 			return err
 		}
+		os.Stdout.Write(data)
 		os.Stdout.WriteString("\n")
 	}
 }
