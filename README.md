@@ -10,12 +10,11 @@
  - **Modular**: easily combine together application components w/o glue code.
  - **Declarative**: de-duplicated declarative requests between controllers.
 
-Controllers communicate over a Bus using Directives: declarative requests for
-system target state, like a de-duplicated API call. Controllers are unaware of
-the implementations of the other components responding to the Directives.
-
 Controller Bus provides a common pattern for structuring large Go projects as
 independent dynamically linked modules, optionally communicating over a network.
+
+Controllers communicate over a Bus using Directives: declarative requests for
+target system state.
 
 ## Examples
 
