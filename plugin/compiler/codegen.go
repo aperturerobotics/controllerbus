@@ -293,7 +293,8 @@ func CodegenPluginWrapperFromAnalysis(
 // BuildPlugin builds a plugin using a temporary code-gen path.
 //
 // Automates the end-to-end build process with reasonable defaults.
-func BuildPlugin(ctx context.Context, le *logrus.Entry, packageSearchPath, outputPath string, packages []string) error {
+// If codegenDir is empty, uses a tmpdir in the user .cache directory.
+func BuildPlugin(ctx context.Context, le *logrus.Entry, packageSearchPath, outputPath, codegenDir string, packages []string) error {
 	var err error
 	packageSearchPath, err = filepath.Abs(packageSearchPath)
 	if err != nil {
@@ -316,24 +317,25 @@ func BuildPlugin(ctx context.Context, le *logrus.Entry, packageSearchPath, outpu
 		buildUid = b58.Encode(hs.Sum(nil))
 	}
 
-	// cannot use /tmp for this, need ~/.cache dir
-	// c.CodegenDir, err = ioutil.TempDir("", "cbus-codegen")
-	userCacheDir, err := os.UserCacheDir()
-	if err != nil {
-		return err
-	}
-	codegenDir := filepath.Join(userCacheDir, "cbus-codegen-"+buildUid)
-	le.Debugf("created tmpdir for code-gen process: %s", codegenDir)
+	if codegenDir != "" {
+		codegenDir, err = filepath.Abs(codegenDir)
+		if err != nil {
+			return err
+		}
+	} else {
+		userCacheDir, err := os.UserCacheDir()
+		if err != nil {
+			return err
+		}
+		codegenDir = filepath.Join(userCacheDir, "cbus", "codegen", buildUid)
 
-	codegenDir, err = filepath.Abs(codegenDir)
-	if err != nil {
-		return err
+		// remove codegen dir on exit
+		le.Debugf("creating tmpdir for codegen: %s", codegenDir)
+		defer func() {
+			_ = os.RemoveAll(codegenDir)
+		}()
 	}
 
-	// remove codegen dir on exit
-	defer func() {
-		_ = os.RemoveAll(codegenDir)
-	}()
 	if err := os.MkdirAll(codegenDir, 0755); err != nil {
 		return err
 	}
