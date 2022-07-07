@@ -21,17 +21,31 @@ func GetProtobufCodec() directive.NetworkedCodec {
 	return &protoCodecSingleton
 }
 
+// vtMarshal is the vtProtobuf marshal type.
+type vtMarshal interface {
+	MarshalVT() ([]byte, error)
+}
+
 // Marshal encodes the networked directive.
 func (c *protoCodec) Marshal(dir directive.Networked) ([]byte, error) {
 	if dir == nil {
 		return nil, nil
 	}
 
+	vtpb, vtpbOk := dir.(vtMarshal)
+	if vtpbOk {
+		return vtpb.MarshalVT()
+	}
 	pb, pbOk := dir.(proto.Message)
 	if !pbOk {
 		return nil, ErrNotProtobuf
 	}
 	return proto.Marshal(pb)
+}
+
+// vtUnmarshal is the vtProtobuf unmarshal type.
+type vtUnmarshal interface {
+	UnmarshalVT([]byte) error
 }
 
 // Unmarshal decodes the data to the networked directive.
@@ -41,6 +55,10 @@ func (c *protoCodec) Unmarshal(data []byte, dir directive.Networked) error {
 		return nil
 	}
 
+	vtpb, vtpbOk := dir.(vtUnmarshal)
+	if vtpbOk {
+		return vtpb.UnmarshalVT(data)
+	}
 	pb, pbOk := dir.(proto.Message)
 	if !pbOk {
 		return ErrNotProtobuf
