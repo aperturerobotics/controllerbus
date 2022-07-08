@@ -15,6 +15,10 @@ func NewInfo(id string, version semver.Version, descrip string) *Info {
 
 // Clone copies the Info object.
 func (i *Info) Clone() *Info {
+	if i == nil {
+		return nil
+	}
+
 	return &Info{
 		Id:          i.Id,
 		Version:     i.Version,
