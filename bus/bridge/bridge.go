@@ -48,7 +48,7 @@ func (b *BusBridge) SetDirectiveBridgeTarget(target bus.Bus) {
 }
 
 // GetControllerInfo returns information about the controller.
-func (b *BusBridge) GetControllerInfo() controller.Info {
+func (b *BusBridge) GetControllerInfo() *controller.Info {
 	return controller.NewInfo(ControllerID, Version, "forwards directives to bus")
 }
 

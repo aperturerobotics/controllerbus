@@ -29,7 +29,7 @@ func NewToyController(le *logrus.Entry, conf *ToyControllerConfig) (*ToyControll
 }
 
 // GetControllerInfo returns information about the controller.
-func (c *ToyController) GetControllerInfo() controller.Info {
+func (c *ToyController) GetControllerInfo() *controller.Info {
 	return controller.NewInfo(
 		ControllerID,
 		Version,

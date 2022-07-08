@@ -15,7 +15,7 @@ type Controller interface {
 	directive.Handler
 
 	// GetControllerInfo returns information about the controller.
-	GetControllerInfo() Info
+	GetControllerInfo() *Info
 	// Execute executes the given controller.
 	// Returning nil ends execution.
 	// Returning an error triggers a retry with backoff.

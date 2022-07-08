@@ -43,11 +43,8 @@ func NewController(
 }
 
 // GetControllerInfo returns information about the controller.
-func (c *Controller) GetControllerInfo() controller.Info {
-	return controller.Info{
-		Id:      ControllerID,
-		Version: Version.String(),
-	}
+func (c *Controller) GetControllerInfo() *controller.Info {
+	return controller.NewInfo(ControllerID, Version, "boilerplate example")
 }
 
 // HandleDirective asks if the handler can resolve the directive.

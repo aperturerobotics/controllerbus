@@ -179,7 +179,7 @@ func (r *ExecControllerRequest) Execute(
 			} else if ctrl := csv.GetController(); ctrl != nil {
 				ctrlInfo := ctrl.GetControllerInfo()
 				resp.Status = ControllerStatus_ControllerStatus_RUNNING
-				resp.ControllerInfo = &ctrlInfo
+				resp.ControllerInfo = ctrlInfo
 			} else {
 				resp.Status = ControllerStatus_ControllerStatus_CONFIGURING
 			}

@@ -21,7 +21,7 @@ func (a *API) GetBusInfo(
 	var resp GetBusInfoResponse
 	for _, ctrl := range controllers {
 		cinfo := ctrl.GetControllerInfo()
-		resp.RunningControllers = append(resp.RunningControllers, &cinfo)
+		resp.RunningControllers = append(resp.RunningControllers, cinfo)
 	}
 	for _, dir := range directives {
 		resp.RunningDirectives = append(resp.RunningDirectives, directive.NewDirectiveState(dir))
