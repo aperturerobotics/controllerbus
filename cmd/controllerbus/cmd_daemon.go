@@ -152,7 +152,6 @@ func runDaemon(c *cli.Context) error {
 			return errors.Wrap(err, "listen on api")
 		}
 		defer apiRef.Release()
-		le.Infof("api listening on: %s", daemonFlags.APIListen)
 	}
 
 	/* TODO profiling plugin

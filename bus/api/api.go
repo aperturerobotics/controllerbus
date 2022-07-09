@@ -2,7 +2,7 @@ package bus_api
 
 import (
 	"github.com/aperturerobotics/controllerbus/bus"
-	"storj.io/drpc"
+	srpc "github.com/aperturerobotics/starpc/srpc"
 )
 
 // API implements the rpc API.
@@ -16,10 +16,10 @@ func NewAPI(bus bus.Bus, conf *Config) *API {
 	return &API{bus: bus, conf: conf}
 }
 
-// RegisterAsDRPCServer registers the API to the DRPC mux.
-func (a *API) RegisterAsDRPCServer(mux drpc.Mux) error {
-	return DRPCRegisterControllerBusService(mux, a)
+// RegisterAsSRPCServer registers the API to the SRPC mux.
+func (a *API) RegisterAsSRPCServer(mux srpc.Mux) error {
+	return SRPCRegisterControllerBusService(mux, a)
 }
 
 // _ is a type assertion
-var _ DRPCControllerBusServiceServer = ((*API)(nil))
+var _ SRPCControllerBusServiceServer = ((*API)(nil))

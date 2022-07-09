@@ -58,7 +58,7 @@
     "bufferutil": "^4.0.6",
     "long": "^5.2.0",
     "protobufjs": "^6.11.3",
-    "starpc": "^0.8.1",
+    "starpc": "^0.8.2",
     "utf-8-validate": "^5.0.9"
   }
 }
