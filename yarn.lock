@@ -2178,6 +2178,27 @@ starpc@^0.8.1:
     protobufjs "^6.11.3"
     ws "^8.8.0"
 
+starpc@^0.8.2:
+  version "0.8.2"
+  resolved "https://registry.yarnpkg.com/starpc/-/starpc-0.8.2.tgz#0c929f1562e9c26a88fa56053a790b7a78949315"
+  integrity sha512-cxOslf7YfS0+cmVADeJuWGMaJPCdGbwuu7cFbbcmOqrPcr+M3aF6DsPx5CSRraofFw1YXmC706XM8myhJAPohw==
+  dependencies:
+    "@libp2p/interface-connection" "^2.1.1"
+    "@libp2p/interface-stream-muxer" "^2.0.1"
+    "@libp2p/mplex" "^4.0.0"
+    event-iterator "^2.0.0"
+    isomorphic-ws "^5.0.0"
+    it-first "^1.0.7"
+    it-length-prefixed "^7.0.1"
+    it-pipe "^2.0.3"
+    it-pushable "^3.0.0"
+    it-stream-types "^1.0.4"
+    it-ws "^5.0.2"
+    long "^5.2.0"
+    patch-package "^6.4.7"
+    protobufjs "^6.11.3"
+    ws "^8.8.0"
+
 string-width@^4.1.0, string-width@^4.2.0:
   version "4.2.3"
   resolved "https://registry.yarnpkg.com/string-width/-/string-width-4.2.3.tgz#269c7117d27b05ad2e536830a8ec895ef9c6d010"

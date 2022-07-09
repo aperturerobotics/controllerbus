@@ -6,8 +6,8 @@ import (
 	"net"
 
 	bus_api "github.com/aperturerobotics/controllerbus/bus/api"
+	"github.com/aperturerobotics/starpc/srpc"
 	"github.com/urfave/cli"
-	"storj.io/drpc/drpcconn"
 )
 
 // ClientArgs contains the client arguments and functions.
@@ -15,9 +15,9 @@ type ClientArgs struct {
 	// ctx is the context
 	ctx context.Context
 	// conn is the connection instance
-	conn *drpcconn.Conn
+	conn srpc.Client
 	// client is the client instance
-	client bus_api.DRPCControllerBusServiceClient
+	client bus_api.SRPCControllerBusServiceClient
 
 	// Interactive indicates we will pretty-print outputs.
 	Interactive bool
@@ -85,12 +85,12 @@ func (a *ClientArgs) BuildControllerBusCommand() cli.Command {
 }
 
 // SetClient sets the client instance.
-func (a *ClientArgs) SetClient(client bus_api.DRPCControllerBusServiceClient) {
+func (a *ClientArgs) SetClient(client bus_api.SRPCControllerBusServiceClient) {
 	a.client = client
 }
 
 // BuildClient builds the client or returns it if it has been set.
-func (a *ClientArgs) BuildClient() (bus_api.DRPCControllerBusServiceClient, error) {
+func (a *ClientArgs) BuildClient() (bus_api.SRPCControllerBusServiceClient, error) {
 	if a.client != nil {
 		return a.client, nil
 	}
@@ -103,12 +103,16 @@ func (a *ClientArgs) BuildClient() (bus_api.DRPCControllerBusServiceClient, erro
 	if err != nil {
 		return nil, err
 	}
-	// N.B.: If you want TLS, you need to wrap the net.Conn with TLS before
-	// making a DRPC conn.
+
+	// If you want TLS, you need to wrap the net.Conn with TLS.
 
 	// convert the net.Conn to a drpc.Conn
-	a.conn = drpcconn.New(nconn)
-	a.client = bus_api.NewDRPCControllerBusServiceClient(a.conn)
+	muxedConn, err := srpc.NewMuxedConn(nconn, false)
+	if err != nil {
+		return nil, err
+	}
+	a.conn = srpc.NewClientWithMuxedConn(muxedConn)
+	a.client = bus_api.NewSRPCControllerBusServiceClient(a.conn)
 	return a.client, nil
 }
 

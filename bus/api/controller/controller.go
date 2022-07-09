@@ -11,10 +11,9 @@ import (
 	api "github.com/aperturerobotics/controllerbus/bus/api"
 	"github.com/aperturerobotics/controllerbus/controller"
 	"github.com/aperturerobotics/controllerbus/directive"
+	"github.com/aperturerobotics/starpc/srpc"
 	"github.com/blang/semver"
 	"github.com/sirupsen/logrus"
-	"storj.io/drpc/drpcmux"
-	"storj.io/drpc/drpcserver"
 )
 
 // Version is the API version.
@@ -62,14 +61,11 @@ func (c *Controller) GetControllerInfo() *controller.Info {
 // Returning an error triggers a retry with backoff.
 func (c *Controller) Execute(ctx context.Context) error {
 	// Construct the API
-	mux := drpcmux.New()
-
+	mux := srpc.NewMux()
 	api := api.NewAPI(c.bus, c.conf.GetBusApiConfig())
-	if err := api.RegisterAsDRPCServer(mux); err != nil {
+	if err := api.RegisterAsSRPCServer(mux); err != nil {
 		return err
 	}
-
-	srv := drpcserver.New(mux)
 
 	lis, err := net.Listen("tcp", c.listenAddr)
 	if err != nil {
@@ -77,8 +73,9 @@ func (c *Controller) Execute(ctx context.Context) error {
 	}
 
 	errCh := make(chan error, 1)
+	srv := srpc.NewServer(mux)
 	go func() {
-		errCh <- srv.Serve(ctx, lis)
+		errCh <- srpc.AcceptMuxedListener(ctx, lis, srv)
 		_ = lis.Close()
 	}()
 
