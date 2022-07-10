@@ -3,8 +3,8 @@ github.com/aperturerobotics/logrus v1.8.2-0.20220322010420-77ab346a2cf8 h1:Op74i
 github.com/aperturerobotics/logrus v1.8.2-0.20220322010420-77ab346a2cf8/go.mod h1:x/wqQ2RFrvQZEw5sMa05JQ/UbAAIfbzwTyMeXz9S0YI=
 github.com/aperturerobotics/protobuf-go v1.27.2-0.20220609075637-a1d116b0035f h1:Nqo41mbCsewradHOkrEyeJZMt1NsXDemmTS2Na8Tsm0=
 github.com/aperturerobotics/protobuf-go v1.27.2-0.20220609075637-a1d116b0035f/go.mod h1:HV8QOd/L58Z+nl8r43ehVNZIU/HEI6OcFqwMG9pJV4I=
-github.com/aperturerobotics/starpc v0.8.3-0.20220709043235-605214effcf9 h1:uoNElOIG7PP6W8AUFQdLLHkiJi3Bea3G9S/v7acOfTc=
-github.com/aperturerobotics/starpc v0.8.3-0.20220709043235-605214effcf9/go.mod h1:mOn8ChuS9R2v71hVEeaEp+6tGiZIOLZudcYq3turmHo=
+github.com/aperturerobotics/starpc v0.8.5 h1:6qzzg5JtAuulkUzEewIzeKWLaoFGshT8Bh5B9aLm17E=
+github.com/aperturerobotics/starpc v0.8.5/go.mod h1:mOn8ChuS9R2v71hVEeaEp+6tGiZIOLZudcYq3turmHo=
 github.com/benbjohnson/clock v1.1.0/go.mod h1:J11/hYXuz8f4ySSvYwY0FKfm+ezbsZBKZxNJlLklBHA=
 github.com/benbjohnson/clock v1.3.0 h1:ip6w0uFQkncKQ979AypyG0ER7mqUSBdKLOgAle/AT8A=
 github.com/blang/semver v3.5.1+incompatible h1:cQNTCjp13qL8KC3Nbxr/y2Bqb63oX6wdnnjpJbkM4JQ=
