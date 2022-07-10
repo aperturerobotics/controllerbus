@@ -103,10 +103,6 @@ func (a *ClientArgs) BuildClient() (bus_api.SRPCControllerBusServiceClient, erro
 	if err != nil {
 		return nil, err
 	}
-
-	// If you want TLS, you need to wrap the net.Conn with TLS.
-
-	// convert the net.Conn to a drpc.Conn
 	muxedConn, err := srpc.NewMuxedConn(nconn, false)
 	if err != nil {
 		return nil, err

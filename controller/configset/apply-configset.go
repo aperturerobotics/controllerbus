@@ -1,6 +1,7 @@
 package configset
 
 import (
+	"sort"
 	"strconv"
 	"strings"
 
@@ -90,6 +91,7 @@ func (d *applyConfigSet) GetDebugVals() directive.DebugValues {
 			i++
 		}
 
+		sort.Strings(confIDs)
 		vals["controller-keys"] = confIDs
 	}
 	return vals
