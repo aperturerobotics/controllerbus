@@ -2,7 +2,7 @@
 import Long from 'long'
 import { ConfigSet } from '../configset/proto/configset.pb.js'
 import { Info } from '../controller.pb.js'
-import * as _m0 from 'protobufjs/minimal'
+import _m0 from 'protobufjs/minimal.js'
 
 export const protobufPackage = 'controller.exec'
 
