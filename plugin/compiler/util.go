@@ -29,6 +29,7 @@ func copyFileFromTo(src, dest string) error {
 }
 
 // filepathHasPrefix checks if a file path has a prefix.
+//
 //nolint:staticcheck // filepath.HasPrefix is deprecated but OK in this use case
 func filepathHasPrefix(p1, p2 string) bool {
 	return filepath.HasPrefix(p1, p2)

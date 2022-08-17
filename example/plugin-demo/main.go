@@ -23,7 +23,8 @@ const (
 )
 
 // NOTE: must have same version of:
-//   "github.com/aperturerobotics/controllerbus/hot/plugin",
+//
+//	"github.com/aperturerobotics/controllerbus/hot/plugin",
 var packagesList = []string{
 	// usual demo boilerplate controller
 	"github.com/aperturerobotics/controllerbus/example/boilerplate/controller",
