@@ -3,7 +3,6 @@ package cli
 import (
 	"context"
 	"io"
-	"io/ioutil"
 	"os"
 
 	controller_exec "github.com/aperturerobotics/controllerbus/controller/exec"
@@ -19,7 +18,7 @@ func (a *ClientArgs) RunExecController(_ *cli.Context) error {
 
 	req := &controller_exec.ExecControllerRequest{}
 	if csPath := a.ExecConfigSetPath; csPath != "" {
-		data, err := ioutil.ReadFile(csPath)
+		data, err := os.ReadFile(csPath)
 		if err != nil {
 			return err
 		}

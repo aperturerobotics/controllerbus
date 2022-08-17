@@ -5,7 +5,6 @@ import (
 	gast "go/ast"
 	"go/build"
 	"io"
-	"io/ioutil"
 	"os"
 	"path"
 	"strings"
@@ -35,11 +34,11 @@ func CompilePluginFromFile(
 		return err
 	}
 	// write the intermediate go file
-	if err := ioutil.WriteFile(intermediateGoFile, dat, 0644); err != nil {
+	if err := os.WriteFile(intermediateGoFile, dat, 0644); err != nil {
 		return err
 	}
 	// build the intermediate output dir
-	tmpName, err := ioutil.TempDir("", "controllerbus-hot-compiler-tmpdir")
+	tmpName, err := os.MkdirTemp("", "controllerbus-hot-compiler-tmpdir")
 	if err != nil {
 		return err
 	}
@@ -107,7 +106,7 @@ func CompilePluginFromFile(
 		return err
 	}
 	_, _ = interFile.Write([]byte("\nvar HotPluginBuildUUID = `" + hashStr + "`\n"))
-	if err := ioutil.WriteFile(intermediateGoFile, dat, 0644); err != nil {
+	if err := os.WriteFile(intermediateGoFile, dat, 0644); err != nil {
 		return err
 	}
 

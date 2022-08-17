@@ -1,7 +1,6 @@
 package plugin_compiler
 
 import (
-	"io/ioutil"
 	"os"
 	"path"
 	"path/filepath"
@@ -15,7 +14,7 @@ var dotSlash = string([]rune{'.', os.PathSeparator})
 
 // parseGoModFile parses a go.mod file at a path.
 func parseGoModFile(srcPath string) (*modfile.File, error) {
-	srcGoMod, err := ioutil.ReadFile(srcPath)
+	srcGoMod, err := os.ReadFile(srcPath)
 	if err != nil {
 		return nil, err
 	}

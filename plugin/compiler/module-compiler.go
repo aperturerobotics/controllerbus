@@ -10,7 +10,6 @@ import (
 	"go/parser"
 	"go/printer"
 	"go/token"
-	"io/ioutil"
 	"os"
 	"path"
 	"path/filepath"
@@ -271,7 +270,7 @@ func (m *ModuleCompiler) GenerateModules(analysis *Analysis, pluginBinaryVersion
 		if err != nil {
 			return err
 		}
-		if err := ioutil.WriteFile(
+		if err := os.WriteFile(
 			codegenModFile,
 			destGoMod,
 			0644,
@@ -361,7 +360,7 @@ func (m *ModuleCompiler) GenerateModules(analysis *Analysis, pluginBinaryVersion
 			if err := os.MkdirAll(pkgCodeOutDirPath, 0755); err != nil {
 				return err
 			}
-			err = ioutil.WriteFile(pkgCodeOutPath, outData, 0644)
+			err = os.WriteFile(pkgCodeOutPath, outData, 0644)
 			if err != nil {
 				return err
 			}
@@ -372,7 +371,7 @@ func (m *ModuleCompiler) GenerateModules(analysis *Analysis, pluginBinaryVersion
 	if err != nil {
 		return err
 	}
-	err = ioutil.WriteFile(outPluginModFilePath, pluginGoMod, 0644)
+	err = os.WriteFile(outPluginModFilePath, pluginGoMod, 0644)
 	if err != nil {
 		return err
 	}
@@ -428,7 +427,7 @@ func (m *ModuleCompiler) GenerateModules(analysis *Analysis, pluginBinaryVersion
 			"\nvar HotPluginBuildUUID = `"+buildPrefix+"`\n",
 		)...)
 	}
-	if err := ioutil.WriteFile(outPluginCodeFilePath, pluginCodeData, 0644); err != nil {
+	if err := os.WriteFile(outPluginCodeFilePath, pluginCodeData, 0644); err != nil {
 		return err
 	}
 
@@ -451,7 +450,7 @@ func (m *ModuleCompiler) CompilePlugin(outFile string) error {
 	}
 
 	// build the intermediate output dir
-	tmpName, err := ioutil.TempDir("", "controllerbus-hot-compiler-tmpdir")
+	tmpName, err := os.MkdirTemp("", "controllerbus-hot-compiler-tmpdir")
 	if err != nil {
 		return err
 	}

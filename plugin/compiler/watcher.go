@@ -3,7 +3,6 @@ package plugin_compiler
 import (
 	"context"
 	"crypto/sha256"
-	"io/ioutil"
 	"os"
 	"path"
 	"path/filepath"
@@ -236,12 +235,12 @@ func CleanupOldVersions(le *logrus.Entry, pluginOutputPath string) error {
 		WithField("filename-match-re", filenameRe.String()).
 		Debug("compilation complete, cleaning up old versions")
 	// list files in target dir
-	dirContents, err := ioutil.ReadDir(pluginOutputDirectory)
+	dirContents, err := os.ReadDir(pluginOutputDirectory)
 	if err != nil {
 		return err
 	}
 	for _, df := range dirContents {
-		if df.IsDir() || !df.Mode().IsRegular() {
+		if df.IsDir() || !df.Type().IsRegular() {
 			continue
 		}
 		dfName := df.Name()

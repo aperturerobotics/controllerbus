@@ -2,7 +2,7 @@ package plugin_loader_filesystem
 
 import (
 	"context"
-	"io/ioutil"
+	"os"
 	"path"
 	"strings"
 	"sync"
@@ -100,13 +100,13 @@ func (w *Watcher) SyncPlugins(ctx context.Context, scanDir string) error {
 	w.mtx.Lock()
 	defer w.mtx.Unlock()
 
-	dirContents, err := ioutil.ReadDir(scanDir)
+	dirContents, err := os.ReadDir(scanDir)
 	if err != nil {
 		return err
 	}
 	foundNames := make(map[string]*shared.PluginStat)
 	for _, df := range dirContents {
-		if df.IsDir() || !df.Mode().IsRegular() {
+		if df.IsDir() || !df.Type().IsRegular() {
 			continue
 		}
 		dfName := df.Name()

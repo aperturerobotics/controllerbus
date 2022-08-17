@@ -48,7 +48,6 @@ func (c *CompilerArgs) setupCompiler(
 
 	if c.CodegenDir == "" {
 		// cannot use /tmp for this, need ~/.cache dir
-		// c.CodegenDir, err = ioutil.TempDir("", "cbus-codegen")
 		userCacheDir, err := os.UserCacheDir()
 		if err != nil {
 			return nil, nil, rel, err
