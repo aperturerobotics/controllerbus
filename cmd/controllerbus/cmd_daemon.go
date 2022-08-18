@@ -17,7 +17,7 @@ import (
 	hot_loader_filesystem "github.com/aperturerobotics/controllerbus/plugin/loader/shared-library/filesystem"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v2"
 )
 
 var daemonFlags cbcli.DaemonArgs
@@ -35,7 +35,7 @@ func init() {
 	})
 	commands = append(
 		commands,
-		cli.Command{
+		&cli.Command{
 			Name:   "daemon",
 			Usage:  "run a controller-bus daemon, loading plugins",
 			Action: runDaemon,

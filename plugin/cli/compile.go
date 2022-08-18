@@ -11,7 +11,7 @@ import (
 	plugin_compiler "github.com/aperturerobotics/controllerbus/plugin/compiler"
 	b58 "github.com/mr-tron/base58/base58"
 	"github.com/sirupsen/logrus"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v2"
 )
 
 // setupCompiler setups and creates the compiler.
@@ -104,7 +104,7 @@ func (c *CompilerArgs) runCompileOnce(cctx *cli.Context) error {
 	log.SetLevel(logrus.DebugLevel)
 	le := logrus.NewEntry(log)
 
-	args := cctx.Args()
+	args := cctx.Args().Slice()
 	if len(args) == 0 {
 		return errors.New("specify list of packages as arguments")
 	}

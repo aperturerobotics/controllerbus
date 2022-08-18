@@ -7,7 +7,7 @@ import (
 
 	bus_api "github.com/aperturerobotics/controllerbus/bus/api"
 	"github.com/aperturerobotics/starpc/srpc"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v2"
 )
 
 // ClientArgs contains the client arguments and functions.
@@ -32,7 +32,7 @@ type ClientArgs struct {
 // BuildFlags attaches the flags to a flag set.
 func (a *ClientArgs) BuildFlags() []cli.Flag {
 	return []cli.Flag{
-		cli.StringFlag{
+		&cli.StringFlag{
 			Name:        "dial-addr",
 			Usage:       "address to dial API on",
 			Destination: &a.DialAddr,
@@ -42,18 +42,19 @@ func (a *ClientArgs) BuildFlags() []cli.Flag {
 }
 
 // BuildCommands attaches the commands.
-func (a *ClientArgs) BuildCommands() []cli.Command {
-	return []cli.Command{
+func (a *ClientArgs) BuildCommands() []*cli.Command {
+	return []*cli.Command{
 		{
 			Name:   "bus-info",
 			Usage:  "returns bus information",
 			Action: a.RunBusInfo,
 			Flags: []cli.Flag{
-				cli.BoolTFlag{
+				&cli.BoolFlag{
 					Name:        "interactive",
 					Usage:       "print interactive (pretty print) output",
 					Destination: &a.Interactive,
-					EnvVar:      "CONTROLLER_BUS_INTERACTIVE",
+					Value:       true,
+					EnvVars:     []string{"CONTROLLER_BUS_INTERACTIVE"},
 				},
 			},
 		},
@@ -62,10 +63,10 @@ func (a *ClientArgs) BuildCommands() []cli.Command {
 			Usage:  "execute a controller configset",
 			Action: a.RunExecController,
 			Flags: []cli.Flag{
-				cli.StringFlag{
+				&cli.StringFlag{
 					Name:        "config-set-file, f",
 					Usage:       "path to config set json or yaml file",
-					EnvVar:      "CONTROLLER_BUS_EXEC_CONFIG_SET_FILE",
+					EnvVars:     []string{"CONTROLLER_BUS_EXEC_CONFIG_SET_FILE"},
 					Destination: &a.ExecConfigSetPath,
 				},
 			},
@@ -74,9 +75,9 @@ func (a *ClientArgs) BuildCommands() []cli.Command {
 }
 
 // BuildControllerBusCommand returns the controller-bus sub-command set.
-func (a *ClientArgs) BuildControllerBusCommand() cli.Command {
+func (a *ClientArgs) BuildControllerBusCommand() *cli.Command {
 	cbusCmds := a.BuildCommands()
-	return cli.Command{
+	return &cli.Command{
 		Name:        "controller-bus",
 		Aliases:     []string{"cbus"},
 		Usage:       "ControllerBus system sub-commands.",

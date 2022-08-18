@@ -5,7 +5,7 @@ import (
 	"errors"
 
 	"github.com/sirupsen/logrus"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v2"
 )
 
 func (c *CompilerArgs) runCodegenOnce(cctx *cli.Context) error {
@@ -15,11 +15,11 @@ func (c *CompilerArgs) runCodegenOnce(cctx *cli.Context) error {
 	le := logrus.NewEntry(log)
 
 	args := cctx.Args()
-	if len(args) == 0 {
+	if args.Len() == 0 {
 		return errors.New("specify list of packages as arguments")
 	}
 
-	an, modCompiler, cleanup, err := c.setupCompiler(ctx, le, args)
+	an, modCompiler, cleanup, err := c.setupCompiler(ctx, le, args.Tail())
 	if err != nil {
 		return err
 	}

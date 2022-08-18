@@ -8,7 +8,7 @@ import (
 	controller_exec "github.com/aperturerobotics/controllerbus/controller/exec"
 	"github.com/ghodss/yaml"
 	"github.com/pkg/errors"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v2"
 	jsonpb "google.golang.org/protobuf/encoding/protojson"
 )
 

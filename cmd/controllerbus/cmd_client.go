@@ -2,7 +2,7 @@ package main
 
 import (
 	ccli "github.com/aperturerobotics/controllerbus/cli"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v2"
 )
 
 // cliArgs are the client arguments
@@ -13,7 +13,7 @@ func init() {
 	clientFlags := (&cliArgs).BuildFlags()
 	commands = append(
 		commands,
-		cli.Command{
+		&cli.Command{
 			Name:        "client",
 			Usage:       "client sub-commands",
 			Subcommands: clientCommands,
