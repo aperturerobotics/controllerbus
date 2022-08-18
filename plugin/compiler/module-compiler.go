@@ -470,6 +470,7 @@ func (m *ModuleCompiler) CompilePlugin(outFile string) error {
 	ecmd = exec.ExecGoCompiler(
 		"build", "-v", "-trimpath",
 		"-buildmode=plugin",
+		"-buildvcs=false",
 		"-tags",
 		buildTag,
 		"-o",
