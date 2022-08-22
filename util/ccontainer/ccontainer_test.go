@@ -9,17 +9,18 @@ import (
 // TestCContainer tests the concurrent container
 func TestCContainer(t *testing.T) {
 	ctx := context.Background()
-	c := NewCContainer(nil)
+	c := NewCContainer[int](nil)
 
 	errCh := make(chan error, 1)
 	_ = c.WaitValueEmpty(ctx, errCh) // should be instant
 
-	go c.SetValue(5)
+	var val = 5
+	go c.SetValue(&val)
 	gv, err := c.WaitValue(ctx, errCh)
 	if err != nil {
 		t.Fatal(err.Error())
 	}
-	if gv != 5 {
+	if gv == nil || *gv != 5 {
 		t.Fail()
 	}
 

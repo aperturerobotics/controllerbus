@@ -6,24 +6,24 @@ import (
 )
 
 // CContainer is a concurrent container.
-type CContainer struct {
+type CContainer[T any] struct {
 	mtx  sync.Mutex
-	val  interface{}
+	val  *T
 	wake chan struct{}
 }
 
 // NewCContainer builds a CContainer with an initial value.
-func NewCContainer(val interface{}) *CContainer {
-	return &CContainer{val: val, wake: make(chan struct{})}
+func NewCContainer[T any](val *T) *CContainer[T] {
+	return &CContainer[T]{val: val, wake: make(chan struct{})}
 }
 
 // WaitValueWithValidator waits for any value that matches the validator in the container.
 // errCh is an optional channel to read an error from.
-func (c *CContainer) WaitValueWithValidator(
+func (c *CContainer[T]) WaitValueWithValidator(
 	ctx context.Context,
-	valid func(v interface{}) (bool, error),
+	valid func(v *T) (bool, error),
 	errCh <-chan error,
-) (interface{}, error) {
+) (*T, error) {
 	var ok bool
 	var err error
 	for {
@@ -58,8 +58,8 @@ func (c *CContainer) WaitValueWithValidator(
 
 // WaitValue waits for any non-nil value in the container.
 // errCh is an optional channel to read an error from.
-func (c *CContainer) WaitValue(ctx context.Context, errCh <-chan error) (interface{}, error) {
-	return c.WaitValueWithValidator(ctx, func(v interface{}) (bool, error) {
+func (c *CContainer[T]) WaitValue(ctx context.Context, errCh <-chan error) (*T, error) {
+	return c.WaitValueWithValidator(ctx, func(v *T) (bool, error) {
 		// untyped nil == no value or type
 		// no checking for typed nil (typed nil != nil)
 		return v != nil, nil
@@ -68,16 +68,16 @@ func (c *CContainer) WaitValue(ctx context.Context, errCh <-chan error) (interfa
 
 // WaitValueChange waits for a value that is different than the given.
 // errCh is an optional channel to read an error from.
-func (c *CContainer) WaitValueChange(ctx context.Context, old interface{}, errCh <-chan error) (interface{}, error) {
-	return c.WaitValueWithValidator(ctx, func(v interface{}) (bool, error) {
+func (c *CContainer[T]) WaitValueChange(ctx context.Context, old *T, errCh <-chan error) (*T, error) {
+	return c.WaitValueWithValidator(ctx, func(v *T) (bool, error) {
 		return v != old, nil
 	}, errCh)
 }
 
 // WaitValueEmpty waits for a untyped nil value.
 // errCh is an optional channel to read an error from.
-func (c *CContainer) WaitValueEmpty(ctx context.Context, errCh <-chan error) error {
-	_, err := c.WaitValueWithValidator(ctx, func(v interface{}) (bool, error) {
+func (c *CContainer[T]) WaitValueEmpty(ctx context.Context, errCh <-chan error) error {
+	_, err := c.WaitValueWithValidator(ctx, func(v *T) (bool, error) {
 		return v == nil, nil
 	}, errCh)
 	return err
@@ -87,7 +87,7 @@ func (c *CContainer) WaitValueEmpty(ctx context.Context, errCh <-chan error) err
 //
 // Be sure to check for nil when setting if necessary: untyped nil is still
 // considered a set value.
-func (c *CContainer) SetValue(val interface{}) {
+func (c *CContainer[T]) SetValue(val *T) {
 	c.mtx.Lock()
 	c.val = val
 	c.wakeWaiting()
@@ -95,7 +95,7 @@ func (c *CContainer) SetValue(val interface{}) {
 }
 
 // wakeWaiting wakes any waiting goroutines
-func (c *CContainer) wakeWaiting() {
+func (c *CContainer[T]) wakeWaiting() {
 	for {
 		select {
 		case <-c.wake:
