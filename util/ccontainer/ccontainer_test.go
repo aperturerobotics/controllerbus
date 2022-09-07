@@ -9,7 +9,7 @@ import (
 // TestCContainer tests the concurrent container
 func TestCContainer(t *testing.T) {
 	ctx := context.Background()
-	c := NewCContainer[int](nil)
+	c := NewCContainer[*int](nil)
 
 	errCh := make(chan error, 1)
 	_ = c.WaitValueEmpty(ctx, errCh) // should be instant
