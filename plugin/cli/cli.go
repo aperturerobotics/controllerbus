@@ -60,6 +60,13 @@ func (a *CompilerArgs) BuildFlags() []cli.Flag {
 			Destination: &a.OutputPath,
 		},
 		&cli.StringFlag{
+			Name:        "build-prefix",
+			Usage:       "build prefix to prepend to import paths, generated on default",
+			EnvVars:     []string{"CONTROLLER_BUS_PLUGIN_BUILD_PREFIX"},
+			Value:       a.BuildPrefix,
+			Destination: &a.BuildPrefix,
+		},
+		&cli.StringFlag{
 			Name:        "plugin-binary-id",
 			Usage:       "binary id for the output plugin",
 			EnvVars:     []string{"CONTROLLER_BUS_PLUGIN_BINARY_ID"},
@@ -89,22 +96,11 @@ func (a *CompilerArgs) BuildSubCommands() []*cli.Command {
 			Name:   "compile",
 			Usage:  "compile packages specified as arguments once",
 			Action: a.runCompileOnce,
-			Flags: []cli.Flag{
-				&cli.StringFlag{
-					Name:        "build-prefix",
-					Usage:       "build prefix to prepend to import paths, generated on default",
-					EnvVars:     []string{"CONTROLLER_BUS_PLUGIN_BUILD_PREFIX"},
-					Value:       a.BuildPrefix,
-					Destination: &a.BuildPrefix,
-				},
-			},
-			Subcommands: []*cli.Command{
-				{
-					Name:   "codegen",
-					Usage:  "generate code for modules in codegen path and exit",
-					Action: a.runCodegenOnce,
-				},
-			},
+		},
+		{
+			Name:   "codegen",
+			Usage:  "generate code for modules to codegen path and exit",
+			Action: a.runCodegenOnce,
 		},
 	}
 }
