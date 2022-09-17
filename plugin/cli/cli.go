@@ -94,12 +94,12 @@ func (a *CompilerArgs) BuildSubCommands() []*cli.Command {
 	return []*cli.Command{
 		{
 			Name:   "compile",
-			Usage:  "compile packages specified as arguments once",
+			Usage:  "compile packages to a plugin binary",
 			Action: a.runCompileOnce,
 		},
 		{
 			Name:   "codegen",
-			Usage:  "generate code for modules to codegen path and exit",
+			Usage:  "generate code for packages",
 			Action: a.runCodegenOnce,
 		},
 	}

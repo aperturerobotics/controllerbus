@@ -19,7 +19,7 @@ func (c *CompilerArgs) runCodegenOnce(cctx *cli.Context) error {
 		return errors.New("specify list of packages as arguments")
 	}
 
-	an, modCompiler, cleanup, err := c.setupCompiler(ctx, le, args.Tail())
+	an, modCompiler, cleanup, err := c.setupCompiler(ctx, le, args.Slice())
 	if err != nil {
 		return err
 	}
