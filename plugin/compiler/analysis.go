@@ -108,6 +108,7 @@ func AnalyzePackages(
 	// Build a list of packages to import.
 	for _, pkg := range loadedPackages {
 		le := le.WithField("pkg", pkg.Types.Path())
+
 		factoryCtorObj := pkg.Types.Scope().Lookup("NewFactory")
 		factoryPkgImportPath := pkg.Types.Path()
 		if factoryCtorObj != nil {

@@ -85,7 +85,7 @@ func (a *CompilerArgs) BuildFlags() []cli.Flag {
 // BuildSubCommands builds the sub-command set.
 func (a *CompilerArgs) BuildSubCommands() []*cli.Command {
 	return []*cli.Command{
-		&cli.Command{
+		{
 			Name:   "compile",
 			Usage:  "compile packages specified as arguments once",
 			Action: a.runCompileOnce,
@@ -99,7 +99,7 @@ func (a *CompilerArgs) BuildSubCommands() []*cli.Command {
 				},
 			},
 			Subcommands: []*cli.Command{
-				&cli.Command{
+				{
 					Name:   "codegen",
 					Usage:  "generate code for modules in codegen path and exit",
 					Action: a.runCodegenOnce,
@@ -111,8 +111,8 @@ func (a *CompilerArgs) BuildSubCommands() []*cli.Command {
 
 // Validate validates the arguments.
 func (a *CompilerArgs) Validate() error {
-	if a.OutputPath == "" || !strings.HasSuffix(a.OutputPath, ".cbus.so") {
-		return errors.New("output path must be set and end with .cbus.so")
+	if a.OutputPath != "" && !strings.HasSuffix(a.OutputPath, ".cbus.so") {
+		return errors.New("output path must end with .cbus.so")
 	}
 	// more?
 	return nil
