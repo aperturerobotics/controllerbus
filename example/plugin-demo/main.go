@@ -86,7 +86,7 @@ func run(ctx context.Context, le *logrus.Entry) error {
 	outPluginPath := filepath.Join(outPluginsPath, "demo-plugin.{buildHash}.cbus.so")
 
 	// compile the plugin with the packages listed
-	err = plugin_compiler.BuildPlugin(ctx, le, "./", outPluginPath, packagesList)
+	err = plugin_compiler.BuildPlugin(ctx, le, "./", outPluginPath, codegenDirPath, packagesList)
 	if err != nil {
 		return err
 	}

@@ -11,7 +11,7 @@ mkdir -p ./output
 go run -v \
    -trimpath \
    github.com/aperturerobotics/controllerbus/cmd/controllerbus -- \
-   plugin --no-cleanup compile codegen \
+   plugin --no-cleanup codegen \
   "github.com/aperturerobotics/controllerbus/example/boilerplate/controller" \
   "./demo-controller" \
   "github.com/pkg/errors" \
