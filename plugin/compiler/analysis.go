@@ -71,8 +71,8 @@ func AnalyzePackages(
 		packages.NeedImports |
 		// NeedDeps adds the fields requested by the LoadMode in the packages in Imports.
 		packages.NeedDeps |
-		// NeedExportsFile adds ExportFile.
-		packages.NeedExportsFile |
+		// NeedExportFile adds ExportFile.
+		packages.NeedExportFile |
 		// NeedTypes adds Types, Fset, and IllTyped.
 		packages.NeedTypes |
 		// NeedSyntax adds Syntax.
