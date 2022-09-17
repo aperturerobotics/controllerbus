@@ -63,8 +63,8 @@ github.com/alexkohler/prealloc v1.0.0 h1:Hbq0/3fJPQhNkN0dR95AVrr6R7tou91y0uHG5pO
 github.com/alexkohler/prealloc v1.0.0/go.mod h1:VetnK3dIgFBBKmg0YnD9F9x6Icjd+9cvfHR56wJVlKE=
 github.com/alingse/asasalint v0.0.11 h1:SFwnQXJ49Kx/1GghOFz1XGqHYKp21Kq1nHad/0WQRnw=
 github.com/alingse/asasalint v0.0.11/go.mod h1:nCaoMhw7a9kSJObvQyVzNTPBDbNpdocqrSP7t/cW5+I=
-github.com/aperturerobotics/starpc v0.10.1 h1:/nwRlsNww7/bxWRr83xMpyy9W2vcUrt7Exd8RlQOTHQ=
-github.com/aperturerobotics/starpc v0.10.1/go.mod h1:Hj3ZKSmrilzisd/vh6cAQ5/7VFAxVu5o6adLcY6rGFU=
+github.com/aperturerobotics/starpc v0.10.6 h1:kD8h9bVe07vCk1GDxNGwbP11UaRiOQws/orOnXkfznM=
+github.com/aperturerobotics/starpc v0.10.6/go.mod h1:Hj3ZKSmrilzisd/vh6cAQ5/7VFAxVu5o6adLcY6rGFU=
 github.com/ashanbrown/forbidigo v1.3.0 h1:VkYIwb/xxdireGAdJNZoo24O4lmnEWkactplBlWTShc=
 github.com/ashanbrown/forbidigo v1.3.0/go.mod h1:vVW7PEdqEFqapJe95xHkTfB1+XvZXBFg8t0sG2FIxmI=
 github.com/ashanbrown/makezero v1.1.1 h1:iCQ87C0V0vSyO+M9E/FZYbu65auqH0lnsOkf5FcB28s=
@@ -405,8 +405,8 @@ github.com/pkg/errors v0.8.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINE
 github.com/pkg/errors v0.9.1 h1:FEBLx1zS214owpjy7qsBeixbURkuhQAwrK5UwLGTwt4=
 github.com/pkg/errors v0.9.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
 github.com/pkg/sftp v1.13.1/go.mod h1:3HaPG6Dq1ILlpPZRO0HVMrsydcdLt6HRDccSgb87qRg=
-github.com/planetscale/vtprotobuf v0.3.1-0.20220816112931-a059103955fb h1:uBNjUDj/OUbEEDQQ1PGQ1jB5ThXYWkUcVzSQf/zG7os=
-github.com/planetscale/vtprotobuf v0.3.1-0.20220816112931-a059103955fb/go.mod h1:wm1N3qk9G/4+VM1WhpkLbvY/d8+0PbwYYpP5P5VhTks=
+github.com/planetscale/vtprotobuf v0.3.1-0.20220817155510-0ae748fd2007 h1:xXCpIHqTWnwfIOJxV+D4/F2DV9Z8piy5ndP2EWQMuIo=
+github.com/planetscale/vtprotobuf v0.3.1-0.20220817155510-0ae748fd2007/go.mod h1:wm1N3qk9G/4+VM1WhpkLbvY/d8+0PbwYYpP5P5VhTks=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/polyfloyd/go-errorlint v1.0.2 h1:kp1yvHflYhTmw5m3MmBy8SCyQkKPjwDthVuMH0ug6Yk=
