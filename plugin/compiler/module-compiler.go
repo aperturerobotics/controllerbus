@@ -49,6 +49,9 @@ func NewModuleCompiler(
 	if pluginCodegenPath == "" {
 		return nil, errors.New("codegen path cannot be empty")
 	}
+	if buildPrefix == "" {
+		return nil, errors.New("build prefix must be specified")
+	}
 	pluginCodegenPath, err := filepath.Abs(pluginCodegenPath)
 	if err != nil {
 		return nil, err
