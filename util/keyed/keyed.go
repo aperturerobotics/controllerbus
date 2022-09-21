@@ -109,3 +109,51 @@ func (k *Keyed) SyncKeys(keys []string, restart bool) {
 		delete(k.routines, key)
 	}
 }
+
+// GetRoutine returns the routine for the given key.
+// Note: this is an instantaneous snapshot.
+func (k *Keyed) GetRoutine(key string) Routine {
+	k.mtx.Lock()
+	defer k.mtx.Unlock()
+
+	v, existed := k.routines[key]
+	if !existed {
+		return nil
+	}
+
+	return v.routine
+}
+
+// CondResetRoutine checks the condition function, if it returns true, closes
+// the routine, constructs a new one, and replaces it (hard reset).
+func (k *Keyed) CondResetRoutine(key string, cond func(Routine) bool) (existed bool, reset bool) {
+	k.mtx.Lock()
+	defer k.mtx.Unlock()
+
+	if k.ctx != nil {
+		select {
+		case <-k.ctx.Done():
+			k.ctx = nil
+		default:
+		}
+	}
+
+	v, existed := k.routines[key]
+	if !existed {
+		return false, false
+	}
+	if cond != nil && !cond(v.routine) {
+		return true, false
+	}
+
+	if v.ctxCancel != nil {
+		v.ctxCancel()
+	}
+	v = newRunningRoutine(k, k.ctorCb(key))
+	k.routines[key] = v
+	if k.ctx != nil {
+		v.start(k.ctx)
+	}
+
+	return true, true
+}
