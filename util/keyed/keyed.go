@@ -2,6 +2,7 @@ package keyed
 
 import (
 	"context"
+	"sort"
 	"sync"
 )
 
@@ -65,6 +66,20 @@ func (k *Keyed) SetContext(ctx context.Context, restart bool) {
 			rr.start(ctx)
 		}
 	}
+}
+
+// GetKeys returns the list of keys registered with the Keyed instance.
+// Note: this is an instantaneous snapshot.
+func (k *Keyed) GetKeys() []string {
+	k.mtx.Lock()
+	defer k.mtx.Unlock()
+
+	keys := make([]string, len(k.routines))
+	for k := range k.routines {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	return keys
 }
 
 // SyncKeys synchronizes the list of running routines with the given list.
