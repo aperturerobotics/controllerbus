@@ -5,9 +5,9 @@ import (
 )
 
 // runningRoutine tracks a running routine
-type runningRoutine struct {
+type runningRoutine[T comparable] struct {
 	// k is the keyed instance
-	k *Keyed
+	k *Keyed[T]
 
 	// fields guarded by k.mtx
 	// ctx is the context
@@ -17,6 +17,8 @@ type runningRoutine struct {
 	ctxCancel context.CancelFunc
 	// routine is the routine callback
 	routine Routine
+	// data is the associated routine data
+	data T
 	// err is the error if any
 	err error
 	// success indicates the routine succeeded
@@ -24,16 +26,17 @@ type runningRoutine struct {
 }
 
 // newRunningRoutine constructs a new runningRoutine
-func newRunningRoutine(k *Keyed, routine Routine) *runningRoutine {
-	return &runningRoutine{
+func newRunningRoutine[T comparable](k *Keyed[T], routine Routine, data T) *runningRoutine[T] {
+	return &runningRoutine[T]{
 		k:       k,
 		routine: routine,
+		data:    data,
 	}
 }
 
 // start starts or restarts the routine.
 // expects k.mtx to be locked by caller
-func (r *runningRoutine) start(ctx context.Context) {
+func (r *runningRoutine[T]) start(ctx context.Context) {
 	if r.success || r.routine == nil {
 		return
 	}
@@ -58,7 +61,7 @@ func (r *runningRoutine) start(ctx context.Context) {
 }
 
 // execute executes the routine.
-func (r *runningRoutine) execute(ctx context.Context, cancel context.CancelFunc) {
+func (r *runningRoutine[T]) execute(ctx context.Context, cancel context.CancelFunc) {
 	err := r.routine(ctx)
 	cancel()
 

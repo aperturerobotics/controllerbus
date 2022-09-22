@@ -11,40 +11,37 @@ import (
 // If an error is returned, can be restarted later.
 type Routine func(ctx context.Context) error
 
-// Constructor returns a function to start for the given key.
-// If nil is returned, skips starting that routine.
-type Constructor func(key string) Routine
-
 // Keyed manages a set of goroutines with associated Keys.
-type Keyed struct {
+type Keyed[T comparable] struct {
 	// ctorCb is the constructor callback
-	ctorCb Constructor
+	ctorCb func(key string) (Routine, T)
 
 	// mtx guards below fields
 	mtx sync.Mutex
 	// ctx is the current root context
 	ctx context.Context
 	// routines is the set of running routines
-	routines map[string]*runningRoutine
+	routines map[string]*runningRoutine[T]
 }
 
 // NewKeyed constructs a new Keyed execution manager.
 // Note: routines won't start until SetContext is called.
-func NewKeyed(ctorCb Constructor) *Keyed {
+func NewKeyed[T comparable](ctorCb func(key string) (Routine, T)) *Keyed[T] {
 	if ctorCb == nil {
-		ctorCb = func(key string) Routine {
-			return nil
+		ctorCb = func(key string) (Routine, T) {
+			var empty T
+			return nil, empty
 		}
 	}
-	return &Keyed{
+	return &Keyed[T]{
 		ctorCb:   ctorCb,
-		routines: make(map[string]*runningRoutine, 1),
+		routines: make(map[string]*runningRoutine[T], 1),
 	}
 }
 
 // SetContext updates the root context, restarting all running routines.
 // if restart is true, all errored routines also restart
-func (k *Keyed) SetContext(ctx context.Context, restart bool) {
+func (k *Keyed[T]) SetContext(ctx context.Context, restart bool) {
 	k.mtx.Lock()
 	defer k.mtx.Unlock()
 
@@ -70,11 +67,11 @@ func (k *Keyed) SetContext(ctx context.Context, restart bool) {
 
 // GetKeys returns the list of keys registered with the Keyed instance.
 // Note: this is an instantaneous snapshot.
-func (k *Keyed) GetKeys() []string {
+func (k *Keyed[T]) GetKeys() []string {
 	k.mtx.Lock()
 	defer k.mtx.Unlock()
 
-	keys := make([]string, len(k.routines))
+	keys := make([]string, 0, len(k.routines))
 	for k := range k.routines {
 		keys = append(keys, k)
 	}
@@ -82,9 +79,36 @@ func (k *Keyed) GetKeys() []string {
 	return keys
 }
 
+// KeyWithData is a key with associated data.
+type KeyWithData[T comparable] struct {
+	// Key is the key.
+	Key string
+	// Data is the associated data.
+	Data T
+}
+
+// GetKeysWithData returns the keys and the data for the keys.
+// Note: this is an instantaneous snapshot.
+func (k *Keyed[T]) GetKeysWithData() []KeyWithData[T] {
+	k.mtx.Lock()
+	defer k.mtx.Unlock()
+
+	out := make([]KeyWithData[T], 0, len(k.routines))
+	for k, v := range k.routines {
+		out = append(out, KeyWithData[T]{
+			Key:  k,
+			Data: v.data,
+		})
+	}
+	sort.Slice(out, func(i, j int) bool {
+		return out[i].Key < out[j].Key
+	})
+	return out
+}
+
 // SyncKeys synchronizes the list of running routines with the given list.
 // If restart=true, restarts any failed routines in the list.
-func (k *Keyed) SyncKeys(keys []string, restart bool) {
+func (k *Keyed[T]) SyncKeys(keys []string, restart bool) {
 	k.mtx.Lock()
 	defer k.mtx.Unlock()
 
@@ -96,7 +120,7 @@ func (k *Keyed) SyncKeys(keys []string, restart bool) {
 		}
 	}
 
-	routines := make(map[string]*runningRoutine, len(keys))
+	routines := make(map[string]*runningRoutine[T], len(keys))
 	for _, key := range keys {
 		v := routines[key]
 		if v != nil {
@@ -104,7 +128,8 @@ func (k *Keyed) SyncKeys(keys []string, restart bool) {
 		}
 		v, existed := k.routines[key]
 		if !existed {
-			v = newRunningRoutine(k, k.ctorCb(key))
+			routine, data := k.ctorCb(key)
+			v = newRunningRoutine(k, routine, data)
 			k.routines[key] = v
 		}
 		routines[key] = v
@@ -127,7 +152,7 @@ func (k *Keyed) SyncKeys(keys []string, restart bool) {
 
 // GetRoutine returns the routine for the given key.
 // Note: this is an instantaneous snapshot.
-func (k *Keyed) GetRoutine(key string) Routine {
+func (k *Keyed[T]) GetRoutine(key string) Routine {
 	k.mtx.Lock()
 	defer k.mtx.Unlock()
 
@@ -141,7 +166,7 @@ func (k *Keyed) GetRoutine(key string) Routine {
 
 // CondResetRoutine checks the condition function, if it returns true, closes
 // the routine, constructs a new one, and replaces it (hard reset).
-func (k *Keyed) CondResetRoutine(key string, cond func(Routine) bool) (existed bool, reset bool) {
+func (k *Keyed[T]) CondResetRoutine(key string, cond func(Routine) bool) (existed bool, reset bool) {
 	k.mtx.Lock()
 	defer k.mtx.Unlock()
 
@@ -164,7 +189,8 @@ func (k *Keyed) CondResetRoutine(key string, cond func(Routine) bool) (existed b
 	if v.ctxCancel != nil {
 		v.ctxCancel()
 	}
-	v = newRunningRoutine(k, k.ctorCb(key))
+	routine, data := k.ctorCb(key)
+	v = newRunningRoutine(k, routine, data)
 	k.routines[key] = v
 	if k.ctx != nil {
 		v.start(k.ctx)

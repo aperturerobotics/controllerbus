@@ -7,11 +7,14 @@ import (
 	"time"
 )
 
+// testData contains some test metadata.
+type testData struct{}
+
 // TestKeyed tests the keyed goroutine manager.
 func TestKeyed(t *testing.T) {
 	ctx := context.Background()
 	vals := make(chan string, 10)
-	k := NewKeyed(func(key string) Routine {
+	k := NewKeyed(func(key string) (Routine, *testData) {
 		return func(ctx context.Context) error {
 			select {
 			case <-ctx.Done():
@@ -19,7 +22,7 @@ func TestKeyed(t *testing.T) {
 			case vals <- key:
 				return nil
 			}
-		}
+		}, &testData{}
 	})
 
 	nsend := 100
