@@ -150,18 +150,19 @@ func (k *Keyed[T]) SyncKeys(keys []string, restart bool) {
 	}
 }
 
-// GetRoutine returns the routine for the given key.
+// GetKey returns the routine for the given key.
 // Note: this is an instantaneous snapshot.
-func (k *Keyed[T]) GetRoutine(key string) Routine {
+func (k *Keyed[T]) GetKey(key string) (Routine, T) {
 	k.mtx.Lock()
 	defer k.mtx.Unlock()
 
 	v, existed := k.routines[key]
 	if !existed {
-		return nil
+		var empty T
+		return nil, empty
 	}
 
-	return v.routine
+	return v.routine, v.data
 }
 
 // CondResetRoutine checks the condition function, if it returns true, closes
