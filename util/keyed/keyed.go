@@ -165,9 +165,11 @@ func (k *Keyed[T]) GetKey(key string) (Routine, T) {
 	return v.routine, v.data
 }
 
-// CondResetRoutine checks the condition function, if it returns true, closes
-// the routine, constructs a new one, and replaces it (hard reset).
-func (k *Keyed[T]) CondResetRoutine(key string, cond func(T) bool) (existed bool, reset bool) {
+// Reset resets the given routine after checking the condition functions. If any
+// return true, resets the instance.
+//
+// If len(conds) == 0, always resets the given key.
+func (k *Keyed[T]) ResetRoutine(key string, conds ...func(T) bool) (existed bool, reset bool) {
 	k.mtx.Lock()
 	defer k.mtx.Unlock()
 
@@ -183,7 +185,14 @@ func (k *Keyed[T]) CondResetRoutine(key string, cond func(T) bool) (existed bool
 	if !existed {
 		return false, false
 	}
-	if cond != nil && !cond(v.data) {
+	anyMatched := len(conds) == 0
+	for _, cond := range conds {
+		if cond != nil && cond(v.data) {
+			anyMatched = true
+			break
+		}
+	}
+	if !anyMatched {
 		return true, false
 	}
 
