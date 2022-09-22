@@ -165,8 +165,8 @@ func (k *Keyed[T]) GetKey(key string) (Routine, T) {
 	return v.routine, v.data
 }
 
-// Reset resets the given routine after checking the condition functions. If any
-// return true, resets the instance.
+// ResetRoutine resets the given routine after checking the condition functions.
+// If any return true, resets the instance.
 //
 // If len(conds) == 0, always resets the given key.
 func (k *Keyed[T]) ResetRoutine(key string, conds ...func(T) bool) (existed bool, reset bool) {
