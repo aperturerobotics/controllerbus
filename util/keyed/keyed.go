@@ -106,8 +106,29 @@ func (k *Keyed[T]) GetKeysWithData() []KeyWithData[T] {
 	return out
 }
 
+// SetKey inserts the given key into the set, if it doesn't already exist.
+// If restart=true, restarts if routines is currently in the failed state.
+// Returns if it existed already or not.
+func (k *Keyed[T]) SetKey(key string, restart bool) bool {
+	k.mtx.Lock()
+	defer k.mtx.Unlock()
+
+	v, existed := k.routines[key]
+	if !existed {
+		routine, data := k.ctorCb(key)
+		v = newRunningRoutine(k, routine, data)
+		k.routines[key] = v
+	}
+	if !existed || restart {
+		if k.ctx != nil {
+			v.start(k.ctx)
+		}
+	}
+	return existed
+}
+
 // SyncKeys synchronizes the list of running routines with the given list.
-// If restart=true, restarts any failed routines in the list.
+// If restart=true, restarts any failed routines in the failed state.
 func (k *Keyed[T]) SyncKeys(keys []string, restart bool) {
 	k.mtx.Lock()
 	defer k.mtx.Unlock()
