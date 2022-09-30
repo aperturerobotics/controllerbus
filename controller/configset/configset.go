@@ -53,6 +53,25 @@ func (c ConfigSet) Equal(os ConfigSet) bool {
 	return true
 }
 
+// MergeConfigSets merges multiple config sets to one ConfigSet.
+func MergeConfigSets(sets ...ConfigSet) ConfigSet {
+	out := make(ConfigSet)
+	for _, set := range sets {
+		for k, v := range set {
+			if v == nil {
+				continue
+			}
+			vRev := v.GetRevision()
+			existing, existingOk := out[k]
+			if existingOk && existing.GetRevision() > vRev {
+				continue
+			}
+			out[k] = v
+		}
+	}
+	return out
+}
+
 // ControllerConfig is a wrapped controller configuration.
 type ControllerConfig interface {
 	// GetRevision returns the revision.
