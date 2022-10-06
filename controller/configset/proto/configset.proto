@@ -13,6 +13,7 @@ message ControllerConfig {
   string id = 1;
   // Revision is the revision number of the configuration.
   uint64 revision = 2;
-  // Config is the configuration object in protobuf form.
+  // Config is the configuration object.
+  // Supports: protobuf and json (must start with {).
   bytes config = 3;
 }
