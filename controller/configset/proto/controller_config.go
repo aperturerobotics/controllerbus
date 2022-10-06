@@ -11,6 +11,7 @@ import (
 	"github.com/ghodss/yaml"
 	"github.com/pkg/errors"
 	"github.com/valyala/fastjson"
+	jsonpb "google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
 )
 
@@ -74,7 +75,7 @@ func (c *ControllerConfig) Resolve(ctx context.Context, b bus.Bus) (configset.Co
 	if configData := c.GetConfig(); len(configData) != 0 {
 		// if configData[0] == '{'
 		if configData[0] == 123 {
-			err = json.Unmarshal(configData, cf)
+			err = jsonpb.Unmarshal(configData, cf)
 		} else {
 			err = proto.Unmarshal(configData, cf)
 		}
