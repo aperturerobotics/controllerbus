@@ -127,6 +127,22 @@ func (k *Keyed[T]) SetKey(key string, restart bool) bool {
 	return existed
 }
 
+// RemoveKey removes the given key from the set, if it exists.
+// Returns if it existed.
+func (k *Keyed[T]) RemoveKey(key string) bool {
+	k.mtx.Lock()
+	defer k.mtx.Unlock()
+
+	v, existed := k.routines[key]
+	if existed {
+		if v.ctxCancel != nil {
+			v.ctxCancel()
+		}
+		delete(k.routines, key)
+	}
+	return existed
+}
+
 // SyncKeys synchronizes the list of running routines with the given list.
 // If restart=true, restarts any failed routines in the failed state.
 func (k *Keyed[T]) SyncKeys(keys []string, restart bool) {
