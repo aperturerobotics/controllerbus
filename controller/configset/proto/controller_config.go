@@ -34,6 +34,17 @@ func (c *ControllerConfig) Validate() error {
 	if len(c.GetId()) == 0 {
 		return ErrControllerConfigIdEmpty
 	}
+	if conf := c.GetConfig(); len(conf) != 0 {
+		// json if first character is {
+		if conf[0] == 123 {
+			// validate json
+			var p fastjson.Parser
+			_, err := p.ParseBytes(conf)
+			if err != nil {
+				return err
+			}
+		}
+	}
 	return nil
 }
 

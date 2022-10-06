@@ -5,6 +5,7 @@ import (
 
 	"github.com/aperturerobotics/controllerbus/bus"
 	"github.com/aperturerobotics/controllerbus/controller/configset"
+	"github.com/pkg/errors"
 )
 
 // ConfigSetMap implements the controllerbus.ConfigSet as protobuf.
@@ -57,4 +58,22 @@ func (c ConfigSetMap) Resolve(ctx context.Context, b bus.Bus) (configset.ConfigS
 		}
 	}
 	return oc, nil
+}
+
+// Validate validates the ConfigSet.
+func (c *ConfigSet) Validate() error {
+	if err := ConfigSetMap(c.GetConfigurations()).Validate(); err != nil {
+		return err
+	}
+	return nil
+}
+
+// Validate validates the ConfigSetMap.
+func (c ConfigSetMap) Validate() error {
+	for configID, configObj := range c {
+		if err := configObj.Validate(); err != nil {
+			return errors.Wrapf(err, "configurations[%s]", configID)
+		}
+	}
+	return nil
 }
