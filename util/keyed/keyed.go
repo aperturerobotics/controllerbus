@@ -40,6 +40,7 @@ func NewKeyed[T comparable](ctorCb func(key string) (Routine, T)) *Keyed[T] {
 }
 
 // SetContext updates the root context, restarting all running routines.
+// If ctx == nil, stops all routines.
 // if restart is true, all errored routines also restart
 func (k *Keyed[T]) SetContext(ctx context.Context, restart bool) {
 	k.mtx.Lock()
@@ -60,7 +61,9 @@ func (k *Keyed[T]) SetContext(ctx context.Context, restart bool) {
 				rr.ctxCancel()
 				rr.ctx, rr.ctxCancel = nil, nil
 			}
-			rr.start(ctx)
+			if ctx != nil {
+				rr.start(ctx)
+			}
 		}
 	}
 }
