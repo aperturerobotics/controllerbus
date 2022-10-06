@@ -4,11 +4,10 @@ go 1.18
 
 replace (
 	github.com/sirupsen/logrus => github.com/aperturerobotics/logrus v1.8.2-0.20220322010420-77ab346a2cf8 // aperture
-	google.golang.org/protobuf => github.com/aperturerobotics/protobuf-go v1.28.2-0.20220907043630-48b5d551eaff // aperture
+	google.golang.org/protobuf => github.com/aperturerobotics/protobuf-go v1.28.2-0.20221006230527-d29c3cad7965 // aperture
 )
 
 require (
-	github.com/Jeffail/gabs/v2 v2.6.1
 	github.com/aperturerobotics/starpc v0.10.6
 	github.com/blang/semver v3.5.1+incompatible
 	github.com/cenkalti/backoff v2.2.1+incompatible

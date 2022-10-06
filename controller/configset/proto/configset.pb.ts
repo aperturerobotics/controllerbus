@@ -21,7 +21,10 @@ export interface ControllerConfig {
   id: string;
   /** Revision is the revision number of the configuration. */
   revision: Long;
-  /** Config is the configuration object in protobuf form. */
+  /**
+   * Config is the configuration object.
+   * Supports: protobuf and json (must start with {).
+   */
   config: Uint8Array;
 }
 
