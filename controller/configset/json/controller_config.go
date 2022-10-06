@@ -6,6 +6,7 @@ import (
 
 	"github.com/aperturerobotics/controllerbus/bus"
 	"github.com/aperturerobotics/controllerbus/controller/configset"
+	"github.com/ghodss/yaml"
 )
 
 // ControllerConfig implements the JSON unmarshaling logic for a configset
@@ -28,6 +29,15 @@ func NewControllerConfig(c configset.ControllerConfig) *ControllerConfig {
 			underlying: c.GetConfig(),
 		},
 	}
+}
+
+// UnmarshalControllerConfigYAML unmarshals a yaml to a ControllerConfig.
+func UnmarshalControllerConfigYAML(data []byte) (*ControllerConfig, error) {
+	conf := &ControllerConfig{}
+	if err := yaml.Unmarshal(data, &conf); err != nil {
+		return nil, err
+	}
+	return conf, nil
 }
 
 // GetRevision returns the revision.
