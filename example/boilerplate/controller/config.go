@@ -10,6 +10,11 @@ import (
 // ConfigID is the string used to identify this config object.
 const ConfigID = ControllerID
 
+// NewConfig constructs the config object.
+func NewConfig() *Config {
+	return &Config{}
+}
+
 // Validate validates the configuration.
 // This is a cursory validation to see if the values "look correct."
 func (c *Config) Validate() error {

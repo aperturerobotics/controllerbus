@@ -34,12 +34,12 @@ func NewController(
 	le *logrus.Entry,
 	bus bus.Bus,
 	conf *Config,
-) *Controller {
+) (*Controller, error) {
 	return &Controller{
 		le:   le,
 		bus:  bus,
 		conf: conf,
-	}
+	}, nil
 }
 
 // GetControllerInfo returns information about the controller.
