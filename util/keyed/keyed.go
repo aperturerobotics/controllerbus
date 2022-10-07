@@ -4,6 +4,8 @@ import (
 	"context"
 	"sort"
 	"sync"
+
+	"github.com/sirupsen/logrus"
 )
 
 // Routine is a function called as a goroutine.
@@ -45,6 +47,18 @@ func NewKeyed[T comparable](
 
 		routines: make(map[string]*runningRoutine[T], 1),
 	}
+}
+
+// NewKeyedWithLogger constructs a new keyed instance that logs when a
+// controller exits without being removed from the Keys set.
+//
+// Note: routines won't start until SetContext is called.
+// exitedCb is called after a routine exits unexpectedly.
+func NewKeyedWithLogger[T comparable](
+	ctorCb func(key string) (Routine, T),
+	le *logrus.Entry,
+) *Keyed[T] {
+	return NewKeyed(ctorCb, NewLogExitedCallback[T](le))
 }
 
 // SetContext updates the root context, restarting all running routines.
