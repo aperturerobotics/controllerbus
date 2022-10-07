@@ -1,7 +1,7 @@
 github.com/aperturerobotics/logrus v1.8.2-0.20220322010420-77ab346a2cf8 h1:Op74irBctc7oEvEILdmoQ2FDkpqmoOqErxU6V/1eHG0=
 github.com/aperturerobotics/logrus v1.8.2-0.20220322010420-77ab346a2cf8/go.mod h1:x/wqQ2RFrvQZEw5sMa05JQ/UbAAIfbzwTyMeXz9S0YI=
-github.com/aperturerobotics/protobuf-go v1.28.2-0.20221006230527-d29c3cad7965 h1:tcnIZU0ZjdbTW+DyNyVex/1e8xpx4hFtoh2X5nqP1NU=
-github.com/aperturerobotics/protobuf-go v1.28.2-0.20221006230527-d29c3cad7965/go.mod h1:HV8QOd/L58Z+nl8r43ehVNZIU/HEI6OcFqwMG9pJV4I=
+github.com/aperturerobotics/protobuf-go v1.28.2-0.20221007002036-6510dd3bc392 h1:aQ4erYVgaBUfDLJZbx80KU9Eyw3NdGAz4G+tExtHrRg=
+github.com/aperturerobotics/protobuf-go v1.28.2-0.20221007002036-6510dd3bc392/go.mod h1:HV8QOd/L58Z+nl8r43ehVNZIU/HEI6OcFqwMG9pJV4I=
 github.com/aperturerobotics/starpc v0.10.6 h1:kD8h9bVe07vCk1GDxNGwbP11UaRiOQws/orOnXkfznM=
 github.com/aperturerobotics/starpc v0.10.6/go.mod h1:Hj3ZKSmrilzisd/vh6cAQ5/7VFAxVu5o6adLcY6rGFU=
 github.com/benbjohnson/clock v1.1.0/go.mod h1:J11/hYXuz8f4ySSvYwY0FKfm+ezbsZBKZxNJlLklBHA=
