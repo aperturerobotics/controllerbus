@@ -13,7 +13,7 @@ type Controller interface {
 
 	// GetControllerInfo returns information about the controller.
 	GetControllerInfo() *Info
-	// Execute executes the given controller.
+	// Execute executes the controller goroutine.
 	// Returning nil ends execution.
 	// Returning an error triggers a retry with backoff.
 	Execute(ctx context.Context) error

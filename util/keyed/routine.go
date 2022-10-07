@@ -8,6 +8,8 @@ import (
 type runningRoutine[T comparable] struct {
 	// k is the keyed instance
 	k *Keyed[T]
+	// key is the key for this routine
+	key string
 
 	// fields guarded by k.mtx
 	// ctx is the context
@@ -26,9 +28,10 @@ type runningRoutine[T comparable] struct {
 }
 
 // newRunningRoutine constructs a new runningRoutine
-func newRunningRoutine[T comparable](k *Keyed[T], routine Routine, data T) *runningRoutine[T] {
+func newRunningRoutine[T comparable](k *Keyed[T], key string, routine Routine, data T) *runningRoutine[T] {
 	return &runningRoutine[T]{
 		k:       k,
+		key:     key,
 		routine: routine,
 		data:    data,
 	}
@@ -71,6 +74,10 @@ func (r *runningRoutine[T]) execute(ctx context.Context, cancel context.CancelFu
 		r.success = err == nil
 		r.ctxCancel = nil
 		r.ctx = nil
+		if r.k.exitedCb != nil {
+			// run after unlocking mtx
+			defer r.k.exitedCb(r.key, r.routine, r.data, r.err)
+		}
 	}
 	r.k.mtx.Unlock()
 }

@@ -51,9 +51,12 @@ func (k *KeyedRef[T]) Release() {
 
 // NewKeyedRefCount constructs a new Keyed execution manager with reference counting.
 // Note: routines won't start until SetContext is called.
-func NewKeyedRefCount[T comparable](ctorCb func(key string) (Routine, T)) *KeyedRefCount[T] {
+func NewKeyedRefCount[T comparable](
+	ctorCb func(key string) (Routine, T),
+	exitedCb func(key string, routine Routine, data T, err error),
+) *KeyedRefCount[T] {
 	return &KeyedRefCount[T]{
-		keyed: NewKeyed(ctorCb),
+		keyed: NewKeyed(ctorCb, exitedCb),
 		refs:  make(map[string][]*KeyedRef[T]),
 	}
 }

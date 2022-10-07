@@ -15,6 +15,8 @@ type Routine func(ctx context.Context) error
 type Keyed[T comparable] struct {
 	// ctorCb is the constructor callback
 	ctorCb func(key string) (Routine, T)
+	// exitedCb is the exited callback
+	exitedCb func(key string, routine Routine, data T, err error)
 
 	// mtx guards below fields
 	mtx sync.Mutex
@@ -26,7 +28,11 @@ type Keyed[T comparable] struct {
 
 // NewKeyed constructs a new Keyed execution manager.
 // Note: routines won't start until SetContext is called.
-func NewKeyed[T comparable](ctorCb func(key string) (Routine, T)) *Keyed[T] {
+// exitedCb is called after a routine exits unexpectedly.
+func NewKeyed[T comparable](
+	ctorCb func(key string) (Routine, T),
+	exitedCb func(key string, routine Routine, data T, err error),
+) *Keyed[T] {
 	if ctorCb == nil {
 		ctorCb = func(key string) (Routine, T) {
 			var empty T
@@ -35,6 +41,8 @@ func NewKeyed[T comparable](ctorCb func(key string) (Routine, T)) *Keyed[T] {
 	}
 	return &Keyed[T]{
 		ctorCb:   ctorCb,
+		exitedCb: exitedCb,
+
 		routines: make(map[string]*runningRoutine[T], 1),
 	}
 }
@@ -119,7 +127,7 @@ func (k *Keyed[T]) SetKey(key string, restart bool) bool {
 	v, existed := k.routines[key]
 	if !existed {
 		routine, data := k.ctorCb(key)
-		v = newRunningRoutine(k, routine, data)
+		v = newRunningRoutine(k, key, routine, data)
 		k.routines[key] = v
 	}
 	if !existed || restart {
@@ -169,7 +177,7 @@ func (k *Keyed[T]) SyncKeys(keys []string, restart bool) {
 		v, existed := k.routines[key]
 		if !existed {
 			routine, data := k.ctorCb(key)
-			v = newRunningRoutine(k, routine, data)
+			v = newRunningRoutine(k, key, routine, data)
 			k.routines[key] = v
 		}
 		routines[key] = v
@@ -240,7 +248,7 @@ func (k *Keyed[T]) ResetRoutine(key string, conds ...func(T) bool) (existed bool
 		v.ctxCancel()
 	}
 	routine, data := k.ctorCb(key)
-	v = newRunningRoutine(k, routine, data)
+	v = newRunningRoutine(k, key, routine, data)
 	k.routines[key] = v
 	if k.ctx != nil {
 		v.start(k.ctx)

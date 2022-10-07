@@ -23,7 +23,7 @@ func TestKeyed(t *testing.T) {
 				return nil
 			}
 		}, &testData{}
-	})
+	}, nil)
 
 	nsend := 100
 	keys := make([]string, nsend)
