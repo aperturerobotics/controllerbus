@@ -49,8 +49,8 @@ func NewKeyed[T comparable](
 	}
 }
 
-// NewKeyedWithLogger constructs a new keyed instance that logs when a
-// controller exits without being removed from the Keys set.
+// NewKeyedWithLogger constructs a new keyed instance.
+// Logs when a controller exits without being removed from the Keys set.
 //
 // Note: routines won't start until SetContext is called.
 // exitedCb is called after a routine exits unexpectedly.

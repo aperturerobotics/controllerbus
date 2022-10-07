@@ -4,6 +4,8 @@ import (
 	"context"
 	"sync"
 	"sync/atomic"
+
+	"github.com/sirupsen/logrus"
 )
 
 // KeyedRefCount manages a list of running routines with reference counts.
@@ -57,6 +59,19 @@ func NewKeyedRefCount[T comparable](
 ) *KeyedRefCount[T] {
 	return &KeyedRefCount[T]{
 		keyed: NewKeyed(ctorCb, exitedCb),
+		refs:  make(map[string][]*KeyedRef[T]),
+	}
+}
+
+// NewKeyedRefCountWithLogger constructs a new Keyed execution manager with reference counting.
+// Logs when a controller exits without being removed from the Keys set.
+// Note: routines won't start until SetContext is called.
+func NewKeyedRefCountWithLogger[T comparable](
+	ctorCb func(key string) (Routine, T),
+	le *logrus.Entry,
+) *KeyedRefCount[T] {
+	return &KeyedRefCount[T]{
+		keyed: NewKeyedWithLogger(ctorCb, le),
 		refs:  make(map[string][]*KeyedRef[T]),
 	}
 }
