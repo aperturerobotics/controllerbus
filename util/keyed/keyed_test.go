@@ -5,6 +5,8 @@ import (
 	"strconv"
 	"testing"
 	"time"
+
+	"github.com/sirupsen/logrus"
 )
 
 // testData contains some test metadata.
@@ -14,6 +16,9 @@ type testData struct{}
 func TestKeyed(t *testing.T) {
 	ctx := context.Background()
 	vals := make(chan string, 10)
+	log := logrus.New()
+	log.SetLevel(logrus.DebugLevel)
+	le := logrus.NewEntry(log)
 	k := NewKeyed(func(key string) (Routine, *testData) {
 		return func(ctx context.Context) error {
 			select {
@@ -23,7 +28,7 @@ func TestKeyed(t *testing.T) {
 				return nil
 			}
 		}, &testData{}
-	}, nil)
+	}, NewLogExitedCallback[*testData](le))
 
 	nsend := 100
 	keys := make([]string, nsend)
