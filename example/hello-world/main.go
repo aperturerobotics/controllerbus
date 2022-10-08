@@ -19,7 +19,7 @@ func execToy() {
 	b := inmem.NewBus(dc)
 
 	// Loader controller constructs and executes controllers
-	cl, err := loader.NewController(le, b, nil)
+	cl, err := loader.NewController(le, b)
 	if err != nil {
 		panic(err)
 	}

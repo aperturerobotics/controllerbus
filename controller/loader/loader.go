@@ -7,7 +7,6 @@ import (
 	"github.com/aperturerobotics/controllerbus/controller"
 	"github.com/aperturerobotics/controllerbus/directive"
 	"github.com/blang/semver"
-	"github.com/cenkalti/backoff"
 	"github.com/sirupsen/logrus"
 )
 
@@ -24,17 +23,12 @@ type Controller struct {
 	le *logrus.Entry
 	// bus is the controller bus
 	bus bus.Bus
-	// execBackoff is the backoff controller for execution
-	execBackoff backoff.BackOff
 }
 
 // NewController builds a new loader controller given a bus.
 // If the given backoff is nil, uses the defaults.
-func NewController(le *logrus.Entry, bus bus.Bus, execBackoff backoff.BackOff) (*Controller, error) {
-	if execBackoff == nil {
-		execBackoff = newExecBackoff()
-	}
-	return &Controller{bus: bus, le: le, execBackoff: execBackoff}, nil
+func NewController(le *logrus.Entry, bus bus.Bus) (*Controller, error) {
+	return &Controller{bus: bus, le: le}, nil
 }
 
 // GetControllerInfo returns information about the controller.

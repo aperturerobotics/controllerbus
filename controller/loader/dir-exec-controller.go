@@ -6,14 +6,16 @@ import (
 	"github.com/aperturerobotics/controllerbus/config"
 	"github.com/aperturerobotics/controllerbus/controller"
 	"github.com/aperturerobotics/controllerbus/directive"
+	"github.com/cenkalti/backoff"
 )
 
 // execController implements the ExecController directive.
 // Will override or yield to exiting directives for the controller.
 type execController struct {
-	factory   controller.Factory
-	config    config.Config
-	valueOpts directive.ValueOptions
+	factory      controller.Factory
+	config       config.Config
+	retryBackoff func() backoff.BackOff
+	valueOpts    directive.ValueOptions
 }
 
 // NewExecController constructs a new ExecController directive.
@@ -27,16 +29,18 @@ func NewExecController(
 	}
 }
 
-// NewExecControllerWithValueOpts constructs a new ExecController directive.
-func NewExecControllerWithValueOpts(
+// NewExecControllerWithOpts constructs a new ExecController directive.
+func NewExecControllerWithOpts(
 	factory controller.Factory,
 	config config.Config,
+	retryBackoff func() backoff.BackOff,
 	valueOpts directive.ValueOptions,
 ) ExecController {
 	return &execController{
-		factory:   factory,
-		config:    config,
-		valueOpts: valueOpts,
+		factory:      factory,
+		config:       config,
+		retryBackoff: retryBackoff,
+		valueOpts:    valueOpts,
 	}
 }
 
@@ -48,6 +52,12 @@ func (d *execController) GetExecControllerFactory() controller.Factory {
 // GetExecControllerConfig returns the config to load the controller with.
 func (d *execController) GetExecControllerConfig() config.Config {
 	return d.config
+}
+
+// GetExecControllerRetryBackoff returns the backoff to use for retries.
+// If empty / nil, uses the default.
+func (d *execController) GetExecControllerRetryBackoff() func() backoff.BackOff {
+	return d.retryBackoff
 }
 
 // GetValueOptions returns options relating to value handling.
@@ -84,10 +94,7 @@ func (d *execController) IsEquivalent(other directive.Directive) bool {
 		return false
 	}
 
-	// This enforces that even with two factories, two controllers with the same
-	// ID and configuration should not be started at the same time. The factory
-	// with the greater version number "wins." If there are multiple sources for
-	// code, the latest version is therefore taken.
+	// If the two configurations are identical, de-duplicate the directive.
 	return d.GetExecControllerConfig().EqualsConfig(otherExec.GetExecControllerConfig())
 }
 

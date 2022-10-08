@@ -10,11 +10,14 @@
  - **Modular**: easily combine together application components w/o glue code.
  - **Declarative**: de-duplicated declarative requests between controllers.
 
-Controller Bus provides a common pattern for structuring large Go projects as
-independent dynamically linked modules, optionally communicating over a network.
+The primary concepts are:
 
-Controllers communicate over a Bus using Directives: declarative requests for
-target system state.
+ - **Config**: configuration for a controller or process.
+ - **Controller**: goroutine which can create & handle Directives.
+ - **Directive**: a cross-controller request or declaration of target state.
+ - **Bus**: communication channel between Controllers.
+
+Controller Bus provides a common pattern for structuring modular Go projects.
 
 ## Examples
 

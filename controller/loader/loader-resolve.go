@@ -54,6 +54,14 @@ func (c *resolver) Resolve(ctx context.Context, vh directive.ResolverHandler) er
 	config := c.directive.GetExecControllerConfig()
 	factory := c.directive.GetExecControllerFactory()
 
+	var execBackoff backoff.BackOff
+	if buildBackoff := c.directive.GetExecControllerRetryBackoff(); buildBackoff != nil {
+		execBackoff = buildBackoff()
+	}
+	if execBackoff == nil {
+		execBackoff = newExecBackoff()
+	}
+
 	le := c.controller.le.WithField("config", factory.GetConfigID())
 	bus := c.controller.bus
 
@@ -65,7 +73,6 @@ func (c *resolver) Resolve(ctx context.Context, vh directive.ResolverHandler) er
 	}
 
 	// execute the controller w/ retry backoff.
-	execBackoff := newExecBackoff()
 	var lastErr error
 	var execNextBo time.Duration
 	for {

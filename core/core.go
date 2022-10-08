@@ -62,7 +62,7 @@ func NewCoreBus(
 	}
 
 	// Loader controller constructs and executes controllers
-	cl, err := loader.NewController(le, b, nil)
+	cl, err := loader.NewController(le, b)
 	if err != nil {
 		return nil, nil, err
 	}

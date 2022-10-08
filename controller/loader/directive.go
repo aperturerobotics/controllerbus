@@ -6,6 +6,7 @@ import (
 	"github.com/aperturerobotics/controllerbus/config"
 	"github.com/aperturerobotics/controllerbus/controller"
 	"github.com/aperturerobotics/controllerbus/directive"
+	"github.com/cenkalti/backoff"
 )
 
 // ExecController is a directive indicating a controller instance should be
@@ -17,9 +18,11 @@ type ExecController interface {
 
 	// GetExecControllerFactory returns the factory desired to load.
 	GetExecControllerFactory() controller.Factory
-
 	// GetExecControllerConfig returns the config to load the controller with.
 	GetExecControllerConfig() config.Config
+	// GetExecControllerRetryBackoff returns the backoff to use for retries.
+	// If empty / nil, uses the default.
+	GetExecControllerRetryBackoff() func() backoff.BackOff
 }
 
 // ExecControllerValue is the value emitted to satisfy the ExecController
