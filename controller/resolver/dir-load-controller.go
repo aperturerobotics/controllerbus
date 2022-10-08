@@ -6,6 +6,7 @@ import (
 	"github.com/aperturerobotics/controllerbus/config"
 	loader "github.com/aperturerobotics/controllerbus/controller/loader"
 	"github.com/aperturerobotics/controllerbus/directive"
+	"github.com/cenkalti/backoff"
 )
 
 // LoadControllerWithConfig is a directive indicating a controller should be
@@ -14,8 +15,11 @@ type LoadControllerWithConfig interface {
 	// Directive indicates this is a directive.
 	directive.Directive
 
-	// GetDesiredControllerConfig returns the desired controller config.
-	GetDesiredControllerConfig() config.Config
+	// GetLoadControllerConfig returns the controller config to load.
+	GetLoadControllerConfig() config.Config
+	// GetExecControllerRetryBackoff returns the backoff to use for retries.
+	// If empty / nil, uses the default.
+	GetExecControllerRetryBackoff() func() backoff.BackOff
 }
 
 // LoadControllerWithConfig is the value emitted to satisfy the
@@ -25,8 +29,9 @@ type LoadControllerWithConfigValue = loader.ExecControllerValue
 // loadControllerWithConfig is an LoadControllerWithConfig directive.
 // Will override or yield to exiting directives for the controller.
 type loadControllerWithConfig struct {
-	config    config.Config
-	valueOpts directive.ValueOptions
+	config      config.Config
+	valueOpts   directive.ValueOptions
+	execBackoff func() backoff.BackOff
 }
 
 // NewLoadControllerWithConfig constructs a new LoadControllerWithConfig directive.
@@ -38,19 +43,21 @@ func NewLoadControllerWithConfig(
 	}
 }
 
-// NewLoadControllerWithConfigAndValueOpts constructs a new LoadControllerWithConfig directive.
-func NewLoadControllerWithConfigAndValueOpts(
+// NewLoadControllerWithConfigAndOpts constructs a new LoadControllerWithConfig directive.
+func NewLoadControllerWithConfigAndOpts(
 	config config.Config,
 	valueOpts directive.ValueOptions,
+	execBackoff func() backoff.BackOff,
 ) LoadControllerWithConfig {
 	return &loadControllerWithConfig{
-		config:    config,
-		valueOpts: valueOpts,
+		config:      config,
+		valueOpts:   valueOpts,
+		execBackoff: execBackoff,
 	}
 }
 
-// GetDesiredControllerConfig returns the factory desired to load.
-func (d *loadControllerWithConfig) GetDesiredControllerConfig() config.Config {
+// GetLoadControllerConfig returns the factory desired to load.
+func (d *loadControllerWithConfig) GetLoadControllerConfig() config.Config {
 	return d.config
 }
 
@@ -77,8 +84,8 @@ func (d *loadControllerWithConfig) IsEquivalent(other directive.Directive) bool 
 		return false
 	}
 
-	f := d.GetDesiredControllerConfig()
-	return f.EqualsConfig(otherExec.GetDesiredControllerConfig())
+	f := d.GetLoadControllerConfig()
+	return f.EqualsConfig(otherExec.GetLoadControllerConfig())
 }
 
 // Superceeds checks if the directive overrides another.
@@ -97,9 +104,9 @@ func (d *loadControllerWithConfig) GetName() string {
 // This is not necessarily unique, and is primarily intended for display.
 func (d *loadControllerWithConfig) GetDebugVals() directive.DebugValues {
 	vals := directive.NewDebugValues()
-	confID := d.GetDesiredControllerConfig().GetConfigID()
+	confID := d.GetLoadControllerConfig().GetConfigID()
 	vals["config-id"] = []string{confID}
-	dbg, dbgOk := d.GetDesiredControllerConfig().(config.Debuggable)
+	dbg, dbgOk := d.GetLoadControllerConfig().(config.Debuggable)
 	if dbgOk {
 		dbgVals := dbg.GetDebugVals()
 		if dbgVals != nil {
@@ -111,6 +118,12 @@ func (d *loadControllerWithConfig) GetDebugVals() directive.DebugValues {
 		}
 	}
 	return vals
+}
+
+// GetExecControllerRetryBackoff returns the backoff to use for retries.
+// If empty / nil, uses the default.
+func (d *loadControllerWithConfig) GetExecControllerRetryBackoff() func() backoff.BackOff {
+	return d.execBackoff
 }
 
 // _ is a type assertion

@@ -37,7 +37,7 @@ func (c *Controller) resolveLoadControllerWithConfig(
 // Any fatal error resolving the value is returned.
 // When the context is canceled valCh will not be drained anymore.
 func (r *loadWithConfigResolver) Resolve(ctx context.Context, vh directive.ResolverHandler) error {
-	conf := r.dir.GetDesiredControllerConfig()
+	conf := r.dir.GetLoadControllerConfig()
 	var factoryRef directive.Reference
 	factory, err := r.res.GetFactoryMatchingConfig(ctx, conf)
 	if err != nil {
