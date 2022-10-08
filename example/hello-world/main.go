@@ -31,7 +31,7 @@ func execToy() {
 	le.Debug("loader controller attached")
 
 	// Issue load directive for toy controller.
-	loadToy := loader.NewExecControllerSingleton(NewToyFactory(), &ToyControllerConfig{
+	loadToy := loader.NewExecController(NewToyFactory(), &ToyControllerConfig{
 		Name: "world",
 	})
 	ctrl, _, valRef, err := loader.WaitExecControllerRunning(ctx, b, loadToy, nil)

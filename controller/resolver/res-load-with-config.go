@@ -65,7 +65,7 @@ func (r *loadWithConfigResolver) Resolve(ctx context.Context, vh directive.Resol
 	}
 
 	valCtx, valCtxCancel := context.WithCancel(r.ctx)
-	execDir := loader.NewExecControllerSingleton(factory, conf)
+	execDir := loader.NewExecController(factory, conf)
 
 	// pass through all values.
 	_, execRef, err := r.bus.AddDirective(execDir, bus.NewPassThruHandler(vh, valCtxCancel))

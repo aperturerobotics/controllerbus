@@ -25,7 +25,8 @@ type LoadControllerWithConfigValue = loader.ExecControllerValue
 // loadControllerWithConfig is an LoadControllerWithConfig directive.
 // Will override or yield to exiting directives for the controller.
 type loadControllerWithConfig struct {
-	config config.Config
+	config    config.Config
+	valueOpts directive.ValueOptions
 }
 
 // NewLoadControllerWithConfig constructs a new LoadControllerWithConfig directive.
@@ -37,6 +38,17 @@ func NewLoadControllerWithConfig(
 	}
 }
 
+// NewLoadControllerWithConfigAndValueOpts constructs a new LoadControllerWithConfig directive.
+func NewLoadControllerWithConfigAndValueOpts(
+	config config.Config,
+	valueOpts directive.ValueOptions,
+) LoadControllerWithConfig {
+	return &loadControllerWithConfig{
+		config:    config,
+		valueOpts: valueOpts,
+	}
+}
+
 // GetDesiredControllerConfig returns the factory desired to load.
 func (d *loadControllerWithConfig) GetDesiredControllerConfig() config.Config {
 	return d.config
@@ -44,10 +56,7 @@ func (d *loadControllerWithConfig) GetDesiredControllerConfig() config.Config {
 
 // GetValueOptions returns options relating to value handling.
 func (d *loadControllerWithConfig) GetValueOptions() directive.ValueOptions {
-	return directive.ValueOptions{
-		// MaxValueCount:   1,
-		// MaxValueHardCap: true,
-	}
+	return d.valueOpts
 }
 
 // Validate validates the directive.
