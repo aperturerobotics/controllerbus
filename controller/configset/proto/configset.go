@@ -38,6 +38,26 @@ func NewConfigSetMap(c configset.ConfigSet) (ConfigSetMap, error) {
 	return m, nil
 }
 
+// MergeConfigSetMaps merges multiple config set maps to one ConfigSetMap.
+func MergeConfigSetMaps(out ConfigSetMap, sets ...ConfigSetMap) {
+	if out == nil {
+		return
+	}
+	for _, set := range sets {
+		for k, v := range set {
+			if v == nil {
+				continue
+			}
+			vRev := v.GetRevision()
+			existing, existingOk := out[k]
+			if existingOk && existing.GetRevision() > vRev {
+				continue
+			}
+			out[k] = v
+		}
+	}
+}
+
 // Resolve resolves the configset into a configset.ConfigSet
 func (c *ConfigSet) Resolve(ctx context.Context, b bus.Bus) (configset.ConfigSet, error) {
 	return ConfigSetMap(c.GetConfigurations()).Resolve(ctx, b)
