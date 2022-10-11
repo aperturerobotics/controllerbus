@@ -38,6 +38,19 @@ func NewConfigSetMap(c configset.ConfigSet) (ConfigSetMap, error) {
 	return m, nil
 }
 
+// MergeConfigSets merges multiple config sets maps to one ConfigSet.
+func MergeConfigSets(sets ...*ConfigSet) *ConfigSet {
+	out := &ConfigSet{Configurations: make(ConfigSetMap)}
+	maps := make([]ConfigSetMap, 0, len(sets))
+	for _, set := range sets {
+		if csm := set.GetConfigurations(); len(csm) != 0 {
+			maps = append(maps, csm)
+		}
+	}
+	MergeConfigSetMaps(out.Configurations, maps...)
+	return out
+}
+
 // MergeConfigSetMaps merges multiple config set maps to one ConfigSetMap.
 func MergeConfigSetMaps(out ConfigSetMap, sets ...ConfigSetMap) {
 	if out == nil {
