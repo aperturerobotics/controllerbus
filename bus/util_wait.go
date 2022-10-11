@@ -77,6 +77,7 @@ func ExecWaitValue[T any](
 			var empty T
 			return empty, nil, context.Canceled
 		case err := <-errCh:
+			diRef.Release()
 			var empty T
 			return empty, nil, err
 		case val := <-valCh:
