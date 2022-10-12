@@ -289,20 +289,22 @@ export interface ControllerBusService {
 
 export class ControllerBusServiceClientImpl implements ControllerBusService {
   private readonly rpc: Rpc;
-  constructor(rpc: Rpc) {
+  private readonly service: string;
+  constructor(rpc: Rpc, opts?: { service?: string }) {
+    this.service = opts?.service || "bus.api.ControllerBusService";
     this.rpc = rpc;
     this.GetBusInfo = this.GetBusInfo.bind(this);
     this.ExecController = this.ExecController.bind(this);
   }
   GetBusInfo(request: GetBusInfoRequest): Promise<GetBusInfoResponse> {
     const data = GetBusInfoRequest.encode(request).finish();
-    const promise = this.rpc.request("bus.api.ControllerBusService", "GetBusInfo", data);
+    const promise = this.rpc.request(this.service, "GetBusInfo", data);
     return promise.then((data) => GetBusInfoResponse.decode(new _m0.Reader(data)));
   }
 
   ExecController(request: ExecControllerRequest): AsyncIterable<ExecControllerResponse> {
     const data = ExecControllerRequest.encode(request).finish();
-    const result = this.rpc.serverStreamingRequest("bus.api.ControllerBusService", "ExecController", data);
+    const result = this.rpc.serverStreamingRequest(this.service, "ExecController", data);
     return ExecControllerResponse.decodeTransform(result);
   }
 }
