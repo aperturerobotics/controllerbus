@@ -68,9 +68,10 @@ func NewCoreBus(
 	}
 
 	// Execute the loader controller.
-	go func() {
-		_ = b.ExecuteController(ctx, cl)
-	}()
+	_, err = b.AddController(ctx, cl, nil)
+	if err != nil {
+		return nil, nil, err
+	}
 
 	// If there are any built in factories append them.
 	sr := static.NewResolver(conf.BuiltInFactories...)
@@ -88,12 +89,10 @@ func NewCoreBus(
 	}
 
 	// execute the factory resolver
-	go func() {
-		_ = b.ExecuteController(
-			ctx,
-			resolver.NewController(le, b, fres),
-		)
-	}()
+	_, err = b.AddController(ctx, resolver.NewController(le, b, fres), nil)
+	if err != nil {
+		return nil, nil, err
+	}
 
 	return b, sr, nil
 }

@@ -4,6 +4,7 @@ import (
 	"context"
 	"runtime/debug"
 	"sync"
+	"sync/atomic"
 
 	"github.com/aperturerobotics/controllerbus/bus"
 	"github.com/aperturerobotics/controllerbus/controller"
@@ -36,6 +37,68 @@ func (b *Bus) GetControllers() []controller.Controller {
 	return c
 }
 
+// AddController adds a controller to the bus and calls Execute().
+// Returns a release function for the controller instance.
+// Any fatal error in the controller is written to the callback.
+// The controller will receive directive callbacks until removed.
+// cb can be nil
+func (b *Bus) AddController(ctx context.Context, ctrl controller.Controller, cb func(exitErr error)) (func(), error) {
+	b.addController(ctrl)
+
+	relCh := make(chan struct{})
+	var released atomic.Bool
+	relFunc := func() {
+		if !released.Swap(true) {
+			close(relCh)
+		}
+	}
+
+	errCh := make(chan error, 1)
+	go func() {
+		var err error
+		defer func() {
+			b.handleControllerPanic(&err)
+			if err != nil {
+				errCh <- err
+			}
+		}()
+		err = ctrl.Execute(ctx)
+	}()
+	go func() {
+		select {
+		case <-ctx.Done():
+			if cb != nil {
+				cb(context.Canceled)
+			}
+		case err := <-errCh:
+			if cb != nil {
+				cb(err)
+			}
+		case _, _ = <-relCh:
+			if cb != nil {
+				cb(nil)
+			}
+		}
+	}()
+
+	return relFunc, nil
+}
+
+// handleControllerPanic handles recover for a paniced controller.
+func (b *Bus) handleControllerPanic(outErr *error) {
+	if rerr := recover(); rerr != nil {
+		e, eOk := rerr.(error)
+		if eOk {
+			debug.PrintStack()
+			if outErr != nil {
+				*outErr = errors.Wrap(e, "controller paniced")
+			}
+		} else if outErr != nil && *outErr == nil {
+			*outErr = errors.New("controller paniced")
+		}
+	}
+}
+
 // ExecuteController adds a controller to the bus and calls Execute().
 // Any fatal error in the controller is returned.
 // The controller will receive directive callbacks.
@@ -44,15 +107,7 @@ func (b *Bus) ExecuteController(ctx context.Context, c controller.Controller) (e
 	b.addController(c)
 
 	defer func() {
-		if rerr := recover(); rerr != nil {
-			e, eOk := rerr.(error)
-			if eOk {
-				debug.PrintStack()
-				err = errors.Wrap(e, "controller paniced")
-			} else if err == nil {
-				err = errors.New("controller paniced")
-			}
-		}
+		b.handleControllerPanic(&err)
 		if err != nil {
 			b.removeController(c)
 		}
