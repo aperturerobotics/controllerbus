@@ -20,8 +20,8 @@ func (c *Controller) resolveBoilerplate(
 	ctx context.Context,
 	inst directive.Instance,
 	dir boilerplate.Boilerplate,
-) (directive.Resolver, error) {
-	return &boilerplateResolver{c: c, dir: dir}, nil
+) ([]directive.Resolver, error) {
+	return directive.Resolvers(&boilerplateResolver{c: c, dir: dir}), nil
 }
 
 // Resolve resolves the values, emitting them to the handler.

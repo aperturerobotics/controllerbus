@@ -29,8 +29,14 @@ type loadWithConfigResolver struct {
 func (c *Controller) resolveLoadControllerWithConfig(
 	ctx context.Context,
 	dir LoadControllerWithConfig,
-) (directive.Resolver, error) {
-	return &loadWithConfigResolver{c: c, ctx: ctx, res: c.resolver, dir: dir, bus: c.bus}, nil
+) ([]directive.Resolver, error) {
+	return directive.Resolvers(&loadWithConfigResolver{
+		c:   c,
+		ctx: ctx,
+		res: c.resolver,
+		dir: dir,
+		bus: c.bus,
+	}), nil
 }
 
 // Resolve resolves the values.

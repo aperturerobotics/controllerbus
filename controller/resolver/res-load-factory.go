@@ -25,13 +25,13 @@ type LoadFactoryByConfigResolver struct {
 func (c *Controller) resolveLoadFactoryByConfig(
 	ctx context.Context,
 	dir LoadFactoryByConfig,
-) (directive.Resolver, error) {
-	return &LoadFactoryByConfigResolver{
+) ([]directive.Resolver, error) {
+	return directive.Resolvers(&LoadFactoryByConfigResolver{
 		ctx: ctx,
 		res: c.resolver,
 		dir: dir,
 		bus: c.bus,
-	}, nil
+	}), nil
 }
 
 // Resolve resolves the values.

@@ -106,7 +106,7 @@ ExecLoop:
 func (c *Controller) HandleDirective(
 	ctx context.Context,
 	di directive.Instance,
-) (directive.Resolver, error) {
+) ([]directive.Resolver, error) {
 	dir := di.GetDirective()
 	switch d := dir.(type) {
 	case configset.ApplyConfigSet:
@@ -190,8 +190,8 @@ func (c *Controller) resolveApplyConfigSet(
 	ctx context.Context,
 	di directive.Instance,
 	dir configset.ApplyConfigSet,
-) directive.Resolver {
-	return newApplyConfigSetResolver(c, ctx, di, dir)
+) []directive.Resolver {
+	return directive.Resolvers(newApplyConfigSetResolver(c, ctx, di, dir))
 }
 
 // resolveLookupConfigSet resolves the LookupConfigSet directive
@@ -199,8 +199,8 @@ func (c *Controller) resolveLookupConfigSet(
 	ctx context.Context,
 	di directive.Instance,
 	dir configset.LookupConfigSet,
-) directive.Resolver {
-	return newLookupConfigSetResolver(c, ctx, di, dir)
+) []directive.Resolver {
+	return directive.Resolvers(newLookupConfigSetResolver(c, ctx, di, dir))
 }
 
 // wake wakes the controller

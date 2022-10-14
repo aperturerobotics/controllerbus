@@ -40,10 +40,10 @@ func newExecBackoff() backoff.BackOff {
 func (c *Controller) resolveExecController(
 	ctx context.Context,
 	dir ExecController,
-) (directive.Resolver, error) {
+) ([]directive.Resolver, error) {
 	// Check if the ExecController is meant for / compatible with us.
 	// In this case, we handle all ExecController requests.
-	return newResolver(ctx, dir, c), nil
+	return directive.Resolvers(newResolver(ctx, dir, c)), nil
 }
 
 // Resolve resolves the values.

@@ -64,7 +64,7 @@ func (b *BusBridge) Execute(ctx context.Context) error {
 // Any exceptional errors are returned for logging.
 // It is safe to add a reference to the directive during this call.
 // The context passed is canceled when the directive instance expires.
-func (b *BusBridge) HandleDirective(ctx context.Context, di directive.Instance) (directive.Resolver, error) {
+func (b *BusBridge) HandleDirective(ctx context.Context, di directive.Instance) ([]directive.Resolver, error) {
 	if b.target == nil {
 		return nil, nil
 	}
@@ -97,7 +97,7 @@ func (b *BusBridge) HandleDirective(ctx context.Context, di directive.Instance) 
 		b.mtx.Unlock()
 	})
 
-	return NewBusBridgeResolver(b.target, dir), nil
+	return directive.Resolvers(NewBusBridgeResolver(b.target, dir)), nil
 }
 
 // Close releases any resources used by the controller.

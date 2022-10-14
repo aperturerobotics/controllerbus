@@ -245,9 +245,9 @@ type Resolver interface {
 // Handler handles new reference instances.
 type Handler interface {
 	// HandleDirective asks if the handler can resolve the directive.
-	// If it can, it returns a resolver. If not, returns nil.
+	// If it can, it returns resolver(s). If not, returns nil.
 	// Any exceptional errors are returned for logging.
 	// It is safe to add a reference to the directive during this call.
 	// The context passed is canceled when the directive instance expires.
-	HandleDirective(context.Context, Instance) (Resolver, error)
+	HandleDirective(context.Context, Instance) ([]Resolver, error)
 }

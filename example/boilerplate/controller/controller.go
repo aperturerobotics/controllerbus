@@ -55,7 +55,7 @@ func (c *Controller) GetControllerInfo() *controller.Info {
 func (c *Controller) HandleDirective(
 	ctx context.Context,
 	inst directive.Instance,
-) (directive.Resolver, error) {
+) ([]directive.Resolver, error) {
 	dir := inst.GetDirective()
 	switch d := dir.(type) {
 	case boilerplate.Boilerplate:

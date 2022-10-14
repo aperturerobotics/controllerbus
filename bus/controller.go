@@ -90,7 +90,7 @@ func (c *BusController[T]) Execute(ctx context.Context) error {
 }
 
 // HandleDirective asks if the handler can resolve the directive.
-func (c *BusController[T]) HandleDirective(ctx context.Context, di directive.Instance) (directive.Resolver, error) {
+func (c *BusController[T]) HandleDirective(ctx context.Context, di directive.Instance) ([]directive.Resolver, error) {
 	return nil, nil
 }
 

@@ -41,7 +41,7 @@ func (c *ToyController) GetControllerInfo() *controller.Info {
 func (c *ToyController) HandleDirective(
 	ctx context.Context,
 	di directive.Instance,
-) (directive.Resolver, error) {
+) ([]directive.Resolver, error) {
 	// Pass for the example controller
 	return nil, nil
 }

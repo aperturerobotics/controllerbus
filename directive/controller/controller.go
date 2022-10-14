@@ -158,27 +158,24 @@ func (c *DirectiveController) GetDirectives() []directive.Instance {
 
 // callHandler calls the directive handler with the directive, managing the resolver if returned.
 func (c *DirectiveController) callHandler(ahnd *attachedHandler, inst *DirectiveInstance) error {
-	// HandleDirective asks if the handler can resolve the directive.
-	// If it can, it returns a resolver. If not, returns nil.
-	// Any exceptional errors are returned for logging.
-	// It is safe to add a reference to the directive during this call.
 	hnd := ahnd.Handler
 	handleCtx, handleCtxCancel := context.WithCancel(ahnd.Context)
-
-	// go is needed here due to relMtx being locked
 	relDispose := inst.AddDisposeCallback(handleCtxCancel)
-	// inst.AddDisposeCallback(handleCtxCancel)
-
-	resolver, err := hnd.HandleDirective(handleCtx, inst)
+	resolvers, err := hnd.HandleDirective(handleCtx, inst)
 	if err != nil {
 		return err
 	}
-	if resolver == nil {
+	// attach resolvers
+	var anyAttached bool
+	for _, resolver := range resolvers {
+		if resolver != nil {
+			anyAttached = true
+			inst.attachResolver(handleCtx, resolver)
+		}
+	}
+	if !anyAttached {
 		relDispose()
 		handleCtxCancel()
-	} else {
-		// attach resolver
-		inst.attachResolver(handleCtx, resolver)
 	}
 
 	return nil

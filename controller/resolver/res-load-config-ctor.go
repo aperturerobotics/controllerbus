@@ -25,13 +25,13 @@ type LoadConfigConstructorByIDResolver struct {
 func (c *Controller) resolveLoadConfigConstructorByID(
 	ctx context.Context,
 	dir LoadConfigConstructorByID,
-) (directive.Resolver, error) {
-	return &LoadConfigConstructorByIDResolver{
+) ([]directive.Resolver, error) {
+	return directive.Resolvers(&LoadConfigConstructorByIDResolver{
 		ctx: ctx,
 		res: c.resolver,
 		dir: dir,
 		bus: c.bus,
-	}, nil
+	}), nil
 }
 
 // Resolve resolves the values.
