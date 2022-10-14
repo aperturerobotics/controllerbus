@@ -166,14 +166,17 @@ func (c *DirectiveController) callHandler(ahnd *attachedHandler, inst *Directive
 	handleCtx, handleCtxCancel := context.WithCancel(ahnd.Context)
 
 	// go is needed here due to relMtx being locked
-	go inst.AddDisposeCallback(handleCtxCancel)
+	relDispose := inst.AddDisposeCallback(handleCtxCancel)
 	// inst.AddDisposeCallback(handleCtxCancel)
 
 	resolver, err := hnd.HandleDirective(handleCtx, inst)
 	if err != nil {
 		return err
 	}
-	if resolver != nil {
+	if resolver == nil {
+		relDispose()
+		handleCtxCancel()
+	} else {
 		// attach resolver
 		inst.attachResolver(handleCtx, resolver)
 	}
