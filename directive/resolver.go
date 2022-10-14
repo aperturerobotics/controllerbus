@@ -21,3 +21,8 @@ func NewResolver(res Resolver, err error) ([]Resolver, error) {
 	}
 	return Resolvers(res), nil
 }
+
+// R is a shortcut for NewResolver.
+func R(res Resolver, err error) ([]Resolver, error) {
+	return NewResolver(res, err)
+}
