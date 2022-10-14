@@ -13,3 +13,11 @@ func Resolvers(resolvers ...Resolver) []Resolver {
 	}
 	return out
 }
+
+// NewResolver checks the error and returns a resolver slice if err == nil.
+func NewResolver(res Resolver, err error) ([]Resolver, error) {
+	if err != nil {
+		return nil, err
+	}
+	return Resolvers(res), nil
+}
