@@ -62,7 +62,8 @@ func (c *resolver) Resolve(ctx context.Context, vh directive.ResolverHandler) er
 		execBackoff = newExecBackoff()
 	}
 
-	le := c.controller.le.WithField("config", factory.GetConfigID())
+	configID := factory.GetConfigID()
+	le := c.controller.le.WithField("config", configID)
 	bus := c.controller.bus
 
 	ci, ciErr := factory.Construct(config, controller.ConstructOpts{
