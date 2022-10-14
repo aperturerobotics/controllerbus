@@ -17,6 +17,22 @@ func NewCContainer[T comparable](val T) *CContainer[T] {
 	return &CContainer[T]{val: val, wake: make(chan struct{})}
 }
 
+// GetValue returns the immediate value of the container.
+func (c *CContainer[T]) GetValue() T {
+	c.mtx.Lock()
+	val := c.val
+	c.mtx.Unlock()
+	return val
+}
+
+// SetValue sets the ccontainer value.
+func (c *CContainer[T]) SetValue(val T) {
+	c.mtx.Lock()
+	c.val = val
+	c.wakeWaiting()
+	c.mtx.Unlock()
+}
+
 // WaitValueWithValidator waits for any value that matches the validator in the container.
 // errCh is an optional channel to read an error from.
 func (c *CContainer[T]) WaitValueWithValidator(
@@ -74,7 +90,7 @@ func (c *CContainer[T]) WaitValueChange(ctx context.Context, old T, errCh <-chan
 	}, errCh)
 }
 
-// WaitValueEmpty waits for a untyped nil value.
+// WaitValueEmpty waits for an empty value.
 // errCh is an optional channel to read an error from.
 func (c *CContainer[T]) WaitValueEmpty(ctx context.Context, errCh <-chan error) error {
 	_, err := c.WaitValueWithValidator(ctx, func(v T) (bool, error) {
@@ -82,17 +98,6 @@ func (c *CContainer[T]) WaitValueEmpty(ctx context.Context, errCh <-chan error) 
 		return v == emptyValue, nil
 	}, errCh)
 	return err
-}
-
-// SetValue sets the ccontainer value.
-//
-// Be sure to check for nil when setting if necessary: untyped nil is still
-// considered a set value.
-func (c *CContainer[T]) SetValue(val T) {
-	c.mtx.Lock()
-	c.val = val
-	c.wakeWaiting()
-	c.mtx.Unlock()
 }
 
 // wakeWaiting wakes any waiting goroutines
