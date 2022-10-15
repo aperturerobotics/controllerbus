@@ -74,7 +74,7 @@ func (b *Bus) AddController(ctx context.Context, ctrl controller.Controller, cb 
 			if cb != nil {
 				cb(err)
 			}
-		case _, _ = <-relCh:
+		case <-relCh:
 			if cb != nil {
 				cb(nil)
 			}
