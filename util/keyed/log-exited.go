@@ -10,9 +10,9 @@ import (
 func NewLogExitedCallback[T comparable](le *logrus.Entry) func(key string, routine Routine, data T, err error) {
 	return func(key string, routine Routine, data T, err error) {
 		if err != nil && err != context.Canceled {
-			le.WithError(err).Warnf("controller exited: %s", key)
+			le.WithError(err).Warnf("keyed: routine exited: %s", key)
 		} else {
-			le.Debugf("controller exited: %s", key)
+			le.Debugf("keyed: routine exited: %s", key)
 		}
 	}
 }
