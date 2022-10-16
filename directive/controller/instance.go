@@ -248,14 +248,8 @@ func (r *DirectiveInstance) AddIdleCallback(cb directive.IdleCallback) func() {
 	defer r.mtx.Unlock()
 
 	errs := r.getResolverErrs()
-
-	if r.released {
-		cb(errs)
-		return func() {}
-	}
-
-	if r.runningResolvers == 0 {
-		cb(errs)
+	if r.released || r.runningResolvers == 0 {
+		go cb(errs)
 		return func() {}
 	}
 
@@ -263,12 +257,15 @@ func (r *DirectiveInstance) AddIdleCallback(cb directive.IdleCallback) func() {
 	r.nidleID++
 	r.idleCallbacks[relid] = cb
 
-	return func() {
+	relIdle := func() {
 		r.mtx.Lock()
 		if r.idleCallbacks != nil {
 			delete(r.idleCallbacks, relid)
 		}
 		r.mtx.Unlock()
+	}
+	return func() {
+		go relIdle()
 	}
 }
 
@@ -360,7 +357,6 @@ func (r *DirectiveInstance) decrementRunningResolvers() {
 				if idleCb != nil {
 					go idleCb(errs)
 				}
-				// delete(r.idleCallbacks, id)
 			}
 		}
 	}
