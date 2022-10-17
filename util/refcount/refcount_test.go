@@ -35,8 +35,7 @@ func TestRefCount(t *testing.T) {
 	}
 
 	var gotValue *string
-	var gotErr error
-	gotErr = AccessRefCount(ctx, rc, func(val *string) error {
+	gotErr := AccessRefCount(ctx, rc, func(val *string) error {
 		gotValue = val
 		return nil
 	})
