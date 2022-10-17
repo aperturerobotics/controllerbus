@@ -65,6 +65,62 @@ func NewRefCount[T comparable](
 	}
 }
 
+// AccessRefCount adds a reference to the RefCount while the fn executes.
+func AccessRefCount[T comparable](
+	ctx context.Context,
+	rc *RefCount[T],
+	cb func(T) error,
+) error {
+	valCh := make(chan T, 1)
+	errCh := make(chan error, 1)
+	ref := rc.AddRef(func(val T, err error) {
+		if err != nil {
+			select {
+			case errCh <- err:
+			default:
+			}
+		} else {
+			select {
+			case valCh <- val:
+			default:
+			}
+		}
+	})
+	defer ref.Release()
+
+	select {
+	case <-ctx.Done():
+		return context.Canceled
+	case err := <-errCh:
+		return err
+	case val := <-valCh:
+		return cb(val)
+	}
+}
+
+// WaitRefCount waits for a RefCount container handling errors.
+// targetErr can be nil
+func WaitRefCount[T comparable](
+	ctx context.Context,
+	target *ccontainer.CContainer[T],
+	targetErr *ccontainer.CContainer[*error],
+) (T, error) {
+	var errCh chan error
+	if targetErr != nil {
+		errCh = make(chan error, 1)
+		go func() {
+			outErr, _ := targetErr.WaitValue(ctx, errCh)
+			if outErr != nil && *outErr != nil {
+				select {
+				case errCh <- *outErr:
+				default:
+				}
+			}
+		}()
+	}
+	return target.WaitValue(ctx, errCh)
+}
+
 // AddRef adds a reference to the RefCount container.
 // cb is an optional callback to call when the value changes.
 func (r *RefCount[T]) AddRef(cb func(val T, err error)) *Ref[T] {
@@ -126,9 +182,13 @@ func (r *RefCount[T]) resolve(ctx context.Context) {
 
 	// store the value and/or error
 	if err != nil {
-		r.targetErr.SetValue(&err)
+		if r.targetErr != nil {
+			r.targetErr.SetValue(&err)
+		}
 	} else {
-		r.targetErr.SetValue(nil)
+		if r.targetErr != nil {
+			r.targetErr.SetValue(nil)
+		}
 		if r.target != nil {
 			r.target.SetValue(val)
 		}

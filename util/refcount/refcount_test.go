@@ -19,10 +19,13 @@ func TestRefCount(t *testing.T) {
 			relCalled = true
 		}, nil
 	})
+
+	ref := rc.AddRef(nil)
 	var gotValue *string
 	var gotErr error
-	nr := rc.AddRef(func(val *string, err error) {
-		gotValue, gotErr = val, err
+	gotErr = AccessRefCount(ctx, rc, func(val *string) error {
+		gotValue = val
+		return nil
 	})
 	waitVal, err := target.WaitValue(ctx, nil)
 	if err != nil {
@@ -31,7 +34,8 @@ func TestRefCount(t *testing.T) {
 	if waitVal != gotValue || gotErr != nil || relCalled {
 		t.Fail()
 	}
-	nr.Release()
+	ref.Release()
+
 	if !relCalled {
 		t.Fail()
 	}
