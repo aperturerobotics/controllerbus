@@ -15,9 +15,10 @@ The primary concepts are:
  - **Config**: configuration for a controller or process.
  - **Controller**: goroutine which can create & handle Directives.
  - **Directive**: a cross-controller request or declaration of target state.
- - **Bus**: communication channel between Controllers.
+ - **Bus**: communication channel between running Controllers.
+ - **Factory**: constructor for controller and configuration objects.
 
-Controller Bus provides a common pattern for structuring modular Go projects.
+Controller Bus provides a pattern for structuring modular Go projects.
 
 ## Examples
 
@@ -25,42 +26,11 @@ Controller Bus provides a common pattern for structuring modular Go projects.
 
 [![asciicast](https://asciinema.org/a/418275.svg)](https://asciinema.org/a/418275)
 
-The [boilerplate](./example/boilerplate/controller/config.proto) example has the
-following configuration proto:
-
-```protobuf
-// Config is the boilerplate configuration.
-message Config {
-  // ExampleField is an example configuration field.
-  string example_field = 1;
-}
-```
-
-This is an example YAML configuration for this controller:
-
-```yaml
-exampleField: "Hello world!"
-```
-
-Using the **LoadControllerWithConfig** directive, we can instruct the system to
-resolve the configuration type to a controller factory & exec the controller:
-
-```go
-	bus.ExecOneOff(
-		ctx,
-		cb,
-		resolver.NewLoadControllerWithConfig(&boilerplate_controller.Config{
-			ExampleField: "Hello World!",
-		}),
-		nil,
-	)
-```
-
-You can also run this demo by:
+Basic demo of the controllerbus daemon and ConfigSet format:
 
 ```sh
 cd ./cmd/controllerbus
-go build -v 
+go build -v
 ./controllerbus daemon
 ```
 
@@ -106,13 +76,61 @@ In this case, `example-1` is the ID of the controller. If multiple ConfigSet are
 applied with the same ID, the latest revision wins. The ConfigSet controller
 will automatically start and stop controllers as ConfigSets are changed.
 
+### How does it work?
+
+Controllers are executed by attaching them to a Bus. When attaching to a Bus,
+all ongoing Directives are passed to the new Controller. The Controllers can
+return Resolver objects to resolve result objects for Directives.
+
+There are multiple ways to start a Controller:
+
+ - `AddController`: with the Go API: construct & add the controller.
+ - `AddDirective` -> `ExecControllerWithConfig`: with a directive.
+ - yaml/json: resolving human-readable configuration to Config objects.
+
+Config objects are Protobuf messages with attached validation functions. They
+can be hand written in YAML and parsed to Protobuf or be created as Go objects.
+
+### Protobuf Configuration
+
+The [boilerplate](./example/boilerplate/controller/config.proto) example has the
+following configuration proto:
+
+```protobuf
+// Config is the boilerplate configuration.
+message Config {
+  // ExampleField is an example configuration field.
+  string example_field = 1;
+}
+```
+
+This is an example YAML configuration for this controller:
+
+```yaml
+exampleField: "Hello world!"
+```
+
+With the Go API, we can use the **LoadControllerWithConfig** directive to
+execute the controller with a configuration object:
+
+```go
+	bus.ExecOneOff(
+		ctx,
+		cb,
+		resolver.NewLoadControllerWithConfig(&boilerplate_controller.Config{
+			ExampleField: "Hello World!",
+		}),
+		nil,
+	)
+```
+
 ## Daemon and API
 
-The [example daemon](./cmd/controllerbus) is an associated client and CLI for
-the [Bus GRPC API](./bus/api), for example:
+The [example daemon](./cmd/controllerbus) has an associated client and CLI for
+the [Bus API](./bus/api), for example:
 
 ```sh
-$ controllerbus client exec -f controllerbus_daemon.yaml 
+$ controllerbus client exec -f controllerbus_daemon.yaml
 ```
 
 ```json
@@ -138,7 +156,7 @@ service ControllerBusService {
 }
 ```
 
-The GRPC API is itself implemented as a controller, which can be configured:
+The RPC API is itself implemented as a controller, which can be configured:
 
 ```yaml
 grpc-api:
@@ -182,9 +200,33 @@ which are intended to be copied to other projects, which reference the core
 This provides logging, context cancelation. A single Factory is attached which
 provides support for the Config type, (see the boilerplate example).
 
+## Daemon and Client CLIs
+
+Plugins can be bundled together with a set of root configurations into a CLI.
+This can be used to bundle modules into a daemon and/or client for an
+application - similar to the [controllerbus cli](./cmd/controllerbus).
+
+## Testing
+
+An in-memory Bus can be created for testing, an
+[example](./example/boilerplate/controller/controller_test.go) is provided in
+the boilerplate package.
+
+## Use Cases
+
+List of projects known to use Controller Bus:
+
+ - [Bifrost]: modular p2p networking and messaging library & daemon
+
+[Bifrost]: https://github.com/aperturerobotics/bifrost
+
+Open a PR to add your project to this list!
+
 ## Plugins
 
-[![asciicast](https://asciinema.org/a/I4LOCViLwzRlztYc1rytgAxWp.svg)](./example/plugin-demo)
+[![asciicast](https://asciinema.org/a/I4LOCViLwzRlztYc1rytgAxWp.svg)](./example/plugin-demo**
+
+**⚠ Plugins are experimental and not yet feature-complete.**
 
 The [plugin](./plugin) system and compiler scans a set of Go packages for
 ControllerBus factories and bundles them together into a hashed Plugin bundle.
@@ -208,50 +250,6 @@ OPTIONS:
 The CLI will analyze a list of Go package paths, discover all Factories
 available in the packages, generate a Go module for importing all of the
 factories into a single Plugin, and compile that package to a .so library.
-
-## Daemon and Client CLIs
-
-Plugins can be bundled together with a set of root configurations into a CLI.
-This can be used to bundle modules into a daemon and/or client for an
-application - similar to the [controllerbus cli](./cmd/controllerbus).
-
-## How does it work?
-
-Config objects are Protobuf messages with attached validation functions. They
-can be hand written in YAML and parsed to Protobuf or be created as Go objects.
-
-Controllers are executed by attaching them to a Bus. When attaching to a Bus,
-all ongoing Directives are passed to the new Controller. The Controllers can
-return Resolver objects to concurrently resolve results for Directives.
-
-The Plugin system implements hot-loading and dynamic linking of components.
-
-The controller model is similar to the microservices model:
-
- - Declare a contract for a component as an API (Rest, gRPC)
- - Other components link against the client for that API
- - Communication between components occurs in-process over network.
- - Subroutines concurrently process requests (distributed model).
-
-The goal of this project is to find a happy medium between the two approaches,
-supporting statically linked, dynamically linked (plugin), or networked
-(distributed) controller implementations and execution models.
-
-## Testing
-
-An in-memory Bus can be created for testing, an
-[example](./example/boilerplate/controller/controller_test.go) is provided in
-the boilerplate package.
-
-## Use Cases
-
-List of projects known to use Controller Bus:
-
- - [Bifrost]: modular p2p networking and messaging library & daemon
-
-[Bifrost]: https://github.com/aperturerobotics/bifrost
-
-Open a PR to add your project to this list!
 
 ## Support
 
