@@ -2,6 +2,13 @@
 
 ## Introduction
 
+[![GoDoc Widget]][GoDoc] [![Go Report Card Widget]][Go Report Card]
+
+[GoDoc]: https://godoc.org/github.com/aperturerobotics/controllerbus
+[GoDoc Widget]: https://godoc.org/github.com/aperturerobotics/controllerbus?status.svg
+[Go Report Card Widget]: https://goreportcard.com/badge/github.com/aperturerobotics/controllerbus
+[Go Report Card]: https://goreportcard.com/report/github.com/aperturerobotics/controllerbus
+
 **ControllerBus** is a framework for **communicating control loops**:
 
  - **Configurable**: flexible self-documenting config with Protobuf and YAML.
@@ -212,16 +219,6 @@ An in-memory Bus can be created for testing, an
 [example](./example/boilerplate/controller/controller_test.go) is provided in
 the boilerplate package.
 
-## Use Cases
-
-List of projects known to use Controller Bus:
-
- - [Bifrost]: modular p2p networking and messaging library & daemon
-
-[Bifrost]: https://github.com/aperturerobotics/bifrost
-
-Open a PR to add your project to this list!
-
 ## Plugins
 
 [![asciicast](https://asciinema.org/a/I4LOCViLwzRlztYc1rytgAxWp.svg)](./example/plugin-demo**
@@ -251,11 +248,17 @@ The CLI will analyze a list of Go package paths, discover all Factories
 available in the packages, generate a Go module for importing all of the
 factories into a single Plugin, and compile that package to a .so library.
 
+## Projects
+
+List of projects known to use Controller Bus:
+
+ - [Bifrost]: networking and p2p library + daemon
+
+[Bifrost]: https://github.com/aperturerobotics/bifrost
+
+Open a PR to add your project to this list!
+
 ## Support
-
-ControllerBus is built & supported by Aperture Robotics, LLC.
-
-Community contributions and discussion are welcomed!
 
 Please open a [GitHub issue] with any questions / issues.
 
@@ -265,3 +268,7 @@ Please open a [GitHub issue] with any questions / issues.
 
 [Discord]: https://discord.gg/ZAZSt8CweP
 [Matrix Chat]: https://matrix.to/#/#aperturerobotics:matrix.org
+
+## License
+
+MIT
