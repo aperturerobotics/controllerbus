@@ -221,7 +221,7 @@ the boilerplate package.
 
 ## Plugins
 
-[![asciicast](https://asciinema.org/a/I4LOCViLwzRlztYc1rytgAxWp.svg)](./example/plugin-demo**
+[![asciicast](https://asciinema.org/a/I4LOCViLwzRlztYc1rytgAxWp.svg)](./example/plugin-demo)
 
 **⚠ Plugins are experimental and not yet feature-complete.**
 
