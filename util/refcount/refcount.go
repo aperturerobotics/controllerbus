@@ -12,7 +12,8 @@ import (
 // Wraps a ccontainer with a ref count mechanism.
 // When there are no references, the container contents are released.
 type RefCount[T comparable] struct {
-	// ctx is the root context
+	// ctx contains the root context
+	// can be nil
 	ctx context.Context
 	// target is the target ccontainer
 	target *ccontainer.CContainer[T]
@@ -49,7 +50,7 @@ func (k *Ref[T]) Release() {
 }
 
 // NewRefCount builds a new RefCount.
-// target and targetErr can be empty
+// ctx, target and targetErr can be empty
 func NewRefCount[T comparable](
 	ctx context.Context,
 	target *ccontainer.CContainer[T],
@@ -121,6 +122,18 @@ func WaitRefCount[T comparable](
 	return target.WaitValue(ctx, errCh)
 }
 
+// SetContext updates the context to use for the RefCount container resolution.
+// If ctx=nil the RefCount will wait until ctx != nil to start.
+// This also restarts resolution, if there are any refs.
+func (r *RefCount[T]) SetContext(ctx context.Context) {
+	r.mtx.Lock()
+	if r.ctx != ctx {
+		r.ctx = ctx
+		r.startResolve()
+	}
+	r.mtx.Unlock()
+}
+
 // AddRef adds a reference to the RefCount container.
 // cb is an optional callback to call when the value changes.
 func (r *RefCount[T]) AddRef(cb func(val T, err error)) *Ref[T] {
@@ -129,6 +142,13 @@ func (r *RefCount[T]) AddRef(cb func(val T, err error)) *Ref[T] {
 	r.refs[nref] = struct{}{}
 	if len(r.refs) == 1 {
 		r.startResolve()
+	} else {
+		var empty T
+		if val := r.target.GetValue(); val != empty {
+			nref.cb(val, nil)
+		} else if err := r.targetErr.GetValue(); err != nil && *err != nil {
+			nref.cb(empty, *err)
+		}
 	}
 	r.mtx.Unlock()
 	return nref
@@ -164,6 +184,13 @@ func (r *RefCount[T]) shutdown() {
 // startResolve starts the resolve goroutine.
 // expects caller to lock mutex.
 func (r *RefCount[T]) startResolve() {
+	if r.resolveCtxCancel != nil {
+		r.resolveCtxCancel()
+	}
+	if r.ctx == nil || len(r.refs) == 0 {
+		r.resolveCtxCancel = nil
+		return
+	}
 	r.resolveCtx, r.resolveCtxCancel = context.WithCancel(r.ctx)
 	go r.resolve(r.resolveCtx)
 }
@@ -194,16 +221,10 @@ func (r *RefCount[T]) resolve(ctx context.Context) {
 		}
 	}
 	r.valueRel = valRel
-
-	refs := make([]*Ref[T], 0, len(r.refs))
 	for ref := range r.refs {
 		if ref.cb != nil {
-			refs = append(refs, ref)
+			ref.cb(val, err)
 		}
 	}
 	r.mtx.Unlock()
-
-	for _, ref := range refs {
-		ref.cb(val, err)
-	}
 }
