@@ -33,4 +33,19 @@ func TestCContainer(t *testing.T) {
 
 	c.SetValue(nil)
 	_ = c.WaitValueEmpty(ctx, errCh) // should be instant
+
+	swapPlusOne := func(val *int) *int {
+		nv := 1
+		if val != nil {
+			nv = *val + 1
+		}
+		return &nv
+	}
+
+	for i := 1; i < 10; i++ {
+		out := c.SwapValue(swapPlusOne)
+		if out == nil || *out != i {
+			t.Fail()
+		}
+	}
 }

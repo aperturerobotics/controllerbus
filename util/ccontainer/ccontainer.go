@@ -33,6 +33,20 @@ func (c *CContainer[T]) SetValue(val T) {
 	c.mtx.Unlock()
 }
 
+// SwapValue locks the container, calls the callback, and stores the return value.
+//
+// Returns the updated value.
+func (c *CContainer[T]) SwapValue(cb func(val T) T) T {
+	c.mtx.Lock()
+	val := c.val
+	if cb != nil {
+		val = cb(val)
+		c.val = val
+	}
+	c.mtx.Unlock()
+	return val
+}
+
 // WaitValueWithValidator waits for any value that matches the validator in the container.
 // errCh is an optional channel to read an error from.
 func (c *CContainer[T]) WaitValueWithValidator(
