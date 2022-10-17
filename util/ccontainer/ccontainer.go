@@ -41,7 +41,10 @@ func (c *CContainer[T]) SwapValue(cb func(val T) T) T {
 	val := c.val
 	if cb != nil {
 		val = cb(val)
-		c.val = val
+		if val != c.val {
+			c.val = val
+			c.wakeWaiting()
+		}
 	}
 	c.mtx.Unlock()
 	return val
