@@ -2,6 +2,7 @@ package keyed
 
 import (
 	"context"
+	"time"
 )
 
 // runningRoutine tracks a running routine
@@ -25,6 +26,8 @@ type runningRoutine[T comparable] struct {
 	err error
 	// success indicates the routine succeeded
 	success bool
+	// deferRemove is set if we are waiting to remove this.
+	deferRemove *time.Timer
 }
 
 // newRunningRoutine constructs a new runningRoutine
@@ -74,10 +77,39 @@ func (r *runningRoutine[T]) execute(ctx context.Context, cancel context.CancelFu
 		r.success = err == nil
 		r.ctxCancel = nil
 		r.ctx = nil
-		if r.k.exitedCb != nil {
+		for i := len(r.k.exitedCbs) - 1; i >= 0; i-- {
 			// run after unlocking mtx
-			defer r.k.exitedCb(r.key, r.routine, r.data, r.err)
+			defer (r.k.exitedCbs[i])(r.key, r.routine, r.data, r.err)
 		}
 	}
 	r.k.mtx.Unlock()
+}
+
+// remove is called when the routine is removed / canceled.
+// expects r.k.mtx to be locked
+func (r *runningRoutine[T]) remove() {
+	if r.deferRemove != nil {
+		return
+	}
+	removeNow := func() {
+		if r.ctxCancel != nil {
+			r.ctxCancel()
+		}
+		delete(r.k.routines, r.key)
+	}
+	if r.k.releaseDelay == 0 {
+		removeNow()
+		return
+	}
+
+	timerCb := func() {
+		r.k.mtx.Lock()
+		if r.k.routines[r.key] == r && r.deferRemove != nil {
+			_ = r.deferRemove.Stop()
+			r.deferRemove = nil
+			removeNow()
+		}
+		r.k.mtx.Unlock()
+	}
+	r.deferRemove = time.AfterFunc(r.k.releaseDelay, timerCb)
 }

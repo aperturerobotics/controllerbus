@@ -4,6 +4,7 @@ import (
 	"context"
 	"sort"
 	"sync"
+	"time"
 
 	"github.com/sirupsen/logrus"
 )
@@ -17,8 +18,11 @@ type Routine func(ctx context.Context) error
 type Keyed[T comparable] struct {
 	// ctorCb is the constructor callback
 	ctorCb func(key string) (Routine, T)
-	// exitedCb is the exited callback
-	exitedCb func(key string, routine Routine, data T, err error)
+	// exitedCbs is the set of exited callbacks.
+	exitedCbs []func(key string, routine Routine, data T, err error)
+
+	// releaseDelay is a delay before stopping a routine.
+	releaseDelay time.Duration
 
 	// mtx guards below fields
 	mtx sync.Mutex
@@ -33,7 +37,7 @@ type Keyed[T comparable] struct {
 // exitedCb is called after a routine exits unexpectedly.
 func NewKeyed[T comparable](
 	ctorCb func(key string) (Routine, T),
-	exitedCb func(key string, routine Routine, data T, err error),
+	opts ...Option[T],
 ) *Keyed[T] {
 	if ctorCb == nil {
 		ctorCb = func(key string) (Routine, T) {
@@ -41,12 +45,17 @@ func NewKeyed[T comparable](
 			return nil, empty
 		}
 	}
-	return &Keyed[T]{
-		ctorCb:   ctorCb,
-		exitedCb: exitedCb,
+	k := &Keyed[T]{
+		ctorCb: ctorCb,
 
 		routines: make(map[string]*runningRoutine[T], 1),
 	}
+	for _, opt := range opts {
+		if opt != nil {
+			opt.applyToKeyed(k)
+		}
+	}
+	return k
 }
 
 // NewKeyedWithLogger constructs a new keyed instance.
@@ -58,7 +67,7 @@ func NewKeyedWithLogger[T comparable](
 	ctorCb func(key string) (Routine, T),
 	le *logrus.Entry,
 ) *Keyed[T] {
-	return NewKeyed(ctorCb, NewLogExitedCallback[T](le))
+	return NewKeyed(ctorCb, WithExitLogger[T](le))
 }
 
 // SetContext updates the root context, restarting all running routines.
@@ -143,6 +152,10 @@ func (k *Keyed[T]) SetKey(key string, restart bool) bool {
 		routine, data := k.ctorCb(key)
 		v = newRunningRoutine(k, key, routine, data)
 		k.routines[key] = v
+	} else if v.deferRemove != nil {
+		// cancel removing this key
+		_ = v.deferRemove.Stop()
+		v.deferRemove = nil
 	}
 	if !existed || restart {
 		if k.ctx != nil {
@@ -160,10 +173,7 @@ func (k *Keyed[T]) RemoveKey(key string) bool {
 
 	v, existed := k.routines[key]
 	if existed {
-		if v.ctxCancel != nil {
-			v.ctxCancel()
-		}
-		delete(k.routines, key)
+		v.remove()
 	}
 	return existed
 }
@@ -205,10 +215,7 @@ func (k *Keyed[T]) SyncKeys(keys []string, restart bool) {
 		if _, ok := routines[key]; ok {
 			continue
 		}
-		if rr.ctxCancel != nil {
-			rr.ctxCancel()
-		}
-		delete(k.routines, key)
+		rr.remove()
 	}
 }
 

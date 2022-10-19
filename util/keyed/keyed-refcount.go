@@ -55,10 +55,10 @@ func (k *KeyedRef[T]) Release() {
 // Note: routines won't start until SetContext is called.
 func NewKeyedRefCount[T comparable](
 	ctorCb func(key string) (Routine, T),
-	exitedCb func(key string, routine Routine, data T, err error),
+	opts ...Option[T],
 ) *KeyedRefCount[T] {
 	return &KeyedRefCount[T]{
-		keyed: NewKeyed(ctorCb, exitedCb),
+		keyed: NewKeyed(ctorCb, opts...),
 		refs:  make(map[string][]*KeyedRef[T]),
 	}
 }
