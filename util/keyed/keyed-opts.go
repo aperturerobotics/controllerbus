@@ -8,8 +8,8 @@ import (
 
 // Option is an option for a Keyed instance.
 type Option[T comparable] interface {
-	// applyToKeyed applies the option to the Keyed.
-	applyToKeyed(k *Keyed[T])
+	// ApplyToKeyed applies the option to the Keyed.
+	ApplyToKeyed(k *Keyed[T])
 }
 
 type option[T comparable] struct {
@@ -23,8 +23,8 @@ func newOption[T comparable](cb func(k *Keyed[T])) *option[T] {
 	}
 }
 
-// newOption constructs a new Option.
-func (o *option[T]) applyToKeyed(k *Keyed[T]) {
+// ApplyToKeyed applies the option to the Keyed instance.
+func (o *option[T]) ApplyToKeyed(k *Keyed[T]) {
 	if o.cb != nil {
 		o.cb(k)
 	}

@@ -52,7 +52,7 @@ func NewKeyed[T comparable](
 	}
 	for _, opt := range opts {
 		if opt != nil {
-			opt.applyToKeyed(k)
+			opt.ApplyToKeyed(k)
 		}
 	}
 	return k
