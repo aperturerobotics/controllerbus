@@ -28,8 +28,10 @@ func (c *CContainer[T]) GetValue() T {
 // SetValue sets the ccontainer value.
 func (c *CContainer[T]) SetValue(val T) {
 	c.mtx.Lock()
-	c.val = val
-	c.wakeWaiting()
+	if c.val != val {
+		c.val = val
+		c.wakeWaiting()
+	}
 	c.mtx.Unlock()
 }
 
