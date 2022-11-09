@@ -47,14 +47,20 @@ func (b *Bus) AddController(ctx context.Context, ctrl controller.Controller, cb 
 		subCtxCancel()
 		b.removeController(ctrl)
 	}
+	b.addController(ctrl)
 	go func() {
-		err := b.ExecuteController(subCtx, ctrl)
-		if err != nil {
-			subCtxCancel()
-			if cb != nil {
-				cb(err)
+		var err error
+		defer func() {
+			b.handleControllerPanic(&err)
+			if err != nil {
+				subCtxCancel()
+				b.removeController(ctrl)
+				if cb != nil {
+					cb(err)
+				}
 			}
-		}
+		}()
+		err = ctrl.Execute(subCtx)
 	}()
 	return relFunc, nil
 }
