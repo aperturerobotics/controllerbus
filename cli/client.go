@@ -104,7 +104,7 @@ func (a *ClientArgs) BuildClient() (bus_api.SRPCControllerBusServiceClient, erro
 	if err != nil {
 		return nil, err
 	}
-	muxedConn, err := srpc.NewMuxedConn(nconn, false)
+	muxedConn, err := srpc.NewMuxedConn(nconn, false, nil)
 	if err != nil {
 		return nil, err
 	}
