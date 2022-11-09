@@ -4,7 +4,6 @@ import (
 	"context"
 	"runtime/debug"
 	"sync"
-	"sync/atomic"
 
 	"github.com/aperturerobotics/controllerbus/bus"
 	"github.com/aperturerobotics/controllerbus/controller"
@@ -43,44 +42,19 @@ func (b *Bus) GetControllers() []controller.Controller {
 // The controller will receive directive callbacks until removed.
 // cb can be nil
 func (b *Bus) AddController(ctx context.Context, ctrl controller.Controller, cb func(exitErr error)) (func(), error) {
-	b.addController(ctrl)
-
-	relCh := make(chan struct{})
-	var released atomic.Bool
+	subCtx, subCtxCancel := context.WithCancel(ctx)
 	relFunc := func() {
-		if !released.Swap(true) {
-			close(relCh)
-		}
+		subCtxCancel()
+		b.removeController(ctrl)
 	}
-
-	errCh := make(chan error, 1)
 	go func() {
-		var err error
-		defer func() {
-			b.handleControllerPanic(&err)
-			if err != nil {
-				errCh <- err
-			}
-		}()
-		err = ctrl.Execute(ctx)
-	}()
-	go func() {
-		select {
-		case <-ctx.Done():
-			if cb != nil {
-				cb(context.Canceled)
-			}
-		case err := <-errCh:
+		err := b.ExecuteController(subCtx, ctrl)
+		if err != nil {
 			if cb != nil {
 				cb(err)
 			}
-		case <-relCh:
-			if cb != nil {
-				cb(nil)
-			}
 		}
 	}()
-
 	return relFunc, nil
 }
 
