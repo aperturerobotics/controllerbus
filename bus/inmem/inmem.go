@@ -50,6 +50,7 @@ func (b *Bus) AddController(ctx context.Context, ctrl controller.Controller, cb 
 	go func() {
 		err := b.ExecuteController(subCtx, ctrl)
 		if err != nil {
+			subCtxCancel()
 			if cb != nil {
 				cb(err)
 			}
