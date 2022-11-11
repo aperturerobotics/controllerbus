@@ -73,17 +73,22 @@ func ExecCollectValues(
 	for {
 		select {
 		case <-ctx.Done():
+			subCtxCancel()
 			if ref != nil {
 				ref.Release()
 			}
 			return vals, nil, context.Canceled
 		case <-subCtx.Done():
-			return vals, ref, nil
-		case err := <-errCh:
 			if ref != nil {
 				ref.Release()
 			}
-			return nil, nil, err
+			return vals, nil, context.Canceled
+		case err := <-errCh:
+			subCtxCancel()
+			if ref != nil {
+				ref.Release()
+			}
+			return vals, nil, err
 		case n := <-valCh:
 			if n == nil {
 				return vals, ref, nil
