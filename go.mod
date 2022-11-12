@@ -11,7 +11,7 @@ require (
 	github.com/aperturerobotics/starpc v0.13.3-0.20221109044340-34435095d711
 	github.com/blang/semver v3.5.1+incompatible
 	github.com/cenkalti/backoff v2.2.1+incompatible
-	github.com/fsnotify/fsnotify v1.5.4
+	github.com/fsnotify/fsnotify v1.6.0
 	github.com/ghodss/yaml v1.0.0
 	github.com/mr-tron/base58 v1.2.0
 	github.com/pkg/errors v0.9.1
