@@ -9,7 +9,7 @@ import (
 type CContainer[T comparable] struct {
 	mtx  sync.Mutex
 	val  T
-	wake chan struct{}
+	wake chan struct{} // closed when val changes
 }
 
 // NewCContainer builds a CContainer with an initial value.
@@ -64,7 +64,7 @@ func (c *CContainer[T]) WaitValueWithValidator(
 	var emptyValue T
 	for {
 		c.mtx.Lock()
-		val := c.val
+		val, wake := c.val, c.wake
 		c.mtx.Unlock()
 		if valid != nil {
 			ok, err = valid(val)
@@ -86,7 +86,7 @@ func (c *CContainer[T]) WaitValueWithValidator(
 			if err != nil {
 				return emptyValue, err
 			}
-		case c.wake <- struct{}{}:
+		case <-wake:
 			// woken, value changed
 		}
 	}
@@ -121,13 +121,6 @@ func (c *CContainer[T]) WaitValueEmpty(ctx context.Context, errCh <-chan error) 
 
 // wakeWaiting wakes any waiting goroutines
 func (c *CContainer[T]) wakeWaiting() {
-	for {
-		select {
-		case <-c.wake:
-			// woke one routine
-		default:
-			// none left
-			return
-		}
-	}
+	close(c.wake)
+	c.wake = make(chan struct{})
 }
