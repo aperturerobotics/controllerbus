@@ -25,19 +25,6 @@ func (m *MockDirective) GetValueOptions() directive.ValueOptions {
 	return m.ValueOpts
 }
 
-// IsEquivalent checks if the other directive is equivalent. If two
-// directives are equivalent, and the new directive does not superceed the
-// old, then the new directive will be merged (de-duplicated) into the old.
-func (m *MockDirective) IsEquivalent(other directive.Directive) bool {
-	return false
-}
-
-// Superceeds checks if the directive overrides another.
-// The other directive will be canceled if superceded.
-func (m *MockDirective) Superceeds(other directive.Directive) bool {
-	return false
-}
-
 // GetDebugVals returns the directive arguments as key/value pairs.
 // This should be something like param1="test", param2="test".
 // This is not necessarily unique, and is primarily intended for display.

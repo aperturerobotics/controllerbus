@@ -24,16 +24,14 @@ func NewPromise[T any]() *Promise[T] {
 
 // NewPromiseWithResult constructs a promise pre-resolved with a result.
 func NewPromiseWithResult[T any](val T, err error) *Promise[T] {
-	var isDone atomic.Bool
-	isDone.Store(true)
-	doneCh := make(chan struct{})
-	close(doneCh)
-	return &Promise[T]{
-		isDone: isDone,
-		done:   doneCh,
+	p := &Promise[T]{
+		done:   make(chan struct{}),
 		result: &val,
 		err:    err,
 	}
+	close(p.done)
+	p.isDone.Store(true)
+	return p
 }
 
 // NewPromiseWithErr constructs a promise pre-resolved with an error.

@@ -2,215 +2,296 @@ package controller
 
 import (
 	"context"
-	"sync"
+	"net/url"
+	"sync/atomic"
 	"time"
 
 	"github.com/aperturerobotics/controllerbus/directive"
 	"github.com/sirupsen/logrus"
 )
 
-// DirectiveInstance implements the directive instance interface.
-type DirectiveInstance struct {
-	// ctx is the parent directive controller ctx
+// directiveInstance implements the directive instance interface.
+type directiveInstance struct {
+	// released indicates this instance is released
+	released atomic.Bool
+	// c is the parent directive controller
+	c *Controller
+	// ctx is canceled when the directive instance expires
 	ctx context.Context
-	// le is the logger
-	le *logrus.Entry
-	// dir is the underlying directive.
+	// ctxCancel cancels ctx
+	ctxCancel context.CancelFunc
+	// id is the id of this instance
+	// incremented by 1 each time a directive is added
+	id uint32
+	// dir is the directive.
 	dir directive.Directive
 	// valueOpts are the directive options
 	valueOpts directive.ValueOptions
+	// ident contains the identifier string
+	// unset until GetDirectiveIdent is called for the first time.
+	ident atomic.Pointer[string]
 
-	// mtx guards below fields
-	mtx sync.Mutex
+	// c.mtx guards below fields
 
-	// refs is the list of references
-	refs []*directiveInstanceReference
-
-	// nvalID stores the next value id
-	nvalID uint32
-	// vals is the map of emitted values
-	vals map[uint32]*attachedValue
-
-	// nrelID stores the next rel id
-	nrelID uint32
-	// rel is the released cb list
-	rel map[uint32]func()
-	// released flags the instance as released
-	released bool
-	// unrefDestroyTimer is the timer to call Close()
-	unrefDestroyTimer *time.Timer
-
-	attachedResolvers []*attachedResolver
-	// attachedResolverCtx is the current context for resolvers
-	attachedResolverCtx context.Context
-	// attachedResolverCtxCancel is the cancellation func for the resolvers ctx
-	attachedResolverCtxCancel context.CancelFunc
-	// runningResolvers is the number of executing resolvers
+	// destroyTimer is the timer to destroy after 0 refs
+	destroyTimer *time.Timer
+	// rels contains all release callbacks
+	rels []*callback[func()]
+	// idles contains all idle callbacks
+	idles []*callback[directive.IdleCallback]
+	// refs contains all directive instance references
+	// all weak references are at the beginning of the list
+	refs []*dirRef
+	// res contains attached resolvers
+	res []*resolver
+	// valCtr is the ID of the next value
+	valCtr uint32
+	// runningResolvers is the number of running resolvers.
 	runningResolvers int
-	// nidleID is the next callback id
-	nidleID uint32
-	// idleCallbacks are the list of idle callback functions
-	idleCallbacks map[uint32]func(errs []error)
 }
 
-// NewDirectiveInstance constructs a new directive instance with an initial reference.
-func NewDirectiveInstance(
-	ctx context.Context,
-	le *logrus.Entry,
+// newDirectiveInstance constructs a new directive instance with an initial reference.
+func newDirectiveInstance(
+	c *Controller,
+	id uint32,
 	dir directive.Directive,
-	cb directive.ReferenceHandler,
-	released func(di *DirectiveInstance),
-) (*DirectiveInstance, directive.Reference) {
-	i := &DirectiveInstance{
-		ctx: ctx,
-		dir: dir,
-		le:  le,
+	h directive.ReferenceHandler,
+) (*directiveInstance, directive.Reference) {
+	i := &directiveInstance{
+		c:         c,
+		id:        id,
+		dir:       dir,
+		valueOpts: dir.GetValueOptions(),
 	}
-	i.attachedResolverCtx, i.attachedResolverCtxCancel = context.WithCancel(ctx)
-	i.vals = make(map[uint32]*attachedValue)
-	i.rel = make(map[uint32]func())
-	i.idleCallbacks = make(map[uint32]func(errs []error))
-	if released != nil {
-		i.rel[0] = func() {
-			released(i)
-		}
-		i.nrelID++
-	}
-	i.valueOpts = dir.GetValueOptions()
-	ref := &directiveInstanceReference{di: i, valCb: cb}
-	i.refs = append(i.refs, ref)
-	return i, ref
+	i.ctx, i.ctxCancel = context.WithCancel(c.ctx)
+	return i, i.addReferenceLocked(h, false)
 }
 
-// AddReference adds a reference to the directive.
-// Will return nil if the directive is already expired.
-// Weak references do not contribute to the reference count.
-func (r *DirectiveInstance) AddReference(
-	cb directive.ReferenceHandler,
-	weakRef bool,
-) directive.Reference {
-	r.mtx.Lock()
-	defer r.mtx.Unlock()
-
-	if r.released {
-		return nil
-	}
-
-	ref := &directiveInstanceReference{
-		di:      r,
-		valCb:   cb,
-		weakRef: weakRef,
-	}
-
-	r.markReferenced()
-
-	r.refs = append(r.refs, ref)
-	if cb != nil {
-		for _, v := range r.vals {
-			callHandleValueAdded(r.le, r, v, cb.HandleValueAdded)
-		}
-	}
-
-	return ref
-}
-
-// emitValue emits a new value to all listeners
-// returns the value ID and boolean OK
-// does NOT expect mtx to be locked by the caller.
-func (r *DirectiveInstance) emitValue(v directive.Value) (uint32, bool) {
-	r.mtx.Lock()
-	defer r.mtx.Unlock()
-
-	if r.released {
-		return 0, false
-	}
-
-	var reject bool
-	var cancelOthers bool
-	valCount := len(r.vals)
-	if maxCount := r.valueOpts.MaxValueCount; maxCount != 0 {
-		if valCount >= maxCount && r.valueOpts.MaxValueHardCap {
-			// reject value
-			reject = true
-		} else if valCount+1 >= maxCount {
-			cancelOthers = true
-		}
-	}
-	r.nvalID++
-	nvid := r.nvalID
-	var nav *attachedValue
-	if !reject {
-		nav = newAttachedValue(nvid, v)
-		r.vals[nvid] = nav
-	}
-
-	if reject {
-		return 0, false
-	}
-
-	for _, ref := range r.refs {
-		if ref != nil && ref.valCb != nil {
-			callHandleValueAdded(r.le, r, nav, ref.valCb.HandleValueAdded)
-		}
-	}
-
-	if cancelOthers {
-		r.cancelResolvers()
-	}
-
-	return nvid, true
-}
-
-// purgeEmittedValue deletes and returns an emitted value
-// returns the value ID and boolean OK
-// does NOT expect caller to lock mtx
-func (r *DirectiveInstance) purgeEmittedValue(id uint32) (directive.Value, bool) {
-	r.mtx.Lock()
-	defer r.mtx.Unlock()
-
-	if r.released {
-		return 0, false
-	}
-
-	if r.vals == nil {
-		return 0, false
-	}
-	val, ok := r.vals[id]
-	if ok {
-		delete(r.vals, id)
-		valCount := len(r.vals)
-		for _, ref := range r.refs {
-			if ref.valCb != nil {
-				callHandleValueRemoved(r.le, r, val, ref.valCb.HandleValueRemoved)
-			}
-		}
-		if maxCount := r.valueOpts.MaxValueCount; maxCount != 0 {
-			if valCount < maxCount {
-				r.restartResolvers()
-			}
-		} else {
-			r.restartResolvers()
-		}
-	}
-
-	return val, true
+// GetContext returns a context that is canceled when Instance is released.
+func (i *directiveInstance) GetContext() context.Context {
+	return i.ctx
 }
 
 // GetDirective returns the underlying directive.
-func (r *DirectiveInstance) GetDirective() directive.Directive {
-	if r == nil {
-		return nil
-	}
+func (i *directiveInstance) GetDirective() directive.Directive {
+	return i.dir
+}
 
-	return r.dir
+// GetDirectiveIdent returns a human-readable string identifying the directive.
+//
+// Ex: DoSomething or DoSomething<param=foo>
+func (i *directiveInstance) GetDirectiveIdent() string {
+	existing := i.ident.Load()
+	if existing != nil {
+		return *existing
+	}
+	var dirDebugStr string
+	debuggable, isDebuggable := i.dir.(directive.Debuggable)
+	if isDebuggable {
+		if debugVals := debuggable.GetDebugVals(); debugVals != nil {
+			dirDebugStr = url.Values(debugVals).Encode()
+			dirDebugStr, _ = url.PathUnescape(dirDebugStr)
+		}
+	}
+	dirNameDebugStr := i.dir.GetName()
+	if dirDebugStr != "" {
+		dirNameDebugStr += "<" + dirDebugStr + ">"
+	}
+	i.ident.CompareAndSwap(nil, &dirNameDebugStr)
+	return dirNameDebugStr
 }
 
 // GetResolverErrors returns a snapshot of any errors returned by resolvers.
-func (r *DirectiveInstance) GetResolverErrors() []error {
-	r.mtx.Lock()
-	defer r.mtx.Unlock()
+func (i *directiveInstance) GetResolverErrors() []error {
+	i.c.mtx.Lock()
+	errs := i.getResolverErrsLocked()
+	i.c.mtx.Unlock()
+	return errs
+}
 
-	return r.getResolverErrs()
+// getResolverErrsLocked returns the list of resolver errors while c.mtx is locked.
+func (i *directiveInstance) getResolverErrsLocked() []error {
+	var errs []error
+	for _, resolver := range i.res {
+		if err := resolver.err; err != nil {
+			errs = append(errs, err)
+		}
+	}
+	return errs
+}
+
+// AddReference adds a reference to the directive.
+// cb is called for each value.
+// cb calls should return immediately.
+// returns nil if the directive is already expired.
+// If marked as a weak ref, the handler will not count towards the ref count.
+func (i *directiveInstance) AddReference(cb directive.ReferenceHandler, weakRef bool) directive.Reference {
+	i.c.mtx.Lock()
+	defer i.c.mtx.Unlock()
+	return i.addReferenceLocked(cb, weakRef)
+}
+
+// addReferenceLocked adds a reference while i.c.mtx is locked.
+// returns nil if the directive is already expired.
+func (i *directiveInstance) addReferenceLocked(cb directive.ReferenceHandler, weakRef bool) directive.Reference {
+	ref := &dirRef{di: i, h: cb, weak: weakRef}
+	if i.released.Load() {
+		ref.released.Store(true)
+		if ref.h != nil {
+			go ref.h.HandleInstanceDisposed(i)
+		}
+		return ref
+	}
+	var firstRef bool
+	if weakRef {
+		i.refs = append([]*dirRef{ref}, i.refs...)
+	} else {
+		firstRef = len(i.refs) == 0 || i.refs[len(i.refs)-1].weak
+		i.refs = append(i.refs, ref)
+	}
+	if cb != nil {
+		for _, res := range i.res {
+			for _, val := range res.vals {
+				go cb.HandleValueAdded(i, val)
+			}
+		}
+	}
+	if firstRef {
+		i.handleReferencedLocked()
+	}
+	return ref
+}
+
+// removeReferenceLocked removes a reference while i.c.mtx is locked.
+func (i *directiveInstance) removeReferenceLocked(ref *dirRef) {
+	for idx, iref := range i.refs {
+		if iref == ref {
+			i.refs = append(i.refs[:idx], i.refs[idx+1:]...)
+			ref.released.Store(true)
+			if len(i.refs) == 0 || i.refs[len(i.refs)-1].weak {
+				i.handleUnreferencedLocked()
+			}
+			break
+		}
+	}
+}
+
+// handleReferencedLocked handles when we reach 1 reference while i.c.mtx is locked
+func (i *directiveInstance) handleReferencedLocked() {
+	if i.released.Load() {
+		return
+	}
+	// cancel dispose callback
+	if i.destroyTimer != nil {
+		_ = i.destroyTimer.Stop()
+		i.destroyTimer = nil
+	}
+	// start all resolvers
+	for _, res := range i.res {
+		res.updateContextLocked(&i.ctx)
+	}
+	i.runningResolvers = len(i.res)
+}
+
+// handleUnreferencedLocked handles when we reach 0 references while i.c.mtx is locked.
+func (i *directiveInstance) handleUnreferencedLocked() {
+	if i.released.Load() || i.destroyTimer != nil {
+		return
+	}
+	disposeDur := i.valueOpts.UnrefDisposeDur
+	if disposeDur == 0 {
+		i.removeLocked(-1)
+	} else {
+		var destroyTimer *time.Timer
+		destroyTimer = time.AfterFunc(disposeDur, func() {
+			if i.released.Load() {
+				return
+			}
+			i.c.mtx.Lock()
+			if !i.released.Load() && destroyTimer == i.destroyTimer {
+				i.removeLocked(-1)
+			}
+			i.c.mtx.Unlock()
+		})
+		i.destroyTimer = destroyTimer
+	}
+}
+
+// handleIdleLocked is called when the instance becomes idle while i.c.mtx is locked
+func (i *directiveInstance) handleIdleLocked() {
+	if len(i.idles) == 0 {
+		return
+	}
+	errs := i.getResolverErrsLocked()
+	for _, idle := range i.idles {
+		if !idle.released.Load() && idle.cb != nil {
+			idle.cb(errs)
+		}
+	}
+}
+
+// removeReleaseCallbackLocked removes a release callback while i.c.mtx is locked.
+func (i *directiveInstance) removeReleaseCallbackLocked(cb *callback[func()]) {
+	removeFromCallbacks(i.rels, cb)
+}
+
+// removeIdleCallbackLocked removes a idle callback while i.c.mtx is locked.
+func (i *directiveInstance) removeIdleCallbackLocked(cb *callback[directive.IdleCallback]) {
+	removeFromCallbacks(i.idles, cb)
+}
+
+// addValueLocked adds a value to the instance while i.c.mtx is locked
+func (i *directiveInstance) addValueLocked(res *resolver, val directive.Value) (uint32, bool) {
+	maxVals := i.valueOpts.MaxValueCount
+	if maxVals != 0 && i.valueOpts.MaxValueHardCap && len(res.vals) >= maxVals {
+		return 0, false
+	}
+
+	vid := i.valCtr
+	i.valCtr++
+	v := &value{id: vid, val: val}
+	res.vals = append(res.vals, v)
+
+	for _, ref := range i.refs {
+		if !ref.released.Load() && ref.h != nil {
+			go ref.h.HandleValueAdded(i, v)
+		}
+	}
+
+	if maxVals != 0 && len(res.vals) >= maxVals {
+		// cancel all resolvers
+		for _, res := range i.res {
+			res.updateContextLocked(nil)
+		}
+	}
+
+	return vid, true
+}
+
+// removeValueLocked removes a value from the instance while i.c.mtx is locked
+func (i *directiveInstance) removeValueLocked(res *resolver, valID uint32) (directive.Value, bool) {
+	for idx := 0; idx < len(res.vals); idx++ {
+		val := res.vals[idx]
+		if val.id == valID {
+			res.vals = append(res.vals[:idx], res.vals[idx+1:]...)
+
+			maxVals := i.valueOpts.MaxValueCount
+			if maxVals != 0 && len(res.vals)+1 == maxVals {
+				// restart resolvers
+				for _, res := range i.res {
+					res.updateContextLocked(&i.ctx)
+				}
+			}
+
+			for _, ref := range i.refs {
+				if !ref.released.Load() && ref.h != nil {
+					go ref.h.HandleValueRemoved(i, val)
+				}
+			}
+			return val.val, true
+		}
+	}
+	return nil, false
 }
 
 // AddDisposeCallback adds a callback that will be called when the instance
@@ -218,245 +299,181 @@ func (r *DirectiveInstance) GetResolverErrors() []error {
 // drops to zero. The callback may occur immediately if the instance is
 // already disposed, but will be made in a new goroutine.
 // Returns a callback release function.
-func (r *DirectiveInstance) AddDisposeCallback(cb func()) func() {
-	r.mtx.Lock()
-	defer r.mtx.Unlock()
-
-	if r.released {
-		cb()
-		return func() {}
+func (i *directiveInstance) AddDisposeCallback(cb func()) func() {
+	i.c.mtx.Lock()
+	rel := newCallback(cb)
+	if i.released.Load() {
+		rel.released.Store(true)
+		go cb()
+	} else {
+		i.rels = append(i.rels, rel)
 	}
-
-	relid := r.nrelID
-	r.nrelID++
-	r.rel[relid] = cb
+	i.c.mtx.Unlock()
 	return func() {
-		r.mtx.Lock()
-		if r.rel != nil {
-			delete(r.rel, relid)
+		if !rel.released.Swap(true) {
+			i.c.mtx.Lock()
+			i.removeReleaseCallbackLocked(rel)
+			i.c.mtx.Unlock()
 		}
-		r.mtx.Unlock()
 	}
 }
 
 // AddIdleCallback adds a callback that will be called when idle.
 // The callback is called exactly once.
-// Errs is the list of non-nil resolver errors.
 // Returns a callback release function.
-func (r *DirectiveInstance) AddIdleCallback(cb directive.IdleCallback) func() {
-	r.mtx.Lock()
-	defer r.mtx.Unlock()
-
-	errs := r.getResolverErrs()
-	if r.released || r.runningResolvers == 0 {
-		go cb(errs)
-		return func() {}
+func (i *directiveInstance) AddIdleCallback(cb directive.IdleCallback) func() {
+	i.c.mtx.Lock()
+	rel := newCallback(cb)
+	i.idles = append(i.idles, rel)
+	isIdle := i.runningResolvers == 0
+	var errs []error
+	if isIdle {
+		errs = i.getResolverErrsLocked()
 	}
-
-	relid := r.nidleID
-	r.nidleID++
-	r.idleCallbacks[relid] = cb
-
-	relIdle := func() {
-		r.mtx.Lock()
-		if r.idleCallbacks != nil {
-			delete(r.idleCallbacks, relid)
-		}
-		r.mtx.Unlock()
+	i.c.mtx.Unlock()
+	if isIdle {
+		go cb(errs)
 	}
 	return func() {
-		go relIdle()
+		if !rel.released.Swap(true) {
+			i.c.mtx.Lock()
+			i.removeIdleCallbackLocked(rel)
+			i.c.mtx.Unlock()
+		}
 	}
 }
 
 // Close cancels the directive instance.
-func (r *DirectiveInstance) Close() {
-	r.mtx.Lock()
-	r.callRel()
-	r.mtx.Unlock()
-}
-
-// callRel calls the release callbacks.
-// caller should lock mtx.
-func (r *DirectiveInstance) callRel() {
-	if r.released {
-		return
-	}
-	r.released = true
-
-	for _, ref := range r.refs {
-		if ref.valCb != nil {
-			go ref.valCb.HandleInstanceDisposed(r)
-		}
-	}
-	r.refs = nil
-	r.vals = nil
-
-	rel := r.rel
-	r.rel = nil
-	for _, ref := range rel {
-		// go ref()
-		go ref()
+func (i *directiveInstance) Close() {
+	if !i.released.Swap(true) {
+		i.c.mtx.Lock()
+		i.removeLocked(-1)
+		i.c.mtx.Unlock()
 	}
 }
 
-// attachResolver calls and attaches a directive resolver.
-func (r *DirectiveInstance) attachResolver(handlerCtx context.Context, res directive.Resolver) {
-	inst := r
-	r.mtx.Lock()
-	defer r.mtx.Unlock()
-	ares := newAttachedResolver(inst, res)
-	r.attachedResolvers = append(r.attachedResolvers, ares)
-	r.runningResolvers++
-	ares.pushHandlerContext(r.attachedResolverCtx)
-	go ares.execResolver(handlerCtx)
-}
-
-// cancelResolvers cancels all children resolvers.
-// requires restartResolvers to resume them.
-func (r *DirectiveInstance) cancelResolvers() {
-	r.attachedResolverCtxCancel()
-}
-
-// restartResolvers pushes a fresh resolver context to child resolvers.
-// restarts any resolvers that exited before the call.
-// expects caller to lock mtx
-func (r *DirectiveInstance) restartResolvers() {
-	// re-use ctx if not canceled
-	nextCtx := r.attachedResolverCtx
-	select {
-	case <-nextCtx.Done():
-		r.attachedResolverCtx, r.attachedResolverCtxCancel = context.WithCancel(r.ctx)
-		nextCtx = r.attachedResolverCtx
-	default:
+// callHandlerUnlocked calls the HandleDirective function while i.c.mtx is not locked.
+//
+// expects c.mtx to not be locked
+func (i *directiveInstance) callHandlerUnlocked(handler *handler) ([]*resolver, error) {
+	resolvers, err := handler.h.HandleDirective(i.ctx, i)
+	if err != nil {
+		return nil, err
 	}
-	// restart any canceled resolvers
-	for _, re := range r.attachedResolvers {
-		re.pushHandlerContext(nextCtx)
+	out := make([]*resolver, len(resolvers))
+	for x, resolver := range resolvers {
+		out[x] = newResolver(i, handler, resolver)
+	}
+	return out, nil
+}
+
+// attachStartResolverLocked attaches and starts a resolver while i.c.mtx is locked
+func (i *directiveInstance) attachStartResolverLocked(res *resolver) {
+	i.res = append(i.res, res)
+	// start resolver if len(refs) != 0
+	if len(i.refs) != 0 {
+		res.updateContextLocked(&i.ctx)
+		i.runningResolvers++
 	}
 }
 
-// incrementRunningResolvers is called when a resolver starts.
-// does NOT expect caller to lock mtx
-func (r *DirectiveInstance) incrementRunningResolvers() {
-	r.mtx.Lock()
-	r.runningResolvers++
-	r.mtx.Unlock()
-}
-
-// decrementRunningResolvers is called when a resolver exits.
-// does NOT expect caller to lock mtx
-func (r *DirectiveInstance) decrementRunningResolvers() {
-	r.mtx.Lock()
-	if r.runningResolvers != 0 {
-		r.runningResolvers--
-		if r.runningResolvers == 0 {
-			// call idle callbacks
-			errs := r.getResolverErrs()
-			for _, idleCb := range r.idleCallbacks {
-				if idleCb != nil {
-					go idleCb(errs)
-				}
+// removeLocked removes the directive instance while i.c.mtx is locked.
+// calls the directive removed callbacks
+// if diIdx != -1, uses the index as the one to remove.
+func (i *directiveInstance) removeLocked(diIdx int) {
+	// mark released
+	i.released.Store(true)
+	i.ctxCancel()
+	if i.destroyTimer != nil {
+		_ = i.destroyTimer.Stop()
+		i.destroyTimer = nil
+	}
+	// determine index in list (if necessary)
+	if diIdx < 0 {
+		for idx, di := range i.c.dir {
+			if di == i {
+				diIdx = idx
+				break
 			}
 		}
-	}
-	r.mtx.Unlock()
-}
-
-// releaseReference releases a instance reference.
-// does NOT expect caller to lock mtx
-func (r *DirectiveInstance) releaseReference(dr *directiveInstanceReference) {
-	r.mtx.Lock()
-	defer r.mtx.Unlock()
-
-	found := false
-	nonWeakRefCount := 0
-	for i := 0; i < len(r.refs); i++ {
-		ref := r.refs[i]
-		if !found && ref == dr {
-			found = true
-			r.refs[i] = r.refs[len(r.refs)-1]
-			r.refs[len(r.refs)-1] = nil
-			r.refs = r.refs[:len(r.refs)-1]
-			i--
-		} else if ref != nil && !ref.weakRef {
-			nonWeakRefCount++
-		}
-
-		if found && nonWeakRefCount != 0 {
-			break
+		if diIdx < 0 {
+			// not found
+			return
 		}
 	}
-
-	if nonWeakRefCount == 0 {
-		r.markUnreferenced()
-	} else {
-		r.markReferenced()
+	// remove from list of instances
+	i.logger().Debug("removed directive")
+	i.c.dir = append(i.c.dir[:diIdx], i.c.dir[diIdx+1:]...)
+	// clear everything else
+	for _, ref := range i.refs {
+		if !ref.released.Swap(true) {
+			go ref.h.HandleInstanceDisposed(i)
+		}
 	}
+	i.refs = nil
+	for _, res := range i.res {
+		res.ctx, res.ctxCancel = nil, nil
+	}
+	i.res = nil
+	for _, cb := range i.rels {
+		if !cb.released.Swap(true) {
+			go cb.cb()
+		}
+	}
+	i.rels = nil
+	for _, idle := range i.idles {
+		idle.released.Store(true)
+	}
+	i.idles = nil
 }
 
-// markUnreferenced requires refsMtx is locked, and starts the Close() timer
-// caller should lock r.mtx
-func (r *DirectiveInstance) markUnreferenced() {
-	if r.unrefDestroyTimer == nil {
-		udd := r.valueOpts.UnrefDisposeDur
-		if udd == 0 {
-			// release immediately
-			r.callRel()
-		} else {
-			r.unrefDestroyTimer = time.AfterFunc(udd, r.Close)
+// removeHandlerLocked removes all resolvers associated with the handler.
+// caller locks c.mtx
+func (i *directiveInstance) removeHandlerLocked(hnd *handler) {
+	for idx := 0; idx < len(i.res); idx++ {
+		res := i.res[idx]
+		if res.hnd == hnd {
+			i.removeResolverLocked(idx, res)
+			idx--
 		}
 	}
 }
 
-// getResolverErrs lists resolver errs while caller has mtx locked.
-func (r *DirectiveInstance) getResolverErrs() []error {
-	errs := make([]error, 0, len(r.attachedResolvers))
-	for _, res := range r.attachedResolvers {
-		if err := res.valErr; err != nil && err != context.Canceled {
-			errs = append(errs, err)
+// removeResolverLocked removes the given resolver while c.mtx is locked.
+// cancels the resolver and removes all values associated with it.
+// if resIdx >= 0 removes that index from i.res, otherwise searches.
+func (i *directiveInstance) removeResolverLocked(resIdx int, rres *resolver) {
+	// search for the resolver in the list if necessary
+	if resIdx < 0 {
+		for i, res := range i.res {
+			if res == rres {
+				resIdx = i
+				break
+			}
+		}
+		if resIdx < 0 {
+			return
 		}
 	}
-	return errs
-}
 
-// markReferenced requires refsMtx is locked, and stops the Close() timer
-func (r *DirectiveInstance) markReferenced() {
-	if r.unrefDestroyTimer != nil {
-		r.unrefDestroyTimer.Stop()
-		r.unrefDestroyTimer = nil
+	// remove the resolver from the list
+	i.res = append(i.res[resIdx:], i.res[resIdx+1:]...)
+	// cancel the resolver
+	rres.updateContextLocked(nil)
+	// remove values associated with the resolver
+	for _, val := range rres.vals {
+		for _, ref := range i.refs {
+			go ref.h.HandleValueRemoved(i, val)
+		}
 	}
+	rres.vals = nil
 }
 
-// callHandleValueAdded calls a handle value added function
-func callHandleValueAdded(
-	le *logrus.Entry,
-	r *DirectiveInstance,
-	v *attachedValue,
-	fn func(r directive.Instance, v directive.AttachedValue),
-) {
-	defer func() {
-		if err := recover(); err != nil {
-			r.le.Errorf("handle value added paniced: %v", err)
-		}
-	}()
-	fn(r, v)
-}
-
-// callHandleValueRemoved calls a handle value removed function
-func callHandleValueRemoved(
-	le *logrus.Entry,
-	r *DirectiveInstance,
-	v *attachedValue,
-	fn func(r directive.Instance, v directive.AttachedValue),
-) {
-	defer func() {
-		if err := recover(); err != nil {
-			r.le.Errorf("handle value removed paniced: %v", err)
-		}
-	}()
-	fn(r, v)
+// logger returns the logger for this instance
+// no locks required
+func (i *directiveInstance) logger() *logrus.Entry {
+	return i.c.le.WithField("directive", i.GetDirectiveIdent())
 }
 
 // _ is a type assertion
-var _ directive.Instance = ((*DirectiveInstance)(nil))
+var _ directive.Instance = ((*directiveInstance)(nil))

@@ -40,9 +40,7 @@ func WaitExecControllerRunning(
 				default:
 				}
 			}
-		}, func(av directive.AttachedValue) {
-		},
-		dispose,
+		}, nil, dispose,
 	))
 	if err != nil {
 		return nil, nil, nil, err
