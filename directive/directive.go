@@ -83,28 +83,18 @@ type Directive interface {
 	// GetValueOptions returns options relating to value handling.
 	GetValueOptions() ValueOptions
 
-	// GetName returns the directives type name (i.e. DoSomething).
-	// This is not intended to be unique and is primarily used for display.
-	GetName() string
-}
-
-// DirectiveWithEquiv contains a check to see if it is equivalent to another directive.
-type DirectiveWithEquiv interface {
-	Directive
-
 	// IsEquivalent checks if the other directive is equivalent. If two
 	// directives are equivalent, and the new directive does not superceed the
 	// old, then the new directive will be merged (de-duplicated) into the old.
 	IsEquivalent(other Directive) bool
-}
-
-// DirectiveWithSuperceeds contains a check to see if the directive superceeds another.
-type DirectiveWithSuperceeds interface {
-	DirectiveWithEquiv
 
 	// Superceeds checks if the directive overrides another.
 	// The other directive will be canceled if superceded.
 	Superceeds(other Directive) bool
+
+	// GetName returns the directive's type name.
+	// This is not necessarily unique, and is primarily intended for display.
+	GetName() string
 }
 
 // Debuggable indicates the directive implements the DebugVals interface.
@@ -134,27 +124,29 @@ type NetworkedCodec interface {
 	Unmarshal([]byte, Networked) error
 }
 
-// Controller manages running directives and handlers.
+// Controller manages directives.
 type Controller interface {
-	// GetDirectives returns a list of all currently executing directives.
-	GetDirectives() []Instance
-
 	// AddDirective adds a directive to the controller.
 	// This call de-duplicates equivalent directives.
 	//
 	// cb receives values in order as they are emitted.
 	// cb can be nil.
 	// cb should not block.
-	//
+	// cb will receive the initial value set as part of the AddDirective
+	//   call, so be careful to not block.
 	// Returns the instance, new reference, and any error.
 	AddDirective(Directive, ReferenceHandler) (Instance, Reference, error)
 
 	// AddHandler adds a directive handler.
 	// The handler will receive calls for all existing directives (initial set).
-	// An error is returned only if adding the handler failed.
-	// Returns a function to remove the handler.
-	// The release function must be non-nil if err is nil, and nil if err != nil.
-	AddHandler(handler Handler) (func(), error)
+	// If the handler returns an error for the initial set, will be returned.
+	AddHandler(handler Handler) error
+
+	// RemoveHandler removes a directive handler.
+	RemoveHandler(Handler)
+
+	// GetDirectives returns a list of all currently executing directives.
+	GetDirectives() []Instance
 }
 
 // Reference is a reference to a directive.
@@ -186,16 +178,8 @@ type IdleCallback func(errs []error)
 
 // Instance tracks a directive with reference counts and resolution state.
 type Instance interface {
-	// GetContext returns a context that is canceled when Instance is released.
-	GetContext() context.Context
-
 	// GetDirective returns the underlying directive object.
 	GetDirective() Directive
-
-	// GetDirectiveIdent returns a human-readable string identifying the directive.
-	//
-	// Ex: DoSomething or DoSomething<param=foo>
-	GetDirectiveIdent() string
 
 	// GetResolverErrors returns a snapshot of any errors returned by resolvers.
 	GetResolverErrors() []error
@@ -203,9 +187,8 @@ type Instance interface {
 	// AddReference adds a reference to the directive.
 	// cb is called for each value.
 	// cb calls should return immediately.
-	// the release callback is called immediately if already released
+	// Will return nil if the directive is already expired.
 	// If marked as a weak ref, the handler will not count towards the ref count.
-	// will never return nil
 	AddReference(cb ReferenceHandler, weakRef bool) Reference
 
 	// AddDisposeCallback adds a callback that will be called when the instance
@@ -220,7 +203,7 @@ type Instance interface {
 	// Returns a callback release function.
 	AddIdleCallback(cb IdleCallback) func()
 
-	// Close cancels the directive instance and removes the directive.
+	// Close cancels the directive instance.
 	Close()
 }
 
@@ -263,6 +246,7 @@ type Resolver interface {
 type Handler interface {
 	// HandleDirective asks if the handler can resolve the directive.
 	// If it can, it returns resolver(s). If not, returns nil.
+	// Any exceptional errors are returned for logging.
 	// It is safe to add a reference to the directive during this call.
 	// The context passed is canceled when the directive instance expires.
 	HandleDirective(context.Context, Instance) ([]Resolver, error)

@@ -2,197 +2,189 @@ package controller
 
 import (
 	"context"
+	"errors"
+	"net/url"
 	"sync"
 
 	"github.com/aperturerobotics/controllerbus/directive"
 	"github.com/sirupsen/logrus"
-	"golang.org/x/exp/slices"
 )
 
-// Controller manages running directives and handlers.
-type Controller struct {
-	// ctx is the root context for running handlers & directives
+// DirectiveController is the directive controller.
+type DirectiveController struct {
+	// ctx is the directive context
 	ctx context.Context
-	// le is the logger for logging events related to the controller
+	// ctxCancel cancels the directive context.
+	ctxCancel context.CancelFunc
+
+	// le is the log entry
 	le *logrus.Entry
 
 	// mtx guards below fields
 	mtx sync.Mutex
-	// dirID contains the next directive instance id
-	dirID uint32
-	// dir contains the list of running directive instances
-	// sorted by ID
-	dir []*directiveInstance
-	// hnd contains the list of attached handlers
-	hnd []*handler
+
+	handlers   []*attachedHandler
+	directives []*DirectiveInstance
 }
 
-// NewController builds a new directive controller.
-func NewController(ctx context.Context, le *logrus.Entry) *Controller {
-	return &Controller{
-		ctx: ctx,
-		le:  le,
+// NewDirectiveController builds a new directive controller.
+func NewDirectiveController(ctx context.Context, le *logrus.Entry) *DirectiveController {
+	nctx, nctxCancel := context.WithCancel(ctx)
+	return &DirectiveController{
+		ctx:       nctx,
+		ctxCancel: nctxCancel,
+		le:        le,
 	}
-}
-
-// GetDirectives returns a list of all currently executing directives.
-func (c *Controller) GetDirectives() []directive.Instance {
-	c.mtx.Lock()
-	defer c.mtx.Unlock()
-	dirs := make([]directive.Instance, len(c.dir))
-	for i, di := range c.dir {
-		dirs[i] = di
-	}
-	return dirs
 }
 
 // AddDirective adds a directive to the controller.
 // This call de-duplicates equivalent directives.
-//
-// cb receives values in order as they are emitted.
-// cb can be nil.
-// cb should not block.
-//
-// Returns the instance, new reference, and anynke error.
-func (c *Controller) AddDirective(
+// Returns the instance, new reference, and any error.
+func (c *DirectiveController) AddDirective(
 	dir directive.Directive,
-	ref directive.ReferenceHandler,
+	cb directive.ReferenceHandler,
 ) (directive.Instance, directive.Reference, error) {
-	c.mtx.Lock()
+	if dir == nil {
+		return nil, nil, errors.New("directive cannot be nil")
+	}
+	if err := dir.Validate(); err != nil {
+		return nil, nil, err
+	}
+
+	var dirDebugStr string
+	debuggable, isDebuggable := dir.(directive.Debuggable)
+	if isDebuggable {
+		if debugVals := debuggable.GetDebugVals(); debugVals != nil {
+			dirDebugStr = url.Values(debugVals).Encode()
+			dirDebugStr, _ = url.PathUnescape(dirDebugStr)
+		}
+	}
+	dirNameDebugStr := dir.GetName()
+	if dirDebugStr != "" {
+		dirNameDebugStr += "<" + dirDebugStr + ">"
+	}
+	le := c.le.WithField("directive", dirNameDebugStr)
+
+	c.mtx.Lock() // lock first
 	defer c.mtx.Unlock()
 
-	// Check if any equivalent directives exist, if applicable.
-	if eqDir, eqDirOk := dir.(directive.DirectiveWithEquiv); eqDirOk {
-		for diIdx, di := range c.dir {
-			if !di.released.Load() && eqDir.IsEquivalent(di.dir) {
-				// Directive is equivalent to di.
-				spDir, spDirOk := eqDir.(directive.DirectiveWithSuperceeds)
-				if spDirOk && spDir.Superceeds(di.dir) {
-					// Remove the other directive (superceed it)
-					di.removeLocked(diIdx)
-				} else {
-					// Add a reference to the other directive & return.
-					return di, di.addReferenceLocked(ref, false), nil
-				}
+	for ii := 0; ii < len(c.directives); ii++ {
+		di := c.directives[ii]
+		d := di.GetDirective()
+		if dir.IsEquivalent(d) {
+			if dir.Superceeds(d) {
+				di.Close()
+				break
 			}
-		}
-	}
 
-	// Push the new directive to the list.
-	di, diRef := newDirectiveInstance(c, c.dirID, dir, ref)
-	c.dirID++
-	di.logger().Debug("added directive")
-	c.dir = append(c.dir, di)
-
-	// call all handlers while mtx is unlocked
-	handlers := make([]*handler, len(c.hnd))
-	copy(handlers, c.hnd)
-	c.mtx.Unlock()
-	var resolvers []*resolver
-	for _, hnd := range handlers {
-		if !hnd.rel.Load() {
-			nres, err := di.callHandlerUnlocked(hnd)
-			if err != nil {
-				di.logger().
-					WithError(err).
-					Warn("directive handler returned error")
+			ref := di.AddReference(cb, false)
+			if ref == nil {
 				continue
+			} else {
+				return di, ref, nil
 			}
-			resolvers = append(resolvers, nres...)
 		}
 	}
-	// attach returned resolvers while mtx is locked
-	c.mtx.Lock()
-	for _, res := range resolvers {
-		di.attachStartResolverLocked(res)
+
+	// Build new reference
+	di, ref := NewDirectiveInstance(c.ctx, le, dir, cb, func(di *DirectiveInstance) {
+		le.Debug("removed directive")
+		c.mtx.Lock() // lock first
+		for i, d := range c.directives {
+			if d == di {
+				c.directives[i] = c.directives[len(c.directives)-1]
+				c.directives[len(c.directives)-1] = nil
+				c.directives = c.directives[:len(c.directives)-1]
+				break
+			}
+		}
+		c.mtx.Unlock()
+	})
+	le.Debug("added directive")
+	c.directives = append(c.directives, di)
+	for _, handler := range c.handlers {
+		if err := c.callHandler(handler, di); err != nil {
+			le.WithError(err).Warn("unable to call directive handler")
+		}
 	}
-	return di, diRef, nil
+	return di, ref, nil
 }
 
 // AddHandler adds a directive handler.
 // The handler will receive calls for all existing directives (initial set).
-// An error is returned only if adding the handler failed.
-// Returns a function to remove the handler.
-// The release function must be non-nil if err is nil, and nil if err != nil.
-func (c *Controller) AddHandler(handler directive.Handler) (func(), error) {
+func (c *DirectiveController) AddHandler(hnd directive.Handler) error {
+	c.mtx.Lock() // lock first
+	defer c.mtx.Unlock()
+
+	ahnd := newAttachedHandler(c.ctx, hnd)
+	c.handlers = append(c.handlers, ahnd)
+
+	for _, dir := range c.directives {
+		err := c.callHandler(ahnd, dir)
+		if err != nil {
+			c.le.WithError(err).Warn("handler returned error")
+		}
+	}
+
+	return nil
+}
+
+// RemoveHandler removes a directive handler.
+func (c *DirectiveController) RemoveHandler(hnd directive.Handler) {
 	c.mtx.Lock()
 	defer c.mtx.Unlock()
-	return c.addHandlerLocked(handler)
-}
-
-// addHandlersLocked adds a set of handlers while c.mtx is locked.
-func (c *Controller) addHandlerLocked(handler directive.Handler) (func(), error) {
-	hnd := newHandler(handler)
-	c.hnd = append(c.hnd, hnd)
-
-	dirs := make([]*directiveInstance, len(c.dir))
-	copy(dirs, c.dir)
-	// unlock temporarily
-	c.mtx.Unlock()
-
-	var resolvers []*resolver
-	var dis []*directiveInstance
-	for _, di := range dirs {
-		if !hnd.rel.Load() {
-			nres, err := di.callHandlerUnlocked(hnd)
-			if err != nil {
-				di.logger().
-					WithError(err).
-					Warn("directive handler returned error")
-				continue
-			}
-			resolvers = append(resolvers, nres...)
-			if len(nres) != 0 {
-				oldLen := len(dis)
-				dis = slices.Grow(dis, len(nres))[:len(dis)+len(nres)]
-				for i := oldLen; i < len(dis); i++ {
-					dis[i] = di
-				}
-			}
-		}
-	}
-	// attach returned resolvers while mtx is locked
-	c.mtx.Lock()
-	for i, res := range resolvers {
-		dis[i].attachStartResolverLocked(res)
-	}
-	relHandler := func() {
-		if !hnd.rel.Swap(true) {
-			c.mtx.Lock()
-			c.removeHandlerLocked(hnd)
-			c.mtx.Unlock()
-		}
-	}
-
-	return relHandler, nil
-}
-
-// removeHandlerLocked removes a handler while c.mtx is locked
-//
-// returns if the handler was found in the set
-func (c *Controller) removeHandlerLocked(hnd *handler) bool {
-	// mark released
-	hnd.rel.Store(true)
-	// remove from list
-	var found bool
-	for i, ih := range c.hnd {
-		if ih == hnd {
-			c.hnd[i] = c.hnd[len(c.hnd)-1]
-			c.hnd[len(c.hnd)-1] = nil
-			c.hnd = c.hnd[:len(c.hnd)-1]
-			found = true
+	for i, h := range c.handlers {
+		if h.Handler == hnd {
+			h.Cancel()
+			c.handlers[i] = c.handlers[len(c.handlers)-1]
+			c.handlers[len(c.handlers)-1] = nil
+			c.handlers = c.handlers[:len(c.handlers)-1]
 			break
 		}
 	}
-	if !found {
-		return false
+	// TODO: ensure removing resolvers from handler.
+}
+
+// GetDirectives returns a list of all currently active directives.
+func (c *DirectiveController) GetDirectives() []directive.Instance {
+	c.mtx.Lock()
+	defer c.mtx.Unlock()
+	d := make([]directive.Instance, len(c.directives))
+	for i := range c.directives {
+		d[i] = c.directives[i]
 	}
-	// cancel all resolvers associated with the handler
-	for _, di := range c.dir {
-		di.removeHandlerLocked(hnd)
+	return d
+}
+
+// callHandler calls the directive handler with the directive, managing the resolver if returned.
+func (c *DirectiveController) callHandler(ahnd *attachedHandler, inst *DirectiveInstance) error {
+	hnd := ahnd.Handler
+	handleCtx, handleCtxCancel := context.WithCancel(ahnd.Context)
+	relDispose := inst.AddDisposeCallback(handleCtxCancel)
+	resolvers, err := hnd.HandleDirective(handleCtx, inst)
+	if err != nil {
+		return err
 	}
-	return true
+	// attach resolvers
+	var anyAttached bool
+	for _, resolver := range resolvers {
+		if resolver != nil {
+			anyAttached = true
+			inst.attachResolver(handleCtx, resolver)
+		}
+	}
+	if !anyAttached {
+		relDispose()
+		handleCtxCancel()
+	}
+
+	return nil
+}
+
+// Close closes the directive instance.
+func (c *DirectiveController) Close() {
+	c.ctxCancel()
 }
 
 // _ is a type assertion
-var _ directive.Controller = ((*Controller)(nil))
+var _ directive.Controller = ((*DirectiveController)(nil))

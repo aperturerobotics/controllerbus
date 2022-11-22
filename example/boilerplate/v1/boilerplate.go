@@ -66,6 +66,12 @@ func (b *Boilerplate) IsEquivalent(other directive.Directive) bool {
 	return ot.BoilerplateMessage() == b.BoilerplateMessage()
 }
 
+// Superceeds checks if the directive overrides another.
+// The other directive will be canceled if superceded.
+func (b *Boilerplate) Superceeds(other directive.Directive) bool {
+	return false
+}
+
 // GetDebugVals returns the directive arguments as key/value pairs.
 // This should be something like param1="test", param2="test".
 // This is not necessarily unique, and is primarily intended for display.
@@ -75,8 +81,8 @@ func (b *Boilerplate) GetDebugVals() directive.DebugValues {
 	}
 }
 
-var (
-	_ boilerplate.Boilerplate      = ((*Boilerplate)(nil))
-	_ directive.Debuggable         = ((*Boilerplate)(nil))
-	_ directive.DirectiveWithEquiv = ((*Boilerplate)(nil))
-)
+// _ is a type assertion
+var _ boilerplate.Boilerplate = ((*Boilerplate)(nil))
+
+// _ is a type assertion
+var _ directive.Debuggable = ((*Boilerplate)(nil))

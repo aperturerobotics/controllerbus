@@ -50,7 +50,7 @@ func NewCoreBus(
 	le *logrus.Entry,
 	opts ...Option,
 ) (bus.Bus, *static.Resolver, error) {
-	dc := cdc.NewController(ctx, le)
+	dc := cdc.NewDirectiveController(ctx, le)
 	b := inmem.NewBus(dc)
 
 	// Process options

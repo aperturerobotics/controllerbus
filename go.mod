@@ -20,7 +20,6 @@ require (
 	github.com/urfave/cli/v2 v2.16.3
 	github.com/valyala/fastjson v1.6.3
 	github.com/zeebo/blake3 v0.2.3
-	golang.org/x/exp v0.0.0-20220916125017-b168a2c6b86b
 	golang.org/x/mod v0.6.0-dev.0.20220906170120-8f535f745b87
 	golang.org/x/tools v0.1.12
 	google.golang.org/protobuf v1.28.1
@@ -31,7 +30,7 @@ require (
 	github.com/cpuguy83/go-md2man/v2 v2.0.2 // indirect
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.1.0 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
-	github.com/google/go-cmp v0.5.8 // indirect
+	github.com/google/go-cmp v0.5.7 // indirect
 	github.com/ipfs/go-cid v0.3.2 // indirect
 	github.com/klauspost/compress v1.15.10 // indirect
 	github.com/klauspost/cpuid/v2 v2.1.1 // indirect
