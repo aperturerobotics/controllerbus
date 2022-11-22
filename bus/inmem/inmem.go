@@ -16,10 +16,10 @@ type Bus struct {
 	// Controller is the directive controller.
 	directive.Controller
 
-	// controllersMtx guards controllers
-	controllersMtx sync.Mutex
-	// controllers is the controllers set
-	controllers []controller.Controller
+	// mtx guards below fields
+	mtx sync.Mutex
+	// controllers is the set of attached controllers
+	controllers []*attachedCtrl
 }
 
 // NewBus constructs a new in-memory Bus with a directive controller.
@@ -29,10 +29,12 @@ func NewBus(dc directive.Controller) *Bus {
 
 // GetControllers returns a list of all currently active controllers.
 func (b *Bus) GetControllers() []controller.Controller {
-	b.controllersMtx.Lock()
+	b.mtx.Lock()
 	c := make([]controller.Controller, len(b.controllers))
-	copy(c, b.controllers)
-	b.controllersMtx.Unlock()
+	for i := range b.controllers {
+		c[i] = b.controllers[i].ctrl
+	}
+	b.mtx.Unlock()
 	return c
 }
 
@@ -47,7 +49,11 @@ func (b *Bus) AddController(ctx context.Context, ctrl controller.Controller, cb 
 		subCtxCancel()
 		b.removeController(ctrl)
 	}
-	b.addController(ctrl)
+	if err := b.addController(ctrl); err != nil {
+		subCtxCancel()
+		_ = ctrl.Close()
+		return nil, err
+	}
 	go func() {
 		var err error
 		defer func() {
@@ -68,9 +74,9 @@ func (b *Bus) AddController(ctx context.Context, ctrl controller.Controller, cb 
 // handleControllerPanic handles recover for a paniced controller.
 func (b *Bus) handleControllerPanic(outErr *error) {
 	if rerr := recover(); rerr != nil {
+		debug.PrintStack()
 		e, eOk := rerr.(error)
 		if eOk {
-			debug.PrintStack()
 			if outErr != nil {
 				*outErr = errors.Wrap(e, "controller paniced")
 			}
@@ -85,7 +91,9 @@ func (b *Bus) handleControllerPanic(outErr *error) {
 // The controller will receive directive callbacks.
 // If the controller returns nil, call RemoveController to remove the controller.
 func (b *Bus) ExecuteController(ctx context.Context, c controller.Controller) (err error) {
-	b.addController(c)
+	if err := b.addController(c); err != nil {
+		return err
+	}
 
 	defer func() {
 		b.handleControllerPanic(&err)
@@ -103,27 +111,32 @@ func (b *Bus) RemoveController(c controller.Controller) {
 }
 
 // addController adds a controller to the bus
-func (b *Bus) addController(c controller.Controller) {
-	b.controllersMtx.Lock()
-	b.controllers = append(b.controllers, c)
-	b.controllersMtx.Unlock()
-
-	_ = b.Controller.AddHandler(c)
+func (b *Bus) addController(c controller.Controller) error {
+	b.mtx.Lock()
+	rel, err := b.Controller.AddHandler(c)
+	if err == nil {
+		b.controllers = append(b.controllers, &attachedCtrl{
+			ctrl: c,
+			rel:  rel,
+		})
+	}
+	b.mtx.Unlock()
+	return err
 }
 
 // removeController removes a controller from the bus
 func (b *Bus) removeController(c controller.Controller) {
-	b.controllersMtx.Lock()
+	b.mtx.Lock()
 	for i, ci := range b.controllers {
-		if ci == c {
+		if ci.ctrl == c {
 			b.controllers[i] = b.controllers[len(b.controllers)-1]
 			b.controllers[len(b.controllers)-1] = nil
 			b.controllers = b.controllers[:len(b.controllers)-1]
-			defer b.Controller.RemoveHandler(ci)
+			ci.rel()
 			break
 		}
 	}
-	b.controllersMtx.Unlock()
+	b.mtx.Unlock()
 }
 
 // _ is a type assertion

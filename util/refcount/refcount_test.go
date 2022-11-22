@@ -2,6 +2,7 @@ package refcount
 
 import (
 	"context"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -13,24 +14,24 @@ func TestRefCount(t *testing.T) {
 	ctx := context.Background()
 	target := ccontainer.NewCContainer[*string](nil)
 	targetErr := ccontainer.NewCContainer[*error](nil)
-	var valCalled, relCalled bool
+	var valCalled, relCalled atomic.Bool
 	rc := NewRefCount(nil, target, targetErr, func(ctx context.Context) (*string, func(), error) {
 		val := "hello world"
-		valCalled = true
+		valCalled.Store(true)
 		return &val, func() {
-			relCalled = true
+			relCalled.Store(true)
 		}, nil
 	})
 
 	ref := rc.AddRef(nil)
 	<-time.After(time.Millisecond * 50)
-	if valCalled || relCalled {
+	if valCalled.Load() || relCalled.Load() {
 		t.Fail()
 	}
 
 	rc.SetContext(ctx)
 	<-time.After(time.Millisecond * 50)
-	if !valCalled || relCalled {
+	if !valCalled.Load() || relCalled.Load() {
 		t.Fail()
 	}
 
@@ -44,12 +45,12 @@ func TestRefCount(t *testing.T) {
 	if err != nil {
 		t.Fatal(err.Error())
 	}
-	if waitVal != gotValue || gotErr != nil || relCalled {
+	if waitVal != gotValue || gotErr != nil || relCalled.Load() {
 		t.Fail()
 	}
 	ref.Release()
 
-	if !relCalled {
+	if !relCalled.Load() {
 		t.Fail()
 	}
 }

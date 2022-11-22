@@ -15,7 +15,7 @@ func execToy() {
 	log.SetLevel(logrus.DebugLevel)
 	le := logrus.NewEntry(log)
 
-	dc := cdc.NewDirectiveController(ctx, le)
+	dc := cdc.NewController(ctx, le)
 	b := inmem.NewBus(dc)
 
 	// Loader controller constructs and executes controllers

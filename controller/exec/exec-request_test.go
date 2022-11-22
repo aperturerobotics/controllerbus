@@ -22,7 +22,7 @@ func TestExecControllerRequest(t *testing.T) {
 		ExampleField: "hello world",
 	})
 	c["test-will-fail"] = configset.NewControllerConfig(1, &boilerplate.Config{
-		ExampleField: "", // cannot be empty
+		FailWithErr: "testing error",
 	})
 	m, err := configset_proto.NewConfigSet(c)
 	if err != nil {
