@@ -102,9 +102,11 @@ func (c *Controller) AddDirective(
 		}
 	}
 	// attach returned resolvers while mtx is locked
-	c.mtx.Lock()
-	for _, res := range resolvers {
-		di.attachStartResolverLocked(res)
+	c.mtx.Lock() // note: unlocked in Defer above
+	if !di.released.Load() {
+		for _, res := range resolvers {
+			di.attachStartResolverLocked(res)
+		}
 	}
 	return di, diRef, nil
 }

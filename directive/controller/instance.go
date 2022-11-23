@@ -42,7 +42,7 @@ type directiveInstance struct {
 	idles []*callback[directive.IdleCallback]
 	// callingRefs indicates we are currently calling a ref callback
 	callingRefCbs bool
-	// refCbs is the reference callbacks queue
+	// refCbs is the callbacks queue
 	// called when callingRefCbs=true and unlocked
 	refCbs []func()
 	// refs contains all directive instance references
@@ -491,7 +491,7 @@ func (i *directiveInstance) removeResolverLocked(resIdx int, rres *resolver) {
 	}
 
 	// remove the resolver from the list
-	i.res = append(i.res[resIdx:], i.res[resIdx+1:]...)
+	i.res = append(i.res[:resIdx], i.res[resIdx+1:]...)
 	// cancel the resolver
 	rres.updateContextLocked(nil)
 	// remove values associated with the resolver
