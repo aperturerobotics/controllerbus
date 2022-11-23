@@ -222,6 +222,7 @@ func (i *directiveInstance) handleUnreferencedLocked() {
 			}
 			i.c.mtx.Lock()
 			if !i.released.Load() && destroyTimer == i.destroyTimer {
+				i.destroyTimer = nil
 				i.removeLocked(-1)
 			}
 			i.c.mtx.Unlock()
@@ -439,18 +440,21 @@ func (i *directiveInstance) removeLocked(diIdx int) {
 			})
 		}
 	}
-	i.callCallbacksLocked(cbs...)
-	i.refs = nil
-	for _, res := range i.res {
-		res.ctx, res.ctxCancel = nil, nil
-	}
-	i.res = nil
 	for _, cb := range i.rels {
-		if !cb.released.Swap(true) {
-			go cb.cb()
+		if !cb.released.Swap(true) && cb.cb != nil {
+			cbs = append(cbs, cb.cb)
 		}
 	}
 	i.rels = nil
+	i.callCallbacksLocked(cbs...)
+	i.refs = nil
+	for _, res := range i.res {
+		if res.ctxCancel != nil {
+			res.ctxCancel()
+		}
+		res.ctx, res.ctxCancel = nil, nil
+	}
+	i.res = nil
 	for _, idle := range i.idles {
 		idle.released.Store(true)
 	}
