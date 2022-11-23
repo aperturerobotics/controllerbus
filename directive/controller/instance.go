@@ -537,7 +537,6 @@ func (i *directiveInstance) callCallbacksLocked(cbs ...func()) {
 				cb()
 			}()
 		}
-		cbs = nil
 		i.c.mtx.Lock()
 		cbs = i.refCbs
 		i.refCbs = nil
