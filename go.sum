@@ -4,6 +4,8 @@ github.com/aperturerobotics/protobuf-go v1.28.2-0.20221007002036-6510dd3bc392 h1
 github.com/aperturerobotics/protobuf-go v1.28.2-0.20221007002036-6510dd3bc392/go.mod h1:HV8QOd/L58Z+nl8r43ehVNZIU/HEI6OcFqwMG9pJV4I=
 github.com/aperturerobotics/starpc v0.13.3-0.20221109044340-34435095d711 h1:Us/HrWZfi31mtP5+OWMUiHzOOFJRHBP7JPdhqjU3rSM=
 github.com/aperturerobotics/starpc v0.13.3-0.20221109044340-34435095d711/go.mod h1:9rr/W2dNkjkJ08TBSTD50PdrrXqKmJAjCXZHOZA9Xyk=
+github.com/aperturerobotics/util v0.0.0-20221123133750-7b0e5b619620 h1:M4ofwWXs/x2QUPQ8LlBNBGfLmyUuY1j43xw7COwIJYk=
+github.com/aperturerobotics/util v0.0.0-20221123133750-7b0e5b619620/go.mod h1:XEAYwKz5dN1eqc7LFyoprXBD7AR/X3UC6o6NqSxnAG0=
 github.com/blang/semver v3.5.1+incompatible h1:cQNTCjp13qL8KC3Nbxr/y2Bqb63oX6wdnnjpJbkM4JQ=
 github.com/blang/semver v3.5.1+incompatible/go.mod h1:kRBLl5iJ+tD4TcOOxsy/0fnwebNt5EWlYSAyrTnjyyk=
 github.com/cenkalti/backoff v2.2.1+incompatible h1:tNowT99t7UNflLxfYYSlKYsBpXdEet03Pg2g16Swow4=

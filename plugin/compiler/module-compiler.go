@@ -14,7 +14,7 @@ import (
 	"path"
 	"path/filepath"
 
-	"github.com/aperturerobotics/controllerbus/util/exec"
+	"github.com/aperturerobotics/util/exec"
 	"github.com/mr-tron/base58/base58"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"

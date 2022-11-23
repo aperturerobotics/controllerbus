@@ -9,7 +9,7 @@ import (
 	"path"
 	"strings"
 
-	"github.com/aperturerobotics/controllerbus/util/exec"
+	"github.com/aperturerobotics/util/exec"
 	b58 "github.com/mr-tron/base58/base58"
 	"github.com/sirupsen/logrus"
 )

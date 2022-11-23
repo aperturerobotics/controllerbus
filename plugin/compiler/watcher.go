@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	debounce_fswatcher "github.com/aperturerobotics/controllerbus/util/debounce-fswatcher"
+	debounce_fswatcher "github.com/aperturerobotics/util/debounce-fswatcher"
 	"github.com/fsnotify/fsnotify"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"

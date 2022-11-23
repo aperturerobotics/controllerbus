@@ -151,6 +151,7 @@ func (c *Controller) addHandlerLocked(handler directive.Handler) (func(), error)
 			}
 		}
 	}
+
 	// attach returned resolvers while mtx is locked
 	c.mtx.Lock()
 	for i, res := range resolvers {
