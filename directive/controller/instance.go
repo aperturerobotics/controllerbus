@@ -240,6 +240,7 @@ func (i *directiveInstance) handleIdleLocked() {
 	var cbs []func()
 	for _, idle := range i.idles {
 		if !idle.released.Load() && idle.cb != nil {
+			idle := idle
 			cbs = append(cbs, func() {
 				idle.cb(errs)
 			})
@@ -308,6 +309,7 @@ func (i *directiveInstance) removeValueLocked(res *resolver, valID uint32) (dire
 
 			var cbs []func()
 			for _, ref := range i.refs {
+				ref := ref
 				if !ref.released.Load() && ref.h != nil {
 					cbs = append(cbs, func() {
 						ref.h.HandleValueRemoved(i, val)
@@ -434,6 +436,7 @@ func (i *directiveInstance) removeLocked(diIdx int) {
 	// clear everything else
 	var cbs []func()
 	for _, ref := range i.refs {
+		ref := ref
 		if !ref.released.Swap(true) && ref.h != nil {
 			cbs = append(cbs, func() {
 				ref.h.HandleInstanceDisposed(i)
@@ -497,7 +500,9 @@ func (i *directiveInstance) removeResolverLocked(resIdx int, rres *resolver) {
 	// remove values associated with the resolver
 	var cbs []func()
 	for _, val := range rres.vals {
+		val := val
 		for _, ref := range i.refs {
+			ref := ref
 			if ref.h != nil && !ref.released.Load() {
 				cbs = append(cbs, func() {
 					ref.h.HandleValueRemoved(i, val)
