@@ -7,6 +7,7 @@ import (
 )
 
 // ExecWaitValue executes a directive and waits for a value matching the cb.
+//
 // If returnIfIdle is set, returns nil, nil, nil if idle.
 // If cb returns true, nil, returns the value.
 // If checkCb is nil, returns first value.

@@ -2,42 +2,54 @@ package bus
 
 import (
 	"context"
+	"sync"
 
 	"github.com/aperturerobotics/controllerbus/directive"
+	"github.com/aperturerobotics/util/broadcast"
 )
 
 // ExecCollectValues collects one or more values while ctx is active and
 // directive is not idle.
 //
-// Returns err if the directive is idle and a resolver returned an error.
-// Does not return an error if ctx was canceled.
-// Does not release ref if err == nil.
+// Returns vals, ref, nil if the directive is idle.
+// Returns err if any resolver returns an error.
+// If err != nil, ref == nil.
 func ExecCollectValues(
 	ctx context.Context,
 	bus Bus,
 	dir directive.Directive,
 	valDisposeCallback func(),
 ) ([]directive.Value, directive.Reference, error) {
-	subCtx, subCtxCancel := context.WithCancel(ctx)
-	defer subCtxCancel()
+	// mtx, bcast guard these variables
+	var mtx sync.Mutex
+	var bcast broadcast.Broadcast
 
-	valCh := make(chan directive.Value, 1)
+	var vals []directive.Value
+	var resErr error
+	var idle bool
+
 	di, ref, err := bus.AddDirective(
 		dir,
-		&CallbackHandler{
-			disposeCb: func() {
-				subCtxCancel()
+		NewCallbackHandler(
+			func(v directive.AttachedValue) {
+				mtx.Lock()
+				vals = append(vals, v.GetValue())
+				bcast.Broadcast()
+				mtx.Unlock()
+			},
+			nil,
+			func() {
+				mtx.Lock()
+				if !idle {
+					idle = true
+					bcast.Broadcast()
+				}
+				mtx.Unlock()
 				if valDisposeCallback != nil {
-					valDisposeCallback()
+					go valDisposeCallback()
 				}
 			},
-			valCb: func(v directive.AttachedValue) {
-				select {
-				case <-subCtx.Done():
-				case valCh <- v.GetValue():
-				}
-			},
-		},
+		),
 	)
 	if err != nil {
 		if ref != nil {
@@ -46,54 +58,46 @@ func ExecCollectValues(
 		return nil, nil, err
 	}
 
-	errCh := make(chan error, 2)
 	defer di.AddIdleCallback(func(errs []error) {
-		if len(errs) != 0 {
-			for _, err := range errs {
-				if err == nil {
-					continue
-				}
-
-				select {
-				case errCh <- err:
-				default:
-					return
-				}
-			}
-		} else {
-			// idle
-			select {
-			case <-subCtx.Done():
-			case valCh <- nil:
+		mtx.Lock()
+		defer mtx.Unlock()
+		if resErr != nil || idle {
+			return
+		}
+		for _, err := range errs {
+			if err != nil {
+				resErr = err
+				break
 			}
 		}
+		// idle
+		if resErr == nil {
+			idle = true
+		}
+		bcast.Broadcast()
 	})()
 
-	var vals []directive.Value
 	for {
+		mtx.Lock()
+		if resErr != nil {
+			ref.Release()
+			defer mtx.Unlock()
+			return vals, nil, resErr
+		}
+		if idle {
+			defer mtx.Unlock()
+			return vals, ref, nil
+		}
+		mtx.Unlock()
+
 		select {
 		case <-ctx.Done():
-			subCtxCancel()
-			if ref != nil {
-				ref.Release()
+			mtx.Lock()
+			if resErr == nil {
+				resErr = context.Canceled
 			}
-			return vals, nil, context.Canceled
-		case <-subCtx.Done():
-			if ref != nil {
-				ref.Release()
-			}
-			return vals, nil, context.Canceled
-		case err := <-errCh:
-			subCtxCancel()
-			if ref != nil {
-				ref.Release()
-			}
-			return vals, nil, err
-		case n := <-valCh:
-			if n == nil {
-				return vals, ref, nil
-			}
-			vals = append(vals, n)
+			mtx.Unlock()
+		case <-bcast.GetWaitCh():
 		}
 	}
 }

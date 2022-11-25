@@ -2,12 +2,17 @@ package bus
 
 import (
 	"context"
+	"sync"
 
 	"github.com/aperturerobotics/controllerbus/directive"
+	"github.com/aperturerobotics/util/broadcast"
 )
 
 // ExecOneOff executes a one-off directive.
+//
 // If returnIfIdle is set, returns nil, nil, nil if idle.
+// If any resolvers return an error, returns that error.
+// If err != nil, ref == nil.
 func ExecOneOff(
 	ctx context.Context,
 	bus Bus,
@@ -15,18 +20,38 @@ func ExecOneOff(
 	returnIfIdle bool,
 	valDisposeCallback func(),
 ) (directive.AttachedValue, directive.Reference, error) {
-	valCh := make(chan directive.AttachedValue, 1)
+	// mtx, bcast guard these variables
+	var mtx sync.Mutex
+	var bcast broadcast.Broadcast
+
+	var val directive.AttachedValue
+	var resErr error
+	var idle bool
+
 	di, ref, err := bus.AddDirective(
 		dir,
-		&CallbackHandler{
-			disposeCb: valDisposeCallback,
-			valCb: func(v directive.AttachedValue) {
-				select {
-				case valCh <- v:
-				default:
+		NewCallbackHandler(
+			func(v directive.AttachedValue) {
+				mtx.Lock()
+				if val == nil {
+					val = v
+				}
+				bcast.Broadcast()
+				mtx.Unlock()
+			},
+			nil,
+			func() {
+				mtx.Lock()
+				if !idle {
+					idle = true
+					bcast.Broadcast()
+				}
+				mtx.Unlock()
+				if valDisposeCallback != nil {
+					go valDisposeCallback()
 				}
 			},
-		},
+		),
 	)
 	if err != nil {
 		if ref != nil {
@@ -35,38 +60,46 @@ func ExecOneOff(
 		return nil, nil, err
 	}
 
-	errCh := make(chan error, 1)
 	defer di.AddIdleCallback(func(errs []error) {
-		var err error
-		if len(errs) != 0 {
-			for _, rerr := range errs {
-				if rerr != nil {
-					err = rerr
-					break
-				}
-			}
-		}
-		if !returnIfIdle && err == nil {
+		mtx.Lock()
+		defer mtx.Unlock()
+		if resErr != nil || idle {
 			return
 		}
-		select {
-		case errCh <- err:
-		default:
+		for _, err := range errs {
+			if err != nil {
+				resErr = err
+				break
+			}
 		}
+		// idle
+		if resErr == nil {
+			idle = true
+		}
+		bcast.Broadcast()
 	})()
 
-	select {
-	case <-ctx.Done():
-		if ref != nil {
-			ref.Release()
+	for {
+		mtx.Lock()
+		if val != nil {
+			defer mtx.Unlock()
+			return val, ref, nil
 		}
-		return nil, nil, context.Canceled
-	case n := <-valCh:
-		return n, ref, nil
-	case err := <-errCh:
-		if ref != nil {
+		if resErr != nil || (idle && returnIfIdle) {
 			ref.Release()
+			defer mtx.Unlock()
+			return nil, nil, resErr
 		}
-		return nil, nil, err
+		mtx.Unlock()
+
+		select {
+		case <-ctx.Done():
+			mtx.Lock()
+			if resErr == nil {
+				resErr = context.Canceled
+			}
+			mtx.Unlock()
+		case <-bcast.GetWaitCh():
+		}
 	}
 }
