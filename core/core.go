@@ -56,6 +56,9 @@ func NewCoreBus(
 	// Process options
 	conf := &CoreBusConfig{}
 	for _, opt := range opts {
+		if opt == nil {
+			continue
+		}
 		if err := opt(conf); err != nil {
 			return nil, nil, err
 		}
