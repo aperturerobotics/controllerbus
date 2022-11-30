@@ -23,6 +23,8 @@ type resolver struct {
 	// vals are the attached values
 	// sorted by id
 	vals []*value
+	// idle indicates the resolver is currently idle
+	idle bool
 }
 
 // newResolver constructs a new resolver.
@@ -46,7 +48,19 @@ func (r *resolver) updateContextLocked(ctx *context.Context) {
 	} else {
 		// start resolver with new context
 		r.ctx, r.ctxCancel = context.WithCancel(*ctx)
+		r.idle = false
 		hnd := &resolverHandler{r: r, ctx: r.ctx}
 		go hnd.executeResolver()
+	}
+}
+
+// markIdleLocked marks the resolver as idle while di.c.mtx is locked
+func (r *resolver) markIdleLocked() {
+	if !r.idle {
+		r.idle = true
+		r.di.runningResolvers--
+		if r.di.runningResolvers == 0 {
+			r.di.handleIdleLocked()
+		}
 	}
 }

@@ -247,6 +247,9 @@ type ResolverHandler interface {
 	// RemoveValue removes a value from the result, returning found.
 	// It is safe to call this function even if the resolver is canceled.
 	RemoveValue(id uint32) (val Value, found bool)
+	// MarkIdle marks the resolver as idle.
+	// If the resolver returns nil or an error, it's also marked as idle.
+	MarkIdle()
 }
 
 // Resolver resolves values for directives.

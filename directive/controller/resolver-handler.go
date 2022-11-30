@@ -40,6 +40,17 @@ func (r *resolverHandler) RemoveValue(id uint32) (val directive.Value, found boo
 	return r.r.di.removeValueLocked(r.r, id)
 }
 
+// MarkIdle marks the resolver as idle.
+// If the resolver returns nil or an error, it's also marked as idle.
+func (r *resolverHandler) MarkIdle() {
+	r.r.di.c.mtx.Lock()
+	defer r.r.di.c.mtx.Unlock()
+	if r.r.ctx != r.ctx {
+		return
+	}
+	r.r.markIdleLocked()
+}
+
 // executeResolver is the goroutine to execute the resolver.
 func (r *resolverHandler) executeResolver() {
 	err := r.r.res.Resolve(r.ctx, r)
@@ -50,10 +61,7 @@ func (r *resolverHandler) executeResolver() {
 		return
 	}
 	r.r.err = err
-	r.r.di.runningResolvers--
-	if r.r.di.runningResolvers == 0 {
-		r.r.di.handleIdleLocked()
-	}
+	r.r.markIdleLocked()
 }
 
 // _ is a type assertion.
