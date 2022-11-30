@@ -51,6 +51,7 @@ type directiveInstance struct {
 	// res contains attached resolvers
 	res []*resolver
 	// valCtr is the ID of the next value
+	// note: the first value ID is 1, not 0
 	valCtr uint32
 	// runningResolvers is the number of running resolvers.
 	runningResolvers int
@@ -266,8 +267,8 @@ func (i *directiveInstance) addValueLocked(res *resolver, val directive.Value) (
 		return 0, false
 	}
 
-	vid := i.valCtr
 	i.valCtr++
+	vid := i.valCtr
 	v := &value{id: vid, val: val}
 	res.vals = append(res.vals, v)
 
