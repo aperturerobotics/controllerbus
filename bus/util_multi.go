@@ -71,9 +71,7 @@ func ExecCollectValues(
 			}
 		}
 		// idle
-		if resErr == nil {
-			idle = true
-		}
+		idle = true
 		bcast.Broadcast()
 	})()
 
