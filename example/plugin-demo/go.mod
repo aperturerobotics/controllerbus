@@ -6,11 +6,11 @@ replace github.com/aperturerobotics/controllerbus => ../..
 
 replace (
 	github.com/sirupsen/logrus => github.com/aperturerobotics/logrus v1.8.2-0.20220322010420-77ab346a2cf8 // aperture
-	google.golang.org/protobuf => github.com/aperturerobotics/protobuf-go v1.28.2-0.20220907043630-48b5d551eaff // aperture
+	google.golang.org/protobuf => github.com/aperturerobotics/protobuf-go v1.28.2-0.20221202092004-7e5a6a8cf680 // aperture
 )
 
 require (
-	github.com/aperturerobotics/controllerbus v0.0.0-00010101000000-000000000000
+	github.com/aperturerobotics/controllerbus v0.19.4-0.20221202091245-988611e98da5
 	github.com/blang/semver v3.5.1+incompatible
 	github.com/pkg/errors v0.9.1
 	github.com/sirupsen/logrus v1.9.0
