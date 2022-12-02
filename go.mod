@@ -8,8 +8,8 @@ replace (
 )
 
 require (
-	github.com/aperturerobotics/starpc v0.15.0
-	github.com/aperturerobotics/util v0.0.0-20221125031036-d86bb72019f6
+	github.com/aperturerobotics/starpc v0.15.2-0.20221202005525-702e2fb770bf
+	github.com/aperturerobotics/util v0.0.0-20221202091107-34bf4a704df5
 	github.com/blang/semver v3.5.1+incompatible
 	github.com/cenkalti/backoff v2.2.1+incompatible
 	github.com/fsnotify/fsnotify v1.6.0
@@ -18,12 +18,12 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/sergi/go-diff v1.2.0
 	github.com/sirupsen/logrus v1.9.0
-	github.com/urfave/cli/v2 v2.16.3
+	github.com/urfave/cli/v2 v2.23.5
 	github.com/valyala/fastjson v1.6.3
 	github.com/zeebo/blake3 v0.2.3
-	golang.org/x/exp v0.0.0-20221114191408-850992195362
+	golang.org/x/exp v0.0.0-20221126150942-6ab00d035af9
 	golang.org/x/mod v0.7.0
-	golang.org/x/tools v0.3.1-0.20221123235330-f718365b8d68
+	golang.org/x/tools v0.3.1-0.20221201230950-47a82463d369
 	google.golang.org/protobuf v1.28.1
 	mvdan.cc/gofumpt v0.3.1
 )
