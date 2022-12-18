@@ -288,6 +288,10 @@ func (i *directiveInstance) addValueLocked(res *resolver, val directive.Value) (
 		for _, res := range i.res {
 			res.updateContextLocked(nil)
 		}
+		if i.runningResolvers != 0 {
+			i.runningResolvers = 0
+			i.handleIdleLocked()
+		}
 	}
 
 	return vid, true

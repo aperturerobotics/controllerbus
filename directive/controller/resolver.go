@@ -45,6 +45,7 @@ func (r *resolver) updateContextLocked(ctx *context.Context) {
 	}
 	if ctx == nil {
 		r.ctx, r.ctxCancel = nil, nil
+		r.idle = true
 	} else {
 		// start resolver with new context
 		r.ctx, r.ctxCancel = context.WithCancel(*ctx)
