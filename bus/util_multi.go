@@ -86,6 +86,7 @@ func ExecCollectValues(
 			defer mtx.Unlock()
 			return vals, ref, nil
 		}
+		waitCh := bcast.GetWaitCh()
 		mtx.Unlock()
 
 		select {
@@ -95,7 +96,7 @@ func ExecCollectValues(
 				resErr = context.Canceled
 			}
 			mtx.Unlock()
-		case <-bcast.GetWaitCh():
+		case <-waitCh:
 		}
 	}
 }
