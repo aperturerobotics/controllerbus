@@ -207,13 +207,24 @@ func (i *directiveInstance) handleReferencedLocked() {
 	i.runningResolvers = len(i.res)
 }
 
+// anyValuesLocked checks if any values have been associated with the resolvers.
+func (i *directiveInstance) anyValuesLocked() bool {
+	for _, res := range i.res {
+		if len(res.vals) != 0 {
+			return true
+		}
+	}
+	return false
+}
+
 // handleUnreferencedLocked handles when we reach 0 references while i.c.mtx is locked.
 func (i *directiveInstance) handleUnreferencedLocked() {
 	if i.released.Load() || i.destroyTimer != nil {
 		return
 	}
 	disposeDur := i.valueOpts.UnrefDisposeDur
-	if disposeDur == 0 {
+	disposeEmptyImmediate := i.valueOpts.UnrefDisposeEmptyImmediate
+	if disposeDur == 0 || (disposeEmptyImmediate && !i.anyValuesLocked()) {
 		i.removeLocked(-1)
 	} else {
 		var destroyTimer *time.Timer

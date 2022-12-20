@@ -72,6 +72,11 @@ type ValueOptions struct {
 	// UnrefDisposeDur is the duration to wait to dispose a directive after all
 	// references have been released.
 	UnrefDisposeDur time.Duration
+
+	// UnrefDisposeEmptyImmediate indicates we should immediately dispose a
+	// directive that has become unreferenced if there are no associated Values
+	// with the directive (it is unresolved) regardless of UnrefDisposeDur.
+	UnrefDisposeEmptyImmediate bool
 }
 
 // Directive implements a requested state (with a set of values).
