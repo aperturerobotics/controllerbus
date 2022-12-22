@@ -51,6 +51,24 @@ func (r *resolverHandler) MarkIdle() {
 	r.r.markIdleLocked()
 }
 
+// ClearValues removes any values that were set by this ResolverHandler.
+// Returns list of value IDs that were removed.
+func (r *resolverHandler) ClearValues() []uint32 {
+	r.r.di.c.mtx.Lock()
+	defer r.r.di.c.mtx.Unlock()
+	if r.r.ctx != r.ctx {
+		return nil
+	}
+	removed := make([]uint32, len(r.r.vals))
+	for i := len(r.r.vals) - 1; i >= 0; i-- {
+		val := r.r.vals[i]
+		removed[i] = val.id
+		r.r.vals = r.r.vals[:i]
+		r.r.di.onValueRemovedLocked(r.r, val)
+	}
+	return removed
+}
+
 // executeResolver is the goroutine to execute the resolver.
 func (r *resolverHandler) executeResolver() {
 	err := r.r.res.Resolve(r.ctx, r)

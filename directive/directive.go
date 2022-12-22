@@ -255,6 +255,9 @@ type ResolverHandler interface {
 	// MarkIdle marks the resolver as idle.
 	// If the resolver returns nil or an error, it's also marked as idle.
 	MarkIdle()
+	// ClearValues removes any values that were set by this ResolverHandler.
+	// Returns list of value IDs that were removed.
+	ClearValues() []uint32
 }
 
 // Resolver resolves values for directives.

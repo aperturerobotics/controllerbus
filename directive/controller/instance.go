@@ -295,13 +295,14 @@ func (i *directiveInstance) addValueLocked(res *resolver, val directive.Value) (
 	i.callCallbacksLocked(cbs...)
 
 	if maxVals != 0 && len(res.vals) >= maxVals {
-		// cancel all resolvers
+		// we have enough values, reaching the maxVals cap
+		// mark resolvers with values as idle
+		// cancel contexts for resolvers with no values
 		for _, res := range i.res {
-			res.updateContextLocked(nil)
-		}
-		if i.runningResolvers != 0 {
-			i.runningResolvers = 0
-			i.handleIdleLocked()
+			res.markIdleLocked()
+			if len(res.vals) == 0 {
+				res.updateContextLocked(nil)
+			}
 		}
 	}
 
@@ -314,29 +315,33 @@ func (i *directiveInstance) removeValueLocked(res *resolver, valID uint32) (dire
 		val := res.vals[idx]
 		if val.id == valID {
 			res.vals = append(res.vals[:idx], res.vals[idx+1:]...)
-
-			maxVals := i.valueOpts.MaxValueCount
-			if maxVals != 0 && len(res.vals)+1 == maxVals {
-				// restart resolvers
-				for _, res := range i.res {
-					res.updateContextLocked(&i.ctx)
-				}
-			}
-
-			var cbs []func()
-			for _, ref := range i.refs {
-				ref := ref
-				if !ref.released.Load() && ref.h != nil {
-					cbs = append(cbs, func() {
-						ref.h.HandleValueRemoved(i, val)
-					})
-				}
-			}
-			i.callCallbacksLocked(cbs...)
+			i.onValueRemovedLocked(res, val)
 			return val.val, true
 		}
 	}
 	return nil, false
+}
+
+// onValueRemovedLocked is called by removeValueLocked after removing an item.
+func (i *directiveInstance) onValueRemovedLocked(res *resolver, val *value) {
+	maxVals := i.valueOpts.MaxValueCount
+	if maxVals != 0 && len(res.vals)+1 == maxVals {
+		// restart resolvers
+		for _, res := range i.res {
+			res.updateContextLocked(&i.ctx)
+		}
+	}
+
+	var cbs []func()
+	for _, ref := range i.refs {
+		ref := ref
+		if !ref.released.Load() && ref.h != nil {
+			cbs = append(cbs, func() {
+				ref.h.HandleValueRemoved(i, val)
+			})
+		}
+	}
+	i.callCallbacksLocked(cbs...)
 }
 
 // AddDisposeCallback adds a callback that will be called when the instance
