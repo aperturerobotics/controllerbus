@@ -78,12 +78,12 @@ func ExecCollectValues(
 	for {
 		mtx.Lock()
 		if resErr != nil {
+			mtx.Unlock()
 			ref.Release()
-			defer mtx.Unlock()
 			return vals, nil, resErr
 		}
 		if idle {
-			defer mtx.Unlock()
+			mtx.Unlock()
 			return vals, ref, nil
 		}
 		waitCh := bcast.GetWaitCh()
