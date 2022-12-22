@@ -39,7 +39,15 @@ func newResolver(di *directiveInstance, hnd *handler, res directive.Resolver) *r
 // updateContextLocked updates the resolver context while di.c.mtx is locked
 //
 // if ctx is nil, stops the resolver.
-func (r *resolver) updateContextLocked(ctx *context.Context) {
+// if forceRestart = false, ctx != nil, and r.ctx is not canceled, does nothing.
+func (r *resolver) updateContextLocked(ctx *context.Context, forceRestart bool) {
+	if ctx != nil && !forceRestart && r.ctx != nil {
+		select {
+		case <-r.ctx.Done():
+		default:
+			return
+		}
+	}
 	if r.ctxCancel != nil {
 		r.ctxCancel()
 	}

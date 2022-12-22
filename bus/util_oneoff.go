@@ -82,12 +82,12 @@ func ExecOneOff(
 	for {
 		mtx.Lock()
 		if val != nil {
-			defer mtx.Unlock()
+			mtx.Unlock()
 			return val, ref, nil
 		}
 		if resErr != nil || (idle && returnIfIdle) {
+			mtx.Unlock()
 			ref.Release()
-			defer mtx.Unlock()
 			return nil, nil, resErr
 		}
 		mtx.Unlock()
