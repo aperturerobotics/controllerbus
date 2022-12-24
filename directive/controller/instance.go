@@ -240,6 +240,13 @@ func (i *directiveInstance) handleUnreferencedLocked() {
 			i.c.mtx.Unlock()
 		})
 		i.destroyTimer = destroyTimer
+
+		// cancel all resolvers that have no values
+		for _, res := range i.res {
+			if len(res.vals) == 0 {
+				res.updateContextLocked(nil)
+			}
+		}
 	}
 }
 
