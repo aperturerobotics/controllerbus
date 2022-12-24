@@ -255,6 +255,10 @@ type ResolverHandler interface {
 	// MarkIdle marks the resolver as idle.
 	// If the resolver returns nil or an error, it's also marked as idle.
 	MarkIdle()
+	// CountValues returns the number of values that were set.
+	// if allResolvers=false, returns the number set by this ResolverHandler.
+	// if allResolvers=true, returns the number set by all resolvers.
+	CountValues(allResolvers bool) int
 	// ClearValues removes any values that were set by this ResolverHandler.
 	// Returns list of value IDs that were removed.
 	ClearValues() []uint32

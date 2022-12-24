@@ -51,6 +51,23 @@ func (r *resolverHandler) MarkIdle() {
 	r.r.markIdleLocked()
 }
 
+// CountValues returns the number of values that were set.
+// if allResolvers=false, returns the number set by this ResolverHandler.
+// if allResolvers=true, returns the number set by all resolvers.
+func (r *resolverHandler) CountValues(allResolvers bool) int {
+	r.r.di.c.mtx.Lock()
+	defer r.r.di.c.mtx.Unlock()
+	if allResolvers {
+		var count int
+		for _, res := range r.r.di.res {
+			count += len(res.vals)
+		}
+		return count
+	} else {
+		return len(r.r.vals)
+	}
+}
+
 // ClearValues removes any values that were set by this ResolverHandler.
 // Returns list of value IDs that were removed.
 func (r *resolverHandler) ClearValues() []uint32 {
