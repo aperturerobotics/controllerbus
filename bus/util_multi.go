@@ -91,11 +91,8 @@ func ExecCollectValues(
 
 		select {
 		case <-ctx.Done():
-			mtx.Lock()
-			if resErr == nil {
-				resErr = context.Canceled
-			}
-			mtx.Unlock()
+			ref.Release()
+			return nil, nil, context.Canceled
 		case <-waitCh:
 		}
 	}
