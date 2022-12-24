@@ -25,6 +25,8 @@ type resolver struct {
 	vals []*value
 	// idle indicates the resolver is currently idle
 	idle bool
+	// exited indicates the resolver has exited
+	exited bool
 }
 
 // newResolver constructs a new resolver.
@@ -39,12 +41,12 @@ func newResolver(di *directiveInstance, hnd *handler, res directive.Resolver) *r
 // updateContextLocked updates the resolver context while di.c.mtx is locked
 //
 // if ctx is nil, stops the resolver.
-// if forceRestart = false, ctx != nil, and r.ctx is not canceled, does nothing.
-func (r *resolver) updateContextLocked(ctx *context.Context, forceRestart bool) {
-	if ctx != nil && !forceRestart && r.ctx != nil {
+func (r *resolver) updateContextLocked(ctx *context.Context) {
+	if ctx != nil && r.ctx != nil && !r.exited {
 		select {
 		case <-r.ctx.Done():
 		default:
+			// resolver is still running
 			return
 		}
 	}
@@ -52,12 +54,12 @@ func (r *resolver) updateContextLocked(ctx *context.Context, forceRestart bool) 
 		r.ctxCancel()
 	}
 	if ctx == nil {
+		r.idle, r.exited = true, true
 		r.ctx, r.ctxCancel = nil, nil
-		r.idle = true
 	} else {
 		// start resolver with new context
+		r.idle, r.exited = false, false
 		r.ctx, r.ctxCancel = context.WithCancel(*ctx)
-		r.idle = false
 		hnd := &resolverHandler{r: r, ctx: r.ctx}
 		go hnd.executeResolver()
 	}

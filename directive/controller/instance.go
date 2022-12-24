@@ -202,7 +202,7 @@ func (i *directiveInstance) handleReferencedLocked() {
 	}
 	// start all resolvers
 	for _, res := range i.res {
-		res.updateContextLocked(&i.ctx, false)
+		res.updateContextLocked(&i.ctx)
 	}
 	i.runningResolvers = len(i.res)
 }
@@ -301,7 +301,7 @@ func (i *directiveInstance) addValueLocked(res *resolver, val directive.Value) (
 		for _, res := range i.res {
 			res.markIdleLocked()
 			if len(res.vals) == 0 {
-				res.updateContextLocked(nil, false)
+				res.updateContextLocked(nil)
 			}
 		}
 	}
@@ -328,7 +328,7 @@ func (i *directiveInstance) onValueRemovedLocked(res *resolver, val *value) {
 	if maxVals != 0 && len(res.vals)+1 == maxVals {
 		// restart resolvers
 		for _, res := range i.res {
-			res.updateContextLocked(&i.ctx, false)
+			res.updateContextLocked(&i.ctx)
 		}
 	}
 
@@ -422,7 +422,7 @@ func (i *directiveInstance) attachStartResolverLocked(res *resolver) {
 	i.res = append(i.res, res)
 	// start resolver if len(refs) != 0
 	if len(i.refs) != 0 {
-		res.updateContextLocked(&i.ctx, true)
+		res.updateContextLocked(&i.ctx)
 		i.runningResolvers++
 	}
 }
@@ -517,7 +517,7 @@ func (i *directiveInstance) removeResolverLocked(resIdx int, rres *resolver) {
 	// remove the resolver from the list
 	i.res = append(i.res[:resIdx], i.res[resIdx+1:]...)
 	// cancel the resolver
-	rres.updateContextLocked(nil, false)
+	rres.updateContextLocked(nil)
 	// remove values associated with the resolver
 	var cbs []func()
 	for _, val := range rres.vals {

@@ -78,6 +78,7 @@ func (r *resolverHandler) executeResolver() {
 	if r.r.ctx != r.ctx {
 		return
 	}
+	r.r.exited = true
 	r.r.err = err
 	r.r.markIdleLocked()
 }
