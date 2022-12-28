@@ -149,11 +149,11 @@ func (i *directiveInstance) addReferenceLocked(cb directive.ReferenceHandler, we
 		}
 		return ref
 	}
-	var firstRef bool
+	firstRef := len(i.refs) == 0
+	firstNonWeakRef := !firstRef && !weakRef && i.refs[len(i.refs)-1].weak
 	if weakRef {
 		i.refs = append([]*dirRef{ref}, i.refs...)
 	} else {
-		firstRef = len(i.refs) == 0 || i.refs[len(i.refs)-1].weak
 		i.refs = append(i.refs, ref)
 	}
 	var cbs []func()
@@ -167,8 +167,8 @@ func (i *directiveInstance) addReferenceLocked(cb directive.ReferenceHandler, we
 			}
 		}
 	}
-	if firstRef {
-		i.handleReferencedLocked()
+	if firstRef || firstNonWeakRef {
+		i.handleReferencedLocked(weakRef)
 	}
 	i.callCallbacksLocked(cbs...)
 	return ref
@@ -180,8 +180,9 @@ func (i *directiveInstance) removeReferenceLocked(ref *dirRef) {
 		if iref == ref {
 			i.refs = append(i.refs[:idx], i.refs[idx+1:]...)
 			ref.released.Store(true)
-			if len(i.refs) == 0 || i.refs[len(i.refs)-1].weak {
-				i.handleUnreferencedLocked()
+			onlyWeakRefs := len(i.refs) != 0 && i.refs[len(i.refs)-1].weak
+			if onlyWeakRefs || len(i.refs) == 0 {
+				i.handleUnreferencedLocked(onlyWeakRefs)
 			}
 			break
 		}
@@ -189,12 +190,13 @@ func (i *directiveInstance) removeReferenceLocked(ref *dirRef) {
 }
 
 // handleReferencedLocked handles when we reach 1 reference while i.c.mtx is locked
-func (i *directiveInstance) handleReferencedLocked() {
+// also called when we reach 1 non-weak reference.
+func (i *directiveInstance) handleReferencedLocked(weakRef bool) {
 	if i.released.Load() {
 		return
 	}
-	// cancel dispose callback
-	if i.destroyTimer != nil {
+	// cancel dispose callback, but only if this isn't a "weak" ref
+	if !weakRef && i.destroyTimer != nil {
 		_ = i.destroyTimer.Stop()
 		i.destroyTimer = nil
 	}
@@ -226,7 +228,7 @@ func (i *directiveInstance) anyValuesLocked() bool {
 }
 
 // handleUnreferencedLocked handles when we reach 0 references while i.c.mtx is locked.
-func (i *directiveInstance) handleUnreferencedLocked() {
+func (i *directiveInstance) handleUnreferencedLocked(anyWeakRefs bool) {
 	if i.released.Load() || i.destroyTimer != nil {
 		return
 	}
@@ -250,9 +252,12 @@ func (i *directiveInstance) handleUnreferencedLocked() {
 		i.destroyTimer = destroyTimer
 
 		// cancel all resolvers that have no values
-		for _, res := range i.res {
-			if len(res.vals) == 0 {
-				res.updateContextLocked(nil)
+		// ... but only if there are not any "weak" references
+		if !anyWeakRefs {
+			for _, res := range i.res {
+				if len(res.vals) == 0 {
+					res.updateContextLocked(nil)
+				}
 			}
 		}
 	}
