@@ -225,6 +225,13 @@ type Instance interface {
 	// Returns a callback release function.
 	AddIdleCallback(cb IdleCallback) func()
 
+	// CloseIfUnreferenced cancels the directive instance if there are no refs.
+	//
+	// This bypasses the unref dispose timer.
+	// If inclWeakRefs=true, keeps the instance if there are any weak refs.
+	// Returns if the directive instance was closed.
+	CloseIfUnreferenced(inclWeakRefs bool) bool
+
 	// Close cancels the directive instance and removes the directive.
 	Close()
 }

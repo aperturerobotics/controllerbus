@@ -415,11 +415,34 @@ func (i *directiveInstance) AddIdleCallback(cb directive.IdleCallback) func() {
 
 // Close cancels the directive instance.
 func (i *directiveInstance) Close() {
+	i.c.mtx.Lock()
+	defer i.c.mtx.Unlock()
 	if !i.released.Swap(true) {
-		i.c.mtx.Lock()
 		i.removeLocked(-1)
-		i.c.mtx.Unlock()
 	}
+}
+
+// CloseIfUnreferenced cancels the directive instance if there are no refs.
+//
+// This bypasses the unref dispose timer.
+// If inclWeakRefs=true, keeps the instance if there are any weak refs.
+// Returns if the directive instance was closed.
+func (i *directiveInstance) CloseIfUnreferenced(inclWeakRefs bool) bool {
+	i.c.mtx.Lock()
+	defer i.c.mtx.Unlock()
+	if i.released.Load() {
+		return true
+	}
+	hasRefs := len(i.refs) != 0
+	if hasRefs && !inclWeakRefs {
+		// if the last ref in the list is a weak ref
+		// there are only weak refs, mark as unreferenced.
+		hasRefs = !i.refs[len(i.refs)-1].weak
+	}
+	if !hasRefs && !i.released.Swap(true) {
+		i.removeLocked(-1)
+	}
+	return i.released.Load()
 }
 
 // callHandlerUnlocked calls the HandleDirective function while i.c.mtx is not locked.
