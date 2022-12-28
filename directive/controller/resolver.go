@@ -32,9 +32,10 @@ type resolver struct {
 // newResolver constructs a new resolver.
 func newResolver(di *directiveInstance, hnd *handler, res directive.Resolver) *resolver {
 	return &resolver{
-		di:  di,
-		hnd: hnd,
-		res: res,
+		di:   di,
+		hnd:  hnd,
+		res:  res,
+		idle: true,
 	}
 }
 
@@ -54,7 +55,10 @@ func (r *resolver) updateContextLocked(ctx *context.Context) {
 		r.ctxCancel()
 	}
 	if ctx == nil {
-		r.idle, r.exited = true, true
+		if !r.idle {
+			r.markIdleLocked()
+		}
+		r.exited = true
 		r.ctx, r.ctxCancel = nil, nil
 	} else {
 		// start resolver with new context
@@ -69,8 +73,7 @@ func (r *resolver) updateContextLocked(ctx *context.Context) {
 func (r *resolver) markIdleLocked() {
 	if !r.idle {
 		r.idle = true
-		r.di.runningResolvers--
-		if r.di.runningResolvers == 0 {
+		if r.di.countRunningResolversLocked() == 0 {
 			r.di.handleIdleLocked()
 		}
 	}

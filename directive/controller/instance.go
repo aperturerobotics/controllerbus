@@ -53,8 +53,6 @@ type directiveInstance struct {
 	// valCtr is the ID of the next value
 	// note: the first value ID is 1, not 0
 	valCtr uint32
-	// runningResolvers is the number of running resolvers.
-	runningResolvers int
 }
 
 // newDirectiveInstance constructs a new directive instance with an initial reference.
@@ -204,7 +202,17 @@ func (i *directiveInstance) handleReferencedLocked() {
 	for _, res := range i.res {
 		res.updateContextLocked(&i.ctx)
 	}
-	i.runningResolvers = len(i.res)
+}
+
+// countRunningResolversLocked counts the number of non-idle running resolvers.
+func (i *directiveInstance) countRunningResolversLocked() int {
+	var count int
+	for _, res := range i.res {
+		if !res.idle && res.ctx != nil && !res.exited {
+			count++
+		}
+	}
+	return count
 }
 
 // anyValuesLocked checks if any values have been associated with the resolvers.
@@ -382,7 +390,7 @@ func (i *directiveInstance) AddIdleCallback(cb directive.IdleCallback) func() {
 	i.c.mtx.Lock()
 	rel := newCallback(cb)
 	i.idles = append(i.idles, rel)
-	isIdle := i.runningResolvers == 0
+	isIdle := i.countRunningResolversLocked() == 0
 	var errs []error
 	if isIdle {
 		errs = i.getResolverErrsLocked()
@@ -430,7 +438,6 @@ func (i *directiveInstance) attachStartResolverLocked(res *resolver) {
 	// start resolver if len(refs) != 0
 	if len(i.refs) != 0 {
 		res.updateContextLocked(&i.ctx)
-		i.runningResolvers++
 	}
 }
 
