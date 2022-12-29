@@ -20,6 +20,9 @@ type resolver struct {
 	ctx context.Context
 	// ctxCancel cancels ctx
 	ctxCancel context.CancelFunc
+	// exitedCh is closed when the routine running with ctx exits
+	// may be nil if ctx == nil
+	exitedCh <-chan struct{}
 	// vals are the attached values
 	// sorted by id
 	vals []*value
@@ -62,11 +65,14 @@ func (r *resolver) updateContextLocked(ctx *context.Context) {
 		r.ctx, r.ctxCancel = nil, nil
 	} else {
 		// start resolver with new context
+		exitedCh := make(chan struct{})
+		waitCh := r.exitedCh
+		r.exitedCh = exitedCh
 		r.err = nil
 		r.idle, r.exited = false, false
 		r.ctx, r.ctxCancel = context.WithCancel(*ctx)
 		hnd := &resolverHandler{r: r, ctx: r.ctx}
-		go hnd.executeResolver()
+		go hnd.executeResolver(r.ctx, exitedCh, waitCh)
 	}
 }
 

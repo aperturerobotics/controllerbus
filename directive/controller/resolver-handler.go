@@ -87,7 +87,16 @@ func (r *resolverHandler) ClearValues() []uint32 {
 }
 
 // executeResolver is the goroutine to execute the resolver.
-func (r *resolverHandler) executeResolver() {
+func (r *resolverHandler) executeResolver(ctx context.Context, exitedCh chan<- struct{}, waitCh <-chan struct{}) {
+	defer close(exitedCh)
+	if waitCh != nil {
+		select {
+		case <-ctx.Done():
+			return
+		case <-waitCh:
+		}
+	}
+
 	err := r.r.res.Resolve(r.ctx, r)
 
 	r.r.di.c.mtx.Lock()
