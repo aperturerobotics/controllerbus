@@ -62,6 +62,7 @@ func (r *resolver) updateContextLocked(ctx *context.Context) {
 		r.ctx, r.ctxCancel = nil, nil
 	} else {
 		// start resolver with new context
+		r.err = nil
 		r.idle, r.exited = false, false
 		r.ctx, r.ctxCancel = context.WithCancel(*ctx)
 		hnd := &resolverHandler{r: r, ctx: r.ctx}
