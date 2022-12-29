@@ -20,6 +20,23 @@ func ExecOneOff(
 	returnIfIdle bool,
 	valDisposeCallback func(),
 ) (directive.AttachedValue, directive.Reference, error) {
+	return ExecOneOffWithFilter(ctx, bus, dir, returnIfIdle, valDisposeCallback, nil)
+}
+
+// ExecOneOffWithFilter executes a one-off directive with a filter cb.
+//
+// Waits until the callback returns true before returning a value.
+// If returnIfIdle is set, returns nil, nil, nil if idle.
+// If any resolvers return an error, returns that error.
+// If err != nil, ref == nil.
+func ExecOneOffWithFilter(
+	ctx context.Context,
+	bus Bus,
+	dir directive.Directive,
+	returnIfIdle bool,
+	valDisposeCallback func(),
+	filterCb func(val directive.AttachedValue) (bool, error),
+) (directive.AttachedValue, directive.Reference, error) {
 	// mtx, bcast guard these variables
 	var mtx sync.Mutex
 	var bcast broadcast.Broadcast
@@ -33,10 +50,19 @@ func ExecOneOff(
 		NewCallbackHandler(
 			func(v directive.AttachedValue) {
 				mtx.Lock()
-				if val == nil {
-					val = v
+				if val == nil && resErr == nil {
+					ok := filterCb == nil
+					if !ok {
+						ok, resErr = filterCb(v)
+						if resErr != nil {
+							bcast.Broadcast()
+						}
+					}
+					if ok && resErr == nil {
+						val = v
+						bcast.Broadcast()
+					}
 				}
-				bcast.Broadcast()
 				mtx.Unlock()
 			},
 			nil,
