@@ -31,6 +31,9 @@ type directiveInstance struct {
 	// ident contains the identifier string
 	// unset until GetDirectiveIdent is called for the first time.
 	ident atomic.Pointer[string]
+	// ready indicates we called the initial set of handlers.
+	// until ready=false, the directive instance is NOT idle.
+	ready bool
 
 	// c.mtx guards below fields
 
@@ -395,7 +398,7 @@ func (i *directiveInstance) AddIdleCallback(cb directive.IdleCallback) func() {
 	i.c.mtx.Lock()
 	rel := newCallback(cb)
 	i.idles = append(i.idles, rel)
-	isIdle := i.countRunningResolversLocked() == 0
+	isIdle := i.ready && i.countRunningResolversLocked() == 0
 	var errs []error
 	if isIdle {
 		errs = i.getResolverErrsLocked()

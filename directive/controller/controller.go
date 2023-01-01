@@ -101,13 +101,21 @@ func (c *Controller) AddDirective(
 			resolvers = append(resolvers, nres...)
 		}
 	}
+
 	// attach returned resolvers while mtx is locked
 	c.mtx.Lock() // note: unlocked in Defer above
+
+	di.ready = true
 	if !di.released.Load() {
 		for _, res := range resolvers {
 			di.attachStartResolverLocked(res)
 		}
+		if di.countRunningResolversLocked() == 0 {
+			// mark idle now that ready=true
+			di.handleIdleLocked()
+		}
 	}
+
 	return di, diRef, nil
 }
 
