@@ -61,7 +61,7 @@ func (r *resolver) updateContextLocked(ctx *context.Context) {
 		if !r.idle {
 			r.markIdleLocked()
 		}
-		r.exited = true
+		r.idle, r.exited = true, true
 		r.ctx, r.ctxCancel = nil, nil
 	} else {
 		// start resolver with new context
