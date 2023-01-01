@@ -183,9 +183,9 @@ func (i *directiveInstance) removeReferenceLocked(ref *dirRef) {
 		if iref == ref {
 			i.refs = append(i.refs[:idx], i.refs[idx+1:]...)
 			ref.released.Store(true)
-			onlyWeakRefs := len(i.refs) != 0 && i.refs[len(i.refs)-1].weak
-			if onlyWeakRefs || len(i.refs) == 0 {
-				i.handleUnreferencedLocked(onlyWeakRefs)
+			anyNonWeakRefs := len(i.refs) != 0 && !i.refs[len(i.refs)-1].weak
+			if !anyNonWeakRefs {
+				i.handleUnreferencedLocked()
 			}
 			break
 		}
@@ -230,8 +230,8 @@ func (i *directiveInstance) anyValuesLocked() bool {
 	return false
 }
 
-// handleUnreferencedLocked handles when we reach 0 references while i.c.mtx is locked.
-func (i *directiveInstance) handleUnreferencedLocked(anyWeakRefs bool) {
+// handleUnreferencedLocked handles when we reach 0 non-weak references while i.c.mtx is locked.
+func (i *directiveInstance) handleUnreferencedLocked() {
 	if i.released.Load() || i.destroyTimer != nil {
 		return
 	}
@@ -253,16 +253,6 @@ func (i *directiveInstance) handleUnreferencedLocked(anyWeakRefs bool) {
 			i.c.mtx.Unlock()
 		})
 		i.destroyTimer = destroyTimer
-
-		// cancel all resolvers that have no values
-		// ... but only if there are not any "weak" references
-		if !anyWeakRefs {
-			for _, res := range i.res {
-				if len(res.vals) == 0 {
-					res.updateContextLocked(nil)
-				}
-			}
-		}
 	}
 }
 
