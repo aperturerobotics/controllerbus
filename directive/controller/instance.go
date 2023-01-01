@@ -309,14 +309,13 @@ func (i *directiveInstance) addValueLocked(res *resolver, val directive.Value) (
 
 	if maxVals != 0 && len(res.vals) >= maxVals {
 		// we have enough values, reaching the maxVals cap
-		// mark all resolvers as idle (so ExecOneOff returns)
+		// mark resolvers with values as idle
 		// cancel contexts for resolvers with no values
-		runningResolvers := i.countRunningResolversLocked()
-		if runningResolvers != 0 {
-			for _, res := range i.res {
-				res.idle = true
+		for _, res := range i.res {
+			res.markIdleLocked()
+			if len(res.vals) == 0 {
+				res.updateContextLocked(nil)
 			}
-			i.handleIdleLocked()
 		}
 	}
 
