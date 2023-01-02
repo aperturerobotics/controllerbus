@@ -31,12 +31,12 @@ type directiveInstance struct {
 	// ident contains the identifier string
 	// unset until GetDirectiveIdent is called for the first time.
 	ident atomic.Pointer[string]
-	// ready indicates we called the initial set of handlers.
-	// until ready=false, the directive instance is NOT idle.
-	ready bool
 
 	// c.mtx guards below fields
 
+	// ready indicates we called the initial set of handlers.
+	// until ready=false, the directive instance is NOT idle.
+	ready bool
 	// destroyTimer is the timer to destroy after 0 refs
 	destroyTimer *time.Timer
 	// rels contains all release callbacks
@@ -56,6 +56,8 @@ type directiveInstance struct {
 	// valCtr is the ID of the next value
 	// note: the first value ID is 1, not 0
 	valCtr uint32
+	// full indicates we have more than MaxValueCap values.
+	full bool
 }
 
 // newDirectiveInstance constructs a new directive instance with an initial reference.
@@ -230,6 +232,15 @@ func (i *directiveInstance) anyValuesLocked() bool {
 	return false
 }
 
+// countValuesLocked counts the number of values attached to the resolvers.
+func (i *directiveInstance) countValuesLocked() int {
+	var count int
+	for _, res := range i.res {
+		count += len(res.vals)
+	}
+	return count
+}
+
 // handleUnreferencedLocked handles when we reach 0 non-weak references while i.c.mtx is locked.
 func (i *directiveInstance) handleUnreferencedLocked() {
 	if i.released.Load() || i.destroyTimer != nil {
@@ -253,6 +264,68 @@ func (i *directiveInstance) handleUnreferencedLocked() {
 			i.c.mtx.Unlock()
 		})
 		i.destroyTimer = destroyTimer
+	}
+}
+
+// handleFullLocked handles reaching the max value cap.
+func (i *directiveInstance) handleFullLocked() {
+	// already full
+	if i.full {
+		return
+	}
+
+	var becameIdle bool
+	i.full = true
+	// we have enough values, reaching the maxVals cap
+	// mark resolvers with values as idle
+	// cancel non-idle resolvers with no values
+	for _, res := range i.res {
+		if res.idle {
+			continue
+		}
+		if !res.exited && len(res.vals) == 0 {
+			res.updateContextLocked(nil)
+		} else {
+			res.idle = true
+			becameIdle = true
+		}
+	}
+	// check if the directive became idle
+	if becameIdle {
+		i.handleIdleLocked()
+	}
+}
+
+// handleNotFullLocked handles going below the max value cap.
+func (i *directiveInstance) handleNotFullLocked() {
+	if !i.full {
+		return
+	}
+
+	i.full = false
+	// restart resolvers that exited with errors and/or with no values
+	for _, res := range i.res {
+		// skip if running OR if it exited with values and no error.
+		if !res.exited || (len(res.vals) != 0 && res.err == nil) {
+			continue
+		}
+		res.updateContextLocked(&i.ctx)
+	}
+}
+
+// checkFullLocked checks if we have reached the maximum value cap.
+func (i *directiveInstance) checkFullLocked() {
+	maxVals := i.valueOpts.MaxValueCount
+	if maxVals == 0 {
+		return
+	}
+
+	valueCount := i.countValuesLocked()
+	isFull := valueCount >= maxVals
+	if isFull {
+		i.handleFullLocked()
+	} else {
+		i.handleNotFullLocked()
 	}
 }
 
@@ -287,7 +360,7 @@ func (i *directiveInstance) removeIdleCallbackLocked(cb *callback[directive.Idle
 // addValueLocked adds a value to the instance while i.c.mtx is locked
 func (i *directiveInstance) addValueLocked(res *resolver, val directive.Value) (uint32, bool) {
 	maxVals := i.valueOpts.MaxValueCount
-	if maxVals != 0 && i.valueOpts.MaxValueHardCap && len(res.vals) >= maxVals {
+	if maxVals != 0 && i.countValuesLocked() >= maxVals && i.valueOpts.MaxValueHardCap {
 		return 0, false
 	}
 
@@ -306,26 +379,7 @@ func (i *directiveInstance) addValueLocked(res *resolver, val directive.Value) (
 		}
 	}
 	i.callCallbacksLocked(cbs...)
-
-	if maxVals != 0 && len(res.vals) >= maxVals {
-		idleBefore := i.countRunningResolversLocked() == 0
-		if !idleBefore {
-			// we have enough values, reaching the maxVals cap
-			// mark resolvers with values as idle
-			// cancel non-idle resolvers with no values
-			for _, res := range i.res {
-				if !res.exited && !res.idle && len(res.vals) == 0 {
-					res.updateContextLocked(nil)
-				} else {
-					res.idle = true
-				}
-			}
-			// check if the directive became idle
-			if idleAfter := i.countRunningResolversLocked() == 0; idleAfter {
-				i.handleIdleLocked()
-			}
-		}
-	}
+	i.checkFullLocked()
 
 	return vid, true
 }
@@ -336,33 +390,28 @@ func (i *directiveInstance) removeValueLocked(res *resolver, valID uint32) (dire
 		val := res.vals[idx]
 		if val.id == valID {
 			res.vals = append(res.vals[:idx], res.vals[idx+1:]...)
-			i.onValueRemovedLocked(res, val)
+			i.onValuesRemovedLocked(res, val)
 			return val.val, true
 		}
 	}
 	return nil, false
 }
 
-// onValueRemovedLocked is called by removeValueLocked after removing an item.
-func (i *directiveInstance) onValueRemovedLocked(res *resolver, val *value) {
-	maxVals := i.valueOpts.MaxValueCount
-	if maxVals != 0 && len(res.vals)+1 == maxVals {
-		// restart resolvers
-		for _, res := range i.res {
-			res.updateContextLocked(&i.ctx)
-		}
-	}
-
+// onValuesRemovedLocked is called after removing values from a resolver.
+func (i *directiveInstance) onValuesRemovedLocked(res *resolver, vals ...*value) {
 	var cbs []func()
-	for _, ref := range i.refs {
-		ref := ref
-		if !ref.released.Load() && ref.h != nil {
-			cbs = append(cbs, func() {
-				ref.h.HandleValueRemoved(i, val)
-			})
+	for _, val := range vals {
+		for _, ref := range i.refs {
+			ref := ref
+			if !ref.released.Load() && ref.h != nil {
+				cbs = append(cbs, func() {
+					ref.h.HandleValueRemoved(i, val)
+				})
+			}
 		}
 	}
 	i.callCallbacksLocked(cbs...)
+	i.checkFullLocked()
 }
 
 // AddDisposeCallback adds a callback that will be called when the instance
@@ -562,20 +611,9 @@ func (i *directiveInstance) removeResolverLocked(resIdx int, rres *resolver) {
 	// cancel the resolver
 	rres.updateContextLocked(nil)
 	// remove values associated with the resolver
-	var cbs []func()
-	for _, val := range rres.vals {
-		val := val
-		for _, ref := range i.refs {
-			ref := ref
-			if ref.h != nil && !ref.released.Load() {
-				cbs = append(cbs, func() {
-					ref.h.HandleValueRemoved(i, val)
-				})
-			}
-		}
-	}
-	i.callCallbacksLocked(cbs...)
+	vals := rres.vals
 	rres.vals = nil
+	i.onValuesRemovedLocked(rres, vals...)
 }
 
 // callCallbacksLocked calls the refsCbs list or adds to queue

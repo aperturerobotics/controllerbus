@@ -58,11 +58,7 @@ func (r *resolverHandler) CountValues(allResolvers bool) int {
 	r.r.di.c.mtx.Lock()
 	defer r.r.di.c.mtx.Unlock()
 	if allResolvers {
-		var count int
-		for _, res := range r.r.di.res {
-			count += len(res.vals)
-		}
-		return count
+		return r.r.di.countValuesLocked()
 	} else {
 		return len(r.r.vals)
 	}
@@ -76,13 +72,13 @@ func (r *resolverHandler) ClearValues() []uint32 {
 	if r.r.ctx != r.ctx {
 		return nil
 	}
-	removed := make([]uint32, len(r.r.vals))
-	for i := len(r.r.vals) - 1; i >= 0; i-- {
-		val := r.r.vals[i]
-		removed[i] = val.id
-		r.r.vals = r.r.vals[:i]
-		r.r.di.onValueRemovedLocked(r.r, val)
+	vals := r.r.vals
+	removed := make([]uint32, len(vals))
+	for i := range vals {
+		removed[i] = vals[i].id
 	}
+	r.r.vals = nil
+	r.r.di.onValuesRemovedLocked(r.r, vals...)
 	return removed
 }
 
