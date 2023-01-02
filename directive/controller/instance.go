@@ -213,7 +213,7 @@ func (i *directiveInstance) handleReferencedLocked(weakRef bool) {
 func (i *directiveInstance) countRunningResolversLocked() int {
 	var count int
 	for _, res := range i.res {
-		if !res.idle && res.ctx != nil && !res.exited {
+		if !res.idle && !res.exited {
 			count++
 		}
 	}
@@ -308,13 +308,21 @@ func (i *directiveInstance) addValueLocked(res *resolver, val directive.Value) (
 	i.callCallbacksLocked(cbs...)
 
 	if maxVals != 0 && len(res.vals) >= maxVals {
-		// we have enough values, reaching the maxVals cap
-		// mark resolvers with values as idle
-		// cancel contexts for resolvers with no values
-		for _, res := range i.res {
-			res.markIdleLocked()
-			if len(res.vals) == 0 {
-				res.updateContextLocked(nil)
+		idleBefore := i.countRunningResolversLocked() == 0
+		if !idleBefore {
+			// we have enough values, reaching the maxVals cap
+			// mark resolvers with values as idle
+			// cancel non-idle resolvers with no values
+			for _, res := range i.res {
+				if !res.exited && !res.idle && len(res.vals) == 0 {
+					res.updateContextLocked(nil)
+				} else {
+					res.idle = true
+				}
+			}
+			// check if the directive became idle
+			if idleAfter := i.countRunningResolversLocked() == 0; idleAfter {
+				i.handleIdleLocked()
 			}
 		}
 	}

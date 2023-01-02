@@ -80,6 +80,7 @@ func (r *resolver) updateContextLocked(ctx *context.Context) {
 func (r *resolver) markIdleLocked() {
 	if !r.idle {
 		r.idle = true
+		// if just became idle:
 		if r.di.countRunningResolversLocked() == 0 {
 			r.di.handleIdleLocked()
 		}
