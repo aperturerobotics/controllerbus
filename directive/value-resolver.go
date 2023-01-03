@@ -15,6 +15,13 @@ func NewValueResolver[T any](vals []T) *ValueResolver[T] {
 
 // Resolve resolves the values, emitting them to the handler.
 func (r *ValueResolver[T]) Resolve(ctx context.Context, handler ResolverHandler) error {
+	existingVals := handler.CountValues(false)
+	if existingVals == len(r.vals) {
+		return nil
+	}
+	if existingVals != 0 {
+		handler.ClearValues()
+	}
 	for _, value := range r.vals {
 		_, _ = handler.AddValue(value)
 	}
