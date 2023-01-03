@@ -68,13 +68,13 @@ func ExecOneOffWithFilter(
 			nil,
 			func() {
 				mtx.Lock()
-				if !idle {
-					idle = true
+				if resErr != nil && !idle {
+					resErr = ErrDirectiveDisposed
 					bcast.Broadcast()
 				}
 				mtx.Unlock()
 				if valDisposeCallback != nil {
-					go valDisposeCallback()
+					valDisposeCallback()
 				}
 			},
 		),
