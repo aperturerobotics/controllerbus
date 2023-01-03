@@ -303,13 +303,11 @@ func (i *directiveInstance) handleNotFullLocked() {
 	}
 
 	i.full = false
-	// restart resolvers that exited with errors and/or with no values
+	// restart resolvers that exited with errors and/or were killed
 	for _, res := range i.res {
-		// skip if running OR if it exited with values and no error.
-		if !res.exited || (len(res.vals) != 0 && res.err == nil) {
-			continue
+		if (res.exited && res.err != nil) || res.killed {
+			res.updateContextLocked(&i.ctx)
 		}
-		res.updateContextLocked(&i.ctx)
 	}
 }
 
@@ -513,8 +511,10 @@ func (i *directiveInstance) callHandlerUnlocked(handler *handler) ([]*resolver, 
 // attachStartResolverLocked attaches and starts a resolver while i.c.mtx is locked
 func (i *directiveInstance) attachStartResolverLocked(res *resolver) {
 	i.res = append(i.res, res)
-	// start resolver if len(refs) != 0
-	if len(i.refs) != 0 {
+	if i.full {
+		res.idle = true
+		res.updateContextLocked(nil)
+	} else {
 		res.updateContextLocked(&i.ctx)
 	}
 }

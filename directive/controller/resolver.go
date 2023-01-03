@@ -30,6 +30,8 @@ type resolver struct {
 	idle bool
 	// exited indicates the resolver has exited
 	exited bool
+	// killed indicates the resolver was canceled
+	killed bool
 }
 
 // newResolver constructs a new resolver.
@@ -46,7 +48,8 @@ func newResolver(di *directiveInstance, hnd *handler, res directive.Resolver) *r
 //
 // if ctx is nil, stops the resolver.
 func (r *resolver) updateContextLocked(ctx *context.Context) {
-	if ctx != nil && r.ctx != nil && !r.exited {
+	// keep the resolver running if it hasn't exited or been killed yet.
+	if ctx != nil && r.ctx != nil && !r.exited && !r.killed {
 		select {
 		case <-r.ctx.Done():
 		default:
@@ -55,6 +58,7 @@ func (r *resolver) updateContextLocked(ctx *context.Context) {
 		}
 	}
 	if r.ctxCancel != nil {
+		r.killed = true
 		r.ctxCancel()
 	}
 	if ctx == nil {
@@ -69,7 +73,7 @@ func (r *resolver) updateContextLocked(ctx *context.Context) {
 		waitCh := r.exitedCh
 		r.exitedCh = exitedCh
 		r.err = nil
-		r.idle, r.exited = false, false
+		r.idle, r.exited, r.killed = false, false, false
 		r.ctx, r.ctxCancel = context.WithCancel(*ctx)
 		hnd := &resolverHandler{r: r, ctx: r.ctx}
 		go hnd.executeResolver(r.ctx, exitedCh, waitCh)
