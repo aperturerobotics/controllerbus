@@ -172,8 +172,8 @@ func (i *directiveInstance) addReferenceLocked(cb directive.ReferenceHandler, we
 			}
 		}
 	}
-	if firstRef || firstNonWeakRef {
-		i.handleReferencedLocked(weakRef)
+	if !weakRef && (firstRef || firstNonWeakRef) {
+		i.handleReferencedLocked()
 	}
 	i.callCallbacksLocked(cbs...)
 	return ref
@@ -194,20 +194,15 @@ func (i *directiveInstance) removeReferenceLocked(ref *dirRef) {
 	}
 }
 
-// handleReferencedLocked handles when we reach 1 reference while i.c.mtx is locked
-// also called when we reach 1 non-weak reference.
-func (i *directiveInstance) handleReferencedLocked(weakRef bool) {
+// handleReferencedLocked handles when we reach 1 non-weak reference while i.c.mtx is locked
+func (i *directiveInstance) handleReferencedLocked() {
 	if i.released.Load() {
 		return
 	}
-	// cancel dispose callback, but only if this isn't a "weak" ref
-	if !weakRef && i.destroyTimer != nil {
+	// cancel dispose callback
+	if i.destroyTimer != nil {
 		_ = i.destroyTimer.Stop()
 		i.destroyTimer = nil
-	}
-	// start all resolvers
-	for _, res := range i.res {
-		res.updateContextLocked(&i.ctx)
 	}
 }
 
@@ -243,14 +238,14 @@ func (i *directiveInstance) countValuesLocked() int {
 
 // handleUnreferencedLocked handles when we reach 0 non-weak references while i.c.mtx is locked.
 func (i *directiveInstance) handleUnreferencedLocked() {
-	if i.released.Load() || i.destroyTimer != nil {
+	if i.released.Load() {
 		return
 	}
 	disposeDur := i.valueOpts.UnrefDisposeDur
 	disposeEmptyImmediate := i.valueOpts.UnrefDisposeEmptyImmediate
 	if disposeDur == 0 || (disposeEmptyImmediate && !i.anyValuesLocked()) {
 		i.removeLocked(-1)
-	} else {
+	} else if i.destroyTimer != nil {
 		var destroyTimer *time.Timer
 		destroyTimer = time.AfterFunc(disposeDur, func() {
 			if i.released.Load() {
@@ -284,6 +279,7 @@ func (i *directiveInstance) handleFullLocked() {
 			continue
 		}
 		if !res.exited && len(res.vals) == 0 {
+			res.stopped = true
 			res.updateContextLocked(nil)
 		} else {
 			res.idle = true
@@ -305,7 +301,7 @@ func (i *directiveInstance) handleNotFullLocked() {
 	i.full = false
 	// restart resolvers that exited with errors and/or were killed
 	for _, res := range i.res {
-		if (res.exited && res.err != nil) || res.killed {
+		if (res.exited && res.err != nil) || res.stopped {
 			res.updateContextLocked(&i.ctx)
 		}
 	}
@@ -450,7 +446,7 @@ func (i *directiveInstance) AddIdleCallback(cb directive.IdleCallback) func() {
 	}
 	i.c.mtx.Unlock()
 	if isIdle {
-		go cb(errs)
+		cb(errs)
 	}
 	return func() {
 		if !rel.released.Swap(true) {
@@ -631,6 +627,7 @@ func (i *directiveInstance) callCallbacksLocked(cbs ...func()) {
 	for len(cbs) != 0 {
 		i.c.mtx.Unlock()
 		for _, cb := range cbs {
+			cb := cb
 			func() {
 				defer func() {
 					if rerr := recover(); rerr != nil {
