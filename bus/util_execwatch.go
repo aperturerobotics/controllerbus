@@ -2,6 +2,7 @@ package bus
 
 import (
 	"github.com/aperturerobotics/controllerbus/directive"
+	"github.com/aperturerobotics/util/ccontainer"
 )
 
 // ExecOneOffWatchCh executes a one-off directive and watches for changes.
@@ -37,4 +38,33 @@ func ExecOneOffWatchCh(
 		),
 	)
 	return valCh, ref, err
+}
+
+// ExecOneOffWatch executes a one-off directive and watches for changes.
+// Continues to watch for changes until the directive is released.
+func ExecOneOffWatch(
+	b Bus,
+	dir directive.Directive,
+) (*ccontainer.CContainer[*directive.AttachedValue], directive.Reference, error) {
+	ctr := ccontainer.NewCContainer[*directive.AttachedValue](nil)
+	_, ref, err := b.AddDirective(
+		dir,
+		NewCallbackHandler(
+			func(av directive.AttachedValue) {
+				ctr.SetValue(&av)
+			},
+			func(av directive.AttachedValue) {
+				ctr.SwapValue(func(val *directive.AttachedValue) *directive.AttachedValue {
+					if val != nil && (*val).GetValueID() == av.GetValueID() {
+						val = nil
+					}
+					return val
+				})
+			},
+			func() {
+				ctr.SetValue(nil)
+			},
+		),
+	)
+	return ctr, ref, err
 }

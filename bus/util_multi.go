@@ -78,11 +78,13 @@ func ExecCollectValues(
 	for {
 		mtx.Lock()
 		if resErr != nil {
+			vals, resErr := vals, resErr // copy
 			mtx.Unlock()
 			ref.Release()
 			return vals, nil, resErr
 		}
 		if idle {
+			vals, ref := vals, ref // copy
 			mtx.Unlock()
 			return vals, ref, nil
 		}

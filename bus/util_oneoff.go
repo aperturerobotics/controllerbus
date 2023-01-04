@@ -108,21 +108,24 @@ func ExecOneOffWithFilter(
 	for {
 		mtx.Lock()
 		if val != nil {
+			val, ref := val, ref // copy
 			mtx.Unlock()
 			return val, ref, nil
 		}
 		if resErr != nil || (idle && returnIfIdle) {
+			err := resErr
 			mtx.Unlock()
 			ref.Release()
-			return nil, nil, resErr
+			return nil, nil, err
 		}
+		waitCh := bcast.GetWaitCh()
 		mtx.Unlock()
 
 		select {
 		case <-ctx.Done():
 			ref.Release()
 			return nil, nil, context.Canceled
-		case <-bcast.GetWaitCh():
+		case <-waitCh:
 		}
 	}
 }

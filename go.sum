@@ -6,6 +6,8 @@ github.com/aperturerobotics/starpc v0.16.0 h1:5ildwMsYteXqWPArkHpDxwlUZeQJNc8mVz
 github.com/aperturerobotics/starpc v0.16.0/go.mod h1:i0XdPBwDzqWt/TiUD5OBplVzKKJsYvPeNQd9ZFRFkFs=
 github.com/aperturerobotics/util v0.0.0-20221219050225-3081033d019b h1:6km5Nc3YlfjT45JRSSfLPXkgUUms+7zV1mbBkU0KZzo=
 github.com/aperturerobotics/util v0.0.0-20221219050225-3081033d019b/go.mod h1:up2AYcp62UgmFVTm7QhM4USXAKGv73gpb5dHraKmzxQ=
+github.com/aperturerobotics/util v0.0.0-20230104042253-9c130514e665 h1:dKm5BdoJfgAShPyDd94n0QNugEkFTADmaav3RosPA1A=
+github.com/aperturerobotics/util v0.0.0-20230104042253-9c130514e665/go.mod h1:up2AYcp62UgmFVTm7QhM4USXAKGv73gpb5dHraKmzxQ=
 github.com/blang/semver v3.5.1+incompatible h1:cQNTCjp13qL8KC3Nbxr/y2Bqb63oX6wdnnjpJbkM4JQ=
 github.com/blang/semver v3.5.1+incompatible/go.mod h1:kRBLl5iJ+tD4TcOOxsy/0fnwebNt5EWlYSAyrTnjyyk=
 github.com/cenkalti/backoff v2.2.1+incompatible h1:tNowT99t7UNflLxfYYSlKYsBpXdEet03Pg2g16Swow4=
