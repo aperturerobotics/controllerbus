@@ -73,6 +73,10 @@ export const Placeholder = {
     return obj;
   },
 
+  create<I extends Exact<DeepPartial<Placeholder>, I>>(base?: I): Placeholder {
+    return Placeholder.fromPartial(base ?? {});
+  },
+
   fromPartial<I extends Exact<DeepPartial<Placeholder>, I>>(_: I): Placeholder {
     const message = createBasePlaceholder();
     return message;

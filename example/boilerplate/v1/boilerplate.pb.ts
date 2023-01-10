@@ -92,6 +92,10 @@ export const Boilerplate = {
     return obj;
   },
 
+  create<I extends Exact<DeepPartial<Boilerplate>, I>>(base?: I): Boilerplate {
+    return Boilerplate.fromPartial(base ?? {});
+  },
+
   fromPartial<I extends Exact<DeepPartial<Boilerplate>, I>>(object: I): Boilerplate {
     const message = createBaseBoilerplate();
     message.messageText = object.messageText ?? "";
@@ -169,6 +173,10 @@ export const BoilerplateResult = {
     const obj: any = {};
     message.printedLen !== undefined && (obj.printedLen = Math.round(message.printedLen));
     return obj;
+  },
+
+  create<I extends Exact<DeepPartial<BoilerplateResult>, I>>(base?: I): BoilerplateResult {
+    return BoilerplateResult.fromPartial(base ?? {});
   },
 
   fromPartial<I extends Exact<DeepPartial<BoilerplateResult>, I>>(object: I): BoilerplateResult {

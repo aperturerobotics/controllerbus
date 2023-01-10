@@ -97,6 +97,10 @@ export const Config = {
     return obj;
   },
 
+  create<I extends Exact<DeepPartial<Config>, I>>(base?: I): Config {
+    return Config.fromPartial(base ?? {});
+  },
+
   fromPartial<I extends Exact<DeepPartial<Config>, I>>(object: I): Config {
     const message = createBaseConfig();
     message.enableExecController = object.enableExecController ?? false;
@@ -167,6 +171,10 @@ export const GetBusInfoRequest = {
   toJSON(_: GetBusInfoRequest): unknown {
     const obj: any = {};
     return obj;
+  },
+
+  create<I extends Exact<DeepPartial<GetBusInfoRequest>, I>>(base?: I): GetBusInfoRequest {
+    return GetBusInfoRequest.fromPartial(base ?? {});
   },
 
   fromPartial<I extends Exact<DeepPartial<GetBusInfoRequest>, I>>(_: I): GetBusInfoRequest {
@@ -269,6 +277,10 @@ export const GetBusInfoResponse = {
       obj.runningDirectives = [];
     }
     return obj;
+  },
+
+  create<I extends Exact<DeepPartial<GetBusInfoResponse>, I>>(base?: I): GetBusInfoResponse {
+    return GetBusInfoResponse.fromPartial(base ?? {});
   },
 
   fromPartial<I extends Exact<DeepPartial<GetBusInfoResponse>, I>>(object: I): GetBusInfoResponse {

@@ -84,6 +84,10 @@ export const ToyControllerConfig = {
     return obj;
   },
 
+  create<I extends Exact<DeepPartial<ToyControllerConfig>, I>>(base?: I): ToyControllerConfig {
+    return ToyControllerConfig.fromPartial(base ?? {});
+  },
+
   fromPartial<I extends Exact<DeepPartial<ToyControllerConfig>, I>>(object: I): ToyControllerConfig {
     const message = createBaseToyControllerConfig();
     message.name = object.name ?? "";

@@ -102,6 +102,10 @@ export const Info = {
     return obj;
   },
 
+  create<I extends Exact<DeepPartial<Info>, I>>(base?: I): Info {
+    return Info.fromPartial(base ?? {});
+  },
+
   fromPartial<I extends Exact<DeepPartial<Info>, I>>(object: I): Info {
     const message = createBaseInfo();
     message.id = object.id ?? "";

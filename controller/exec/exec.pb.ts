@@ -178,6 +178,10 @@ export const ExecControllerRequest = {
     return obj;
   },
 
+  create<I extends Exact<DeepPartial<ExecControllerRequest>, I>>(base?: I): ExecControllerRequest {
+    return ExecControllerRequest.fromPartial(base ?? {});
+  },
+
   fromPartial<I extends Exact<DeepPartial<ExecControllerRequest>, I>>(object: I): ExecControllerRequest {
     const message = createBaseExecControllerRequest();
     message.configSet = (object.configSet !== undefined && object.configSet !== null)
@@ -288,6 +292,10 @@ export const ExecControllerResponse = {
       (obj.controllerInfo = message.controllerInfo ? Info.toJSON(message.controllerInfo) : undefined);
     message.errorInfo !== undefined && (obj.errorInfo = message.errorInfo);
     return obj;
+  },
+
+  create<I extends Exact<DeepPartial<ExecControllerResponse>, I>>(base?: I): ExecControllerResponse {
+    return ExecControllerResponse.fromPartial(base ?? {});
   },
 
   fromPartial<I extends Exact<DeepPartial<ExecControllerResponse>, I>>(object: I): ExecControllerResponse {

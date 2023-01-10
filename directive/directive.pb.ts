@@ -112,6 +112,10 @@ export const DirectiveInfo = {
     return obj;
   },
 
+  create<I extends Exact<DeepPartial<DirectiveInfo>, I>>(base?: I): DirectiveInfo {
+    return DirectiveInfo.fromPartial(base ?? {});
+  },
+
   fromPartial<I extends Exact<DeepPartial<DirectiveInfo>, I>>(object: I): DirectiveInfo {
     const message = createBaseDirectiveInfo();
     message.name = object.name ?? "";
@@ -190,6 +194,10 @@ export const DirectiveState = {
     const obj: any = {};
     message.info !== undefined && (obj.info = message.info ? DirectiveInfo.toJSON(message.info) : undefined);
     return obj;
+  },
+
+  create<I extends Exact<DeepPartial<DirectiveState>, I>>(base?: I): DirectiveState {
+    return DirectiveState.fromPartial(base ?? {});
   },
 
   fromPartial<I extends Exact<DeepPartial<DirectiveState>, I>>(object: I): DirectiveState {
@@ -285,6 +293,10 @@ export const ProtoDebugValue = {
       obj.values = [];
     }
     return obj;
+  },
+
+  create<I extends Exact<DeepPartial<ProtoDebugValue>, I>>(base?: I): ProtoDebugValue {
+    return ProtoDebugValue.fromPartial(base ?? {});
   },
 
   fromPartial<I extends Exact<DeepPartial<ProtoDebugValue>, I>>(object: I): ProtoDebugValue {
