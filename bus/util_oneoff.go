@@ -10,8 +10,6 @@ import (
 
 // ExecOneOff executes a one-off directive.
 //
-// valDisposeCb is called if the value is no longer valid.
-// valDisposeCb might be called multiple times.
 // If returnIfIdle is set, returns nil, nil, nil if idle.
 // If any resolvers return an error, returns that error.
 // valDisposeCb is called if the value is no longer valid.

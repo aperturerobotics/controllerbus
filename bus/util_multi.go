@@ -3,6 +3,7 @@ package bus
 import (
 	"context"
 	"sync"
+	"sync/atomic"
 
 	"github.com/aperturerobotics/controllerbus/directive"
 	"github.com/aperturerobotics/util/broadcast"
@@ -13,41 +14,76 @@ import (
 //
 // Returns vals, ref, nil if the directive is idle.
 // Returns err if any resolver returns an error.
+// valDisposeCb is called if any of the values are no longer valid.
+// valDisposeCb might be called multiple times.
 // If err != nil, ref == nil.
 func ExecCollectValues(
 	ctx context.Context,
 	bus Bus,
 	dir directive.Directive,
-	valDisposeCallback func(),
+	valDisposeCb func(),
 ) ([]directive.Value, directive.Reference, error) {
+	var disposed atomic.Bool
+	valDisposeCallback := func() {
+		if !disposed.Swap(true) {
+			if valDisposeCb != nil {
+				valDisposeCb()
+			}
+		}
+	}
+
 	// mtx, bcast guard these variables
 	var mtx sync.Mutex
 	var bcast broadcast.Broadcast
 
 	var vals []directive.Value
+	var valIDs []uint32
 	var resErr error
 	var idle bool
+	var returned bool
 
 	di, ref, err := bus.AddDirective(
 		dir,
 		NewCallbackHandler(
 			func(v directive.AttachedValue) {
 				mtx.Lock()
-				vals = append(vals, v.GetValue())
-				bcast.Broadcast()
-				mtx.Unlock()
-			},
-			nil,
-			func() {
-				mtx.Lock()
-				if resErr != nil && !idle {
-					resErr = ErrDirectiveDisposed
+				if !returned {
+					vals = append(vals, v.GetValue())
+					valIDs = append(valIDs, v.GetValueID())
 					bcast.Broadcast()
 				}
 				mtx.Unlock()
-				if valDisposeCallback != nil {
-					valDisposeCallback()
+			},
+			func(v directive.AttachedValue) {
+				mtx.Lock()
+				id := v.GetValueID()
+				for i, valID := range valIDs {
+					if valID == id {
+						if returned {
+							defer valDisposeCallback()
+						} else {
+							valIDs[i] = valIDs[len(valIDs)-1]
+							valIDs = valIDs[:len(valIDs)-1]
+							vals[i] = vals[len(vals)-1]
+							vals[len(vals)-1] = nil
+							vals = vals[:len(vals)-1]
+						}
+						break
+					}
 				}
+				mtx.Unlock()
+			},
+			func() {
+				mtx.Lock()
+				if !returned {
+					if resErr == nil && !idle {
+						resErr = ErrDirectiveDisposed
+						bcast.Broadcast()
+					}
+				} else {
+					defer valDisposeCallback()
+				}
+				mtx.Unlock()
 			},
 		),
 	)
@@ -79,12 +115,14 @@ func ExecCollectValues(
 		mtx.Lock()
 		if resErr != nil {
 			vals, resErr := vals, resErr // copy
+			returned = true
 			mtx.Unlock()
 			ref.Release()
 			return vals, nil, resErr
 		}
 		if idle {
 			vals, ref := vals, ref // copy
+			returned = true
 			mtx.Unlock()
 			return vals, ref, nil
 		}
