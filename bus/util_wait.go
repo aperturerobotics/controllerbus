@@ -12,7 +12,7 @@ import (
 // If returnIfIdle is set, returns nil, nil, nil if idle.
 // If cb returns true, nil, returns the value.
 // If checkCb is nil, returns first value.
-func ExecWaitValue[T any](
+func ExecWaitValue[T directive.Value](
 	ctx context.Context,
 	b Bus,
 	dir directive.Directive,

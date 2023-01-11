@@ -17,12 +17,12 @@ import (
 // valDisposeCb is called if any of the values are no longer valid.
 // valDisposeCb might be called multiple times.
 // If err != nil, ref == nil.
-func ExecCollectValues(
+func ExecCollectValues[T directive.Value](
 	ctx context.Context,
 	bus Bus,
 	dir directive.Directive,
 	valDisposeCb func(),
-) ([]directive.Value, directive.Reference, error) {
+) ([]T, directive.Reference, error) {
 	var disposed atomic.Bool
 	valDisposeCallback := func() {
 		if !disposed.Swap(true) {
@@ -36,7 +36,7 @@ func ExecCollectValues(
 	var mtx sync.Mutex
 	var bcast broadcast.Broadcast
 
-	var vals []directive.Value
+	var vals []T
 	var valIDs []uint32
 	var resErr error
 	var idle bool
@@ -46,15 +46,23 @@ func ExecCollectValues(
 		dir,
 		NewCallbackHandler(
 			func(v directive.AttachedValue) {
+				val, valOk := v.GetValue().(T)
+				if !valOk {
+					return
+				}
 				mtx.Lock()
 				if !returned {
-					vals = append(vals, v.GetValue())
+					vals = append(vals, val)
 					valIDs = append(valIDs, v.GetValueID())
 					bcast.Broadcast()
 				}
 				mtx.Unlock()
 			},
 			func(v directive.AttachedValue) {
+				_, valOk := v.GetValue().(T)
+				if !valOk {
+					return
+				}
 				mtx.Lock()
 				id := v.GetValueID()
 				for i, valID := range valIDs {
@@ -65,7 +73,8 @@ func ExecCollectValues(
 							valIDs[i] = valIDs[len(valIDs)-1]
 							valIDs = valIDs[:len(valIDs)-1]
 							vals[i] = vals[len(vals)-1]
-							vals[len(vals)-1] = nil
+							var empty T
+							vals[len(vals)-1] = empty
 							vals = vals[:len(vals)-1]
 						}
 						break
