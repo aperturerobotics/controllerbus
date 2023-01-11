@@ -10,8 +10,12 @@ import (
 
 // ExecOneOff executes a one-off directive.
 //
+// valDisposeCb is called if the value is no longer valid.
+// valDisposeCb might be called multiple times.
 // If returnIfIdle is set, returns nil, nil, nil if idle.
 // If any resolvers return an error, returns that error.
+// valDisposeCb is called if the value is no longer valid.
+// valDisposeCb might be called multiple times.
 // If err != nil, ref == nil.
 func ExecOneOff(
 	ctx context.Context,
@@ -28,6 +32,8 @@ func ExecOneOff(
 // Waits until the callback returns true before returning a value.
 // If returnIfIdle is set, returns nil, nil, nil if idle.
 // If any resolvers return an error, returns that error.
+// valDisposeCb is called if the value is no longer valid.
+// valDisposeCb might be called multiple times.
 // If err != nil, ref == nil.
 func ExecOneOffWithFilter(
 	ctx context.Context,
@@ -65,7 +71,17 @@ func ExecOneOffWithFilter(
 				}
 				mtx.Unlock()
 			},
-			nil,
+			func(v directive.AttachedValue) {
+				if valDisposeCallback == nil {
+					return
+				}
+				mtx.Lock()
+				valueRemoved := val != nil && val.GetValueID() == v.GetValueID()
+				mtx.Unlock()
+				if valueRemoved {
+					valDisposeCallback()
+				}
+			},
 			func() {
 				mtx.Lock()
 				if resErr != nil && !idle {
