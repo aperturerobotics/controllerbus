@@ -9,7 +9,7 @@ replace (
 
 require (
 	github.com/aperturerobotics/starpc v0.16.1
-	github.com/aperturerobotics/util v0.0.0-20230110012415-f34944e875c8
+	github.com/aperturerobotics/util v0.0.0-20230111030137-bd066f6c8b4a
 	github.com/blang/semver v3.5.1+incompatible
 	github.com/cenkalti/backoff v2.2.1+incompatible
 	github.com/fsnotify/fsnotify v1.6.0
