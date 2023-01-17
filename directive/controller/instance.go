@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/aperturerobotics/controllerbus/directive"
+	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 )
 
@@ -492,7 +493,16 @@ func (i *directiveInstance) CloseIfUnreferenced(inclWeakRefs bool) bool {
 // callHandlerUnlocked calls the HandleDirective function while i.c.mtx is not locked.
 //
 // expects c.mtx to not be locked
-func (i *directiveInstance) callHandlerUnlocked(handler *handler) ([]*resolver, error) {
+func (i *directiveInstance) callHandlerUnlocked(handler *handler) (res []*resolver, err error) {
+	defer func() {
+		if rerr := recover(); rerr != nil {
+			perr := handlePanic(i.logger(), rerr)
+			if err == nil {
+				err = perr
+			}
+		}
+	}()
+
 	resolvers, err := handler.h.HandleDirective(i.ctx, i)
 	if err != nil {
 		return nil, err
@@ -631,15 +641,7 @@ func (i *directiveInstance) callCallbacksLocked(cbs ...func()) {
 			func() {
 				defer func() {
 					if rerr := recover(); rerr != nil {
-						debug.PrintStack()
-						e, eOk := rerr.(error)
-						le := i.logger()
-						if eOk {
-							le = le.WithError(e)
-						} else {
-							le = le.WithField("error", rerr)
-						}
-						le.Error("callback paniced")
+						_ = handlePanic(i.logger(), rerr)
 					}
 				}()
 				cb()
@@ -650,6 +652,17 @@ func (i *directiveInstance) callCallbacksLocked(cbs ...func()) {
 		i.refCbs = nil
 	}
 	i.callingRefCbs = false
+}
+
+// handlePanic converts a panic error into a regular error
+func handlePanic(le *logrus.Entry, panicErr interface{}) error {
+	debug.PrintStack()
+	e, eOk := panicErr.(error)
+	if !eOk {
+		e = errors.Errorf("%v", panicErr)
+	}
+	le.WithError(e).Error("callback panic")
+	return e
 }
 
 // logger returns the logger for this instance
