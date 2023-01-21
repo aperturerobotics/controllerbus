@@ -294,9 +294,9 @@ export const GetBusInfoResponse = {
 /** ControllerBusService is a generic controller bus lookup api. */
 export interface ControllerBusService {
   /** GetBusInfo requests information about the controller bus. */
-  GetBusInfo(request: GetBusInfoRequest): Promise<GetBusInfoResponse>;
+  GetBusInfo(request: GetBusInfoRequest, abortSignal?: AbortSignal): Promise<GetBusInfoResponse>;
   /** ExecController executes a controller configuration on the bus. */
-  ExecController(request: ExecControllerRequest): AsyncIterable<ExecControllerResponse>;
+  ExecController(request: ExecControllerRequest, abortSignal?: AbortSignal): AsyncIterable<ExecControllerResponse>;
 }
 
 export class ControllerBusServiceClientImpl implements ControllerBusService {
@@ -308,15 +308,15 @@ export class ControllerBusServiceClientImpl implements ControllerBusService {
     this.GetBusInfo = this.GetBusInfo.bind(this);
     this.ExecController = this.ExecController.bind(this);
   }
-  GetBusInfo(request: GetBusInfoRequest): Promise<GetBusInfoResponse> {
+  GetBusInfo(request: GetBusInfoRequest, abortSignal?: AbortSignal): Promise<GetBusInfoResponse> {
     const data = GetBusInfoRequest.encode(request).finish();
-    const promise = this.rpc.request(this.service, "GetBusInfo", data);
+    const promise = this.rpc.request(this.service, "GetBusInfo", data, abortSignal || undefined);
     return promise.then((data) => GetBusInfoResponse.decode(new _m0.Reader(data)));
   }
 
-  ExecController(request: ExecControllerRequest): AsyncIterable<ExecControllerResponse> {
+  ExecController(request: ExecControllerRequest, abortSignal?: AbortSignal): AsyncIterable<ExecControllerResponse> {
     const data = ExecControllerRequest.encode(request).finish();
-    const result = this.rpc.serverStreamingRequest(this.service, "ExecController", data);
+    const result = this.rpc.serverStreamingRequest(this.service, "ExecController", data, abortSignal || undefined);
     return ExecControllerResponse.decodeTransform(result);
   }
 }
@@ -349,13 +349,24 @@ export const ControllerBusServiceDefinition = {
 } as const;
 
 interface Rpc {
-  request(service: string, method: string, data: Uint8Array): Promise<Uint8Array>;
-  clientStreamingRequest(service: string, method: string, data: AsyncIterable<Uint8Array>): Promise<Uint8Array>;
-  serverStreamingRequest(service: string, method: string, data: Uint8Array): AsyncIterable<Uint8Array>;
+  request(service: string, method: string, data: Uint8Array, abortSignal?: AbortSignal): Promise<Uint8Array>;
+  clientStreamingRequest(
+    service: string,
+    method: string,
+    data: AsyncIterable<Uint8Array>,
+    abortSignal?: AbortSignal,
+  ): Promise<Uint8Array>;
+  serverStreamingRequest(
+    service: string,
+    method: string,
+    data: Uint8Array,
+    abortSignal?: AbortSignal,
+  ): AsyncIterable<Uint8Array>;
   bidirectionalStreamingRequest(
     service: string,
     method: string,
     data: AsyncIterable<Uint8Array>,
+    abortSignal?: AbortSignal,
   ): AsyncIterable<Uint8Array>;
 }
 

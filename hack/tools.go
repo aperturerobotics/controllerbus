@@ -4,6 +4,10 @@
 package hack
 
 import (
+	// _ imports the parent project.
+	// this forces the versions in hack to be at least the versions in ..
+	_ "github.com/aperturerobotics/controllerbus/core"
+
 	// _ imports protowrap
 	_ "github.com/aperturerobotics/goprotowrap/cmd/protowrap"
 	// _ imports protoc-gen-go
