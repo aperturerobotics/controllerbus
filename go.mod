@@ -16,7 +16,7 @@ require (
 	github.com/ghodss/yaml v1.0.0
 	github.com/mr-tron/base58 v1.2.0
 	github.com/pkg/errors v0.9.1
-	github.com/sergi/go-diff v1.2.0
+	github.com/sergi/go-diff v1.3.1
 	github.com/sirupsen/logrus v1.9.0
 	github.com/urfave/cli/v2 v2.23.7
 	github.com/valyala/fastjson v1.6.4
@@ -55,7 +55,7 @@ require (
 	github.com/xrash/smetrics v0.0.0-20201216005158-039620a65673 // indirect
 	golang.org/x/crypto v0.3.0 // indirect
 	golang.org/x/sys v0.4.0 // indirect
-	gopkg.in/yaml.v2 v2.2.8 // indirect
+	gopkg.in/yaml.v2 v2.4.0 // indirect
 	lukechampine.com/blake3 v1.1.8-0.20220321170924-7afca5966e5e // indirect
 	nhooyr.io/websocket v1.8.8-0.20221213223501-14fb98eba64e // indirect
 )
