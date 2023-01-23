@@ -17,7 +17,7 @@ require (
 	github.com/aperturerobotics/controllerbus v0.0.0-00010101000000-000000000000
 	github.com/aperturerobotics/goprotowrap v0.3.0
 	github.com/aperturerobotics/starpc v0.17.1
-	github.com/evanw/esbuild v0.17.3
+	github.com/evanw/esbuild v0.17.4
 )
 
 require (
