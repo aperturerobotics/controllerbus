@@ -53,7 +53,8 @@ func (a *CompilerArgs) BuildFlags() []cli.Flag {
 			Destination: &a.CodegenDir,
 		},
 		&cli.StringFlag{
-			Name:        "output, o",
+			Name:        "output",
+			Aliases:     []string{"o"},
 			Usage:       "write the output plugin to `PATH` - accepts {buildHash}",
 			EnvVars:     []string{"CONTROLLER_BUS_OUTPUT"},
 			Value:       a.OutputPath,

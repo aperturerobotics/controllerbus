@@ -15,7 +15,8 @@ type DaemonArgs struct {
 func (a *DaemonArgs) BuildFlags() []cli.Flag {
 	return []cli.Flag{
 		&cli.StringFlag{
-			Name:        "config, c",
+			Name:        "config",
+			Aliases:     []string{"c"},
 			Usage:       "path to configuration yaml file",
 			EnvVars:     []string{"CONTROLLER_BUS_CONFIG"},
 			Value:       "controllerbus_daemon.yaml",

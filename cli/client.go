@@ -64,7 +64,8 @@ func (a *ClientArgs) BuildCommands() []*cli.Command {
 			Action: a.RunExecController,
 			Flags: []cli.Flag{
 				&cli.StringFlag{
-					Name:        "config-set-file, f",
+					Name:        "config-set-file",
+					Aliases:     []string{"f"},
 					Usage:       "path to config set json or yaml file",
 					EnvVars:     []string{"CONTROLLER_BUS_EXEC_CONFIG_SET_FILE"},
 					Destination: &a.ExecConfigSetPath,
