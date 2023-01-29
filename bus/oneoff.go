@@ -21,7 +21,7 @@ func ExecOneOff(
 	dir directive.Directive,
 	returnIfIdle bool,
 	valDisposeCallback func(),
-) (directive.AttachedValue, directive.Reference, error) {
+) (directive.AttachedValue, directive.Instance, directive.Reference, error) {
 	return ExecOneOffWithFilter(ctx, bus, dir, returnIfIdle, valDisposeCallback, nil)
 }
 
@@ -40,7 +40,7 @@ func ExecOneOffWithFilter(
 	returnIfIdle bool,
 	valDisposeCallback func(),
 	filterCb func(val directive.AttachedValue) (bool, error),
-) (directive.AttachedValue, directive.Reference, error) {
+) (directive.AttachedValue, directive.Instance, directive.Reference, error) {
 	// mtx, bcast guard these variables
 	var mtx sync.Mutex
 	var bcast broadcast.Broadcast
@@ -97,7 +97,7 @@ func ExecOneOffWithFilter(
 		if ref != nil {
 			ref.Release()
 		}
-		return nil, nil, err
+		return nil, nil, nil, err
 	}
 
 	defer di.AddIdleCallback(func(errs []error) {
@@ -124,13 +124,13 @@ func ExecOneOffWithFilter(
 		if val != nil {
 			val, ref := val, ref // copy
 			mtx.Unlock()
-			return val, ref, nil
+			return val, di, ref, nil
 		}
 		if resErr != nil || (idle && returnIfIdle) {
 			err := resErr
 			mtx.Unlock()
 			ref.Release()
-			return nil, nil, err
+			return nil, nil, nil, err
 		}
 		waitCh := bcast.GetWaitCh()
 		mtx.Unlock()
@@ -138,7 +138,7 @@ func ExecOneOffWithFilter(
 		select {
 		case <-ctx.Done():
 			ref.Release()
-			return nil, nil, context.Canceled
+			return nil, nil, nil, context.Canceled
 		case <-waitCh:
 		}
 	}

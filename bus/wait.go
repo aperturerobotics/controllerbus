@@ -19,8 +19,8 @@ func ExecWaitValue[T directive.Value](
 	returnIfIdle bool,
 	valDisposeCallback func(),
 	checkCb func(val T) (bool, error),
-) (T, directive.Reference, error) {
-	av, avRef, err := ExecOneOffWithFilter(ctx, b, dir, returnIfIdle, valDisposeCallback, func(val directive.AttachedValue) (bool, error) {
+) (T, directive.Instance, directive.Reference, error) {
+	av, avDi, avRef, err := ExecOneOffWithFilter(ctx, b, dir, returnIfIdle, valDisposeCallback, func(val directive.AttachedValue) (bool, error) {
 		v, vOk := val.GetValue().(T)
 		if !vOk {
 			return false, nil
@@ -35,9 +35,9 @@ func ExecWaitValue[T directive.Value](
 			avRef.Release()
 		}
 		var empty T
-		return empty, nil, err
+		return empty, nil, nil, err
 	}
 
 	// note: type is already asserted above
-	return av.GetValue().(T), avRef, nil
+	return av.GetValue().(T), avDi, avRef, nil
 }

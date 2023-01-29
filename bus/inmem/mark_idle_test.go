@@ -58,7 +58,7 @@ func TestMarkIdle(t *testing.T) {
 	}
 	defer rel()
 
-	res, resRef, err := bus.ExecOneOff(ctx, b, &boilerplate_v1.Boilerplate{
+	res, _, resRef, err := bus.ExecOneOff(ctx, b, &boilerplate_v1.Boilerplate{
 		MessageText: "hello world",
 	}, true, nil)
 	if res != nil || resRef != nil {

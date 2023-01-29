@@ -15,9 +15,9 @@ import (
 func ExecOneOffWatchCh(
 	b Bus,
 	dir directive.Directive,
-) (<-chan directive.AttachedValue, directive.Reference, error) {
+) (<-chan directive.AttachedValue, directive.Instance, directive.Reference, error) {
 	valCh := make(chan directive.AttachedValue, 1)
-	_, ref, err := b.AddDirective(
+	di, ref, err := b.AddDirective(
 		dir,
 		NewCallbackHandler(
 			func(av directive.AttachedValue) {
@@ -41,7 +41,7 @@ func ExecOneOffWatchCh(
 			},
 		),
 	)
-	return valCh, ref, err
+	return valCh, di, ref, err
 }
 
 // ExecOneOffWatch executes a one-off directive and watches for changes.
@@ -49,9 +49,9 @@ func ExecOneOffWatchCh(
 func ExecOneOffWatch(
 	b Bus,
 	dir directive.Directive,
-) (*ccontainer.CContainer[*directive.AttachedValue], directive.Reference, error) {
+) (*ccontainer.CContainer[*directive.AttachedValue], directive.Instance, directive.Reference, error) {
 	ctr := ccontainer.NewCContainer[*directive.AttachedValue](nil)
-	_, ref, err := b.AddDirective(
+	di, ref, err := b.AddDirective(
 		dir,
 		NewCallbackHandler(
 			func(av directive.AttachedValue) {
@@ -70,7 +70,7 @@ func ExecOneOffWatch(
 			},
 		),
 	)
-	return ctr, ref, err
+	return ctr, di, ref, err
 }
 
 // ExecOneOffWatchRoutine executes a one-off directive and watches for changes.
@@ -84,12 +84,12 @@ func ExecOneOffWatchRoutine[T directive.Value](
 	b Bus,
 	dir directive.Directive,
 	cb func(ctx context.Context, value T) error,
-) (*routine.RoutineContainer, directive.Reference, error) {
+) (*routine.RoutineContainer, directive.Instance, directive.Reference, error) {
 	var mtx sync.Mutex
 	var currValueID uint32
 
 	routineCtr := routine.NewRoutineContainer()
-	_, ref, err := b.AddDirective(
+	di, ref, err := b.AddDirective(
 		dir,
 		NewCallbackHandler(
 			func(av directive.AttachedValue) {
@@ -121,5 +121,5 @@ func ExecOneOffWatchRoutine[T directive.Value](
 			},
 		),
 	)
-	return routineCtr, ref, err
+	return routineCtr, di, ref, err
 }

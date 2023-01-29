@@ -43,7 +43,7 @@ func TestExecControllerRequest(t *testing.T) {
 	}
 	sr.AddFactory(boilerplate.NewFactory(b))
 
-	_, csCtrlRef, err := bus.ExecOneOff(
+	_, _, csCtrlRef, err := bus.ExecOneOff(
 		ctx,
 		b,
 		resolver.NewLoadControllerWithConfig(&configset_controller.Config{}),

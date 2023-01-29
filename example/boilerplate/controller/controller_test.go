@@ -28,13 +28,13 @@ func TestBoilerplateController(t *testing.T) {
 	execDir := resolver.NewLoadControllerWithConfig(&Config{
 		ExampleField: "testing",
 	})
-	_, ctrlRef, err := bus.ExecOneOff(ctx, b, execDir, false, nil)
+	_, _, ctrlRef, err := bus.ExecOneOff(ctx, b, execDir, false, nil)
 	if err != nil {
 		t.Fatal(err.Error())
 	}
 	defer ctrlRef.Release()
 
-	res, resRef, err := bus.ExecOneOff(ctx, b, &boilerplate_v1.Boilerplate{
+	res, _, resRef, err := bus.ExecOneOff(ctx, b, &boilerplate_v1.Boilerplate{
 		MessageText: "hello world",
 	}, false, nil)
 	if err != nil {
