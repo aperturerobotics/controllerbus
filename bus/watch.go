@@ -1,8 +1,12 @@
 package bus
 
 import (
+	"context"
+	"sync"
+
 	"github.com/aperturerobotics/controllerbus/directive"
 	"github.com/aperturerobotics/util/ccontainer"
+	"github.com/aperturerobotics/util/routine"
 )
 
 // ExecOneOffWatchCh executes a one-off directive and watches for changes.
@@ -67,4 +71,55 @@ func ExecOneOffWatch(
 		),
 	)
 	return ctr, ref, err
+}
+
+// ExecOneOffWatchRoutine executes a one-off directive and watches for changes.
+//
+// The routine will not start until SetContext is called.
+// The routine will be restarted when the value changes.
+// If the routine returns nil or any error, the function returns that value.
+// If the routine context is canceled, return context.Canceled.
+// If the directive is disposed, the routine will return ErrDirectiveDisposed.
+func ExecOneOffWatchRoutine[T directive.Value](
+	b Bus,
+	dir directive.Directive,
+	cb func(ctx context.Context, value T) error,
+) (*routine.RoutineContainer, directive.Reference, error) {
+	var mtx sync.Mutex
+	var currValueID uint32
+
+	routineCtr := routine.NewRoutineContainer()
+	_, ref, err := b.AddDirective(
+		dir,
+		NewCallbackHandler(
+			func(av directive.AttachedValue) {
+				val, ok := av.GetValue().(T)
+				if !ok {
+					return
+				}
+				mtx.Lock()
+				currValueID = av.GetValueID()
+				routineCtr.SetRoutine(func(ctx context.Context) error {
+					return cb(ctx, val)
+				})
+				mtx.Unlock()
+			},
+			func(av directive.AttachedValue) {
+				mtx.Lock()
+				if currValueID == av.GetValueID() {
+					routineCtr.SetRoutine(nil)
+				}
+				mtx.Unlock()
+			},
+			func() {
+				mtx.Lock()
+				currValueID = 0
+				routineCtr.SetRoutine(func(ctx context.Context) error {
+					return ErrDirectiveDisposed
+				})
+				mtx.Unlock()
+			},
+		),
+	)
+	return routineCtr, ref, err
 }
