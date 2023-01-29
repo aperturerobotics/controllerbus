@@ -51,7 +51,7 @@ func NewBusControllerFactory[T config.Config, C controller.Controller](
 	newConfig func() T,
 	newController func(base *BusController[T]) (C, error),
 ) *BusFactory[T, C] {
-	return NewFactory(
+	return NewBusFactory(
 		b,
 		configID,
 		version,

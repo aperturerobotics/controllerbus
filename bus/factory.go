@@ -17,8 +17,8 @@ type BusFactory[T config.Config, C controller.Controller] struct {
 	newController func(le *logrus.Entry, b Bus, conf T) (C, error)
 }
 
-// NewFactory constructs a new Factory with details.
-func NewFactory[T config.Config, C controller.Controller](
+// NewBusFactory constructs a new Factory with details.
+func NewBusFactory[T config.Config, C controller.Controller](
 	b Bus,
 	configID string,
 	version semver.Version,

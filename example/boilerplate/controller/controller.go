@@ -42,6 +42,14 @@ func NewController(
 	}, nil
 }
 
+// Factory constructs Boilerplate controllers.
+type Factory = bus.BusFactory[*Config, *Controller]
+
+// NewFactory builds a boilerplate factory.
+func NewFactory(b bus.Bus) *Factory {
+	return bus.NewBusFactory(b, ConfigID, Version, NewConfig, NewController)
+}
+
 // GetControllerInfo returns information about the controller.
 func (c *Controller) GetControllerInfo() *controller.Info {
 	return controller.NewInfo(ControllerID, Version, "boilerplate example")
