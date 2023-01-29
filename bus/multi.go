@@ -22,7 +22,7 @@ func ExecCollectValues[T directive.Value](
 	bus Bus,
 	dir directive.Directive,
 	valDisposeCb func(),
-) ([]T, directive.Reference, error) {
+) ([]T, directive.Instance, directive.Reference, error) {
 	var disposed atomic.Bool
 	valDisposeCallback := func() {
 		if !disposed.Swap(true) {
@@ -100,7 +100,7 @@ func ExecCollectValues[T directive.Value](
 		if ref != nil {
 			ref.Release()
 		}
-		return nil, nil, err
+		return nil, nil, nil, err
 	}
 
 	defer di.AddIdleCallback(func(errs []error) {
@@ -127,13 +127,13 @@ func ExecCollectValues[T directive.Value](
 			returned = true
 			mtx.Unlock()
 			ref.Release()
-			return vals, nil, resErr
+			return vals, di, nil, resErr
 		}
 		if idle {
 			vals, ref := vals, ref // copy
 			returned = true
 			mtx.Unlock()
-			return vals, ref, nil
+			return vals, di, ref, nil
 		}
 		waitCh := bcast.GetWaitCh()
 		mtx.Unlock()
@@ -141,7 +141,7 @@ func ExecCollectValues[T directive.Value](
 		select {
 		case <-ctx.Done():
 			ref.Release()
-			return nil, nil, context.Canceled
+			return nil, nil, nil, context.Canceled
 		case <-waitCh:
 		}
 	}
