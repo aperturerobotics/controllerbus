@@ -17,10 +17,12 @@ import (
 // valDisposeCb is called if any of the values are no longer valid.
 // valDisposeCb might be called multiple times.
 // If err != nil, ref == nil.
+// If waitOne=true, waits for at least one value before returning.
 func ExecCollectValues[T directive.Value](
 	ctx context.Context,
 	bus Bus,
 	dir directive.Directive,
+	waitOne bool,
 	valDisposeCb func(),
 ) ([]T, directive.Instance, directive.Reference, error) {
 	var disposed atomic.Bool
@@ -51,6 +53,7 @@ func ExecCollectValues[T directive.Value](
 					return
 				}
 				mtx.Lock()
+				idle = false
 				if !returned {
 					vals = append(vals, val)
 					valIDs = append(valIDs, v.GetValueID())
@@ -64,6 +67,7 @@ func ExecCollectValues[T directive.Value](
 					return
 				}
 				mtx.Lock()
+				idle = false
 				id := v.GetValueID()
 				for i, valID := range valIDs {
 					if valID == id {
@@ -129,7 +133,7 @@ func ExecCollectValues[T directive.Value](
 			ref.Release()
 			return vals, di, nil, resErr
 		}
-		if idle {
+		if idle && (!waitOne || len(vals) != 0) {
 			vals, ref := vals, ref // copy
 			returned = true
 			mtx.Unlock()

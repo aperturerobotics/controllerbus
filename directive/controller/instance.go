@@ -434,7 +434,6 @@ func (i *directiveInstance) AddDisposeCallback(cb func()) func() {
 }
 
 // AddIdleCallback adds a callback that will be called when idle.
-// The callback is called exactly once.
 // Returns a callback release function.
 func (i *directiveInstance) AddIdleCallback(cb directive.IdleCallback) func() {
 	i.c.mtx.Lock()
