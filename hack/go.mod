@@ -8,13 +8,13 @@ replace google.golang.org/protobuf => github.com/aperturerobotics/protobuf-go v1
 
 require (
 	github.com/golangci/golangci-lint v1.51.1
-	github.com/planetscale/vtprotobuf v0.3.1-0.20220817155510-0ae748fd2007
+	github.com/planetscale/vtprotobuf v0.4.0
 	github.com/psampaz/go-mod-outdated v0.8.0
 	google.golang.org/protobuf v1.28.1
 )
 
 require (
-	github.com/aperturerobotics/controllerbus v0.0.0-00010101000000-000000000000
+	github.com/aperturerobotics/controllerbus v0.23.6-0.20230207030537-50542b88976a
 	github.com/aperturerobotics/goprotowrap v0.3.0
 	github.com/aperturerobotics/starpc v0.18.0
 	github.com/evanw/esbuild v0.17.6
