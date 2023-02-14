@@ -27,7 +27,7 @@ const configSetYaml = `
 boilerplate-demo-0:
   config:
     exampleField: testing
-  id: controllerbus/example/boilerplate/1
+  id: controllerbus/example/boilerplate
   revision: 1
 `
 

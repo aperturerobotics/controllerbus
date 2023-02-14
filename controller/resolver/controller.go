@@ -37,7 +37,6 @@ func (c *Controller) GetControllerID() string {
 		"controllerbus",
 		"resolver",
 		c.resolver.GetResolverID(),
-		c.resolver.GetResolverVersion().String(),
 	}, "/")
 }
 

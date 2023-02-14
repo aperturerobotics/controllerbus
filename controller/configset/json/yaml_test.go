@@ -17,7 +17,7 @@ import (
 var basicYAMLOutput = `test:
   config:
     exampleField: test 123
-  id: controllerbus/example/boilerplate/1
+  id: controllerbus/example/boilerplate
   revision: 1
 `
 

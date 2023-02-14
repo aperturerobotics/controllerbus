@@ -44,22 +44,22 @@ go build -v
 This will load `controllerbus_daemon.yaml` and execute the boilerplate demo:
 
 ```
-added directive                               directive="LoadControllerWithConfig<config-id=controllerbus/configset/1>"
-added directive                               directive="ExecController<config-id=controllerbus/configset/1>"
-added directive                               directive="LoadConfigConstructorByID<config-id=controllerbus/example/boilerplate/1>"
-starting controller                           controller=controllerbus/configset/1
+added directive                               directive="LoadControllerWithConfig<config-id=controllerbus/configset>"
+added directive                               directive="ExecController<config-id=controllerbus/configset"
+added directive                               directive="LoadConfigConstructorByID<config-id=controllerbus/example/boilerplate>"
+starting controller                           controller=controllerbus/configset
 added directive                               directive="ApplyConfigSet<controller-keys=boilerplate-example-0@1>"
-added directive                               directive="LoadControllerWithConfig<config-id=controllerbus/bus/api/1>"
-removed directive                             directive="LoadConfigConstructorByID<config-id=controllerbus/example/boilerplate/1>"
-added directive                               directive="ExecController<config-id=controllerbus/bus/api/1>"
-executing controller                          config-key=boilerplate-example-0 controller=controllerbus/configset/1
-starting controller                           controller=controllerbus/bus/api/1
+added directive                               directive="LoadControllerWithConfig<config-id=controllerbus/bus/api>"
+removed directive                             directive="LoadConfigConstructorByID<config-id=controllerbus/example/boilerplate>"
+added directive                               directive="ExecController<config-id=controllerbus/bus/api>"
+executing controller                          config-key=boilerplate-example-0 controller=controllerbus/configset
+starting controller                           controller=controllerbus/bus/api
 grpc api listening on: :5110                 
-added directive                               directive="LoadControllerWithConfig<config-id=controllerbus/example/boilerplate/1>"
-added directive                               directive="ExecController<config-id=controllerbus/example/boilerplate/1>"
-starting controller                           controller=controllerbus/example/boilerplate/1
-hello from boilerplate controller 1: hello world  controller=controllerbus/example/boilerplate/1
-controller exited normally                    controller=controllerbus/example/boilerplate/1 exec-time="31.053µs"
+added directive                               directive="LoadControllerWithConfig<config-id=controllerbus/example/boilerplate>"
+added directive                               directive="ExecController<config-id=controllerbus/example/boilerplate>"
+starting controller                           controller=controllerbus/example/boilerplate
+hello from boilerplate controller 1: hello world  controller=controllerbus/example/boilerplate
+controller exited normally                    controller=controllerbus/example/boilerplate exec-time="31.053µs"
 ```
 
 ### ConfigSet
@@ -72,9 +72,9 @@ The following is an example ConfigSet in YAML format for a program:
 example-1:
   # configuration object
   config:
-    exampleField: "Hello world 1!"
+    exampleField: "Hello world!"
   # ID of the configuration type
-  id: controllerbus/example/boilerplate/1
+  id: controllerbus/example/boilerplate
   # revision # for overriding previous configs
   revision: 1
 ```
@@ -144,7 +144,7 @@ $ controllerbus client exec -f controllerbus_daemon.yaml
   {
     "controllerInfo": {
       "version": "0.0.1",
-      "id": "controllerbus/example/boilerplate/1"
+      "id": "controllerbus/example/boilerplate"
     },
     "status": "ControllerStatus_RUNNING",
     "id": "boilerplate-example-0"
@@ -171,7 +171,7 @@ grpc-api:
     listenAddr: ":5000"
     busApiConfig:
       enableExecController: true
-  id: controllerbus/bus/api/1
+  id: controllerbus/bus/api
   revision: 1
 ```
 

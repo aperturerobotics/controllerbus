@@ -46,7 +46,6 @@ func NewResolver(
 		pluginBinaryID,
 		pluginBinaryVersion,
 		"static-resolver",
-		Version.String(),
 	}, "/")
 	staticResolver := static.NewResolver(factories...)
 	return &Resolver{

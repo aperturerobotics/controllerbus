@@ -18,7 +18,7 @@ import (
 
 const (
 	codegenDirPathRel = "./codegen-module/"
-	binaryID          = "controllerbus/examples/hot-demo/codegen-demo/1"
+	binaryID          = "controllerbus/examples/hot-demo/codegen-demo"
 	binaryVersion     = "0.0.1"
 )
 
@@ -45,12 +45,12 @@ const configSetYaml = `
 boilerplate-demo-0:
   config:
     exampleField: testing
-  id: controllerbus/example/boilerplate/1
+  id: controllerbus/example/boilerplate
   revision: 1
 loader-demo:
   config:
     exitAfterDur: 3s
-  id: controllerbus/example/hot-demo/demo-controller/1
+  id: controllerbus/example/hot-demo/demo-controller
   revision: 1
 `
 

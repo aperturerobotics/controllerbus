@@ -13,7 +13,7 @@ import (
 const (
 	codegenDirPathRel = "./codegen-module/"
 	outputPath        = "./plugins/example.{buildHash}.cbus.so"
-	binaryID          = "controllerbus/examples/plugin-demo/codegen-demo/1"
+	binaryID          = "controllerbus/examples/plugin-demo/codegen-demo"
 	binaryVersion     = "0.0.1"
 )
 
