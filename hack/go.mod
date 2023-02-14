@@ -17,7 +17,7 @@ require (
 	github.com/aperturerobotics/controllerbus v0.23.6-0.20230207030537-50542b88976a
 	github.com/aperturerobotics/goprotowrap v0.3.0
 	github.com/aperturerobotics/starpc v0.18.0
-	github.com/evanw/esbuild v0.17.6
+	github.com/evanw/esbuild v0.17.8
 )
 
 require (
@@ -182,7 +182,7 @@ require (
 	go.uber.org/zap v1.17.0 // indirect
 	golang.org/x/exp v0.0.0-20230118134722-a68e582fa157 // indirect
 	golang.org/x/exp/typeparams v0.0.0-20221208152030-732eee02a75a // indirect
-	golang.org/x/mod v0.7.0 // indirect
+	golang.org/x/mod v0.8.0 // indirect
 	golang.org/x/sync v0.1.0 // indirect
 	golang.org/x/sys v0.4.1-0.20230131160137-e7d7f63158de // indirect
 	golang.org/x/text v0.6.0 // indirect
