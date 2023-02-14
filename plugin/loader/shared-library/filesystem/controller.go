@@ -17,7 +17,7 @@ import (
 var Version = semver.MustParse("0.0.1")
 
 // ControllerID is the ID of the controller.
-const ControllerID = "controllerbus/plugin/loader/shared-library/filesystem/1"
+const ControllerID = "controllerbus/plugin/loader/shared-library/filesystem"
 
 // Controller is the hot plugin filesystem loading controller.
 //

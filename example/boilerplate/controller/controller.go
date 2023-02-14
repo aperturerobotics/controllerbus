@@ -17,7 +17,7 @@ import (
 var Version = semver.MustParse("0.0.1")
 
 // ControllerID is the ID of the controller.
-const ControllerID = "controllerbus/example/boilerplate/1"
+const ControllerID = "controllerbus/example/boilerplate"
 
 // Controller implements the boilerplate example controller.
 type Controller struct {

@@ -20,7 +20,7 @@ import (
 var Version = semver.MustParse("0.0.1")
 
 // ControllerID is the ID of the controller.
-const ControllerID = "controllerbus/example/hot-demo/demo-controller/1"
+const ControllerID = "controllerbus/example/hot-demo/demo-controller"
 
 // Controller implements the demo controller.
 type Controller struct {

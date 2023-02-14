@@ -10,7 +10,7 @@ import (
 )
 
 // ControllerID is the controller ID.
-const ControllerID = "controllerbus/toys/load-controller/controller/1"
+const ControllerID = "controllerbus/toys/load-controller/controller"
 
 // Version is the controller version.
 var Version = semver.MustParse("0.0.1")

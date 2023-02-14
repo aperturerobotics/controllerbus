@@ -16,7 +16,7 @@ import (
 var Version = semver.MustParse("0.0.1")
 
 // ControllerID is the ID of the controller.
-const ControllerID = "controllerbus/configset/1"
+const ControllerID = "controllerbus/configset"
 
 // Controller is the ConfigSet controller.
 type Controller struct {

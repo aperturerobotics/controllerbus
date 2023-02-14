@@ -8,7 +8,7 @@ import (
 )
 
 // ControllerID identifies the API controller.
-const ControllerID = "controllerbus/bus/api/1"
+const ControllerID = "controllerbus/bus/api"
 
 // Factory constructs a API.
 type Factory struct {
