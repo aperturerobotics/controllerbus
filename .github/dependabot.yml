@@ -12,3 +12,19 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: daily
+
+  - package-ecosystem: gomod
+    directory: /example/cross-platform/proxy
+    schedule:
+      interval: daily
+
+  - package-ecosystem: gomod
+    directory: /example/plugin-demo
+    schedule:
+      interval: daily
