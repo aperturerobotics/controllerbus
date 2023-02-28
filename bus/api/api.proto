@@ -18,9 +18,9 @@ message GetBusInfoRequest {
 // GetBusInfoResponse is the response type for GetBusInfo.
 message GetBusInfoResponse {
   // RunningControllers is the list of running controllers.
-  repeated controller.Info running_controllers = 1;
+  repeated .controller.Info running_controllers = 1;
   // RunningDirectives is the list of running directives.
-  repeated directive.DirectiveState running_directives = 2;
+  repeated .directive.DirectiveState running_directives = 2;
 }
 
 // ControllerBusService is a generic controller bus lookup api.
@@ -28,5 +28,5 @@ service ControllerBusService {
   // GetBusInfo requests information about the controller bus.
   rpc GetBusInfo(GetBusInfoRequest) returns (GetBusInfoResponse) {}
   // ExecController executes a controller configuration on the bus.
-  rpc ExecController(controller.exec.ExecControllerRequest) returns (stream controller.exec.ExecControllerResponse) {}
+  rpc ExecController(.controller.exec.ExecControllerRequest) returns (stream .controller.exec.ExecControllerResponse) {}
 }

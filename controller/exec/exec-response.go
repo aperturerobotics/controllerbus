@@ -1,6 +1,9 @@
 package controller_exec
 
-import "errors"
+import (
+	"errors"
+	"strings"
+)
 
 // GetError returns an error if the response indicated one, or nil for success.
 //
@@ -16,4 +19,19 @@ func (e *ExecControllerResponse) GetError() error {
 	}
 
 	return ErrAllControllersFailed
+}
+
+// FormatLogString formats a log string with info from the response.
+func (e *ExecControllerResponse) FormatLogString() string {
+	var pts []string
+	if id := e.GetId(); len(id) != 0 {
+		pts = append(pts, id)
+	}
+	if status := e.GetStatus(); status != 0 {
+		pts = append(pts, status.String())
+	}
+	if err := e.GetError(); err != nil {
+		pts = append(pts, err.Error())
+	}
+	return strings.Join(pts, ": ")
 }
