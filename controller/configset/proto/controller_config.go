@@ -2,8 +2,10 @@ package configset_proto
 
 import (
 	"context"
+	"encoding/base64"
 	"encoding/json"
 
+	gabs "github.com/Jeffail/gabs/v2"
 	"github.com/aperturerobotics/controllerbus/bus"
 	"github.com/aperturerobotics/controllerbus/config"
 	"github.com/aperturerobotics/controllerbus/controller/configset"
@@ -132,7 +134,51 @@ func (c *ControllerConfig) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+// MarshalJSON marshals json from the controller config.
+// For the config field: supports JSON, YAML, or a string containing either.
+func (c *ControllerConfig) MarshalJSON() ([]byte, error) {
+	outCtr := gabs.New()
+
+	// marshal the regular fields
+	if rev := c.GetRevision(); rev != 0 {
+		_, err := outCtr.Set(rev, "revision")
+		if err != nil {
+			return nil, err
+		}
+	}
+	if configID := c.GetId(); configID != "" {
+		_, err := outCtr.Set(configID, "id")
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if confFieldData := c.GetConfig(); len(confFieldData) != 0 {
+		// detect if the config field is json, if so, set it as inline json.
+		if confFieldData[0] == '{' && confFieldData[len(confFieldData)-1] == '}' {
+			confJSON, err := gabs.ParseJSON(confFieldData)
+			if err != nil {
+				return nil, err
+			}
+			_, err = outCtr.Set(confJSON, "config")
+			if err != nil {
+				return nil, err
+			}
+		} else {
+			// otherwise encode it as base64 (this is what jsonpb does)
+			_, err := outCtr.Set(base64.StdEncoding.EncodeToString(confFieldData), "config")
+			if err != nil {
+				return nil, err
+			}
+		}
+	}
+
+	// finalize the json
+	return outCtr.EncodeJSON(), nil
+}
+
 // _ is a type assertion
 var (
 	_ json.Unmarshaler = ((*ControllerConfig)(nil))
+	_ json.Marshaler   = ((*ControllerConfig)(nil))
 )

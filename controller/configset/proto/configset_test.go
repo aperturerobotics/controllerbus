@@ -7,7 +7,9 @@ import (
 	"github.com/aperturerobotics/controllerbus/controller/configset"
 	configset_controller "github.com/aperturerobotics/controllerbus/controller/configset/controller"
 	"github.com/aperturerobotics/controllerbus/core"
+	boilerplate_controller "github.com/aperturerobotics/controllerbus/example/boilerplate/controller"
 	"github.com/sirupsen/logrus"
+	jsonpb "google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
 )
 
@@ -44,4 +46,34 @@ func TestE2E(t *testing.T) {
 	}
 	_ = sr
 	_ = cs
+}
+
+// TestJSON ensures that we can marshal and unmarshal from JSON.
+// Tests when we have JSON in the Config field.
+func TestJSON(t *testing.T) {
+	mEnc := &ConfigSet{
+		Configurations: map[string]*ControllerConfig{
+			"test-config": {
+				Revision: 1,
+				Id:       boilerplate_controller.ConfigID,
+				Config:   []byte(`{"exampleField":"hello world"}`),
+			},
+		},
+	}
+	t.Logf("%v", mEnc)
+	dat, err := jsonpb.Marshal(mEnc)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+	t.Logf("%v", string(dat))
+
+	mDec := &ConfigSet{}
+	if err := jsonpb.Unmarshal(dat, mDec); err != nil {
+		t.Fatal(err.Error())
+	}
+	t.Logf("%v", mDec)
+
+	if !mEnc.EqualVT(mDec) {
+		t.Fatal("values not identical after decoding")
+	}
 }
