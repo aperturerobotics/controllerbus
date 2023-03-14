@@ -3,7 +3,7 @@ module github.com/aperturerobotics/controllerbus
 go 1.19
 
 replace (
-	github.com/sirupsen/logrus => github.com/aperturerobotics/logrus v1.9.0 // aperture
+	github.com/sirupsen/logrus => github.com/aperturerobotics/logrus v1.9.1-0.20221224130652-ff61cbb763af // aperture
 	google.golang.org/protobuf => github.com/aperturerobotics/protobuf-go v1.28.2-0.20230301012226-7fb3cdbd9197 // aperture
 )
 
