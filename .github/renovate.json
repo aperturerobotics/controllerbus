@@ -7,15 +7,6 @@
     "group:all",
     "workarounds:all"
   ],
-  "branchConcurrentLimit":0,
-  "packageRules": [
-    {
-      "matchLanguages": ["go"],
-      "groupName": "go"
-    },
-    {
-      "matchLanguages": ["js"],
-      "groupName": "js"
-    }
-  ]
+  "branchConcurrentLimit": 0,
+  "postUpdateOptions": ["gomodMassage"]
 }
