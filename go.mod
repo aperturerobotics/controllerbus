@@ -3,7 +3,7 @@ module github.com/aperturerobotics/controllerbus
 go 1.19
 
 replace (
-	github.com/sirupsen/logrus => github.com/aperturerobotics/logrus v1.9.1-0.20221224130652-ff61cbb763af // aperture
+	github.com/sirupsen/logrus => github.com/aperturerobotics/logrus f8bf7650dccb // aperture
 	google.golang.org/protobuf => github.com/aperturerobotics/protobuf-go v1.28.2-0.20230301012226-7fb3cdbd9197 // aperture
 )
 
@@ -21,7 +21,7 @@ require (
 	github.com/urfave/cli/v2 v2.25.0
 	github.com/valyala/fastjson v1.6.4
 	github.com/zeebo/blake3 v0.2.3
-	golang.org/x/exp v0.0.0-20230118134722-a68e582fa157
+	golang.org/x/exp v0.0.0-20230310171629-522b1b587ee0
 	golang.org/x/mod v0.9.0
 	golang.org/x/tools v0.7.0
 	google.golang.org/protobuf v1.29.0
