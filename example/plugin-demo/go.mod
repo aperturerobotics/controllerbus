@@ -10,7 +10,7 @@ replace (
 )
 
 require (
-	github.com/aperturerobotics/controllerbus v0.19.4-0.20221202091245-988611e98da5
+	github.com/aperturerobotics/controllerbus v0.24.0
 	github.com/blang/semver v3.5.1+incompatible
 	github.com/pkg/errors v0.9.1
 	github.com/sirupsen/logrus v1.9.0
