@@ -5,7 +5,7 @@ go 1.16
 replace github.com/aperturerobotics/controllerbus => ../..
 
 replace (
-	github.com/sirupsen/logrus => github.com/aperturerobotics/logrus v1.8.2-0.20220322010420-77ab346a2cf8 // aperture
+	github.com/sirupsen/logrus => github.com/aperturerobotics/logrus v1.9.0 // aperture
 	google.golang.org/protobuf => github.com/aperturerobotics/protobuf-go v1.28.2-0.20221202092004-7e5a6a8cf680 // aperture
 )
 
