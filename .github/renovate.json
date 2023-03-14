@@ -3,6 +3,7 @@
   "extends": [
     "config:base"
   ],
+  "branchConcurrentLimit":0,
   "packageRules": [
     {
       "matchLanguages": ["go"],
