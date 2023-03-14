@@ -1,5 +1,7 @@
 github.com/Jeffail/gabs/v2 v2.7.0 h1:Y2edYaTcE8ZpRsR2AtmPu5xQdFDIthFG0jYhu5PY8kg=
 github.com/Jeffail/gabs/v2 v2.7.0/go.mod h1:dp5ocw1FvBBQYssgHsG7I1WYsiLRtkUaB1FEtSwvNUw=
+github.com/aperturerobotics/logrus v1.9.0 h1:ZDaYSeiYCvg8wHazcnIY5iZM8TrKPsO36B6Xv3OyqRw=
+github.com/aperturerobotics/logrus v1.9.0/go.mod h1:naHLuLoDiP4jHNo9R0sCBMtWGeIprob74mVsIT4qYEQ=
 github.com/aperturerobotics/logrus v1.9.1-0.20221224130652-ff61cbb763af h1:nRveANX8PK0j+6M+d6Hyl45W+fQpg6BDBfcrrFMbbrw=
 github.com/aperturerobotics/logrus v1.9.1-0.20221224130652-ff61cbb763af/go.mod h1:naHLuLoDiP4jHNo9R0sCBMtWGeIprob74mVsIT4qYEQ=
 github.com/aperturerobotics/protobuf-go v1.28.2-0.20230301012226-7fb3cdbd9197 h1:JH6tRBjafohuZ71YD2MReuyTAQ+kFeK9qGDshJjEB2Y=
