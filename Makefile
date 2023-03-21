@@ -1,6 +1,5 @@
 # https://github.com/aperturerobotics/protobuf-project
 
-ESBUILD=hack/bin/esbuild
 PROTOWRAP=hack/bin/protowrap
 PROTOC_GEN_GO=hack/bin/protoc-gen-go
 PROTOC_GEN_STARPC=hack/bin/protoc-gen-go-starpc
@@ -18,12 +17,6 @@ all:
 
 vendor:
 	go mod vendor
-
-$(ESBUILD):
-	cd ./hack; \
-	go build -v \
-		-o ./bin/esbuild \
-		github.com/evanw/esbuild/cmd/esbuild
 
 $(PROTOC_GEN_GO):
 	cd ./hack; \
@@ -158,8 +151,3 @@ fix: $(GOLANGCI_LINT)
 .PHONY: test
 test:
 	go test -v ./...
-
-.PHONY: demo
-demo: node_modules vendor $(ESBUILD)
-	export PATH=$$(pwd)/hack/bin:$${PATH}; \
-	cd ./example && bash ./example.bash

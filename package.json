@@ -22,7 +22,7 @@
     "build": "tsc --project tsconfig.json --noEmit false --module ES6 --target es2022 --outDir ./dist/",
     "check": "npm run typecheck",
     "typecheck": "tsc --noEmit",
-    "deps": "depcheck --ignores bufferutil,utf-8-validate,starpc,ts-proto,ts-poet,esbuild,@aperturerobotics/ts-common",
+    "deps": "depcheck --ignores bufferutil,utf-8-validate,starpc,ts-proto,ts-poet,@aperturerobotics/ts-common",
     "codegen": "npm run gen",
     "ci": "npm run build && npm run lint:js && npm run lint:go",
     "format": "prettier --write './!(vendor|dist)/**/(*.ts|*.tsx|*.js|*.html|*.css)'",
@@ -43,16 +43,15 @@
   },
   "devDependencies": {
     "@aperturerobotics/ts-common": "0.3.3",
-    "@typescript-eslint/eslint-plugin": "^5.55.0",
-    "@typescript-eslint/parser": "^5.55.0",
+    "@typescript-eslint/eslint-plugin": "^5.56.0",
+    "@typescript-eslint/parser": "^5.56.0",
     "depcheck": "^1.4.3",
-    "esbuild": "^0.17.11",
     "eslint": "^8.36.0",
-    "eslint-config-prettier": "^8.7.0",
+    "eslint-config-prettier": "^8.8.0",
     "patch-package": "^6.5.1",
-    "prettier": "^2.8.4",
-    "ts-proto": "^1.141.1",
-    "typescript": "^4.9.5"
+    "prettier": "^2.8.5",
+    "ts-proto": "^1.143.0",
+    "typescript": "^5.0.2"
   },
   "dependencies": {
     "bufferutil": "^4.0.7",
