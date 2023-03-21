@@ -14,7 +14,7 @@ require (
 )
 
 require (
-	github.com/aperturerobotics/controllerbus v0.24.1
+	github.com/aperturerobotics/controllerbus v0.24.2
 	github.com/aperturerobotics/goprotowrap v0.3.0
 	github.com/aperturerobotics/starpc v0.18.3
 )
