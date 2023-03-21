@@ -10,13 +10,13 @@ require (
 	github.com/golangci/golangci-lint v1.52.0
 	github.com/planetscale/vtprotobuf v0.4.0
 	github.com/psampaz/go-mod-outdated v0.9.0
-	google.golang.org/protobuf v1.29.1
+	google.golang.org/protobuf v1.30.0
 )
 
 require (
-	github.com/aperturerobotics/controllerbus v0.23.6-0.20230207030537-50542b88976a
+	github.com/aperturerobotics/controllerbus v0.24.1
 	github.com/aperturerobotics/goprotowrap v0.3.0
-	github.com/aperturerobotics/starpc v0.18.2
+	github.com/aperturerobotics/starpc v0.18.3
 )
 
 require (
@@ -32,7 +32,7 @@ require (
 	github.com/OpenPeeDeeP/depguard v1.1.1 // indirect
 	github.com/alexkohler/prealloc v1.0.0 // indirect
 	github.com/alingse/asasalint v0.0.11 // indirect
-	github.com/aperturerobotics/util v1.0.5 // indirect
+	github.com/aperturerobotics/util v1.0.6-0.20230313071030-6260e05b62e5 // indirect
 	github.com/ashanbrown/forbidigo v1.5.1 // indirect
 	github.com/ashanbrown/makezero v1.1.1 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
