@@ -14,17 +14,25 @@ import (
 	"github.com/pkg/errors"
 	"github.com/valyala/fastjson"
 	jsonpb "google.golang.org/protobuf/encoding/protojson"
-	"google.golang.org/protobuf/proto"
 )
 
 // NewControllerConfig constructs a new controller config.
-func NewControllerConfig(c configset.ControllerConfig) (*ControllerConfig, error) {
+func NewControllerConfig(c configset.ControllerConfig, useJson bool) (*ControllerConfig, error) {
 	conf := c.GetConfig()
 	cID := conf.GetConfigID()
-	confData, err := proto.Marshal(conf)
+
+	var confData []byte
+	var err error
+	if useJson {
+		m := &jsonpb.MarshalOptions{}
+		confData, err = m.Marshal(conf)
+	} else {
+		confData, err = conf.MarshalVT()
+	}
 	if err != nil {
 		return nil, err
 	}
+
 	return &ControllerConfig{
 		Id:       cID,
 		Config:   confData,
@@ -79,7 +87,7 @@ func (c *ControllerConfig) Resolve(ctx context.Context, b bus.Bus) (configset.Co
 		if configData[0] == 123 {
 			err = jsonpb.Unmarshal(configData, cf)
 		} else {
-			err = proto.Unmarshal(configData, cf)
+			err = cf.UnmarshalVT(configData)
 		}
 		if err != nil {
 			return nil, err

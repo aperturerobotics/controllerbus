@@ -24,7 +24,7 @@ func TestExecControllerRequest(t *testing.T) {
 	c["test-will-fail"] = configset.NewControllerConfig(1, &boilerplate.Config{
 		FailWithErr: "testing error",
 	})
-	m, err := configset_proto.NewConfigSet(c)
+	m, err := configset_proto.NewConfigSet(c, false)
 	if err != nil {
 		t.Fatal(err.Error())
 	}

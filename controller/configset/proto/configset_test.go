@@ -10,24 +10,23 @@ import (
 	boilerplate_controller "github.com/aperturerobotics/controllerbus/example/boilerplate/controller"
 	"github.com/sirupsen/logrus"
 	jsonpb "google.golang.org/protobuf/encoding/protojson"
-	"google.golang.org/protobuf/proto"
 )
 
 // TestE2E tests configset proto end to end.
 func TestE2E(t *testing.T) {
 	c := make(configset.ConfigSet)
 	c["test"] = configset.NewControllerConfig(1, &configset_controller.Config{})
-	m, err := NewConfigSet(c)
+	m, err := NewConfigSet(c, true)
 	if err != nil {
 		t.Fatal(err.Error())
 	}
-	mDat, err := proto.Marshal(m)
+	mDat, err := m.MarshalVT()
 	if err != nil {
 		t.Fatal(err.Error())
 	}
 
 	mDec := &ConfigSet{}
-	if err := proto.Unmarshal(mDat, mDec); err != nil {
+	if err := mDec.UnmarshalVT(mDat); err != nil {
 		t.Fatal(err.Error())
 	}
 

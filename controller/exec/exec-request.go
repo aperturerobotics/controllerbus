@@ -27,7 +27,7 @@ func ExecControllerYAMLFromConfigSet(cs configset.ConfigSet) (*ExecControllerReq
 // ExecControllerProtoFromConfigSet converts a config set to a ExecControllerRequest w/ proto.
 func ExecControllerProtoFromConfigSet(cs configset.ConfigSet) (*ExecControllerRequest, error) {
 	// encode to proto
-	pcs, err := configset_proto.NewConfigSet(cs)
+	pcs, err := configset_proto.NewConfigSet(cs, false)
 	if err != nil {
 		return nil, err
 	}

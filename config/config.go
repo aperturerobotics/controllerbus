@@ -16,6 +16,11 @@ type Config interface {
 	GetConfigID() string
 	// EqualsConfig checks if the config is equal to another.
 	EqualsConfig(other Config) bool
+
+	// MarshalVT marshals the config object with vtprotobuf.
+	MarshalVT() ([]byte, error)
+	// UnmarshalVT unmarshals the config object with vtprotobuf.
+	UnmarshalVT(data []byte) error
 }
 
 // Constructor constructs configuration objects.

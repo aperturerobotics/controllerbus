@@ -13,8 +13,8 @@ import (
 type ConfigSetMap map[string]*ControllerConfig
 
 // NewConfigSet constructs a configset from a configset.ConfigSet.
-func NewConfigSet(c configset.ConfigSet) (*ConfigSet, error) {
-	m, err := NewConfigSetMap(c)
+func NewConfigSet(c configset.ConfigSet, useJson bool) (*ConfigSet, error) {
+	m, err := NewConfigSetMap(c, useJson)
 	if err != nil {
 		return nil, err
 	}
@@ -23,14 +23,14 @@ func NewConfigSet(c configset.ConfigSet) (*ConfigSet, error) {
 }
 
 // NewConfigSetMap packs a configset to a proto object.
-func NewConfigSetMap(c configset.ConfigSet) (ConfigSetMap, error) {
+func NewConfigSetMap(c configset.ConfigSet, useJson bool) (ConfigSetMap, error) {
 	if c == nil {
 		return nil, nil
 	}
 	m := make(ConfigSetMap)
 	var err error
 	for k, v := range c {
-		m[k], err = NewControllerConfig(v)
+		m[k], err = NewControllerConfig(v, useJson)
 		if err != nil {
 			return nil, err
 		}
