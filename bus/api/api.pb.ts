@@ -417,7 +417,7 @@ export const ControllerBusServiceDefinition = {
       requestStream: false,
       responseType: GetBusInfoResponse,
       responseStream: false,
-      options: { _unknownFields: {} },
+      options: {},
     },
     /** ExecController executes a controller configuration on the bus. */
     execController: {
@@ -426,7 +426,7 @@ export const ControllerBusServiceDefinition = {
       requestStream: false,
       responseType: ExecControllerResponse,
       responseStream: true,
-      options: { _unknownFields: {} },
+      options: {},
     },
   },
 } as const
