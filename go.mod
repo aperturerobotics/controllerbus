@@ -8,8 +8,8 @@ replace (
 )
 
 require (
-	github.com/aperturerobotics/starpc v0.19.0 // latest
-	github.com/aperturerobotics/util v1.1.1 // latest
+	github.com/aperturerobotics/starpc v0.19.1 // latest
+	github.com/aperturerobotics/util v1.1.2-0.20230418220558-ef07f561ed14 // latest
 	github.com/blang/semver v3.5.1+incompatible
 	github.com/cenkalti/backoff v2.2.1+incompatible
 	github.com/fsnotify/fsnotify v1.6.0
@@ -21,7 +21,7 @@ require (
 	github.com/urfave/cli/v2 v2.25.1
 	github.com/valyala/fastjson v1.6.4
 	github.com/zeebo/blake3 v0.2.3
-	golang.org/x/exp v0.0.0-20230321023759-10a507213a29
+	golang.org/x/exp v0.0.0-20230418202329-0354be287a23
 	golang.org/x/mod v0.10.0
 	golang.org/x/tools v0.8.0
 	google.golang.org/protobuf v1.30.0
@@ -36,7 +36,7 @@ require (
 	github.com/google/go-cmp v0.5.9 // indirect
 	github.com/ipfs/go-cid v0.3.2 // indirect
 	github.com/klauspost/compress v1.15.12 // indirect
-	github.com/klauspost/cpuid/v2 v2.2.1 // indirect
+	github.com/klauspost/cpuid/v2 v2.2.4 // indirect
 	github.com/libp2p/go-buffer-pool v0.1.0 // indirect
 	github.com/libp2p/go-libp2p v0.26.3 // indirect
 	github.com/libp2p/go-yamux/v4 v4.0.1-0.20220919134236-1c09f2ab3ec1 // indirect
