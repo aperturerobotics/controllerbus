@@ -36,6 +36,11 @@ func ExecControllerProtoFromConfigSet(cs configset.ConfigSet) (*ExecControllerRe
 	}, nil
 }
 
+// IsNil checks if the object is nil.
+func (r *ExecControllerRequest) IsNil() bool {
+	return r == nil
+}
+
 // Execute executes the request to apply a config set.
 // Cb should not hold ExecControllerResponse after returning.
 func (r *ExecControllerRequest) Execute(
