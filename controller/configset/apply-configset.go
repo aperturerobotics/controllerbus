@@ -86,7 +86,7 @@ func (d *applyConfigSet) GetDebugVals() directive.DebugValues {
 			confIDs[i] = strings.Join([]string{
 				k,
 				"@",
-				strconv.FormatUint(v.GetRevision(), 10),
+				strconv.FormatUint(v.GetRev(), 10),
 			}, "")
 			i++
 		}

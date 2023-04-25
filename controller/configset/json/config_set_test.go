@@ -15,7 +15,7 @@ import (
 	// "github.com/aperturerobotics/controllerbus/controller/resolver/static"
 )
 
-var basicOutput = `{"test":{"revision":1,"id":"controllerbus/configset","config":{}}}`
+var basicOutput = `{"test":{"rev":1,"id":"controllerbus/configset","config":{}}}`
 
 // TestMarshalConfigSet tests marshaling a config set to json.
 func TestMarshalConfigSet(t *testing.T) {

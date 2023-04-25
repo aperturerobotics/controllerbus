@@ -75,12 +75,12 @@ example-1:
     exampleField: "Hello world!"
   # ID of the configuration type
   id: controllerbus/example/boilerplate
-  # revision # for overriding previous configs
-  revision: 1
+  # rev # for overriding previous configs
+  rev: 1
 ```
 
 In this case, `example-1` is the ID of the controller. If multiple ConfigSet are
-applied with the same ID, the latest revision wins. The ConfigSet controller
+applied with the same ID, the latest rev wins. The ConfigSet controller
 will automatically start and stop controllers as ConfigSets are changed.
 
 ### How does it work?
@@ -172,7 +172,7 @@ grpc-api:
     busApiConfig:
       enableExecController: true
   id: controllerbus/bus/api
-  revision: 1
+  rev: 1
 ```
 
 For security, the default value of `enableExecController` is `false` to disallow

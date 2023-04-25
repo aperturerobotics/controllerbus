@@ -19,8 +19,8 @@ export interface ConfigSet_ConfigurationsEntry {
 export interface ControllerConfig {
   /** Id is the config ID. */
   id: string
-  /** Revision is the revision number of the configuration. */
-  revision: Long
+  /** Rev is the revision number of the configuration. */
+  rev: Long
   /**
    * Config is the configuration object.
    * Supports: protobuf and json (must start with {).
@@ -287,7 +287,7 @@ export const ConfigSet_ConfigurationsEntry = {
 }
 
 function createBaseControllerConfig(): ControllerConfig {
-  return { id: '', revision: Long.UZERO, config: new Uint8Array() }
+  return { id: '', rev: Long.UZERO, config: new Uint8Array() }
 }
 
 export const ControllerConfig = {
@@ -298,8 +298,8 @@ export const ControllerConfig = {
     if (message.id !== '') {
       writer.uint32(10).string(message.id)
     }
-    if (!message.revision.isZero()) {
-      writer.uint32(16).uint64(message.revision)
+    if (!message.rev.isZero()) {
+      writer.uint32(16).uint64(message.rev)
     }
     if (message.config.length !== 0) {
       writer.uint32(26).bytes(message.config)
@@ -327,7 +327,7 @@ export const ControllerConfig = {
             break
           }
 
-          message.revision = reader.uint64() as Long
+          message.rev = reader.uint64() as Long
           continue
         case 3:
           if (tag != 26) {
@@ -384,9 +384,7 @@ export const ControllerConfig = {
   fromJSON(object: any): ControllerConfig {
     return {
       id: isSet(object.id) ? String(object.id) : '',
-      revision: isSet(object.revision)
-        ? Long.fromValue(object.revision)
-        : Long.UZERO,
+      rev: isSet(object.rev) ? Long.fromValue(object.rev) : Long.UZERO,
       config: isSet(object.config)
         ? bytesFromBase64(object.config)
         : new Uint8Array(),
@@ -396,8 +394,8 @@ export const ControllerConfig = {
   toJSON(message: ControllerConfig): unknown {
     const obj: any = {}
     message.id !== undefined && (obj.id = message.id)
-    message.revision !== undefined &&
-      (obj.revision = (message.revision || Long.UZERO).toString())
+    message.rev !== undefined &&
+      (obj.rev = (message.rev || Long.UZERO).toString())
     message.config !== undefined &&
       (obj.config = base64FromBytes(
         message.config !== undefined ? message.config : new Uint8Array()
@@ -416,9 +414,9 @@ export const ControllerConfig = {
   ): ControllerConfig {
     const message = createBaseControllerConfig()
     message.id = object.id ?? ''
-    message.revision =
-      object.revision !== undefined && object.revision !== null
-        ? Long.fromValue(object.revision)
+    message.rev =
+      object.rev !== undefined && object.rev !== null
+        ? Long.fromValue(object.rev)
         : Long.UZERO
     message.config = object.config ?? new Uint8Array()
     return message

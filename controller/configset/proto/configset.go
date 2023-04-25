@@ -61,9 +61,9 @@ func MergeConfigSetMaps(out ConfigSetMap, sets ...ConfigSetMap) {
 			if v == nil {
 				continue
 			}
-			vRev := v.GetRevision()
+			vRev := v.GetRev()
 			existing, existingOk := out[k]
-			if existingOk && existing.GetRevision() > vRev {
+			if existingOk && existing.GetRev() > vRev {
 				continue
 			}
 			out[k] = v

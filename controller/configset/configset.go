@@ -39,7 +39,7 @@ func (c ConfigSet) Equal(os ConfigSet) bool {
 		if !ov.GetConfig().EqualsConfig(v.GetConfig()) {
 			return false
 		}
-		if ov.GetRevision() != v.GetRevision() {
+		if ov.GetRev() != v.GetRev() {
 			return false
 		}
 	}
@@ -61,9 +61,9 @@ func MergeConfigSets(sets ...ConfigSet) ConfigSet {
 			if v == nil {
 				continue
 			}
-			vRev := v.GetRevision()
+			vRev := v.GetRev()
 			existing, existingOk := out[k]
-			if existingOk && existing.GetRevision() > vRev {
+			if existingOk && existing.GetRev() > vRev {
 				continue
 			}
 			out[k] = v
@@ -74,8 +74,8 @@ func MergeConfigSets(sets ...ConfigSet) ConfigSet {
 
 // ControllerConfig is a wrapped controller configuration.
 type ControllerConfig interface {
-	// GetRevision returns the revision.
-	GetRevision() uint64
+	// GetRev returns the revision.
+	GetRev() uint64
 	// GetConfig returns the config object.
 	GetConfig() config.Config
 }

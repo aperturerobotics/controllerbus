@@ -28,7 +28,7 @@ boilerplate-demo-0:
   config:
     exampleField: testing
   id: controllerbus/example/boilerplate
-  revision: 1
+  rev: 1
 `
 
 // run runs the program.

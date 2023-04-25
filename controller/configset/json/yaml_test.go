@@ -18,7 +18,7 @@ var basicYAMLOutput = `test:
   config:
     exampleField: test 123
   id: controllerbus/example/boilerplate
-  revision: 1
+  rev: 1
 `
 
 // TestMarshalConfigSetYAML tests marshaling a config set to yaml.

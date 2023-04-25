@@ -8,7 +8,7 @@ import (
 
 var mockControllerConfig = `
 id: test/controller
-revision: 4
+rev: 4
 config:
   test: true
 `

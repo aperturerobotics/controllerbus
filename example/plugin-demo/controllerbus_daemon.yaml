@@ -2,9 +2,9 @@ boilerplate-example-0:
   config:
     exampleField: "hello world"
   id: controllerbus/example/boilerplate
-  revision: 1
+  rev: 1
 plugin-example:
   config:
     exitAfterDur: "10s"
   id: controllerbus/example/hot-demo/demo-controller
-  revision: 1
+  rev: 1

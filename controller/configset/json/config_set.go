@@ -36,7 +36,7 @@ func (c ConfigSet) Resolve(ctx context.Context, b bus.Bus) (configset.ConfigSet,
 			return nil, err
 		}
 
-		m[k] = configset.NewControllerConfig(cc.GetRevision(), cc.GetConfig())
+		m[k] = configset.NewControllerConfig(cc.GetRev(), cc.GetConfig())
 	}
 
 	return m, nil

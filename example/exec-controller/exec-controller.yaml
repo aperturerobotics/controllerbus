@@ -3,4 +3,4 @@ hold-open:
     # failWithErr: This error was configured in exec-controller.yaml
     exampleField: Hello from YAML exec-controller!
   id: controllerbus/example/boilerplate
-  revision: 1
+  rev: 1

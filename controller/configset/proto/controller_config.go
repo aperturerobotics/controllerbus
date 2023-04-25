@@ -34,9 +34,9 @@ func NewControllerConfig(c configset.ControllerConfig, useJson bool) (*Controlle
 	}
 
 	return &ControllerConfig{
-		Id:       cID,
-		Config:   confData,
-		Revision: c.GetRevision(),
+		Id:     cID,
+		Config: confData,
+		Rev:    c.GetRev(),
 	}, nil
 }
 
@@ -94,7 +94,7 @@ func (c *ControllerConfig) Resolve(ctx context.Context, b bus.Bus) (configset.Co
 		}
 	}
 
-	return configset.NewControllerConfig(c.GetRevision(), cf), nil
+	return configset.NewControllerConfig(c.GetRev(), cf), nil
 }
 
 // UnmarshalJSON unmarshals json to the controller config.
@@ -112,8 +112,12 @@ func (c *ControllerConfig) UnmarshalJSON(data []byte) error {
 	if v.Exists("id") {
 		c.Id = string(v.GetStringBytes("id"))
 	}
+	// backwards compatible
 	if v.Exists("revision") {
-		c.Revision = v.GetUint64("revision")
+		c.Rev = v.GetUint64("revision")
+	}
+	if v.Exists("rev") {
+		c.Rev = v.GetUint64("rev")
 	}
 	if v.Exists("config") {
 		var configVal *fastjson.Value
@@ -148,7 +152,7 @@ func (c *ControllerConfig) MarshalJSON() ([]byte, error) {
 	outCtr := gabs.New()
 
 	// marshal the regular fields
-	if rev := c.GetRevision(); rev != 0 {
+	if rev := c.GetRev(); rev != 0 {
 		_, err := outCtr.Set(rev, "revision")
 		if err != nil {
 			return nil, err

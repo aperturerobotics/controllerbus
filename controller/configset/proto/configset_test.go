@@ -53,9 +53,9 @@ func TestJSON(t *testing.T) {
 	mEnc := &ConfigSet{
 		Configurations: map[string]*ControllerConfig{
 			"test-config": {
-				Revision: 1,
-				Id:       boilerplate_controller.ConfigID,
-				Config:   []byte(`{"exampleField":"hello world"}`),
+				Rev:    1,
+				Id:     boilerplate_controller.ConfigID,
+				Config: []byte(`{"exampleField":"hello world"}`),
 			},
 		},
 	}

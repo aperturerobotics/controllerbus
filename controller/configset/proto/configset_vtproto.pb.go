@@ -48,8 +48,8 @@ func (m *ControllerConfig) CloneVT() *ControllerConfig {
 		return (*ControllerConfig)(nil)
 	}
 	r := &ControllerConfig{
-		Id:       m.Id,
-		Revision: m.Revision,
+		Id:  m.Id,
+		Rev: m.Rev,
 	}
 	if rhs := m.Config; rhs != nil {
 		tmpBytes := make([]byte, len(rhs))
@@ -112,7 +112,7 @@ func (this *ControllerConfig) EqualVT(that *ControllerConfig) bool {
 	if this.Id != that.Id {
 		return false
 	}
-	if this.Revision != that.Revision {
+	if this.Rev != that.Rev {
 		return false
 	}
 	if string(this.Config) != string(that.Config) {
@@ -220,8 +220,8 @@ func (m *ControllerConfig) MarshalToSizedBufferVT(dAtA []byte) (int, error) {
 		i--
 		dAtA[i] = 0x1a
 	}
-	if m.Revision != 0 {
-		i = encodeVarint(dAtA, i, uint64(m.Revision))
+	if m.Rev != 0 {
+		i = encodeVarint(dAtA, i, uint64(m.Rev))
 		i--
 		dAtA[i] = 0x10
 	}
@@ -279,8 +279,8 @@ func (m *ControllerConfig) SizeVT() (n int) {
 	if l > 0 {
 		n += 1 + l + sov(uint64(l))
 	}
-	if m.Revision != 0 {
-		n += 1 + sov(uint64(m.Revision))
+	if m.Rev != 0 {
+		n += 1 + sov(uint64(m.Rev))
 	}
 	l = len(m.Config)
 	if l > 0 {
@@ -539,9 +539,9 @@ func (m *ControllerConfig) UnmarshalVT(dAtA []byte) error {
 			iNdEx = postIndex
 		case 2:
 			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Revision", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Rev", wireType)
 			}
-			m.Revision = 0
+			m.Rev = 0
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflow
@@ -551,7 +551,7 @@ func (m *ControllerConfig) UnmarshalVT(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				m.Revision |= uint64(b&0x7F) << shift
+				m.Rev |= uint64(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}

@@ -46,12 +46,12 @@ boilerplate-demo-0:
   config:
     exampleField: testing
   id: controllerbus/example/boilerplate
-  revision: 1
+  rev: 1
 loader-demo:
   config:
     exitAfterDur: 3s
   id: controllerbus/example/hot-demo/demo-controller
-  revision: 1
+  rev: 1
 `
 
 func main() {

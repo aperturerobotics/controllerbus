@@ -18,8 +18,8 @@ func NewControllerConfig(rev uint64, conf config.Config) ControllerConfig {
 	}
 }
 
-// GetRevision returns the revision.
-func (c *controllerConfig) GetRevision() uint64 {
+// GetRev returns the revision.
+func (c *controllerConfig) GetRev() uint64 {
 	return c.rev
 }
 

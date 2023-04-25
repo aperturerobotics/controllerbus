@@ -12,8 +12,8 @@ import (
 // ControllerConfig implements the JSON unmarshaling logic for a configset
 // ControllerConfig.
 type ControllerConfig struct {
-	// Revision is the revision number.
-	Revision uint64 `json:"revision,omitempty"`
+	// Rev is the revision number.
+	Rev uint64 `json:"rev,omitempty"`
 	// Id is the configuration ID.
 	Id string `json:"id"`
 	// Config is the configuration object.
@@ -23,8 +23,8 @@ type ControllerConfig struct {
 // NewControllerConfig builds a new controller config.
 func NewControllerConfig(c configset.ControllerConfig) *ControllerConfig {
 	return &ControllerConfig{
-		Revision: c.GetRevision(),
-		Id:       c.GetConfig().GetConfigID(),
+		Rev: c.GetRev(),
+		Id:  c.GetConfig().GetConfigID(),
 		Config: &Config{
 			underlying: c.GetConfig(),
 		},
@@ -40,9 +40,9 @@ func UnmarshalControllerConfigYAML(data []byte) (*ControllerConfig, error) {
 	return conf, nil
 }
 
-// GetRevision returns the revision.
-func (c *ControllerConfig) GetRevision() uint64 {
-	return c.Revision
+// GetRev returns the revision.
+func (c *ControllerConfig) GetRev() uint64 {
+	return c.Rev
 }
 
 // Resolve resolves the config into a configset.ControllerConfig
@@ -65,5 +65,5 @@ func (c *ControllerConfig) Resolve(ctx context.Context, b bus.Bus) (configset.Co
 		return nil, errors.New("config parsed to null")
 	}
 
-	return configset.NewControllerConfig(c.Revision, c.Config.GetConfig()), nil
+	return configset.NewControllerConfig(c.Rev, c.Config.GetConfig()), nil
 }

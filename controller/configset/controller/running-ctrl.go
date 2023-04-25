@@ -191,7 +191,7 @@ func (c *runningController) ApplyConfig(conf configset.ControllerConfig) bool {
 	c.mtx.Lock()
 	defer c.mtx.Unlock()
 
-	if c.conf.GetRevision() >= conf.GetRevision() {
+	if c.conf.GetRev() >= conf.GetRev() {
 		return false
 	}
 
