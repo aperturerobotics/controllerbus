@@ -153,7 +153,7 @@ func (c *ControllerConfig) MarshalJSON() ([]byte, error) {
 
 	// marshal the regular fields
 	if rev := c.GetRev(); rev != 0 {
-		_, err := outCtr.Set(rev, "revision")
+		_, err := outCtr.Set(rev, "rev")
 		if err != nil {
 			return nil, err
 		}
