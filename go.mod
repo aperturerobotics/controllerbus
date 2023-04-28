@@ -4,12 +4,12 @@ go 1.19
 
 replace (
 	github.com/sirupsen/logrus => github.com/aperturerobotics/logrus v1.9.1-0.20221224130652-ff61cbb763af // aperture
-	google.golang.org/protobuf => github.com/aperturerobotics/protobuf-go v1.30.1-0.20230321052045-f39bd7370e10 // aperture
+	google.golang.org/protobuf => github.com/aperturerobotics/protobuf-go v1.30.1-0.20230428014030-7089409cbc63 // aperture
 )
 
 require (
 	github.com/aperturerobotics/starpc v0.19.1 // latest
-	github.com/aperturerobotics/util v1.1.2-0.20230418220558-ef07f561ed14 // latest
+	github.com/aperturerobotics/util v1.2.0 // latest
 	github.com/blang/semver v3.5.1+incompatible
 	github.com/cenkalti/backoff v2.2.1+incompatible
 	github.com/fsnotify/fsnotify v1.6.0

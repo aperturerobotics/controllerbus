@@ -4,7 +4,7 @@ go 1.19
 
 replace github.com/aperturerobotics/controllerbus => ../
 
-replace google.golang.org/protobuf => github.com/aperturerobotics/protobuf-go v1.28.2-0.20230301012226-7fb3cdbd9197 // aperture
+replace google.golang.org/protobuf => github.com/aperturerobotics/protobuf-go v1.30.1-0.20230428013618-b0462aa10fd6 // aperture
 
 require (
 	github.com/golangci/golangci-lint v1.52.2
@@ -32,7 +32,7 @@ require (
 	github.com/OpenPeeDeeP/depguard v1.1.1 // indirect
 	github.com/alexkohler/prealloc v1.0.0 // indirect
 	github.com/alingse/asasalint v0.0.11 // indirect
-	github.com/aperturerobotics/util v1.1.2-0.20230418220558-ef07f561ed14 // indirect
+	github.com/aperturerobotics/util v1.2.0 // indirect
 	github.com/ashanbrown/forbidigo v1.5.1 // indirect
 	github.com/ashanbrown/makezero v1.1.1 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
