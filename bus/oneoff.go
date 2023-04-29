@@ -127,7 +127,7 @@ func ExecOneOffWithFilter(
 			return val, di, ref, nil
 		}
 		if resErr != nil || (idle && returnIfIdle) {
-			err := resErr
+			err, ref := resErr, ref
 			mtx.Unlock()
 			ref.Release()
 			return nil, nil, nil, err
