@@ -71,7 +71,7 @@ func (c *runningController) Execute(ctx context.Context) (rerr error) {
 
 		// execute the controller with the current config
 		execDir := resolver.NewLoadControllerWithConfig(ctrlConf)
-		c.le.Info("executing controller")
+		c.le.Debug("executing controller")
 		updValCh, _, execRef, err := bus.ExecOneOffWatchCh(c.c.bus, execDir)
 		if err != nil {
 			if err == context.Canceled {
