@@ -12,5 +12,5 @@ message Boilerplate {
 // BoilerplateResult implements the boilerplate directive result.
 message BoilerplateResult {
   // PrintedLen is the final length of the printed message.
-  uint32 printed_len = 1; 
+  uint32 printed_len = 1;
 }
