@@ -21,9 +21,9 @@ require (
 	github.com/urfave/cli/v2 v2.25.3
 	github.com/valyala/fastjson v1.6.4
 	github.com/zeebo/blake3 v0.2.3
-	golang.org/x/exp v0.0.0-20230425010034-47ecfdc1ba53
+	golang.org/x/exp v0.0.0-20230510235704-dd950f8aeaea
 	golang.org/x/mod v0.10.0
-	golang.org/x/tools v0.8.0
+	golang.org/x/tools v0.9.1
 	google.golang.org/protobuf v1.30.0
 	mvdan.cc/gofumpt v0.5.0
 )
@@ -53,7 +53,7 @@ require (
 	github.com/spaolacci/murmur3 v1.1.1-0.20190317074736-539464a789e9 // indirect
 	github.com/xrash/smetrics v0.0.0-20201216005158-039620a65673 // indirect
 	golang.org/x/crypto v0.4.0 // indirect
-	golang.org/x/sys v0.7.0 // indirect
+	golang.org/x/sys v0.8.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	lukechampine.com/blake3 v1.1.8-0.20220321170924-7afca5966e5e // indirect
 	nhooyr.io/websocket v1.8.8-0.20221213223501-14fb98eba64e // indirect
