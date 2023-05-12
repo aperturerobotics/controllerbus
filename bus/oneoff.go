@@ -8,9 +8,49 @@ import (
 	"github.com/aperturerobotics/util/broadcast"
 )
 
+// ExecIdleCallback is an idle callback for ExecOneOffWithFilter.
+//
+// idleCb is called when idle with the list of resolver errors.
+// idleCb should return (wait, error): if wait=true, continues to wait.
+// if idleCb is nil: continues to wait when the directive becomes idle
+// errs is the list of errors from the resolvers (if any)
+type ExecIdleCallback func(errs []error) (bool, error)
+
+// WaitWhenIdle returns an ExecIdleCallback that waits when the directive becomes idle.
+//
+// if ignoreErrors is false, returns any non-nil resolver error that occurs.
+func WaitWhenIdle(ignoreErrors bool) ExecIdleCallback {
+	return func(errs []error) (bool, error) {
+		if !ignoreErrors {
+			for _, err := range errs {
+				if err != nil {
+					return false, err
+				}
+			}
+		}
+		return true, nil
+	}
+}
+
+// ReturnWhenIdle returns an ExecIdleCallback that returns when the directive becomes idle.
+func ReturnWhenIdle() ExecIdleCallback {
+	return func(errs []error) (bool, error) {
+		for _, err := range errs {
+			if err != nil {
+				return false, err
+			}
+		}
+		return false, nil
+	}
+}
+
 // ExecOneOff executes a one-off directive.
 //
-// If returnIfIdle is set, returns nil, nil, nil if idle.
+// idleCb is called when idle with the list of resolver errors.
+// idleCb should return (wait, error): if wait=true, continues to wait.
+// if idleCb is nil: continues to wait when the directive becomes idle
+// errs is the list of errors from the resolvers (if any)
+//
 // If any resolvers return an error, returns that error.
 // valDisposeCb is called if the value is no longer valid.
 // valDisposeCb might be called multiple times.
@@ -19,25 +59,29 @@ func ExecOneOff(
 	ctx context.Context,
 	bus Bus,
 	dir directive.Directive,
-	returnIfIdle bool,
+	idleCb ExecIdleCallback,
 	valDisposeCallback func(),
 ) (directive.AttachedValue, directive.Instance, directive.Reference, error) {
-	return ExecOneOffWithFilter(ctx, bus, dir, returnIfIdle, valDisposeCallback, nil)
+	return ExecOneOffWithFilter(ctx, bus, dir, idleCb, valDisposeCallback, nil)
 }
 
 // ExecOneOffWithFilter executes a one-off directive with a filter cb.
 //
 // Waits until the callback returns true before returning a value.
-// If returnIfIdle is set, returns nil, nil, nil if idle.
-// If any resolvers return an error, returns that error.
 // valDisposeCb is called if the value is no longer valid.
 // valDisposeCb might be called multiple times.
+//
+// idleCb is called when idle with the list of resolver errors.
+// idleCb should return (wait, error): if wait=true, continues to wait.
+// if idleCb is nil: continues to wait when the directive becomes idle
+// errs is the list of errors from the resolvers (if any)
+//
 // If err != nil, ref == nil.
 func ExecOneOffWithFilter(
 	ctx context.Context,
 	bus Bus,
 	dir directive.Directive,
-	returnIfIdle bool,
+	idleCb ExecIdleCallback,
 	valDisposeCallback func(),
 	filterCb func(val directive.AttachedValue) (bool, error),
 ) (directive.AttachedValue, directive.Instance, directive.Reference, error) {
@@ -47,7 +91,11 @@ func ExecOneOffWithFilter(
 
 	var val directive.AttachedValue
 	var resErr error
-	var idle bool
+	var idle, wait bool
+
+	if idleCb == nil {
+		idleCb = WaitWhenIdle(false)
+	}
 
 	di, ref, err := bus.AddDirective(
 		dir,
@@ -106,16 +154,9 @@ func ExecOneOffWithFilter(
 		if resErr != nil {
 			return
 		}
-		for _, err := range errs {
-			if err != nil {
-				resErr = err
-				break
-			}
-		}
 		// idle
-		if resErr == nil {
-			idle = true
-		}
+		idle = true
+		wait, resErr = idleCb(errs)
 		bcast.Broadcast()
 	})()
 
@@ -126,7 +167,7 @@ func ExecOneOffWithFilter(
 			mtx.Unlock()
 			return val, di, ref, nil
 		}
-		if resErr != nil || (idle && returnIfIdle) {
+		if resErr != nil || (idle && !wait) {
 			err, ref := resErr, ref
 			mtx.Unlock()
 			ref.Release()

@@ -60,7 +60,7 @@ func TestMarkIdle(t *testing.T) {
 
 	res, _, resRef, err := bus.ExecOneOff(ctx, b, &boilerplate_v1.Boilerplate{
 		MessageText: "hello world",
-	}, true, nil)
+	}, bus.ReturnWhenIdle(), nil)
 	if res != nil || resRef != nil {
 		err = errors.New("expected idle with no values")
 	}

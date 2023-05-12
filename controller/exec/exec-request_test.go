@@ -47,7 +47,7 @@ func TestExecControllerRequest(t *testing.T) {
 		ctx,
 		b,
 		resolver.NewLoadControllerWithConfig(&configset_controller.Config{}),
-		false,
+		nil,
 		nil,
 	)
 	if err != nil {

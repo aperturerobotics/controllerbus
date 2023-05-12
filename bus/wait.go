@@ -9,18 +9,22 @@ import (
 // ExecWaitValue executes a directive and waits for a value matching the cb.
 //
 // valDisposeCallback can be nil, will be called if the value is disposed.
-// If returnIfIdle is set, returns nil, nil, nil if idle.
 // If cb returns true, nil, returns the value.
 // If checkCb is nil, returns first value.
+//
+// idleCb is called when idle with the list of resolver errors.
+// idleCb should return (wait, error): if wait=true, continues to wait.
+// if idleCb is nil: continues to wait when the directive becomes idle
+// errs is the list of errors from the resolvers (if any)
 func ExecWaitValue[T directive.Value](
 	ctx context.Context,
 	b Bus,
 	dir directive.Directive,
-	returnIfIdle bool,
+	idleCb func(errs []error) (bool, error),
 	valDisposeCallback func(),
 	checkCb func(val T) (bool, error),
 ) (T, directive.Instance, directive.Reference, error) {
-	av, avDi, avRef, err := ExecOneOffWithFilter(ctx, b, dir, returnIfIdle, valDisposeCallback, func(val directive.AttachedValue) (bool, error) {
+	av, avDi, avRef, err := ExecOneOffWithFilter(ctx, b, dir, idleCb, valDisposeCallback, func(val directive.AttachedValue) (bool, error) {
 		v, vOk := val.GetValue().(T)
 		if !vOk {
 			return false, nil

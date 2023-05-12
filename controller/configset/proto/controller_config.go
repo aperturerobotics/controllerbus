@@ -66,7 +66,7 @@ func (c *ControllerConfig) Resolve(ctx context.Context, b bus.Bus) (configset.Co
 	}
 
 	configCtorDir := resolver.NewLoadConfigConstructorByID(c.GetId())
-	configCtorVal, _, configCtorRef, err := bus.ExecOneOff(ctx, b, configCtorDir, false, nil)
+	configCtorVal, _, configCtorRef, err := bus.ExecOneOff(ctx, b, configCtorDir, nil, nil)
 	if err != nil {
 		if err == context.Canceled {
 			return nil, err

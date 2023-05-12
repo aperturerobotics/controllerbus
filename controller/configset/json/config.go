@@ -32,7 +32,7 @@ func NewConfigWithJSON(data string) *Config {
 // Resolve constructs the underlying config from the pending parse data.
 func (c *Config) Resolve(ctx context.Context, configID string, b bus.Bus) error {
 	configCtorDir := resolver.NewLoadConfigConstructorByID(configID)
-	configCtorVal, _, configCtorRef, err := bus.ExecOneOff(ctx, b, configCtorDir, false, nil)
+	configCtorVal, _, configCtorRef, err := bus.ExecOneOff(ctx, b, configCtorDir, nil, nil)
 	if err != nil {
 		return errors.WithMessage(err, "resolve config object")
 	}
