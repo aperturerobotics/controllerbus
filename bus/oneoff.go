@@ -44,6 +44,14 @@ func ReturnWhenIdle() ExecIdleCallback {
 	}
 }
 
+// ReturnIfIdle returns an ExecIdleCallback that returns when the directive becomes idle if true.
+func ReturnIfIdle(returnIfIdle bool) ExecIdleCallback {
+	if returnIfIdle {
+		return ReturnWhenIdle()
+	}
+	return WaitWhenIdle(false)
+}
+
 // ExecOneOff executes a one-off directive.
 //
 // idleCb is called when idle with the list of resolver errors.
