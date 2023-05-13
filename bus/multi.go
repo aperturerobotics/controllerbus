@@ -88,13 +88,11 @@ func ExecCollectValues[T directive.Value](
 			},
 			func() {
 				mtx.Lock()
-				if !returned {
-					if resErr == nil && !idle {
-						resErr = ErrDirectiveDisposed
-						bcast.Broadcast()
-					}
-				} else {
+				if returned {
 					defer valDisposeCallback()
+				} else if resErr == nil {
+					resErr = ErrDirectiveDisposed
+					bcast.Broadcast()
 				}
 				mtx.Unlock()
 			},
@@ -110,7 +108,7 @@ func ExecCollectValues[T directive.Value](
 	defer di.AddIdleCallback(func(errs []error) {
 		mtx.Lock()
 		defer mtx.Unlock()
-		if resErr != nil || idle {
+		if resErr != nil {
 			return
 		}
 		for _, err := range errs {
