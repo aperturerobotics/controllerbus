@@ -12,24 +12,33 @@ import (
 // Removes the value and waits for a new one when the value is released.
 // Calls MarkIdle when the value has been added.
 // buildValue can be nil
+// if useCtx is set, uses the refcount resolver context to start the refcount container.
 // If buildValue is set, will be called with the values.
 // if buildValue returns nil, nil, ignores the value.
 type RefCountResolver[T comparable] struct {
 	rc         *refcount.RefCount[T]
+	useCtx     bool
 	buildValue func(val T) (Value, error)
 }
 
 // NewRefCountResolver constructs a new RefCountResolver.
+//
+// if useCtx is set, uses the refcount resolver context to start the refcount container.
 func NewRefCountResolver[T comparable](
 	rc *refcount.RefCount[T],
+	useCtx bool,
 	buildValue func(val T) (Value, error),
 ) *RefCountResolver[T] {
-	return &RefCountResolver[T]{rc: rc, buildValue: buildValue}
+	return &RefCountResolver[T]{
+		rc:         rc,
+		useCtx:     useCtx,
+		buildValue: buildValue,
+	}
 }
 
 // Resolve resolves the values, emitting them to the handler.
 func (r *RefCountResolver[T]) Resolve(ctx context.Context, handler ResolverHandler) error {
-	return r.rc.Access(ctx, func(ctx context.Context, tval T) error {
+	return r.rc.Access(ctx, r.useCtx, func(ctx context.Context, tval T) error {
 		var val Value = tval
 		if r.buildValue != nil {
 			var err error
