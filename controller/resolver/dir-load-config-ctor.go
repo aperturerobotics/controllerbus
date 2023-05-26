@@ -2,6 +2,7 @@ package resolver
 
 import (
 	"errors"
+	"time"
 
 	"github.com/aperturerobotics/controllerbus/config"
 	"github.com/aperturerobotics/controllerbus/directive"
@@ -49,6 +50,9 @@ func (d *loadConfigConstructorByID) GetValueOptions() directive.ValueOptions {
 	return directive.ValueOptions{
 		MaxValueCount:   1,
 		MaxValueHardCap: true,
+
+		UnrefDisposeDur:            time.Millisecond * 500,
+		UnrefDisposeEmptyImmediate: true,
 	}
 }
 
