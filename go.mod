@@ -9,7 +9,7 @@ replace (
 
 require (
 	github.com/aperturerobotics/starpc v0.19.1 // latest
-	github.com/aperturerobotics/util v1.5.0 // latest
+	github.com/aperturerobotics/util v1.5.4 // latest
 	github.com/blang/semver v3.5.1+incompatible
 	github.com/cenkalti/backoff v2.2.1+incompatible
 	github.com/fsnotify/fsnotify v1.6.0
@@ -17,7 +17,7 @@ require (
 	github.com/mr-tron/base58 v1.2.0
 	github.com/pkg/errors v0.9.1
 	github.com/sergi/go-diff v1.3.1
-	github.com/sirupsen/logrus v1.9.2
+	github.com/sirupsen/logrus v1.9.3
 	github.com/urfave/cli/v2 v2.25.3
 	github.com/valyala/fastjson v1.6.4
 	github.com/zeebo/blake3 v0.2.3
