@@ -363,11 +363,12 @@ export interface ControllerBusService {
   ): AsyncIterable<ExecControllerResponse>
 }
 
+export const ControllerBusServiceServiceName = 'bus.api.ControllerBusService'
 export class ControllerBusServiceClientImpl implements ControllerBusService {
   private readonly rpc: Rpc
   private readonly service: string
   constructor(rpc: Rpc, opts?: { service?: string }) {
-    this.service = opts?.service || 'bus.api.ControllerBusService'
+    this.service = opts?.service || ControllerBusServiceServiceName
     this.rpc = rpc
     this.GetBusInfo = this.GetBusInfo.bind(this)
     this.ExecController = this.ExecController.bind(this)

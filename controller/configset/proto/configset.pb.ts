@@ -287,7 +287,7 @@ export const ConfigSet_ConfigurationsEntry = {
 }
 
 function createBaseControllerConfig(): ControllerConfig {
-  return { id: '', rev: Long.UZERO, config: new Uint8Array() }
+  return { id: '', rev: Long.UZERO, config: new Uint8Array(0) }
 }
 
 export const ControllerConfig = {
@@ -387,7 +387,7 @@ export const ControllerConfig = {
       rev: isSet(object.rev) ? Long.fromValue(object.rev) : Long.UZERO,
       config: isSet(object.config)
         ? bytesFromBase64(object.config)
-        : new Uint8Array(),
+        : new Uint8Array(0),
     }
   },
 
@@ -398,7 +398,7 @@ export const ControllerConfig = {
       (obj.rev = (message.rev || Long.UZERO).toString())
     message.config !== undefined &&
       (obj.config = base64FromBytes(
-        message.config !== undefined ? message.config : new Uint8Array()
+        message.config !== undefined ? message.config : new Uint8Array(0)
       ))
     return obj
   },
@@ -418,7 +418,7 @@ export const ControllerConfig = {
       object.rev !== undefined && object.rev !== null
         ? Long.fromValue(object.rev)
         : Long.UZERO
-    message.config = object.config ?? new Uint8Array()
+    message.config = object.config ?? new Uint8Array(0)
     return message
   },
 }
