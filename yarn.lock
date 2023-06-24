@@ -2189,9 +2189,9 @@ ts-proto-descriptors@1.9.0:
     protobufjs "^6.8.8"
 
 ts-proto@^1.150.0:
-  version "1.150.0"
-  resolved "https://registry.yarnpkg.com/ts-proto/-/ts-proto-1.150.0.tgz#41b9a737caa5bc242274eda01749e4ecfc1a4fa2"
-  integrity sha512-EYnKWkNkWRmnK2nG5D9J1zN959YD/gff+e8/nqpOw7kdrfsnCe1dr/+EYxiRhPnq/umVpBLwI/KaSDg9G+9KPA==
+  version "1.150.1"
+  resolved "https://registry.yarnpkg.com/ts-proto/-/ts-proto-1.150.1.tgz#ae412e37b46c78eac77c5d0483fe669b66290883"
+  integrity sha512-8g6zaegwqRZNbLUQxTRPhNj3yygKjVVtA9GO2EwPiJrnh9e1yUPSEPLc2tCRwf5d11D0cSlZhuRxddXkReIbxg==
   dependencies:
     "@types/object-hash" "^3.0.2"
     case-anything "^2.1.10"
