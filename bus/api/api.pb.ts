@@ -34,7 +34,7 @@ function createBaseConfig(): Config {
 export const Config = {
   encode(
     message: Config,
-    writer: _m0.Writer = _m0.Writer.create()
+    writer: _m0.Writer = _m0.Writer.create(),
   ): _m0.Writer {
     if (message.enableExecController === true) {
       writer.uint32(8).bool(message.enableExecController)
@@ -69,7 +69,7 @@ export const Config = {
   // encodeTransform encodes a source of message objects.
   // Transform<Config, Uint8Array>
   async *encodeTransform(
-    source: AsyncIterable<Config | Config[]> | Iterable<Config | Config[]>
+    source: AsyncIterable<Config | Config[]> | Iterable<Config | Config[]>,
   ): AsyncIterable<Uint8Array> {
     for await (const pkt of source) {
       if (Array.isArray(pkt)) {
@@ -87,7 +87,7 @@ export const Config = {
   async *decodeTransform(
     source:
       | AsyncIterable<Uint8Array | Uint8Array[]>
-      | Iterable<Uint8Array | Uint8Array[]>
+      | Iterable<Uint8Array | Uint8Array[]>,
   ): AsyncIterable<Config> {
     for await (const pkt of source) {
       if (Array.isArray(pkt)) {
@@ -133,7 +133,7 @@ function createBaseGetBusInfoRequest(): GetBusInfoRequest {
 export const GetBusInfoRequest = {
   encode(
     _: GetBusInfoRequest,
-    writer: _m0.Writer = _m0.Writer.create()
+    writer: _m0.Writer = _m0.Writer.create(),
   ): _m0.Writer {
     return writer
   },
@@ -160,7 +160,7 @@ export const GetBusInfoRequest = {
   async *encodeTransform(
     source:
       | AsyncIterable<GetBusInfoRequest | GetBusInfoRequest[]>
-      | Iterable<GetBusInfoRequest | GetBusInfoRequest[]>
+      | Iterable<GetBusInfoRequest | GetBusInfoRequest[]>,
   ): AsyncIterable<Uint8Array> {
     for await (const pkt of source) {
       if (Array.isArray(pkt)) {
@@ -178,7 +178,7 @@ export const GetBusInfoRequest = {
   async *decodeTransform(
     source:
       | AsyncIterable<Uint8Array | Uint8Array[]>
-      | Iterable<Uint8Array | Uint8Array[]>
+      | Iterable<Uint8Array | Uint8Array[]>,
   ): AsyncIterable<GetBusInfoRequest> {
     for await (const pkt of source) {
       if (Array.isArray(pkt)) {
@@ -201,13 +201,13 @@ export const GetBusInfoRequest = {
   },
 
   create<I extends Exact<DeepPartial<GetBusInfoRequest>, I>>(
-    base?: I
+    base?: I,
   ): GetBusInfoRequest {
     return GetBusInfoRequest.fromPartial(base ?? {})
   },
 
   fromPartial<I extends Exact<DeepPartial<GetBusInfoRequest>, I>>(
-    _: I
+    _: I,
   ): GetBusInfoRequest {
     const message = createBaseGetBusInfoRequest()
     return message
@@ -221,7 +221,7 @@ function createBaseGetBusInfoResponse(): GetBusInfoResponse {
 export const GetBusInfoResponse = {
   encode(
     message: GetBusInfoResponse,
-    writer: _m0.Writer = _m0.Writer.create()
+    writer: _m0.Writer = _m0.Writer.create(),
   ): _m0.Writer {
     for (const v of message.runningControllers) {
       Info.encode(v!, writer.uint32(10).fork()).ldelim()
@@ -253,7 +253,7 @@ export const GetBusInfoResponse = {
           }
 
           message.runningDirectives.push(
-            DirectiveState.decode(reader, reader.uint32())
+            DirectiveState.decode(reader, reader.uint32()),
           )
           continue
       }
@@ -270,7 +270,7 @@ export const GetBusInfoResponse = {
   async *encodeTransform(
     source:
       | AsyncIterable<GetBusInfoResponse | GetBusInfoResponse[]>
-      | Iterable<GetBusInfoResponse | GetBusInfoResponse[]>
+      | Iterable<GetBusInfoResponse | GetBusInfoResponse[]>,
   ): AsyncIterable<Uint8Array> {
     for await (const pkt of source) {
       if (Array.isArray(pkt)) {
@@ -288,7 +288,7 @@ export const GetBusInfoResponse = {
   async *decodeTransform(
     source:
       | AsyncIterable<Uint8Array | Uint8Array[]>
-      | Iterable<Uint8Array | Uint8Array[]>
+      | Iterable<Uint8Array | Uint8Array[]>,
   ): AsyncIterable<GetBusInfoResponse> {
     for await (const pkt of source) {
       if (Array.isArray(pkt)) {
@@ -316,14 +316,14 @@ export const GetBusInfoResponse = {
     const obj: any = {}
     if (message.runningControllers) {
       obj.runningControllers = message.runningControllers.map((e) =>
-        e ? Info.toJSON(e) : undefined
+        e ? Info.toJSON(e) : undefined,
       )
     } else {
       obj.runningControllers = []
     }
     if (message.runningDirectives) {
       obj.runningDirectives = message.runningDirectives.map((e) =>
-        e ? DirectiveState.toJSON(e) : undefined
+        e ? DirectiveState.toJSON(e) : undefined,
       )
     } else {
       obj.runningDirectives = []
@@ -332,13 +332,13 @@ export const GetBusInfoResponse = {
   },
 
   create<I extends Exact<DeepPartial<GetBusInfoResponse>, I>>(
-    base?: I
+    base?: I,
   ): GetBusInfoResponse {
     return GetBusInfoResponse.fromPartial(base ?? {})
   },
 
   fromPartial<I extends Exact<DeepPartial<GetBusInfoResponse>, I>>(
-    object: I
+    object: I,
   ): GetBusInfoResponse {
     const message = createBaseGetBusInfoResponse()
     message.runningControllers =
@@ -354,12 +354,12 @@ export interface ControllerBusService {
   /** GetBusInfo requests information about the controller bus. */
   GetBusInfo(
     request: GetBusInfoRequest,
-    abortSignal?: AbortSignal
+    abortSignal?: AbortSignal,
   ): Promise<GetBusInfoResponse>
   /** ExecController executes a controller configuration on the bus. */
   ExecController(
     request: ExecControllerRequest,
-    abortSignal?: AbortSignal
+    abortSignal?: AbortSignal,
   ): AsyncIterable<ExecControllerResponse>
 }
 
@@ -375,30 +375,30 @@ export class ControllerBusServiceClientImpl implements ControllerBusService {
   }
   GetBusInfo(
     request: GetBusInfoRequest,
-    abortSignal?: AbortSignal
+    abortSignal?: AbortSignal,
   ): Promise<GetBusInfoResponse> {
     const data = GetBusInfoRequest.encode(request).finish()
     const promise = this.rpc.request(
       this.service,
       'GetBusInfo',
       data,
-      abortSignal || undefined
+      abortSignal || undefined,
     )
     return promise.then((data) =>
-      GetBusInfoResponse.decode(_m0.Reader.create(data))
+      GetBusInfoResponse.decode(_m0.Reader.create(data)),
     )
   }
 
   ExecController(
     request: ExecControllerRequest,
-    abortSignal?: AbortSignal
+    abortSignal?: AbortSignal,
   ): AsyncIterable<ExecControllerResponse> {
     const data = ExecControllerRequest.encode(request).finish()
     const result = this.rpc.serverStreamingRequest(
       this.service,
       'ExecController',
       data,
-      abortSignal || undefined
+      abortSignal || undefined,
     )
     return ExecControllerResponse.decodeTransform(result)
   }
@@ -437,25 +437,25 @@ interface Rpc {
     service: string,
     method: string,
     data: Uint8Array,
-    abortSignal?: AbortSignal
+    abortSignal?: AbortSignal,
   ): Promise<Uint8Array>
   clientStreamingRequest(
     service: string,
     method: string,
     data: AsyncIterable<Uint8Array>,
-    abortSignal?: AbortSignal
+    abortSignal?: AbortSignal,
   ): Promise<Uint8Array>
   serverStreamingRequest(
     service: string,
     method: string,
     data: Uint8Array,
-    abortSignal?: AbortSignal
+    abortSignal?: AbortSignal,
   ): AsyncIterable<Uint8Array>
   bidirectionalStreamingRequest(
     service: string,
     method: string,
     data: AsyncIterable<Uint8Array>,
-    abortSignal?: AbortSignal
+    abortSignal?: AbortSignal,
   ): AsyncIterable<Uint8Array>
 }
 

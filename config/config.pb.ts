@@ -38,7 +38,7 @@ export const Placeholder = {
   async *encodeTransform(
     source:
       | AsyncIterable<Placeholder | Placeholder[]>
-      | Iterable<Placeholder | Placeholder[]>
+      | Iterable<Placeholder | Placeholder[]>,
   ): AsyncIterable<Uint8Array> {
     for await (const pkt of source) {
       if (Array.isArray(pkt)) {
@@ -56,7 +56,7 @@ export const Placeholder = {
   async *decodeTransform(
     source:
       | AsyncIterable<Uint8Array | Uint8Array[]>
-      | Iterable<Uint8Array | Uint8Array[]>
+      | Iterable<Uint8Array | Uint8Array[]>,
   ): AsyncIterable<Placeholder> {
     for await (const pkt of source) {
       if (Array.isArray(pkt)) {

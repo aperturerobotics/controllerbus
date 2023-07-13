@@ -27,7 +27,7 @@ function createBaseBoilerplate(): Boilerplate {
 export const Boilerplate = {
   encode(
     message: Boilerplate,
-    writer: _m0.Writer = _m0.Writer.create()
+    writer: _m0.Writer = _m0.Writer.create(),
   ): _m0.Writer {
     if (message.messageText !== '') {
       writer.uint32(10).string(message.messageText)
@@ -64,7 +64,7 @@ export const Boilerplate = {
   async *encodeTransform(
     source:
       | AsyncIterable<Boilerplate | Boilerplate[]>
-      | Iterable<Boilerplate | Boilerplate[]>
+      | Iterable<Boilerplate | Boilerplate[]>,
   ): AsyncIterable<Uint8Array> {
     for await (const pkt of source) {
       if (Array.isArray(pkt)) {
@@ -82,7 +82,7 @@ export const Boilerplate = {
   async *decodeTransform(
     source:
       | AsyncIterable<Uint8Array | Uint8Array[]>
-      | Iterable<Uint8Array | Uint8Array[]>
+      | Iterable<Uint8Array | Uint8Array[]>,
   ): AsyncIterable<Boilerplate> {
     for await (const pkt of source) {
       if (Array.isArray(pkt)) {
@@ -112,7 +112,7 @@ export const Boilerplate = {
   },
 
   fromPartial<I extends Exact<DeepPartial<Boilerplate>, I>>(
-    object: I
+    object: I,
   ): Boilerplate {
     const message = createBaseBoilerplate()
     message.messageText = object.messageText ?? ''
@@ -127,7 +127,7 @@ function createBaseBoilerplateResult(): BoilerplateResult {
 export const BoilerplateResult = {
   encode(
     message: BoilerplateResult,
-    writer: _m0.Writer = _m0.Writer.create()
+    writer: _m0.Writer = _m0.Writer.create(),
   ): _m0.Writer {
     if (message.printedLen !== 0) {
       writer.uint32(8).uint32(message.printedLen)
@@ -164,7 +164,7 @@ export const BoilerplateResult = {
   async *encodeTransform(
     source:
       | AsyncIterable<BoilerplateResult | BoilerplateResult[]>
-      | Iterable<BoilerplateResult | BoilerplateResult[]>
+      | Iterable<BoilerplateResult | BoilerplateResult[]>,
   ): AsyncIterable<Uint8Array> {
     for await (const pkt of source) {
       if (Array.isArray(pkt)) {
@@ -182,7 +182,7 @@ export const BoilerplateResult = {
   async *decodeTransform(
     source:
       | AsyncIterable<Uint8Array | Uint8Array[]>
-      | Iterable<Uint8Array | Uint8Array[]>
+      | Iterable<Uint8Array | Uint8Array[]>,
   ): AsyncIterable<BoilerplateResult> {
     for await (const pkt of source) {
       if (Array.isArray(pkt)) {
@@ -209,13 +209,13 @@ export const BoilerplateResult = {
   },
 
   create<I extends Exact<DeepPartial<BoilerplateResult>, I>>(
-    base?: I
+    base?: I,
   ): BoilerplateResult {
     return BoilerplateResult.fromPartial(base ?? {})
   },
 
   fromPartial<I extends Exact<DeepPartial<BoilerplateResult>, I>>(
-    object: I
+    object: I,
   ): BoilerplateResult {
     const message = createBaseBoilerplateResult()
     message.printedLen = object.printedLen ?? 0

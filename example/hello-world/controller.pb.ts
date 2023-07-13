@@ -17,7 +17,7 @@ function createBaseToyControllerConfig(): ToyControllerConfig {
 export const ToyControllerConfig = {
   encode(
     message: ToyControllerConfig,
-    writer: _m0.Writer = _m0.Writer.create()
+    writer: _m0.Writer = _m0.Writer.create(),
   ): _m0.Writer {
     if (message.name !== '') {
       writer.uint32(10).string(message.name)
@@ -54,7 +54,7 @@ export const ToyControllerConfig = {
   async *encodeTransform(
     source:
       | AsyncIterable<ToyControllerConfig | ToyControllerConfig[]>
-      | Iterable<ToyControllerConfig | ToyControllerConfig[]>
+      | Iterable<ToyControllerConfig | ToyControllerConfig[]>,
   ): AsyncIterable<Uint8Array> {
     for await (const pkt of source) {
       if (Array.isArray(pkt)) {
@@ -72,7 +72,7 @@ export const ToyControllerConfig = {
   async *decodeTransform(
     source:
       | AsyncIterable<Uint8Array | Uint8Array[]>
-      | Iterable<Uint8Array | Uint8Array[]>
+      | Iterable<Uint8Array | Uint8Array[]>,
   ): AsyncIterable<ToyControllerConfig> {
     for await (const pkt of source) {
       if (Array.isArray(pkt)) {
@@ -96,13 +96,13 @@ export const ToyControllerConfig = {
   },
 
   create<I extends Exact<DeepPartial<ToyControllerConfig>, I>>(
-    base?: I
+    base?: I,
   ): ToyControllerConfig {
     return ToyControllerConfig.fromPartial(base ?? {})
   },
 
   fromPartial<I extends Exact<DeepPartial<ToyControllerConfig>, I>>(
-    object: I
+    object: I,
   ): ToyControllerConfig {
     const message = createBaseToyControllerConfig()
     message.name = object.name ?? ''

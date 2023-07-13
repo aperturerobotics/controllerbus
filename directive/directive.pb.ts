@@ -33,7 +33,7 @@ function createBaseDirectiveInfo(): DirectiveInfo {
 export const DirectiveInfo = {
   encode(
     message: DirectiveInfo,
-    writer: _m0.Writer = _m0.Writer.create()
+    writer: _m0.Writer = _m0.Writer.create(),
   ): _m0.Writer {
     if (message.name !== '') {
       writer.uint32(10).string(message.name)
@@ -65,7 +65,7 @@ export const DirectiveInfo = {
           }
 
           message.debugVals.push(
-            ProtoDebugValue.decode(reader, reader.uint32())
+            ProtoDebugValue.decode(reader, reader.uint32()),
           )
           continue
       }
@@ -82,7 +82,7 @@ export const DirectiveInfo = {
   async *encodeTransform(
     source:
       | AsyncIterable<DirectiveInfo | DirectiveInfo[]>
-      | Iterable<DirectiveInfo | DirectiveInfo[]>
+      | Iterable<DirectiveInfo | DirectiveInfo[]>,
   ): AsyncIterable<Uint8Array> {
     for await (const pkt of source) {
       if (Array.isArray(pkt)) {
@@ -100,7 +100,7 @@ export const DirectiveInfo = {
   async *decodeTransform(
     source:
       | AsyncIterable<Uint8Array | Uint8Array[]>
-      | Iterable<Uint8Array | Uint8Array[]>
+      | Iterable<Uint8Array | Uint8Array[]>,
   ): AsyncIterable<DirectiveInfo> {
     for await (const pkt of source) {
       if (Array.isArray(pkt)) {
@@ -127,7 +127,7 @@ export const DirectiveInfo = {
     message.name !== undefined && (obj.name = message.name)
     if (message.debugVals) {
       obj.debugVals = message.debugVals.map((e) =>
-        e ? ProtoDebugValue.toJSON(e) : undefined
+        e ? ProtoDebugValue.toJSON(e) : undefined,
       )
     } else {
       obj.debugVals = []
@@ -136,13 +136,13 @@ export const DirectiveInfo = {
   },
 
   create<I extends Exact<DeepPartial<DirectiveInfo>, I>>(
-    base?: I
+    base?: I,
   ): DirectiveInfo {
     return DirectiveInfo.fromPartial(base ?? {})
   },
 
   fromPartial<I extends Exact<DeepPartial<DirectiveInfo>, I>>(
-    object: I
+    object: I,
   ): DirectiveInfo {
     const message = createBaseDirectiveInfo()
     message.name = object.name ?? ''
@@ -159,7 +159,7 @@ function createBaseDirectiveState(): DirectiveState {
 export const DirectiveState = {
   encode(
     message: DirectiveState,
-    writer: _m0.Writer = _m0.Writer.create()
+    writer: _m0.Writer = _m0.Writer.create(),
   ): _m0.Writer {
     if (message.info !== undefined) {
       DirectiveInfo.encode(message.info, writer.uint32(10).fork()).ldelim()
@@ -196,7 +196,7 @@ export const DirectiveState = {
   async *encodeTransform(
     source:
       | AsyncIterable<DirectiveState | DirectiveState[]>
-      | Iterable<DirectiveState | DirectiveState[]>
+      | Iterable<DirectiveState | DirectiveState[]>,
   ): AsyncIterable<Uint8Array> {
     for await (const pkt of source) {
       if (Array.isArray(pkt)) {
@@ -214,7 +214,7 @@ export const DirectiveState = {
   async *decodeTransform(
     source:
       | AsyncIterable<Uint8Array | Uint8Array[]>
-      | Iterable<Uint8Array | Uint8Array[]>
+      | Iterable<Uint8Array | Uint8Array[]>,
   ): AsyncIterable<DirectiveState> {
     for await (const pkt of source) {
       if (Array.isArray(pkt)) {
@@ -243,13 +243,13 @@ export const DirectiveState = {
   },
 
   create<I extends Exact<DeepPartial<DirectiveState>, I>>(
-    base?: I
+    base?: I,
   ): DirectiveState {
     return DirectiveState.fromPartial(base ?? {})
   },
 
   fromPartial<I extends Exact<DeepPartial<DirectiveState>, I>>(
-    object: I
+    object: I,
   ): DirectiveState {
     const message = createBaseDirectiveState()
     message.info =
@@ -267,7 +267,7 @@ function createBaseProtoDebugValue(): ProtoDebugValue {
 export const ProtoDebugValue = {
   encode(
     message: ProtoDebugValue,
-    writer: _m0.Writer = _m0.Writer.create()
+    writer: _m0.Writer = _m0.Writer.create(),
   ): _m0.Writer {
     if (message.key !== '') {
       writer.uint32(10).string(message.key)
@@ -314,7 +314,7 @@ export const ProtoDebugValue = {
   async *encodeTransform(
     source:
       | AsyncIterable<ProtoDebugValue | ProtoDebugValue[]>
-      | Iterable<ProtoDebugValue | ProtoDebugValue[]>
+      | Iterable<ProtoDebugValue | ProtoDebugValue[]>,
   ): AsyncIterable<Uint8Array> {
     for await (const pkt of source) {
       if (Array.isArray(pkt)) {
@@ -332,7 +332,7 @@ export const ProtoDebugValue = {
   async *decodeTransform(
     source:
       | AsyncIterable<Uint8Array | Uint8Array[]>
-      | Iterable<Uint8Array | Uint8Array[]>
+      | Iterable<Uint8Array | Uint8Array[]>,
   ): AsyncIterable<ProtoDebugValue> {
     for await (const pkt of source) {
       if (Array.isArray(pkt)) {
@@ -366,13 +366,13 @@ export const ProtoDebugValue = {
   },
 
   create<I extends Exact<DeepPartial<ProtoDebugValue>, I>>(
-    base?: I
+    base?: I,
   ): ProtoDebugValue {
     return ProtoDebugValue.fromPartial(base ?? {})
   },
 
   fromPartial<I extends Exact<DeepPartial<ProtoDebugValue>, I>>(
-    object: I
+    object: I,
   ): ProtoDebugValue {
     const message = createBaseProtoDebugValue()
     message.key = object.key ?? ''

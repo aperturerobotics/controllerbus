@@ -35,12 +35,12 @@ function createBaseConfigSet(): ConfigSet {
 export const ConfigSet = {
   encode(
     message: ConfigSet,
-    writer: _m0.Writer = _m0.Writer.create()
+    writer: _m0.Writer = _m0.Writer.create(),
   ): _m0.Writer {
     Object.entries(message.configurations).forEach(([key, value]) => {
       ConfigSet_ConfigurationsEntry.encode(
         { key: key as any, value },
-        writer.uint32(10).fork()
+        writer.uint32(10).fork(),
       ).ldelim()
     })
     return writer
@@ -61,7 +61,7 @@ export const ConfigSet = {
 
           const entry1 = ConfigSet_ConfigurationsEntry.decode(
             reader,
-            reader.uint32()
+            reader.uint32(),
           )
           if (entry1.value !== undefined) {
             message.configurations[entry1.key] = entry1.value
@@ -81,7 +81,7 @@ export const ConfigSet = {
   async *encodeTransform(
     source:
       | AsyncIterable<ConfigSet | ConfigSet[]>
-      | Iterable<ConfigSet | ConfigSet[]>
+      | Iterable<ConfigSet | ConfigSet[]>,
   ): AsyncIterable<Uint8Array> {
     for await (const pkt of source) {
       if (Array.isArray(pkt)) {
@@ -99,7 +99,7 @@ export const ConfigSet = {
   async *decodeTransform(
     source:
       | AsyncIterable<Uint8Array | Uint8Array[]>
-      | Iterable<Uint8Array | Uint8Array[]>
+      | Iterable<Uint8Array | Uint8Array[]>,
   ): AsyncIterable<ConfigSet> {
     for await (const pkt of source) {
       if (Array.isArray(pkt)) {
@@ -141,11 +141,11 @@ export const ConfigSet = {
   },
 
   fromPartial<I extends Exact<DeepPartial<ConfigSet>, I>>(
-    object: I
+    object: I,
   ): ConfigSet {
     const message = createBaseConfigSet()
     message.configurations = Object.entries(
-      object.configurations ?? {}
+      object.configurations ?? {},
     ).reduce<{ [key: string]: ControllerConfig }>((acc, [key, value]) => {
       if (value !== undefined) {
         acc[key] = ControllerConfig.fromPartial(value)
@@ -163,7 +163,7 @@ function createBaseConfigSet_ConfigurationsEntry(): ConfigSet_ConfigurationsEntr
 export const ConfigSet_ConfigurationsEntry = {
   encode(
     message: ConfigSet_ConfigurationsEntry,
-    writer: _m0.Writer = _m0.Writer.create()
+    writer: _m0.Writer = _m0.Writer.create(),
   ): _m0.Writer {
     if (message.key !== '') {
       writer.uint32(10).string(message.key)
@@ -176,7 +176,7 @@ export const ConfigSet_ConfigurationsEntry = {
 
   decode(
     input: _m0.Reader | Uint8Array,
-    length?: number
+    length?: number,
   ): ConfigSet_ConfigurationsEntry {
     const reader =
       input instanceof _m0.Reader ? input : _m0.Reader.create(input)
@@ -217,7 +217,7 @@ export const ConfigSet_ConfigurationsEntry = {
         >
       | Iterable<
           ConfigSet_ConfigurationsEntry | ConfigSet_ConfigurationsEntry[]
-        >
+        >,
   ): AsyncIterable<Uint8Array> {
     for await (const pkt of source) {
       if (Array.isArray(pkt)) {
@@ -235,7 +235,7 @@ export const ConfigSet_ConfigurationsEntry = {
   async *decodeTransform(
     source:
       | AsyncIterable<Uint8Array | Uint8Array[]>
-      | Iterable<Uint8Array | Uint8Array[]>
+      | Iterable<Uint8Array | Uint8Array[]>,
   ): AsyncIterable<ConfigSet_ConfigurationsEntry> {
     for await (const pkt of source) {
       if (Array.isArray(pkt)) {
@@ -268,13 +268,13 @@ export const ConfigSet_ConfigurationsEntry = {
   },
 
   create<I extends Exact<DeepPartial<ConfigSet_ConfigurationsEntry>, I>>(
-    base?: I
+    base?: I,
   ): ConfigSet_ConfigurationsEntry {
     return ConfigSet_ConfigurationsEntry.fromPartial(base ?? {})
   },
 
   fromPartial<I extends Exact<DeepPartial<ConfigSet_ConfigurationsEntry>, I>>(
-    object: I
+    object: I,
   ): ConfigSet_ConfigurationsEntry {
     const message = createBaseConfigSet_ConfigurationsEntry()
     message.key = object.key ?? ''
@@ -293,7 +293,7 @@ function createBaseControllerConfig(): ControllerConfig {
 export const ControllerConfig = {
   encode(
     message: ControllerConfig,
-    writer: _m0.Writer = _m0.Writer.create()
+    writer: _m0.Writer = _m0.Writer.create(),
   ): _m0.Writer {
     if (message.id !== '') {
       writer.uint32(10).string(message.id)
@@ -350,7 +350,7 @@ export const ControllerConfig = {
   async *encodeTransform(
     source:
       | AsyncIterable<ControllerConfig | ControllerConfig[]>
-      | Iterable<ControllerConfig | ControllerConfig[]>
+      | Iterable<ControllerConfig | ControllerConfig[]>,
   ): AsyncIterable<Uint8Array> {
     for await (const pkt of source) {
       if (Array.isArray(pkt)) {
@@ -368,7 +368,7 @@ export const ControllerConfig = {
   async *decodeTransform(
     source:
       | AsyncIterable<Uint8Array | Uint8Array[]>
-      | Iterable<Uint8Array | Uint8Array[]>
+      | Iterable<Uint8Array | Uint8Array[]>,
   ): AsyncIterable<ControllerConfig> {
     for await (const pkt of source) {
       if (Array.isArray(pkt)) {
@@ -398,19 +398,19 @@ export const ControllerConfig = {
       (obj.rev = (message.rev || Long.UZERO).toString())
     message.config !== undefined &&
       (obj.config = base64FromBytes(
-        message.config !== undefined ? message.config : new Uint8Array(0)
+        message.config !== undefined ? message.config : new Uint8Array(0),
       ))
     return obj
   },
 
   create<I extends Exact<DeepPartial<ControllerConfig>, I>>(
-    base?: I
+    base?: I,
   ): ControllerConfig {
     return ControllerConfig.fromPartial(base ?? {})
   },
 
   fromPartial<I extends Exact<DeepPartial<ControllerConfig>, I>>(
-    object: I
+    object: I,
   ): ControllerConfig {
     const message = createBaseControllerConfig()
     message.id = object.id ?? ''
@@ -423,10 +423,10 @@ export const ControllerConfig = {
   },
 }
 
-declare var self: any | undefined
-declare var window: any | undefined
-declare var global: any | undefined
-var tsProtoGlobalThis: any = (() => {
+declare const self: any | undefined
+declare const window: any | undefined
+declare const global: any | undefined
+const tsProtoGlobalThis: any = (() => {
   if (typeof globalThis !== 'undefined') {
     return globalThis
   }
