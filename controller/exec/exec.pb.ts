@@ -199,23 +199,23 @@ export const ExecControllerRequest = {
 
   toJSON(message: ExecControllerRequest): unknown {
     const obj: any = {}
-    message.configSet !== undefined &&
-      (obj.configSet = message.configSet
-        ? ConfigSet.toJSON(message.configSet)
-        : undefined)
-    message.configSetYaml !== undefined &&
-      (obj.configSetYaml = message.configSetYaml)
-    message.configSetYamlOverwrite !== undefined &&
-      (obj.configSetYamlOverwrite = message.configSetYamlOverwrite)
+    if (message.configSet !== undefined) {
+      obj.configSet = ConfigSet.toJSON(message.configSet)
+    }
+    if (message.configSetYaml !== '') {
+      obj.configSetYaml = message.configSetYaml
+    }
+    if (message.configSetYamlOverwrite === true) {
+      obj.configSetYamlOverwrite = message.configSetYamlOverwrite
+    }
     return obj
   },
 
   create<I extends Exact<DeepPartial<ExecControllerRequest>, I>>(
     base?: I,
   ): ExecControllerRequest {
-    return ExecControllerRequest.fromPartial(base ?? {})
+    return ExecControllerRequest.fromPartial(base ?? ({} as any))
   },
-
   fromPartial<I extends Exact<DeepPartial<ExecControllerRequest>, I>>(
     object: I,
   ): ExecControllerRequest {
@@ -353,23 +353,26 @@ export const ExecControllerResponse = {
 
   toJSON(message: ExecControllerResponse): unknown {
     const obj: any = {}
-    message.id !== undefined && (obj.id = message.id)
-    message.status !== undefined &&
-      (obj.status = controllerStatusToJSON(message.status))
-    message.controllerInfo !== undefined &&
-      (obj.controllerInfo = message.controllerInfo
-        ? Info.toJSON(message.controllerInfo)
-        : undefined)
-    message.errorInfo !== undefined && (obj.errorInfo = message.errorInfo)
+    if (message.id !== '') {
+      obj.id = message.id
+    }
+    if (message.status !== 0) {
+      obj.status = controllerStatusToJSON(message.status)
+    }
+    if (message.controllerInfo !== undefined) {
+      obj.controllerInfo = Info.toJSON(message.controllerInfo)
+    }
+    if (message.errorInfo !== '') {
+      obj.errorInfo = message.errorInfo
+    }
     return obj
   },
 
   create<I extends Exact<DeepPartial<ExecControllerResponse>, I>>(
     base?: I,
   ): ExecControllerResponse {
-    return ExecControllerResponse.fromPartial(base ?? {})
+    return ExecControllerResponse.fromPartial(base ?? ({} as any))
   },
-
   fromPartial<I extends Exact<DeepPartial<ExecControllerResponse>, I>>(
     object: I,
   ): ExecControllerResponse {

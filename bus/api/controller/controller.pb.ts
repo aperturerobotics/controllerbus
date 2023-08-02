@@ -107,18 +107,18 @@ export const Config = {
 
   toJSON(message: Config): unknown {
     const obj: any = {}
-    message.listenAddr !== undefined && (obj.listenAddr = message.listenAddr)
-    message.busApiConfig !== undefined &&
-      (obj.busApiConfig = message.busApiConfig
-        ? Config1.toJSON(message.busApiConfig)
-        : undefined)
+    if (message.listenAddr !== '') {
+      obj.listenAddr = message.listenAddr
+    }
+    if (message.busApiConfig !== undefined) {
+      obj.busApiConfig = Config1.toJSON(message.busApiConfig)
+    }
     return obj
   },
 
   create<I extends Exact<DeepPartial<Config>, I>>(base?: I): Config {
-    return Config.fromPartial(base ?? {})
+    return Config.fromPartial(base ?? ({} as any))
   },
-
   fromPartial<I extends Exact<DeepPartial<Config>, I>>(object: I): Config {
     const message = createBaseConfig()
     message.listenAddr = object.listenAddr ?? ''

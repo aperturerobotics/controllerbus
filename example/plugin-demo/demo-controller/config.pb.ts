@@ -93,15 +93,15 @@ export const Config = {
 
   toJSON(message: Config): unknown {
     const obj: any = {}
-    message.exitAfterDur !== undefined &&
-      (obj.exitAfterDur = message.exitAfterDur)
+    if (message.exitAfterDur !== '') {
+      obj.exitAfterDur = message.exitAfterDur
+    }
     return obj
   },
 
   create<I extends Exact<DeepPartial<Config>, I>>(base?: I): Config {
-    return Config.fromPartial(base ?? {})
+    return Config.fromPartial(base ?? ({} as any))
   },
-
   fromPartial<I extends Exact<DeepPartial<Config>, I>>(object: I): Config {
     const message = createBaseConfig()
     message.exitAfterDur = object.exitAfterDur ?? ''

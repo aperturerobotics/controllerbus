@@ -104,15 +104,18 @@ export const Config = {
 
   toJSON(message: Config): unknown {
     const obj: any = {}
-    message.dir !== undefined && (obj.dir = message.dir)
-    message.watch !== undefined && (obj.watch = message.watch)
+    if (message.dir !== '') {
+      obj.dir = message.dir
+    }
+    if (message.watch === true) {
+      obj.watch = message.watch
+    }
     return obj
   },
 
   create<I extends Exact<DeepPartial<Config>, I>>(base?: I): Config {
-    return Config.fromPartial(base ?? {})
+    return Config.fromPartial(base ?? ({} as any))
   },
-
   fromPartial<I extends Exact<DeepPartial<Config>, I>>(object: I): Config {
     const message = createBaseConfig()
     message.dir = object.dir ?? ''

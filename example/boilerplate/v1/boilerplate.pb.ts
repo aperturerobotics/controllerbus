@@ -103,14 +103,15 @@ export const Boilerplate = {
 
   toJSON(message: Boilerplate): unknown {
     const obj: any = {}
-    message.messageText !== undefined && (obj.messageText = message.messageText)
+    if (message.messageText !== '') {
+      obj.messageText = message.messageText
+    }
     return obj
   },
 
   create<I extends Exact<DeepPartial<Boilerplate>, I>>(base?: I): Boilerplate {
-    return Boilerplate.fromPartial(base ?? {})
+    return Boilerplate.fromPartial(base ?? ({} as any))
   },
-
   fromPartial<I extends Exact<DeepPartial<Boilerplate>, I>>(
     object: I,
   ): Boilerplate {
@@ -203,17 +204,17 @@ export const BoilerplateResult = {
 
   toJSON(message: BoilerplateResult): unknown {
     const obj: any = {}
-    message.printedLen !== undefined &&
-      (obj.printedLen = Math.round(message.printedLen))
+    if (message.printedLen !== 0) {
+      obj.printedLen = Math.round(message.printedLen)
+    }
     return obj
   },
 
   create<I extends Exact<DeepPartial<BoilerplateResult>, I>>(
     base?: I,
   ): BoilerplateResult {
-    return BoilerplateResult.fromPartial(base ?? {})
+    return BoilerplateResult.fromPartial(base ?? ({} as any))
   },
-
   fromPartial<I extends Exact<DeepPartial<BoilerplateResult>, I>>(
     object: I,
   ): BoilerplateResult {

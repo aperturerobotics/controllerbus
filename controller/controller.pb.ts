@@ -114,16 +114,21 @@ export const Info = {
 
   toJSON(message: Info): unknown {
     const obj: any = {}
-    message.id !== undefined && (obj.id = message.id)
-    message.version !== undefined && (obj.version = message.version)
-    message.description !== undefined && (obj.description = message.description)
+    if (message.id !== '') {
+      obj.id = message.id
+    }
+    if (message.version !== '') {
+      obj.version = message.version
+    }
+    if (message.description !== '') {
+      obj.description = message.description
+    }
     return obj
   },
 
   create<I extends Exact<DeepPartial<Info>, I>>(base?: I): Info {
-    return Info.fromPartial(base ?? {})
+    return Info.fromPartial(base ?? ({} as any))
   },
-
   fromPartial<I extends Exact<DeepPartial<Info>, I>>(object: I): Info {
     const message = createBaseInfo()
     message.id = object.id ?? ''

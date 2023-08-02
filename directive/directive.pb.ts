@@ -124,13 +124,11 @@ export const DirectiveInfo = {
 
   toJSON(message: DirectiveInfo): unknown {
     const obj: any = {}
-    message.name !== undefined && (obj.name = message.name)
-    if (message.debugVals) {
-      obj.debugVals = message.debugVals.map((e) =>
-        e ? ProtoDebugValue.toJSON(e) : undefined,
-      )
-    } else {
-      obj.debugVals = []
+    if (message.name !== '') {
+      obj.name = message.name
+    }
+    if (message.debugVals?.length) {
+      obj.debugVals = message.debugVals.map((e) => ProtoDebugValue.toJSON(e))
     }
     return obj
   },
@@ -138,9 +136,8 @@ export const DirectiveInfo = {
   create<I extends Exact<DeepPartial<DirectiveInfo>, I>>(
     base?: I,
   ): DirectiveInfo {
-    return DirectiveInfo.fromPartial(base ?? {})
+    return DirectiveInfo.fromPartial(base ?? ({} as any))
   },
-
   fromPartial<I extends Exact<DeepPartial<DirectiveInfo>, I>>(
     object: I,
   ): DirectiveInfo {
@@ -237,17 +234,17 @@ export const DirectiveState = {
 
   toJSON(message: DirectiveState): unknown {
     const obj: any = {}
-    message.info !== undefined &&
-      (obj.info = message.info ? DirectiveInfo.toJSON(message.info) : undefined)
+    if (message.info !== undefined) {
+      obj.info = DirectiveInfo.toJSON(message.info)
+    }
     return obj
   },
 
   create<I extends Exact<DeepPartial<DirectiveState>, I>>(
     base?: I,
   ): DirectiveState {
-    return DirectiveState.fromPartial(base ?? {})
+    return DirectiveState.fromPartial(base ?? ({} as any))
   },
-
   fromPartial<I extends Exact<DeepPartial<DirectiveState>, I>>(
     object: I,
   ): DirectiveState {
@@ -356,11 +353,11 @@ export const ProtoDebugValue = {
 
   toJSON(message: ProtoDebugValue): unknown {
     const obj: any = {}
-    message.key !== undefined && (obj.key = message.key)
-    if (message.values) {
-      obj.values = message.values.map((e) => e)
-    } else {
-      obj.values = []
+    if (message.key !== '') {
+      obj.key = message.key
+    }
+    if (message.values?.length) {
+      obj.values = message.values
     }
     return obj
   },
@@ -368,9 +365,8 @@ export const ProtoDebugValue = {
   create<I extends Exact<DeepPartial<ProtoDebugValue>, I>>(
     base?: I,
   ): ProtoDebugValue {
-    return ProtoDebugValue.fromPartial(base ?? {})
+    return ProtoDebugValue.fromPartial(base ?? ({} as any))
   },
-
   fromPartial<I extends Exact<DeepPartial<ProtoDebugValue>, I>>(
     object: I,
   ): ProtoDebugValue {

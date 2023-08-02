@@ -91,16 +91,17 @@ export const ToyControllerConfig = {
 
   toJSON(message: ToyControllerConfig): unknown {
     const obj: any = {}
-    message.name !== undefined && (obj.name = message.name)
+    if (message.name !== '') {
+      obj.name = message.name
+    }
     return obj
   },
 
   create<I extends Exact<DeepPartial<ToyControllerConfig>, I>>(
     base?: I,
   ): ToyControllerConfig {
-    return ToyControllerConfig.fromPartial(base ?? {})
+    return ToyControllerConfig.fromPartial(base ?? ({} as any))
   },
-
   fromPartial<I extends Exact<DeepPartial<ToyControllerConfig>, I>>(
     object: I,
   ): ToyControllerConfig {

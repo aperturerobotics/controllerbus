@@ -110,15 +110,15 @@ export const Config = {
 
   toJSON(message: Config): unknown {
     const obj: any = {}
-    message.enableExecController !== undefined &&
-      (obj.enableExecController = message.enableExecController)
+    if (message.enableExecController === true) {
+      obj.enableExecController = message.enableExecController
+    }
     return obj
   },
 
   create<I extends Exact<DeepPartial<Config>, I>>(base?: I): Config {
-    return Config.fromPartial(base ?? {})
+    return Config.fromPartial(base ?? ({} as any))
   },
-
   fromPartial<I extends Exact<DeepPartial<Config>, I>>(object: I): Config {
     const message = createBaseConfig()
     message.enableExecController = object.enableExecController ?? false
@@ -203,9 +203,8 @@ export const GetBusInfoRequest = {
   create<I extends Exact<DeepPartial<GetBusInfoRequest>, I>>(
     base?: I,
   ): GetBusInfoRequest {
-    return GetBusInfoRequest.fromPartial(base ?? {})
+    return GetBusInfoRequest.fromPartial(base ?? ({} as any))
   },
-
   fromPartial<I extends Exact<DeepPartial<GetBusInfoRequest>, I>>(
     _: I,
   ): GetBusInfoRequest {
@@ -314,19 +313,15 @@ export const GetBusInfoResponse = {
 
   toJSON(message: GetBusInfoResponse): unknown {
     const obj: any = {}
-    if (message.runningControllers) {
+    if (message.runningControllers?.length) {
       obj.runningControllers = message.runningControllers.map((e) =>
-        e ? Info.toJSON(e) : undefined,
+        Info.toJSON(e),
       )
-    } else {
-      obj.runningControllers = []
     }
-    if (message.runningDirectives) {
+    if (message.runningDirectives?.length) {
       obj.runningDirectives = message.runningDirectives.map((e) =>
-        e ? DirectiveState.toJSON(e) : undefined,
+        DirectiveState.toJSON(e),
       )
-    } else {
-      obj.runningDirectives = []
     }
     return obj
   },
@@ -334,9 +329,8 @@ export const GetBusInfoResponse = {
   create<I extends Exact<DeepPartial<GetBusInfoResponse>, I>>(
     base?: I,
   ): GetBusInfoResponse {
-    return GetBusInfoResponse.fromPartial(base ?? {})
+    return GetBusInfoResponse.fromPartial(base ?? ({} as any))
   },
-
   fromPartial<I extends Exact<DeepPartial<GetBusInfoResponse>, I>>(
     object: I,
   ): GetBusInfoResponse {

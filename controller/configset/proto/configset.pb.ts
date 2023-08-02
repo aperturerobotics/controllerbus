@@ -127,19 +127,21 @@ export const ConfigSet = {
 
   toJSON(message: ConfigSet): unknown {
     const obj: any = {}
-    obj.configurations = {}
     if (message.configurations) {
-      Object.entries(message.configurations).forEach(([k, v]) => {
-        obj.configurations[k] = ControllerConfig.toJSON(v)
-      })
+      const entries = Object.entries(message.configurations)
+      if (entries.length > 0) {
+        obj.configurations = {}
+        entries.forEach(([k, v]) => {
+          obj.configurations[k] = ControllerConfig.toJSON(v)
+        })
+      }
     }
     return obj
   },
 
   create<I extends Exact<DeepPartial<ConfigSet>, I>>(base?: I): ConfigSet {
-    return ConfigSet.fromPartial(base ?? {})
+    return ConfigSet.fromPartial(base ?? ({} as any))
   },
-
   fromPartial<I extends Exact<DeepPartial<ConfigSet>, I>>(
     object: I,
   ): ConfigSet {
@@ -259,20 +261,20 @@ export const ConfigSet_ConfigurationsEntry = {
 
   toJSON(message: ConfigSet_ConfigurationsEntry): unknown {
     const obj: any = {}
-    message.key !== undefined && (obj.key = message.key)
-    message.value !== undefined &&
-      (obj.value = message.value
-        ? ControllerConfig.toJSON(message.value)
-        : undefined)
+    if (message.key !== '') {
+      obj.key = message.key
+    }
+    if (message.value !== undefined) {
+      obj.value = ControllerConfig.toJSON(message.value)
+    }
     return obj
   },
 
   create<I extends Exact<DeepPartial<ConfigSet_ConfigurationsEntry>, I>>(
     base?: I,
   ): ConfigSet_ConfigurationsEntry {
-    return ConfigSet_ConfigurationsEntry.fromPartial(base ?? {})
+    return ConfigSet_ConfigurationsEntry.fromPartial(base ?? ({} as any))
   },
-
   fromPartial<I extends Exact<DeepPartial<ConfigSet_ConfigurationsEntry>, I>>(
     object: I,
   ): ConfigSet_ConfigurationsEntry {
@@ -393,22 +395,23 @@ export const ControllerConfig = {
 
   toJSON(message: ControllerConfig): unknown {
     const obj: any = {}
-    message.id !== undefined && (obj.id = message.id)
-    message.rev !== undefined &&
-      (obj.rev = (message.rev || Long.UZERO).toString())
-    message.config !== undefined &&
-      (obj.config = base64FromBytes(
-        message.config !== undefined ? message.config : new Uint8Array(0),
-      ))
+    if (message.id !== '') {
+      obj.id = message.id
+    }
+    if (!message.rev.isZero()) {
+      obj.rev = (message.rev || Long.UZERO).toString()
+    }
+    if (message.config.length !== 0) {
+      obj.config = base64FromBytes(message.config)
+    }
     return obj
   },
 
   create<I extends Exact<DeepPartial<ControllerConfig>, I>>(
     base?: I,
   ): ControllerConfig {
-    return ControllerConfig.fromPartial(base ?? {})
+    return ControllerConfig.fromPartial(base ?? ({} as any))
   },
-
   fromPartial<I extends Exact<DeepPartial<ControllerConfig>, I>>(
     object: I,
   ): ControllerConfig {

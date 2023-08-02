@@ -79,9 +79,8 @@ export const Placeholder = {
   },
 
   create<I extends Exact<DeepPartial<Placeholder>, I>>(base?: I): Placeholder {
-    return Placeholder.fromPartial(base ?? {})
+    return Placeholder.fromPartial(base ?? ({} as any))
   },
-
   fromPartial<I extends Exact<DeepPartial<Placeholder>, I>>(_: I): Placeholder {
     const message = createBasePlaceholder()
     return message

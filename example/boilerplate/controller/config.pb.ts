@@ -106,16 +106,18 @@ export const Config = {
 
   toJSON(message: Config): unknown {
     const obj: any = {}
-    message.exampleField !== undefined &&
-      (obj.exampleField = message.exampleField)
-    message.failWithErr !== undefined && (obj.failWithErr = message.failWithErr)
+    if (message.exampleField !== '') {
+      obj.exampleField = message.exampleField
+    }
+    if (message.failWithErr !== '') {
+      obj.failWithErr = message.failWithErr
+    }
     return obj
   },
 
   create<I extends Exact<DeepPartial<Config>, I>>(base?: I): Config {
-    return Config.fromPartial(base ?? {})
+    return Config.fromPartial(base ?? ({} as any))
   },
-
   fromPartial<I extends Exact<DeepPartial<Config>, I>>(object: I): Config {
     const message = createBaseConfig()
     message.exampleField = object.exampleField ?? ''
