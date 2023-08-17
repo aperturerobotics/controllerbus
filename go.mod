@@ -1,6 +1,6 @@
 module github.com/aperturerobotics/controllerbus
 
-go 1.19
+go 1.20
 
 replace (
 	github.com/sirupsen/logrus => github.com/aperturerobotics/logrus v1.9.1-0.20221224130652-ff61cbb763af // aperture
@@ -23,7 +23,7 @@ require (
 	github.com/zeebo/blake3 v0.2.3
 	golang.org/x/exp v0.0.0-20230817173708-d852ddb80c63
 	golang.org/x/mod v0.12.0
-	golang.org/x/tools v0.12.1-0.20230815132531-74c255bcf846
+	golang.org/x/tools v0.12.1-0.20230816192654-b225aa0590e7
 	google.golang.org/protobuf v1.31.0
 	mvdan.cc/gofumpt v0.5.0
 )
