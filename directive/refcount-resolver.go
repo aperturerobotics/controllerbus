@@ -18,7 +18,7 @@ import (
 type RefCountResolver[T comparable] struct {
 	rc         *refcount.RefCount[T]
 	useCtx     bool
-	buildValue func(val T) (Value, error)
+	buildValue func(ctx context.Context, val T) (Value, error)
 }
 
 // NewRefCountResolver constructs a new RefCountResolver.
@@ -27,7 +27,7 @@ type RefCountResolver[T comparable] struct {
 func NewRefCountResolver[T comparable](
 	rc *refcount.RefCount[T],
 	useCtx bool,
-	buildValue func(val T) (Value, error),
+	buildValue func(ctx context.Context, val T) (Value, error),
 ) *RefCountResolver[T] {
 	return &RefCountResolver[T]{
 		rc:         rc,
@@ -42,7 +42,7 @@ func (r *RefCountResolver[T]) Resolve(ctx context.Context, handler ResolverHandl
 		var val Value = tval
 		if r.buildValue != nil {
 			var err error
-			val, err = r.buildValue(tval)
+			val, err = r.buildValue(ctx, tval)
 			if err != nil {
 				return err
 			}

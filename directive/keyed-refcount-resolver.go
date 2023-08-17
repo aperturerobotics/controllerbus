@@ -19,7 +19,7 @@ type KeyedRefCountResolver[K, V comparable] struct {
 	rc         *keyed.KeyedRefCount[K, V]
 	key        K
 	useCtx     bool
-	buildValue func(val V) (Value, error)
+	buildValue func(ctx context.Context, val V) (Value, error)
 }
 
 // NewKeyedRefCountResolver constructs a new KeyedRefCountResolver.
@@ -29,7 +29,7 @@ func NewKeyedRefCountResolver[K, V comparable](
 	rc *keyed.KeyedRefCount[K, V],
 	key K,
 	useCtx bool,
-	buildValue func(val V) (Value, error),
+	buildValue func(ctx context.Context, val V) (Value, error),
 ) *KeyedRefCountResolver[K, V] {
 	return &KeyedRefCountResolver[K, V]{
 		rc:         rc,
@@ -51,7 +51,7 @@ func (r *KeyedRefCountResolver[K, V]) Resolve(ctx context.Context, handler Resol
 	var empty V
 	if r.buildValue != nil {
 		var err error
-		val, err = r.buildValue(data)
+		val, err = r.buildValue(ctx, data)
 		if err != nil {
 			return err
 		}
