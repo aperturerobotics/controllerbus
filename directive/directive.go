@@ -139,11 +139,8 @@ type NetworkedCodec interface {
 	Unmarshal([]byte, Networked) error
 }
 
-// Controller manages running directives and handlers.
-type Controller interface {
-	// GetDirectives returns a list of all currently executing directives.
-	GetDirectives() []Instance
-
+// DirectiveAdder can add a directive to a bus.
+type DirectiveAdder interface {
 	// AddDirective adds a directive to the controller.
 	// This call de-duplicates equivalent directives.
 	//
@@ -153,13 +150,34 @@ type Controller interface {
 	//
 	// Returns the instance, new reference, and any error.
 	AddDirective(Directive, ReferenceHandler) (Instance, Reference, error)
+}
 
+// HandlerAdder can add a handler to a bus.
+type HandlerAdder interface {
 	// AddHandler adds a directive handler.
 	// The handler will receive calls for all existing directives (initial set).
 	// An error is returned only if adding the handler failed.
 	// Returns a function to remove the handler.
 	// The release function must be non-nil if err is nil, and nil if err != nil.
 	AddHandler(handler Handler) (func(), error)
+}
+
+// DirectiveLister can list directives.
+type DirectiveLister interface {
+	// GetDirectives returns a list of all currently executing directives.
+	GetDirectives() []Instance
+}
+
+// Controller manages running directives and handlers.
+type Controller interface {
+	// DirectiveLister has GetDirectives.
+	DirectiveLister
+
+	// DirectiveAdder has AddDirective.
+	DirectiveAdder
+
+	// HandlerAdder has AddHandler.
+	HandlerAdder
 }
 
 // Reference is a reference to a directive.
