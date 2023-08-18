@@ -5,8 +5,11 @@ import (
 )
 
 // TransformAttachedValueFunc transforms an AttachedValue.
-// Returns the transformed value to emit to the handler, bool true/false to emit the value, and any error.
-type TransformAttachedValueFunc[T Value] func(ctx context.Context, val AttachedValue) (T, bool, error)
+// rval is the returned transformed value to emit to the handler (if any).
+// rel is the release function to call when the value is no longer valid (if any).
+// rval is ignored if ok = false.
+// err, if any, will unwind the resolver with the error.
+type TransformAttachedValueFunc[T Value] func(ctx context.Context, val AttachedValue) (rval T, rel func(), ok bool, err error)
 
 // TransformResolver resolves a directive by adding another directive and transforming the results.
 // T is the type of the value that we will yield to the handler.
@@ -30,7 +33,11 @@ func NewTransformResolver[T Value](adder DirectiveAdder, dir Directive, xfrm Tra
 
 // Resolve resolves the values, emitting them to the handler.
 func (r *TransformResolver[T]) Resolve(ctx context.Context, handler ResolverHandler) error {
-	addedVals := make(map[uint32]uint32)
+	type addedVal struct {
+		id  uint32
+		rel func()
+	}
+	addedVals := make(map[uint32]addedVal)
 	errCh := make(chan error, 1)
 	pushErr := func(err error) {
 		select {
@@ -42,16 +49,24 @@ func (r *TransformResolver[T]) Resolve(ctx context.Context, handler ResolverHand
 		r.dir,
 		NewCallbackHandler(func(av AttachedValue) {
 			var val T
+			var valRel func()
 			if xfrm := r.xfrm; xfrm != nil {
-				result, ok, err := xfrm(ctx, av)
+				result, rel, ok, err := xfrm(ctx, av)
 				if err != nil {
 					pushErr(err)
+					if rel != nil {
+						rel()
+					}
 					return
 				}
 				if !ok {
+					if rel != nil {
+						rel()
+					}
 					return
 				}
 				val = result
+				valRel = rel
 			} else {
 				var ok bool
 				val, ok = av.GetValue().(T)
@@ -62,16 +77,27 @@ func (r *TransformResolver[T]) Resolve(ctx context.Context, handler ResolverHand
 
 			id, accepted := handler.AddValue(val)
 			if accepted {
-				addedVals[id] = av.GetValueID()
+				addedVals[id] = addedVal{id: av.GetValueID(), rel: valRel}
 			}
 		}, func(av AttachedValue) {
 			valueID := av.GetValueID()
-			if addedValueID, ok := addedVals[valueID]; ok {
+			if addedValue, ok := addedVals[valueID]; ok {
 				delete(addedVals, valueID)
-				_, _ = handler.RemoveValue(addedValueID)
+				_, _ = handler.RemoveValue(addedValue.id)
+				if addedValue.rel != nil {
+					addedValue.rel()
+				}
 			}
 		},
-			nil,
+			func() {
+				for k, addedValue := range addedVals {
+					delete(addedVals, k)
+					_, _ = handler.RemoveValue(addedValue.id)
+					if addedValue.rel != nil {
+						addedValue.rel()
+					}
+				}
+			},
 		),
 	)
 	if err != nil {
