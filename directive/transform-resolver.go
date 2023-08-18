@@ -78,6 +78,10 @@ func (r *TransformResolver[T]) Resolve(ctx context.Context, handler ResolverHand
 			id, accepted := handler.AddValue(val)
 			if accepted {
 				addedVals[id] = addedVal{id: av.GetValueID(), rel: valRel}
+			} else {
+				if valRel != nil {
+					valRel()
+				}
 			}
 		}, func(av AttachedValue) {
 			valueID := av.GetValueID()
