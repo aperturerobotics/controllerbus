@@ -33,6 +33,7 @@ func NewKeyedRefCountResolver[K, V comparable](
 ) *KeyedRefCountResolver[K, V] {
 	return &KeyedRefCountResolver[K, V]{
 		rc:         rc,
+		key:        key,
 		useCtx:     useCtx,
 		buildValue: buildValue,
 	}
