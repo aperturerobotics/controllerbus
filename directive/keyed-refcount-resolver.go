@@ -60,12 +60,17 @@ func (r *KeyedRefCountResolver[K, V]) Resolve(ctx context.Context, handler Resol
 		val = data
 	}
 
-	if val != nil {
-		_, _ = handler.AddValue(val)
+	if val == nil {
+		return nil
 	}
 
-	handler.MarkIdle()
+	_, accepted := handler.AddValue(val)
+	if !accepted {
+		return nil
+	}
 
+	// mark idle & wait for ctx to be canceled
+	handler.MarkIdle()
 	<-ctx.Done()
 	handler.ClearValues()
 	return context.Canceled
