@@ -46,12 +46,12 @@
     "@typescript-eslint/eslint-plugin": "^6.3.0",
     "@typescript-eslint/parser": "^6.3.0",
     "depcheck": "^1.4.3",
-    "eslint": "^8.46.0",
+    "eslint": "^8.48.0",
     "eslint-config-prettier": "^9.0.0",
     "patch-package": "^8.0.0",
     "prettier": "^3.0.1",
     "ts-proto": "^1.156.7",
-    "typescript": "^5.1.6"
+    "typescript": "^5.2.2"
   },
   "dependencies": {
     "bufferutil": "^4.0.7",

@@ -16,7 +16,7 @@ require (
 require (
 	github.com/aperturerobotics/controllerbus v0.28.2
 	github.com/aperturerobotics/goprotowrap v0.3.0
-	github.com/aperturerobotics/starpc v0.19.3
+	github.com/aperturerobotics/starpc v0.20.1
 )
 
 require (
@@ -190,7 +190,7 @@ require (
 	golang.org/x/sync v0.3.0 // indirect
 	golang.org/x/sys v0.11.0 // indirect
 	golang.org/x/text v0.9.0 // indirect
-	golang.org/x/tools v0.12.1-0.20230816192654-b225aa0590e7 // indirect
+	golang.org/x/tools v0.12.1-0.20230821203513-6eca6dfbb247 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
