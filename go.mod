@@ -9,7 +9,7 @@ replace (
 
 require (
 	github.com/aperturerobotics/starpc v0.20.1 // latest
-	github.com/aperturerobotics/util v1.7.4 // latest
+	github.com/aperturerobotics/util v1.7.5 // latest
 	github.com/blang/semver v3.5.1+incompatible
 	github.com/cenkalti/backoff v2.2.1+incompatible
 	github.com/fsnotify/fsnotify v1.6.0
@@ -53,7 +53,7 @@ require (
 	github.com/spaolacci/murmur3 v1.1.1-0.20190317074736-539464a789e9 // indirect
 	github.com/xrash/smetrics v0.0.0-20201216005158-039620a65673 // indirect
 	golang.org/x/crypto v0.12.0 // indirect
-	golang.org/x/sys v0.12.1-0.20230915184527-c7ff727a8c41 // indirect
+	golang.org/x/sys v0.12.1-0.20230922162325-aa9470e40da9 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	lukechampine.com/blake3 v1.2.1 // indirect
 	nhooyr.io/websocket v1.8.8-0.20221213223501-14fb98eba64e // indirect
