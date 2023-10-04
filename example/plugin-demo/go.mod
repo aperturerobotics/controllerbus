@@ -6,7 +6,7 @@ replace github.com/aperturerobotics/controllerbus => ../..
 
 replace (
 	github.com/sirupsen/logrus => github.com/aperturerobotics/logrus v1.9.1-0.20221224130652-ff61cbb763af // aperture
-	google.golang.org/protobuf => github.com/aperturerobotics/protobuf-go v1.30.1-0.20230428014030-7089409cbc63 // aperture
+	google.golang.org/protobuf => github.com/aperturerobotics/protobuf-go v1.31.1-0.20231004004114-bf10d4f3cd42 // aperture
 )
 
 require (
