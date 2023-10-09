@@ -10,7 +10,7 @@ replace (
 )
 
 require (
-	github.com/aperturerobotics/controllerbus v0.30.4
+	github.com/aperturerobotics/controllerbus v0.30.5
 	github.com/blang/semver v3.5.1+incompatible
 	github.com/pkg/errors v0.9.1
 	github.com/sirupsen/logrus v1.9.3
@@ -20,7 +20,7 @@ require (
 require (
 	github.com/Jeffail/gabs/v2 v2.7.0 // indirect
 	github.com/aperturerobotics/starpc v0.20.1 // indirect
-	github.com/aperturerobotics/util v1.7.4 // indirect
+	github.com/aperturerobotics/util v1.7.6 // indirect
 	github.com/cenkalti/backoff v2.2.1+incompatible // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.2 // indirect
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.2.0 // indirect
@@ -52,7 +52,7 @@ require (
 	golang.org/x/crypto v0.12.0 // indirect
 	golang.org/x/exp v0.0.0-20230905200255-921286631fa9 // indirect
 	golang.org/x/mod v0.12.0 // indirect
-	golang.org/x/sys v0.12.1-0.20230915184527-c7ff727a8c41 // indirect
+	golang.org/x/sys v0.12.1-0.20230922162325-aa9470e40da9 // indirect
 	golang.org/x/tools v0.13.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	lukechampine.com/blake3 v1.2.1 // indirect
