@@ -84,12 +84,12 @@ export const ConfigSet = {
       | Iterable<ConfigSet | ConfigSet[]>,
   ): AsyncIterable<Uint8Array> {
     for await (const pkt of source) {
-      if (Array.isArray(pkt)) {
-        for (const p of pkt) {
+      if (globalThis.Array.isArray(pkt)) {
+        for (const p of pkt as any) {
           yield* [ConfigSet.encode(p).finish()]
         }
       } else {
-        yield* [ConfigSet.encode(pkt).finish()]
+        yield* [ConfigSet.encode(pkt as any).finish()]
       }
     }
   },
@@ -102,12 +102,12 @@ export const ConfigSet = {
       | Iterable<Uint8Array | Uint8Array[]>,
   ): AsyncIterable<ConfigSet> {
     for await (const pkt of source) {
-      if (Array.isArray(pkt)) {
-        for (const p of pkt) {
+      if (globalThis.Array.isArray(pkt)) {
+        for (const p of pkt as any) {
           yield* [ConfigSet.decode(p)]
         }
       } else {
-        yield* [ConfigSet.decode(pkt)]
+        yield* [ConfigSet.decode(pkt as any)]
       }
     }
   },
@@ -222,12 +222,12 @@ export const ConfigSet_ConfigurationsEntry = {
         >,
   ): AsyncIterable<Uint8Array> {
     for await (const pkt of source) {
-      if (Array.isArray(pkt)) {
-        for (const p of pkt) {
+      if (globalThis.Array.isArray(pkt)) {
+        for (const p of pkt as any) {
           yield* [ConfigSet_ConfigurationsEntry.encode(p).finish()]
         }
       } else {
-        yield* [ConfigSet_ConfigurationsEntry.encode(pkt).finish()]
+        yield* [ConfigSet_ConfigurationsEntry.encode(pkt as any).finish()]
       }
     }
   },
@@ -240,19 +240,19 @@ export const ConfigSet_ConfigurationsEntry = {
       | Iterable<Uint8Array | Uint8Array[]>,
   ): AsyncIterable<ConfigSet_ConfigurationsEntry> {
     for await (const pkt of source) {
-      if (Array.isArray(pkt)) {
-        for (const p of pkt) {
+      if (globalThis.Array.isArray(pkt)) {
+        for (const p of pkt as any) {
           yield* [ConfigSet_ConfigurationsEntry.decode(p)]
         }
       } else {
-        yield* [ConfigSet_ConfigurationsEntry.decode(pkt)]
+        yield* [ConfigSet_ConfigurationsEntry.decode(pkt as any)]
       }
     }
   },
 
   fromJSON(object: any): ConfigSet_ConfigurationsEntry {
     return {
-      key: isSet(object.key) ? String(object.key) : '',
+      key: isSet(object.key) ? globalThis.String(object.key) : '',
       value: isSet(object.value)
         ? ControllerConfig.fromJSON(object.value)
         : undefined,
@@ -355,12 +355,12 @@ export const ControllerConfig = {
       | Iterable<ControllerConfig | ControllerConfig[]>,
   ): AsyncIterable<Uint8Array> {
     for await (const pkt of source) {
-      if (Array.isArray(pkt)) {
-        for (const p of pkt) {
+      if (globalThis.Array.isArray(pkt)) {
+        for (const p of pkt as any) {
           yield* [ControllerConfig.encode(p).finish()]
         }
       } else {
-        yield* [ControllerConfig.encode(pkt).finish()]
+        yield* [ControllerConfig.encode(pkt as any).finish()]
       }
     }
   },
@@ -373,19 +373,19 @@ export const ControllerConfig = {
       | Iterable<Uint8Array | Uint8Array[]>,
   ): AsyncIterable<ControllerConfig> {
     for await (const pkt of source) {
-      if (Array.isArray(pkt)) {
-        for (const p of pkt) {
+      if (globalThis.Array.isArray(pkt)) {
+        for (const p of pkt as any) {
           yield* [ControllerConfig.decode(p)]
         }
       } else {
-        yield* [ControllerConfig.decode(pkt)]
+        yield* [ControllerConfig.decode(pkt as any)]
       }
     }
   },
 
   fromJSON(object: any): ControllerConfig {
     return {
-      id: isSet(object.id) ? String(object.id) : '',
+      id: isSet(object.id) ? globalThis.String(object.id) : '',
       rev: isSet(object.rev) ? Long.fromValue(object.rev) : Long.UZERO,
       config: isSet(object.config)
         ? bytesFromBase64(object.config)
@@ -426,30 +426,11 @@ export const ControllerConfig = {
   },
 }
 
-declare const self: any | undefined
-declare const window: any | undefined
-declare const global: any | undefined
-const tsProtoGlobalThis: any = (() => {
-  if (typeof globalThis !== 'undefined') {
-    return globalThis
-  }
-  if (typeof self !== 'undefined') {
-    return self
-  }
-  if (typeof window !== 'undefined') {
-    return window
-  }
-  if (typeof global !== 'undefined') {
-    return global
-  }
-  throw 'Unable to locate global object'
-})()
-
 function bytesFromBase64(b64: string): Uint8Array {
-  if (tsProtoGlobalThis.Buffer) {
-    return Uint8Array.from(tsProtoGlobalThis.Buffer.from(b64, 'base64'))
+  if (globalThis.Buffer) {
+    return Uint8Array.from(globalThis.Buffer.from(b64, 'base64'))
   } else {
-    const bin = tsProtoGlobalThis.atob(b64)
+    const bin = globalThis.atob(b64)
     const arr = new Uint8Array(bin.length)
     for (let i = 0; i < bin.length; ++i) {
       arr[i] = bin.charCodeAt(i)
@@ -459,14 +440,14 @@ function bytesFromBase64(b64: string): Uint8Array {
 }
 
 function base64FromBytes(arr: Uint8Array): string {
-  if (tsProtoGlobalThis.Buffer) {
-    return tsProtoGlobalThis.Buffer.from(arr).toString('base64')
+  if (globalThis.Buffer) {
+    return globalThis.Buffer.from(arr).toString('base64')
   } else {
     const bin: string[] = []
     arr.forEach((byte) => {
-      bin.push(String.fromCharCode(byte))
+      bin.push(globalThis.String.fromCharCode(byte))
     })
-    return tsProtoGlobalThis.btoa(bin.join(''))
+    return globalThis.btoa(bin.join(''))
   }
 }
 
@@ -483,8 +464,8 @@ export type DeepPartial<T> = T extends Builtin
   ? T
   : T extends Long
   ? string | number | Long
-  : T extends Array<infer U>
-  ? Array<DeepPartial<U>>
+  : T extends globalThis.Array<infer U>
+  ? globalThis.Array<DeepPartial<U>>
   : T extends ReadonlyArray<infer U>
   ? ReadonlyArray<DeepPartial<U>>
   : T extends { $case: string }

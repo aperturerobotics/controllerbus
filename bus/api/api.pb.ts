@@ -72,12 +72,12 @@ export const Config = {
     source: AsyncIterable<Config | Config[]> | Iterable<Config | Config[]>,
   ): AsyncIterable<Uint8Array> {
     for await (const pkt of source) {
-      if (Array.isArray(pkt)) {
-        for (const p of pkt) {
+      if (globalThis.Array.isArray(pkt)) {
+        for (const p of pkt as any) {
           yield* [Config.encode(p).finish()]
         }
       } else {
-        yield* [Config.encode(pkt).finish()]
+        yield* [Config.encode(pkt as any).finish()]
       }
     }
   },
@@ -90,12 +90,12 @@ export const Config = {
       | Iterable<Uint8Array | Uint8Array[]>,
   ): AsyncIterable<Config> {
     for await (const pkt of source) {
-      if (Array.isArray(pkt)) {
-        for (const p of pkt) {
+      if (globalThis.Array.isArray(pkt)) {
+        for (const p of pkt as any) {
           yield* [Config.decode(p)]
         }
       } else {
-        yield* [Config.decode(pkt)]
+        yield* [Config.decode(pkt as any)]
       }
     }
   },
@@ -103,7 +103,7 @@ export const Config = {
   fromJSON(object: any): Config {
     return {
       enableExecController: isSet(object.enableExecController)
-        ? Boolean(object.enableExecController)
+        ? globalThis.Boolean(object.enableExecController)
         : false,
     }
   },
@@ -163,12 +163,12 @@ export const GetBusInfoRequest = {
       | Iterable<GetBusInfoRequest | GetBusInfoRequest[]>,
   ): AsyncIterable<Uint8Array> {
     for await (const pkt of source) {
-      if (Array.isArray(pkt)) {
-        for (const p of pkt) {
+      if (globalThis.Array.isArray(pkt)) {
+        for (const p of pkt as any) {
           yield* [GetBusInfoRequest.encode(p).finish()]
         }
       } else {
-        yield* [GetBusInfoRequest.encode(pkt).finish()]
+        yield* [GetBusInfoRequest.encode(pkt as any).finish()]
       }
     }
   },
@@ -181,12 +181,12 @@ export const GetBusInfoRequest = {
       | Iterable<Uint8Array | Uint8Array[]>,
   ): AsyncIterable<GetBusInfoRequest> {
     for await (const pkt of source) {
-      if (Array.isArray(pkt)) {
-        for (const p of pkt) {
+      if (globalThis.Array.isArray(pkt)) {
+        for (const p of pkt as any) {
           yield* [GetBusInfoRequest.decode(p)]
         }
       } else {
-        yield* [GetBusInfoRequest.decode(pkt)]
+        yield* [GetBusInfoRequest.decode(pkt as any)]
       }
     }
   },
@@ -272,12 +272,12 @@ export const GetBusInfoResponse = {
       | Iterable<GetBusInfoResponse | GetBusInfoResponse[]>,
   ): AsyncIterable<Uint8Array> {
     for await (const pkt of source) {
-      if (Array.isArray(pkt)) {
-        for (const p of pkt) {
+      if (globalThis.Array.isArray(pkt)) {
+        for (const p of pkt as any) {
           yield* [GetBusInfoResponse.encode(p).finish()]
         }
       } else {
-        yield* [GetBusInfoResponse.encode(pkt).finish()]
+        yield* [GetBusInfoResponse.encode(pkt as any).finish()]
       }
     }
   },
@@ -290,22 +290,22 @@ export const GetBusInfoResponse = {
       | Iterable<Uint8Array | Uint8Array[]>,
   ): AsyncIterable<GetBusInfoResponse> {
     for await (const pkt of source) {
-      if (Array.isArray(pkt)) {
-        for (const p of pkt) {
+      if (globalThis.Array.isArray(pkt)) {
+        for (const p of pkt as any) {
           yield* [GetBusInfoResponse.decode(p)]
         }
       } else {
-        yield* [GetBusInfoResponse.decode(pkt)]
+        yield* [GetBusInfoResponse.decode(pkt as any)]
       }
     }
   },
 
   fromJSON(object: any): GetBusInfoResponse {
     return {
-      runningControllers: Array.isArray(object?.runningControllers)
+      runningControllers: globalThis.Array.isArray(object?.runningControllers)
         ? object.runningControllers.map((e: any) => Info.fromJSON(e))
         : [],
-      runningDirectives: Array.isArray(object?.runningDirectives)
+      runningDirectives: globalThis.Array.isArray(object?.runningDirectives)
         ? object.runningDirectives.map((e: any) => DirectiveState.fromJSON(e))
         : [],
     }
@@ -466,8 +466,8 @@ export type DeepPartial<T> = T extends Builtin
   ? T
   : T extends Long
   ? string | number | Long
-  : T extends Array<infer U>
-  ? Array<DeepPartial<U>>
+  : T extends globalThis.Array<infer U>
+  ? globalThis.Array<DeepPartial<U>>
   : T extends ReadonlyArray<infer U>
   ? ReadonlyArray<DeepPartial<U>>
   : T extends { $case: string }

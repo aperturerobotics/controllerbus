@@ -155,12 +155,12 @@ export const ExecControllerRequest = {
       | Iterable<ExecControllerRequest | ExecControllerRequest[]>,
   ): AsyncIterable<Uint8Array> {
     for await (const pkt of source) {
-      if (Array.isArray(pkt)) {
-        for (const p of pkt) {
+      if (globalThis.Array.isArray(pkt)) {
+        for (const p of pkt as any) {
           yield* [ExecControllerRequest.encode(p).finish()]
         }
       } else {
-        yield* [ExecControllerRequest.encode(pkt).finish()]
+        yield* [ExecControllerRequest.encode(pkt as any).finish()]
       }
     }
   },
@@ -173,12 +173,12 @@ export const ExecControllerRequest = {
       | Iterable<Uint8Array | Uint8Array[]>,
   ): AsyncIterable<ExecControllerRequest> {
     for await (const pkt of source) {
-      if (Array.isArray(pkt)) {
-        for (const p of pkt) {
+      if (globalThis.Array.isArray(pkt)) {
+        for (const p of pkt as any) {
           yield* [ExecControllerRequest.decode(p)]
         }
       } else {
-        yield* [ExecControllerRequest.decode(pkt)]
+        yield* [ExecControllerRequest.decode(pkt as any)]
       }
     }
   },
@@ -189,10 +189,10 @@ export const ExecControllerRequest = {
         ? ConfigSet.fromJSON(object.configSet)
         : undefined,
       configSetYaml: isSet(object.configSetYaml)
-        ? String(object.configSetYaml)
+        ? globalThis.String(object.configSetYaml)
         : '',
       configSetYamlOverwrite: isSet(object.configSetYamlOverwrite)
-        ? Boolean(object.configSetYamlOverwrite)
+        ? globalThis.Boolean(object.configSetYamlOverwrite)
         : false,
     }
   },
@@ -310,12 +310,12 @@ export const ExecControllerResponse = {
       | Iterable<ExecControllerResponse | ExecControllerResponse[]>,
   ): AsyncIterable<Uint8Array> {
     for await (const pkt of source) {
-      if (Array.isArray(pkt)) {
-        for (const p of pkt) {
+      if (globalThis.Array.isArray(pkt)) {
+        for (const p of pkt as any) {
           yield* [ExecControllerResponse.encode(p).finish()]
         }
       } else {
-        yield* [ExecControllerResponse.encode(pkt).finish()]
+        yield* [ExecControllerResponse.encode(pkt as any).finish()]
       }
     }
   },
@@ -328,26 +328,28 @@ export const ExecControllerResponse = {
       | Iterable<Uint8Array | Uint8Array[]>,
   ): AsyncIterable<ExecControllerResponse> {
     for await (const pkt of source) {
-      if (Array.isArray(pkt)) {
-        for (const p of pkt) {
+      if (globalThis.Array.isArray(pkt)) {
+        for (const p of pkt as any) {
           yield* [ExecControllerResponse.decode(p)]
         }
       } else {
-        yield* [ExecControllerResponse.decode(pkt)]
+        yield* [ExecControllerResponse.decode(pkt as any)]
       }
     }
   },
 
   fromJSON(object: any): ExecControllerResponse {
     return {
-      id: isSet(object.id) ? String(object.id) : '',
+      id: isSet(object.id) ? globalThis.String(object.id) : '',
       status: isSet(object.status)
         ? controllerStatusFromJSON(object.status)
         : 0,
       controllerInfo: isSet(object.controllerInfo)
         ? Info.fromJSON(object.controllerInfo)
         : undefined,
-      errorInfo: isSet(object.errorInfo) ? String(object.errorInfo) : '',
+      errorInfo: isSet(object.errorInfo)
+        ? globalThis.String(object.errorInfo)
+        : '',
     }
   },
 
@@ -401,8 +403,8 @@ export type DeepPartial<T> = T extends Builtin
   ? T
   : T extends Long
   ? string | number | Long
-  : T extends Array<infer U>
-  ? Array<DeepPartial<U>>
+  : T extends globalThis.Array<infer U>
+  ? globalThis.Array<DeepPartial<U>>
   : T extends ReadonlyArray<infer U>
   ? ReadonlyArray<DeepPartial<U>>
   : T extends { $case: string }

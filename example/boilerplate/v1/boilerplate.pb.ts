@@ -67,12 +67,12 @@ export const Boilerplate = {
       | Iterable<Boilerplate | Boilerplate[]>,
   ): AsyncIterable<Uint8Array> {
     for await (const pkt of source) {
-      if (Array.isArray(pkt)) {
-        for (const p of pkt) {
+      if (globalThis.Array.isArray(pkt)) {
+        for (const p of pkt as any) {
           yield* [Boilerplate.encode(p).finish()]
         }
       } else {
-        yield* [Boilerplate.encode(pkt).finish()]
+        yield* [Boilerplate.encode(pkt as any).finish()]
       }
     }
   },
@@ -85,19 +85,21 @@ export const Boilerplate = {
       | Iterable<Uint8Array | Uint8Array[]>,
   ): AsyncIterable<Boilerplate> {
     for await (const pkt of source) {
-      if (Array.isArray(pkt)) {
-        for (const p of pkt) {
+      if (globalThis.Array.isArray(pkt)) {
+        for (const p of pkt as any) {
           yield* [Boilerplate.decode(p)]
         }
       } else {
-        yield* [Boilerplate.decode(pkt)]
+        yield* [Boilerplate.decode(pkt as any)]
       }
     }
   },
 
   fromJSON(object: any): Boilerplate {
     return {
-      messageText: isSet(object.messageText) ? String(object.messageText) : '',
+      messageText: isSet(object.messageText)
+        ? globalThis.String(object.messageText)
+        : '',
     }
   },
 
@@ -168,12 +170,12 @@ export const BoilerplateResult = {
       | Iterable<BoilerplateResult | BoilerplateResult[]>,
   ): AsyncIterable<Uint8Array> {
     for await (const pkt of source) {
-      if (Array.isArray(pkt)) {
-        for (const p of pkt) {
+      if (globalThis.Array.isArray(pkt)) {
+        for (const p of pkt as any) {
           yield* [BoilerplateResult.encode(p).finish()]
         }
       } else {
-        yield* [BoilerplateResult.encode(pkt).finish()]
+        yield* [BoilerplateResult.encode(pkt as any).finish()]
       }
     }
   },
@@ -186,19 +188,21 @@ export const BoilerplateResult = {
       | Iterable<Uint8Array | Uint8Array[]>,
   ): AsyncIterable<BoilerplateResult> {
     for await (const pkt of source) {
-      if (Array.isArray(pkt)) {
-        for (const p of pkt) {
+      if (globalThis.Array.isArray(pkt)) {
+        for (const p of pkt as any) {
           yield* [BoilerplateResult.decode(p)]
         }
       } else {
-        yield* [BoilerplateResult.decode(pkt)]
+        yield* [BoilerplateResult.decode(pkt as any)]
       }
     }
   },
 
   fromJSON(object: any): BoilerplateResult {
     return {
-      printedLen: isSet(object.printedLen) ? Number(object.printedLen) : 0,
+      printedLen: isSet(object.printedLen)
+        ? globalThis.Number(object.printedLen)
+        : 0,
     }
   },
 
@@ -237,8 +241,8 @@ export type DeepPartial<T> = T extends Builtin
   ? T
   : T extends Long
   ? string | number | Long
-  : T extends Array<infer U>
-  ? Array<DeepPartial<U>>
+  : T extends globalThis.Array<infer U>
+  ? globalThis.Array<DeepPartial<U>>
   : T extends ReadonlyArray<infer U>
   ? ReadonlyArray<DeepPartial<U>>
   : T extends { $case: string }

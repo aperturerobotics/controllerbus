@@ -85,12 +85,12 @@ export const DirectiveInfo = {
       | Iterable<DirectiveInfo | DirectiveInfo[]>,
   ): AsyncIterable<Uint8Array> {
     for await (const pkt of source) {
-      if (Array.isArray(pkt)) {
-        for (const p of pkt) {
+      if (globalThis.Array.isArray(pkt)) {
+        for (const p of pkt as any) {
           yield* [DirectiveInfo.encode(p).finish()]
         }
       } else {
-        yield* [DirectiveInfo.encode(pkt).finish()]
+        yield* [DirectiveInfo.encode(pkt as any).finish()]
       }
     }
   },
@@ -103,20 +103,20 @@ export const DirectiveInfo = {
       | Iterable<Uint8Array | Uint8Array[]>,
   ): AsyncIterable<DirectiveInfo> {
     for await (const pkt of source) {
-      if (Array.isArray(pkt)) {
-        for (const p of pkt) {
+      if (globalThis.Array.isArray(pkt)) {
+        for (const p of pkt as any) {
           yield* [DirectiveInfo.decode(p)]
         }
       } else {
-        yield* [DirectiveInfo.decode(pkt)]
+        yield* [DirectiveInfo.decode(pkt as any)]
       }
     }
   },
 
   fromJSON(object: any): DirectiveInfo {
     return {
-      name: isSet(object.name) ? String(object.name) : '',
-      debugVals: Array.isArray(object?.debugVals)
+      name: isSet(object.name) ? globalThis.String(object.name) : '',
+      debugVals: globalThis.Array.isArray(object?.debugVals)
         ? object.debugVals.map((e: any) => ProtoDebugValue.fromJSON(e))
         : [],
     }
@@ -196,12 +196,12 @@ export const DirectiveState = {
       | Iterable<DirectiveState | DirectiveState[]>,
   ): AsyncIterable<Uint8Array> {
     for await (const pkt of source) {
-      if (Array.isArray(pkt)) {
-        for (const p of pkt) {
+      if (globalThis.Array.isArray(pkt)) {
+        for (const p of pkt as any) {
           yield* [DirectiveState.encode(p).finish()]
         }
       } else {
-        yield* [DirectiveState.encode(pkt).finish()]
+        yield* [DirectiveState.encode(pkt as any).finish()]
       }
     }
   },
@@ -214,12 +214,12 @@ export const DirectiveState = {
       | Iterable<Uint8Array | Uint8Array[]>,
   ): AsyncIterable<DirectiveState> {
     for await (const pkt of source) {
-      if (Array.isArray(pkt)) {
-        for (const p of pkt) {
+      if (globalThis.Array.isArray(pkt)) {
+        for (const p of pkt as any) {
           yield* [DirectiveState.decode(p)]
         }
       } else {
-        yield* [DirectiveState.decode(pkt)]
+        yield* [DirectiveState.decode(pkt as any)]
       }
     }
   },
@@ -314,12 +314,12 @@ export const ProtoDebugValue = {
       | Iterable<ProtoDebugValue | ProtoDebugValue[]>,
   ): AsyncIterable<Uint8Array> {
     for await (const pkt of source) {
-      if (Array.isArray(pkt)) {
-        for (const p of pkt) {
+      if (globalThis.Array.isArray(pkt)) {
+        for (const p of pkt as any) {
           yield* [ProtoDebugValue.encode(p).finish()]
         }
       } else {
-        yield* [ProtoDebugValue.encode(pkt).finish()]
+        yield* [ProtoDebugValue.encode(pkt as any).finish()]
       }
     }
   },
@@ -332,21 +332,21 @@ export const ProtoDebugValue = {
       | Iterable<Uint8Array | Uint8Array[]>,
   ): AsyncIterable<ProtoDebugValue> {
     for await (const pkt of source) {
-      if (Array.isArray(pkt)) {
-        for (const p of pkt) {
+      if (globalThis.Array.isArray(pkt)) {
+        for (const p of pkt as any) {
           yield* [ProtoDebugValue.decode(p)]
         }
       } else {
-        yield* [ProtoDebugValue.decode(pkt)]
+        yield* [ProtoDebugValue.decode(pkt as any)]
       }
     }
   },
 
   fromJSON(object: any): ProtoDebugValue {
     return {
-      key: isSet(object.key) ? String(object.key) : '',
-      values: Array.isArray(object?.values)
-        ? object.values.map((e: any) => String(e))
+      key: isSet(object.key) ? globalThis.String(object.key) : '',
+      values: globalThis.Array.isArray(object?.values)
+        ? object.values.map((e: any) => globalThis.String(e))
         : [],
     }
   },
@@ -390,8 +390,8 @@ export type DeepPartial<T> = T extends Builtin
   ? T
   : T extends Long
   ? string | number | Long
-  : T extends Array<infer U>
-  ? Array<DeepPartial<U>>
+  : T extends globalThis.Array<infer U>
+  ? globalThis.Array<DeepPartial<U>>
   : T extends ReadonlyArray<infer U>
   ? ReadonlyArray<DeepPartial<U>>
   : T extends { $case: string }

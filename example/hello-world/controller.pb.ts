@@ -57,12 +57,12 @@ export const ToyControllerConfig = {
       | Iterable<ToyControllerConfig | ToyControllerConfig[]>,
   ): AsyncIterable<Uint8Array> {
     for await (const pkt of source) {
-      if (Array.isArray(pkt)) {
-        for (const p of pkt) {
+      if (globalThis.Array.isArray(pkt)) {
+        for (const p of pkt as any) {
           yield* [ToyControllerConfig.encode(p).finish()]
         }
       } else {
-        yield* [ToyControllerConfig.encode(pkt).finish()]
+        yield* [ToyControllerConfig.encode(pkt as any).finish()]
       }
     }
   },
@@ -75,18 +75,18 @@ export const ToyControllerConfig = {
       | Iterable<Uint8Array | Uint8Array[]>,
   ): AsyncIterable<ToyControllerConfig> {
     for await (const pkt of source) {
-      if (Array.isArray(pkt)) {
-        for (const p of pkt) {
+      if (globalThis.Array.isArray(pkt)) {
+        for (const p of pkt as any) {
           yield* [ToyControllerConfig.decode(p)]
         }
       } else {
-        yield* [ToyControllerConfig.decode(pkt)]
+        yield* [ToyControllerConfig.decode(pkt as any)]
       }
     }
   },
 
   fromJSON(object: any): ToyControllerConfig {
-    return { name: isSet(object.name) ? String(object.name) : '' }
+    return { name: isSet(object.name) ? globalThis.String(object.name) : '' }
   },
 
   toJSON(message: ToyControllerConfig): unknown {
@@ -124,8 +124,8 @@ export type DeepPartial<T> = T extends Builtin
   ? T
   : T extends Long
   ? string | number | Long
-  : T extends Array<infer U>
-  ? Array<DeepPartial<U>>
+  : T extends globalThis.Array<infer U>
+  ? globalThis.Array<DeepPartial<U>>
   : T extends ReadonlyArray<infer U>
   ? ReadonlyArray<DeepPartial<U>>
   : T extends { $case: string }

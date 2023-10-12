@@ -76,12 +76,12 @@ export const Info = {
     source: AsyncIterable<Info | Info[]> | Iterable<Info | Info[]>,
   ): AsyncIterable<Uint8Array> {
     for await (const pkt of source) {
-      if (Array.isArray(pkt)) {
-        for (const p of pkt) {
+      if (globalThis.Array.isArray(pkt)) {
+        for (const p of pkt as any) {
           yield* [Info.encode(p).finish()]
         }
       } else {
-        yield* [Info.encode(pkt).finish()]
+        yield* [Info.encode(pkt as any).finish()]
       }
     }
   },
@@ -94,21 +94,23 @@ export const Info = {
       | Iterable<Uint8Array | Uint8Array[]>,
   ): AsyncIterable<Info> {
     for await (const pkt of source) {
-      if (Array.isArray(pkt)) {
-        for (const p of pkt) {
+      if (globalThis.Array.isArray(pkt)) {
+        for (const p of pkt as any) {
           yield* [Info.decode(p)]
         }
       } else {
-        yield* [Info.decode(pkt)]
+        yield* [Info.decode(pkt as any)]
       }
     }
   },
 
   fromJSON(object: any): Info {
     return {
-      id: isSet(object.id) ? String(object.id) : '',
-      version: isSet(object.version) ? String(object.version) : '',
-      description: isSet(object.description) ? String(object.description) : '',
+      id: isSet(object.id) ? globalThis.String(object.id) : '',
+      version: isSet(object.version) ? globalThis.String(object.version) : '',
+      description: isSet(object.description)
+        ? globalThis.String(object.description)
+        : '',
     }
   },
 
@@ -151,8 +153,8 @@ export type DeepPartial<T> = T extends Builtin
   ? T
   : T extends Long
   ? string | number | Long
-  : T extends Array<infer U>
-  ? Array<DeepPartial<U>>
+  : T extends globalThis.Array<infer U>
+  ? globalThis.Array<DeepPartial<U>>
   : T extends ReadonlyArray<infer U>
   ? ReadonlyArray<DeepPartial<U>>
   : T extends { $case: string }
