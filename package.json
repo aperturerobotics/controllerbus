@@ -34,7 +34,7 @@
     "lint:go": "make lint",
     "lint:js": "eslint -c .eslintrc.js --ext .ts ./**/*.ts",
     "patch": "patch-package --use-yarn --patch-dir ./node_modules/@aperturerobotics/ts-common/patches",
-    "prepare": "npm run patch && go mod vendor",
+    "prepare": "npm run patch && go mod vendor && cd ./example/plugin-demo && go mod tidy",
     "precommit": "npm run format"
   },
   "prettier": {
