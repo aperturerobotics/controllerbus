@@ -151,10 +151,10 @@ func (c *Controller) addHandlerLocked(handler directive.Handler) (func(), error)
 					Warn("directive handler returned error")
 				continue
 			}
-			resolvers = append(resolvers, nres...)
 			if len(nres) != 0 {
+				resolvers = append(resolvers, nres...)
 				oldLen := len(dis)
-				dis = slices.Grow(dis, len(nres))[:len(dis)+len(nres)]
+				dis = slices.Grow(dis, len(nres))
 				for i := oldLen; i < len(dis); i++ {
 					dis[i] = di
 				}
