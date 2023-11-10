@@ -153,8 +153,10 @@ func (c *Controller) addHandlerLocked(handler directive.Handler) (func(), error)
 			}
 			if len(nres) != 0 {
 				resolvers = append(resolvers, nres...)
+
+				// We have to use this loop instead of append because the type changes.
 				oldLen := len(dis)
-				dis = slices.Grow(dis, len(nres))
+				dis = slices.Grow(dis, len(nres))[:oldLen+len(nres)]
 				for i := oldLen; i < len(dis); i++ {
 					dis[i] = di
 				}
