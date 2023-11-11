@@ -7,13 +7,17 @@
     "workarounds:all"
   ],
   "branchConcurrentLimit": 0,
-  "ignorePaths": [
-    "hack",
-    "examples/plugin-demo"
-  ],
-  "packageRules": [{
-    "matchManagers": ["gomod"],
-    "matchDepTypes": ["replace"],
-    "enabled": false
-  }]
+  "ignorePaths": ["hack", "examples/plugin-demo"],
+  "packageRules": [
+    {
+      "matchManagers": ["gomod"],
+      "matchDepTypes": ["replace"],
+      "enabled": false
+    },
+    {
+      "matchPackagePatterns": ["github.com/aperturerobotics/controllerbus"],
+      "matchManagers": ["gomod"],
+      "enabled": false
+    }
+  ]
 }
