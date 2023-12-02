@@ -8,7 +8,7 @@ replace (
 )
 
 require (
-	github.com/aperturerobotics/starpc v0.21.4 // latest
+	github.com/aperturerobotics/starpc v0.21.5 // latest
 	github.com/aperturerobotics/util v1.7.8 // latest
 	github.com/blang/semver v3.5.1+incompatible
 	github.com/cenkalti/backoff v2.2.1+incompatible
