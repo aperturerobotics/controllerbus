@@ -21,7 +21,7 @@ require (
 	github.com/urfave/cli/v2 v2.26.0
 	github.com/valyala/fastjson v1.6.4
 	github.com/zeebo/blake3 v0.2.3
-	golang.org/x/exp v0.0.0-20231127185646-65229373498e
+	golang.org/x/exp v0.0.0-20231206192017-f3f8817b8deb
 	golang.org/x/mod v0.14.0
 	golang.org/x/tools v0.16.0
 	google.golang.org/protobuf v1.31.0
