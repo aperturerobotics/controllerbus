@@ -16,7 +16,7 @@ require (
 require (
 	github.com/aperturerobotics/controllerbus v0.30.7
 	github.com/aperturerobotics/goprotowrap v0.3.0
-	github.com/aperturerobotics/starpc v0.21.6
+	github.com/aperturerobotics/starpc v0.22.0
 )
 
 require (
@@ -34,7 +34,7 @@ require (
 	github.com/alexkohler/nakedret/v2 v2.0.2 // indirect
 	github.com/alexkohler/prealloc v1.0.0 // indirect
 	github.com/alingse/asasalint v0.0.11 // indirect
-	github.com/aperturerobotics/util v1.8.1 // indirect
+	github.com/aperturerobotics/util v1.8.2 // indirect
 	github.com/ashanbrown/forbidigo v1.5.3 // indirect
 	github.com/ashanbrown/makezero v1.1.1 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
