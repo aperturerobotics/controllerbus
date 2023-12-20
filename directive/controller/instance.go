@@ -246,7 +246,7 @@ func (i *directiveInstance) handleUnreferencedLocked() {
 	disposeEmptyImmediate := i.valueOpts.UnrefDisposeEmptyImmediate
 	if disposeDur == 0 || (disposeEmptyImmediate && !i.anyValuesLocked()) {
 		i.removeLocked(-1)
-	} else if i.destroyTimer != nil {
+	} else if i.destroyTimer == nil {
 		var destroyTimer *time.Timer
 		destroyTimer = time.AfterFunc(disposeDur, func() {
 			if i.released.Load() {
