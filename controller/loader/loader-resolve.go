@@ -146,6 +146,9 @@ func (c *resolver) Resolve(ctx context.Context, vh directive.ResolverHandler) er
 		if execErr == nil {
 			// controller Execute() is complete.
 			// note: we need to take care to RemoveController in this case.
+			vh.AddValueRemovedCallback(vid, func() {
+				bus.RemoveController(ci)
+			})
 			return nil
 		}
 		// remove old value, will be replaced next loop.
