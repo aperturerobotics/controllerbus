@@ -4,8 +4,10 @@ import (
 	"context"
 
 	"github.com/aperturerobotics/controllerbus/bus"
+	"github.com/aperturerobotics/controllerbus/config"
 	"github.com/aperturerobotics/controllerbus/controller/configset"
 	"github.com/pkg/errors"
+	jsonpb "google.golang.org/protobuf/encoding/protojson"
 )
 
 // ConfigSetMap implements the controllerbus.ConfigSet as protobuf.
@@ -109,4 +111,15 @@ func (c ConfigSetMap) Validate() error {
 		}
 	}
 	return nil
+}
+
+// ApplyConfig applies a config to the ConfigSetMap.
+func (c ConfigSetMap) ApplyConfig(id string, conf config.Config, rev uint64, useJson bool) (*ControllerConfig, error) {
+	ctrlConf, err := NewControllerConfig(configset.NewControllerConfig(rev, conf), useJson)
+	if err != nil {
+		return nil, err
+	}
+
+	c[id] = ctrlConf
+	return ctrlConf, nil
 }
