@@ -58,7 +58,7 @@ func (c *Controller) HandleDirective(
 	dir := di.GetDirective()
 	switch d := dir.(type) {
 	case ExecController:
-		return c.resolveExecController(ctx, d)
+		return c.resolveExecController(ctx, di, d)
 	}
 
 	return nil, nil

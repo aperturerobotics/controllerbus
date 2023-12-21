@@ -13,15 +13,17 @@ import (
 // resolver tracks a ExecController request
 type resolver struct {
 	ctx        context.Context
-	directive  ExecController
+	di         directive.Instance
+	dir        ExecController
 	controller *Controller
 }
 
 // newResolver builds a new ExecController resolver.
-func newResolver(ctx context.Context, directive ExecController, controller *Controller) *resolver {
+func newResolver(ctx context.Context, di directive.Instance, dir ExecController, controller *Controller) *resolver {
 	return &resolver{
 		ctx:        ctx,
-		directive:  directive,
+		di:         di,
+		dir:        dir,
 		controller: controller,
 	}
 }
@@ -39,11 +41,12 @@ func newExecBackoff() backoff.BackOff {
 // resolveExecController handles a ExecController directive.
 func (c *Controller) resolveExecController(
 	ctx context.Context,
+	di directive.Instance,
 	dir ExecController,
 ) ([]directive.Resolver, error) {
 	// Check if the ExecController is meant for / compatible with us.
 	// In this case, we handle all ExecController requests.
-	return directive.Resolvers(newResolver(ctx, dir, c)), nil
+	return directive.Resolvers(newResolver(ctx, di, dir, c)), nil
 }
 
 // Resolve resolves the values.
@@ -51,11 +54,11 @@ func (c *Controller) resolveExecController(
 // When the context is canceled valCh will not be drained anymore.
 func (c *resolver) Resolve(ctx context.Context, vh directive.ResolverHandler) error {
 	// Construct and attach the new controller to the bus.
-	config := c.directive.GetExecControllerConfig()
-	factory := c.directive.GetExecControllerFactory()
+	config := c.dir.GetExecControllerConfig()
+	factory := c.dir.GetExecControllerFactory()
 
 	var execBackoff backoff.BackOff
-	if buildBackoff := c.directive.GetExecControllerRetryBackoff(); buildBackoff != nil {
+	if buildBackoff := c.dir.GetExecControllerRetryBackoff(); buildBackoff != nil {
 		execBackoff = buildBackoff()
 	}
 	if execBackoff == nil {
@@ -128,16 +131,21 @@ func (c *resolver) Resolve(ctx context.Context, vh directive.ResolverHandler) er
 		le.Debug("starting controller")
 		execErr := bus.ExecuteController(c.ctx, ci)
 		le := le.WithField("exec-time", time.Since(t1).String())
-		if execErr != nil && execErr != context.Canceled {
+		ctxCanceled := ctx.Err() != nil
+		if execErr != nil && (!ctxCanceled || execErr != context.Canceled) {
 			le.WithError(execErr).Warn("controller exited with error")
 			lastErr = execErr
 		} else {
 			le.Debug("controller exited normally")
-			execErr = nil
+		}
+		if ctxCanceled {
+			bus.RemoveController(ci)
+			return context.Canceled
 		}
 		// note: if context canceled, loop once more to check.
 		if execErr == nil {
 			// controller Execute() is complete.
+			// note: we need to take care to RemoveController in this case.
 			return nil
 		}
 		// remove old value, will be replaced next loop.

@@ -44,10 +44,10 @@ func (r *runningControllerRef) GetState() configset.State {
 	return &st
 }
 
-// AddStateCb adds a callback that is called when the state changes.
+// AddStateCallback adds a callback that is called when the state changes.
 // Should not block.
 // Will be called with the initial state.
-func (r *runningControllerRef) AddStateCb(cb func(configset.State)) {
+func (r *runningControllerRef) AddStateCallback(cb func(configset.State)) {
 	r.mtx.Lock()
 	r.cbs = append(r.cbs, cb)
 	rc := r.rc

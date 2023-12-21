@@ -82,6 +82,29 @@ func (r *resolverHandler) ClearValues() []uint32 {
 	return removed
 }
 
+// AddValueRemovedCallback adds a callback that will be called when the given
+// value id is disposed or removed. The callback might be called immediately if
+// the value was already removed.
+func (r *resolverHandler) AddValueRemovedCallback(id uint32, cb func()) func() {
+	emptyFn := func() {}
+	if cb == nil {
+		return emptyFn
+	}
+
+	r.r.di.c.mtx.Lock()
+	var relFn func()
+	var found bool
+	if r.r.ctx == r.ctx {
+		_, relFn, found = r.r.di.addValueRemovedCallbackLocked(r.r, id, cb)
+	}
+	r.r.di.c.mtx.Unlock()
+	if !found {
+		cb()
+		return emptyFn
+	}
+	return relFn
+}
+
 // executeResolver is the goroutine to execute the resolver.
 func (r *resolverHandler) executeResolver(ctx context.Context, exitedCh chan<- struct{}, waitCh <-chan struct{}) {
 	defer close(exitedCh)

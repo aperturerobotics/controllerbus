@@ -89,10 +89,10 @@ type Reference interface {
 	GetConfigKey() string
 	// GetState returns the current state object.
 	GetState() State
-	// AddStateCb adds a callback that is called when the state changes.
+	// AddStateCallback adds a callback that is called when the state changes.
 	// Should not block.
 	// Will be called with the initial state.
-	AddStateCb(func(State))
+	AddStateCallback(func(State))
 	// Release releases the reference.
 	Release()
 }

@@ -287,6 +287,16 @@ type ResolverHandler interface {
 	// ClearValues removes any values that were set by this ResolverHandler.
 	// Returns list of value IDs that were removed.
 	ClearValues() []uint32
+	// AddValueRemovedCallback adds a callback that will be called when the
+	// given value id is disposed or removed.
+	//
+	// The callback will be called if the value is removed for any reason,
+	// including if the parent handler (controller) is removed.
+	//
+	// The callback might be called immediately if the value was already removed.
+	//
+	// Returns a release function to clear the callback early.
+	AddValueRemovedCallback(id uint32, cb func()) func()
 }
 
 // Resolver resolves values for directives.

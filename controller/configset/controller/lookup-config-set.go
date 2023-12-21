@@ -84,7 +84,7 @@ func (r *lookupConfigSetResolver) Resolve(
 		r.refsMtx.Lock()
 		r.refs[ref] = 0
 		r.refsMtx.Unlock()
-		ref.AddStateCb(func(st configset.State) {
+		ref.AddStateCallback(func(st configset.State) {
 			r.refsMtx.Lock()
 			v, vOk := r.refs[ref]
 			if !vOk {

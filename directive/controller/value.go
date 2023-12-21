@@ -1,6 +1,7 @@
 package controller
 
 import "github.com/aperturerobotics/controllerbus/directive"
+import "sync/atomic"
 
 // value contains an attached resolver value
 type value struct {
@@ -8,6 +9,17 @@ type value struct {
 	id uint32
 	// val is the directive value
 	val directive.Value
+	// removeCallbackCtr is the counter for remove callback id
+	removeCallbackCtr uint32
+	// removeCallbacks is a set of callbacks to call when removed
+	removeCallbacks []*valueRemoveCallback
+}
+
+// valueRemoveCallback is a callback to call when value is removed
+type valueRemoveCallback struct {
+	released atomic.Bool
+	id       uint32
+	cb       func()
 }
 
 // GetValueID returns the value ID.

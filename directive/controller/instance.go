@@ -392,10 +392,49 @@ func (i *directiveInstance) removeValueLocked(res *resolver, valID uint32) (dire
 	return nil, false
 }
 
+// addValueRemovedCallbackLocked adds a callback to be called when the given value id is removed.
+// returns nil, nil, false if the value was not found
+func (i *directiveInstance) addValueRemovedCallbackLocked(res *resolver, valID uint32, cb func()) (directive.Value, func(), bool) {
+	for idx := 0; idx < len(res.vals); idx++ {
+		val := res.vals[idx]
+		if val.id == valID {
+			val.removeCallbackCtr++
+			cbID := val.removeCallbackCtr
+			vrc := &valueRemoveCallback{id: cbID, cb: cb}
+			val.removeCallbacks = append(val.removeCallbacks, vrc)
+			relLocked := func() {
+				if !vrc.released.Swap(true) {
+					for k := 0; k < len(val.removeCallbacks); k++ {
+						if val.removeCallbacks[k].id == cbID {
+							val.removeCallbacks = append(val.removeCallbacks[:k], val.removeCallbacks[k+1:]...)
+							break
+						}
+					}
+				}
+			}
+			return val.val, func() {
+				i.c.mtx.Lock()
+				defer i.c.mtx.Unlock()
+				relLocked()
+			}, true
+		}
+	}
+
+	// not found
+	return nil, nil, false
+}
+
 // onValuesRemovedLocked is called after removing values from a resolver.
 func (i *directiveInstance) onValuesRemovedLocked(res *resolver, vals ...*value) {
 	var cbs []func()
 	for _, val := range vals {
+		for _, removedCallback := range val.removeCallbacks {
+			if !removedCallback.released.Swap(true) {
+				cbs = append(cbs, removedCallback.cb)
+			}
+		}
+		val.removeCallbacks = nil
+
 		for _, ref := range i.refs {
 			ref := ref
 			if !ref.released.Load() && ref.h != nil {
