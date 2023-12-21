@@ -49,6 +49,7 @@ func WaitExecControllerRunning(
 	for {
 		select {
 		case <-subCtx.Done():
+			diRef.Release()
 			return nil, nil, nil, subCtx.Err()
 		case val := <-execValueCh:
 			if err := val.GetError(); err != nil {
