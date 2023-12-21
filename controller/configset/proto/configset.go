@@ -7,7 +7,6 @@ import (
 	"github.com/aperturerobotics/controllerbus/config"
 	"github.com/aperturerobotics/controllerbus/controller/configset"
 	"github.com/pkg/errors"
-	jsonpb "google.golang.org/protobuf/encoding/protojson"
 )
 
 // ConfigSetMap implements the controllerbus.ConfigSet as protobuf.
