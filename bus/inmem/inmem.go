@@ -126,21 +126,17 @@ func (b *Bus) addController(c controller.Controller) error {
 
 // removeController removes a controller from the bus
 func (b *Bus) removeController(c controller.Controller) {
-	var rel func()
 	b.mtx.Lock()
 	for i, ci := range b.controllers {
 		if ci.ctrl == c {
 			b.controllers[i] = b.controllers[len(b.controllers)-1]
 			b.controllers[len(b.controllers)-1] = nil
 			b.controllers = b.controllers[:len(b.controllers)-1]
-			rel = ci.rel
+			ci.rel()
 			break
 		}
 	}
 	b.mtx.Unlock()
-	if rel != nil {
-		rel()
-	}
 }
 
 // _ is a type assertion
