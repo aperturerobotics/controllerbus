@@ -52,11 +52,6 @@ func (w *Watcher) WatchCompilePlugin(
 	le.
 		WithField("codegen-path", pluginCodegenPath).
 		Info("hot: starting to build/watch plugin")
-	watcher, err := fsnotify.NewWatcher()
-	if err != nil {
-		return err
-	}
-	defer watcher.Close()
 
 	// hhBaseKey is the seed key to use for blake3 (32 bytes)
 	var hhBaseKey []byte
@@ -152,36 +147,36 @@ func (w *Watcher) WatchCompilePlugin(
 		return an, err
 	}
 
-	watchedFiles := make(map[string]struct{})
 	for {
 		an, err := compilePlugin()
 		if err != nil {
 			return err
 		}
 
+		// ignoreWatchPrefixes are prefixes to ignore from watching
+		ignoreWatchPrefixes := []string{"vendor", "node_modules", ".bldr", "(disabled)"}
+
 		// build file watchlist
+		watchedFiles := make(map[string]struct{})
 		codefileMap := an.GetProgramCodeFiles(w.packagePaths, "")
-		nextWatchedFiles := make(map[string]struct{})
 		for _, filePaths := range codefileMap {
 			for _, filePath := range filePaths {
-				nextWatchedFiles[filePath] = struct{}{}
+				for _, prefix := range ignoreWatchPrefixes {
+					if strings.HasPrefix(filePath, prefix) {
+						continue
+					}
+				}
+				watchedFiles[filePath] = struct{}{}
 			}
 		}
+
+		watchedSourcePaths := make(map[string]struct{}, len(watchedFiles))
+		watchedSourceDirs := make(map[string]struct{}, len(watchedFiles))
 		for filePath := range watchedFiles {
-			if _, ok := nextWatchedFiles[filePath]; ok {
-				delete(nextWatchedFiles, filePath)
-				continue
-			}
-			le.Debugf("removing watcher for file: %s", filePath)
-			if err := watcher.Remove(filePath); err != nil {
-				return err
-			}
-		}
-		for filePath := range nextWatchedFiles {
-			le.Debugf("adding watcher for file: %s", filePath)
-			watchedFiles[filePath] = struct{}{}
-			if err := watcher.Add(filePath); err != nil {
-				return err
+			watchedSourcePaths[filePath] = struct{}{}
+			sourceDir := filepath.Dir(filePath)
+			if _, ok := watchedSourceDirs[sourceDir]; !ok {
+				watchedSourceDirs[sourceDir] = struct{}{}
 			}
 		}
 
@@ -191,15 +186,51 @@ func (w *Watcher) WatchCompilePlugin(
 			len(watchedFiles),
 		)
 
+		// It's best to watch the entire directory tree and filter the events.
+		//
+		// This is both more efficient on the kernel side and avoids nasty quriks
+		// with git and other editors deleting and re-creating files.
+		//
+		// See fsnotify comments:
+		//   Watching individual files (rather than directories) is generally not
+		//   recommended as many programs (especially editors) update files atomically: it
+		//   will write to a temporary file which is then moved to to destination,
+		//   overwriting the original (or some variant thereof). The watcher on the
+		//   original file is now lost, as that no longer exists.
+		//
+		// It's necessary to create one watcher per directory:
+		//   https://github.com/fsnotify/fsnotify/issues/18
+		watcher, err := fsnotify.NewWatcher()
+		if err != nil {
+			return err
+		}
+
+		for watchedDirPath := range watchedSourceDirs {
+			le.Infof("watching dir path: %s", watchedDirPath)
+			err = watcher.Add(watchedDirPath)
+			if err != nil {
+				_ = watcher.Close()
+				return err
+			}
+		}
+
 		// wait for a file change
 		happened, err := debounce_fswatcher.DebounceFSWatcherEvents(
 			ctx,
 			watcher,
-			time.Second,
+			time.Millisecond*500,
+			func(event fsnotify.Event) (match bool, err error) {
+				if _, ok := watchedSourcePaths[event.Name]; !ok {
+					return false, nil
+				}
+				return true, nil
+			},
 		)
+		_ = watcher.Close()
 		if err != nil {
 			return err
 		}
+
 		le.Infof("re-analyzing packages after %d filesystem events", len(happened))
 	}
 }

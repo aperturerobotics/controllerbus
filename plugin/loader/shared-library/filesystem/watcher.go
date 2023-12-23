@@ -199,7 +199,7 @@ func (w *Watcher) Execute(ctx context.Context, syncDir string, watch bool) error
 	}
 
 	for {
-		happened, err := debounce_fswatcher.DebounceFSWatcherEvents(ctx, watcher, debounceTime)
+		happened, err := debounce_fswatcher.DebounceFSWatcherEvents(ctx, watcher, debounceTime, nil)
 		if err != nil {
 			return err
 		}

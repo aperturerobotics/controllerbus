@@ -14,13 +14,13 @@ require (
 	github.com/blang/semver v3.5.1+incompatible
 	github.com/pkg/errors v0.9.1
 	github.com/sirupsen/logrus v1.9.3
-	google.golang.org/protobuf v1.31.0
+	google.golang.org/protobuf v1.32.0
 )
 
 require (
 	github.com/Jeffail/gabs/v2 v2.7.0 // indirect
-	github.com/aperturerobotics/starpc v0.22.0 // indirect
-	github.com/aperturerobotics/util v1.8.2 // indirect
+	github.com/aperturerobotics/starpc v0.22.4 // indirect
+	github.com/aperturerobotics/util v1.9.0 // indirect
 	github.com/cenkalti/backoff v2.2.1+incompatible // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.2 // indirect
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.2.0 // indirect

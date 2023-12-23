@@ -8,8 +8,8 @@ replace (
 )
 
 require (
-	github.com/aperturerobotics/starpc v0.22.0 // latest
-	github.com/aperturerobotics/util v1.8.2 // latest
+	github.com/aperturerobotics/starpc v0.22.4 // latest
+	github.com/aperturerobotics/util v1.9.0 // latest
 	github.com/blang/semver v3.5.1+incompatible
 	github.com/cenkalti/backoff v2.2.1+incompatible
 	github.com/fsnotify/fsnotify v1.7.0
@@ -24,7 +24,7 @@ require (
 	golang.org/x/exp v0.0.0-20231219180239-dc181d75b848
 	golang.org/x/mod v0.14.0
 	golang.org/x/tools v0.16.1
-	google.golang.org/protobuf v1.31.0
+	google.golang.org/protobuf v1.32.0
 	mvdan.cc/gofumpt v0.5.0
 )
 
