@@ -2,7 +2,7 @@ package bus
 
 import (
 	"context"
-	"sync"
+	"slices"
 	"sync/atomic"
 
 	"github.com/aperturerobotics/controllerbus/directive"
@@ -34,8 +34,7 @@ func ExecCollectValues[T directive.Value](
 		}
 	}
 
-	// mtx, bcast guard these variables
-	var mtx sync.Mutex
+	// bcast guards these variables
 	var bcast broadcast.Broadcast
 
 	var vals []T
@@ -52,49 +51,62 @@ func ExecCollectValues[T directive.Value](
 				if !valOk {
 					return
 				}
-				mtx.Lock()
-				idle = false
-				if !returned {
-					vals = append(vals, val)
-					valIDs = append(valIDs, v.GetValueID())
-					bcast.Broadcast()
-				}
-				mtx.Unlock()
+				bcast.HoldLock(func(broadcast func(), getWaitCh func() <-chan struct{}) {
+					idle = false
+					if !returned {
+						// we can append without re-allocating.
+						vals = append(vals, val)
+						valIDs = append(valIDs, v.GetValueID())
+						broadcast()
+					}
+				})
 			},
 			func(v directive.AttachedValue) {
 				_, valOk := v.GetValue().(T)
 				if !valOk {
 					return
 				}
-				mtx.Lock()
-				idle = false
-				id := v.GetValueID()
-				for i, valID := range valIDs {
-					if valID == id {
-						if returned {
-							defer valDisposeCallback()
-						} else {
-							valIDs[i] = valIDs[len(valIDs)-1]
-							valIDs = valIDs[:len(valIDs)-1]
-							vals[i] = vals[len(vals)-1]
-							var empty T
-							vals[len(vals)-1] = empty
-							vals = vals[:len(vals)-1]
+				var cb func()
+				bcast.HoldLock(func(broadcast func(), getWaitCh func() <-chan struct{}) {
+					idle = false
+					id := v.GetValueID()
+					for i, valID := range valIDs {
+						if valID == id {
+							if returned {
+								cb = valDisposeCallback
+							} else {
+								// removing requires re-allocating.
+								valIDs = slices.Clone(valIDs)
+								valIDs[i] = valIDs[len(valIDs)-1]
+								valIDs = valIDs[:len(valIDs)-1]
+								vals = slices.Clone(vals)
+								vals[i] = vals[len(vals)-1]
+								var empty T
+								vals[len(vals)-1] = empty
+								vals = vals[:len(vals)-1]
+								broadcast()
+							}
+							break
 						}
-						break
 					}
+				})
+				if cb != nil {
+					cb()
 				}
-				mtx.Unlock()
 			},
 			func() {
-				mtx.Lock()
-				if returned {
-					defer valDisposeCallback()
-				} else if resErr == nil {
-					resErr = ErrDirectiveDisposed
-					bcast.Broadcast()
+				var cb func()
+				bcast.HoldLock(func(broadcast func(), getWaitCh func() <-chan struct{}) {
+					if returned {
+						cb = valDisposeCallback
+					} else if resErr == nil {
+						resErr = ErrDirectiveDisposed
+						broadcast()
+					}
+				})
+				if cb != nil {
+					cb()
 				}
-				mtx.Unlock()
 			},
 		),
 	)
@@ -106,43 +118,46 @@ func ExecCollectValues[T directive.Value](
 	}
 
 	defer di.AddIdleCallback(func(errs []error) {
-		mtx.Lock()
-		defer mtx.Unlock()
-		if resErr != nil {
-			return
-		}
-		for _, err := range errs {
-			if err != nil {
-				resErr = err
-				break
+		bcast.HoldLock(func(broadcast func(), getWaitCh func() <-chan struct{}) {
+			if resErr != nil {
+				return
 			}
-		}
-		// idle
-		idle = true
-		bcast.Broadcast()
+			for _, err := range errs {
+				if err != nil {
+					resErr = err
+					break
+				}
+			}
+			// idle
+			idle = true
+			broadcast()
+		})
 	})()
 
 	for {
-		mtx.Lock()
-		if resErr != nil {
-			vals, resErr := vals, resErr // copy
-			returned = true
-			mtx.Unlock()
-			ref.Release()
-			return vals, di, nil, resErr
+		var currVals []T
+		var currResErr error
+		var currIdle bool
+		var currRef directive.Reference
+		var waitCh <-chan struct{}
+		var returnVals bool
+		bcast.HoldLock(func(broadcast func(), getWaitCh func() <-chan struct{}) {
+			currVals, currResErr, currIdle, currRef = vals, resErr, idle, ref
+			waitCh = getWaitCh()
+			returnVals = currResErr == nil && currIdle && (!waitOne || len(currVals) != 0)
+			returned = currResErr != nil || returnVals
+		})
+		if currResErr != nil {
+			currRef.Release()
+			return currVals, di, nil, currResErr
 		}
-		if idle && (!waitOne || len(vals) != 0) {
-			vals, ref := vals, ref // copy
-			returned = true
-			mtx.Unlock()
-			return vals, di, ref, nil
+		if returnVals {
+			return currVals, di, currRef, nil
 		}
-		waitCh := bcast.GetWaitCh()
-		mtx.Unlock()
 
 		select {
 		case <-ctx.Done():
-			ref.Release()
+			currRef.Release()
 			return nil, nil, nil, context.Canceled
 		case <-waitCh:
 		}
