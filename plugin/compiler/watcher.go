@@ -160,10 +160,11 @@ func (w *Watcher) WatchCompilePlugin(
 		watchedFiles := make(map[string]struct{})
 		codefileMap := an.GetProgramCodeFiles(w.packagePaths, "")
 		for _, filePaths := range codefileMap {
+		FilePathLoop:
 			for _, filePath := range filePaths {
 				for _, prefix := range ignoreWatchPrefixes {
 					if strings.HasPrefix(filePath, prefix) {
-						continue
+						continue FilePathLoop
 					}
 				}
 				watchedFiles[filePath] = struct{}{}
