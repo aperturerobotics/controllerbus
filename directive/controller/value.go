@@ -1,7 +1,10 @@
 package controller
 
-import "github.com/aperturerobotics/controllerbus/directive"
-import "sync/atomic"
+import (
+	"sync/atomic"
+
+	"github.com/aperturerobotics/controllerbus/directive"
+)
 
 // value contains an attached resolver value
 type value struct {
