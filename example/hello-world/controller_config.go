@@ -4,7 +4,6 @@ import (
 	"errors"
 
 	"github.com/aperturerobotics/controllerbus/config"
-	"google.golang.org/protobuf/proto"
 )
 
 // Validate validates the configuration.
@@ -25,5 +24,5 @@ func (c *ToyControllerConfig) GetConfigID() string {
 
 // EqualsConfig checks if the config is equal to another.
 func (c *ToyControllerConfig) EqualsConfig(other config.Config) bool {
-	return proto.Equal(c, other)
+	return config.EqualsConfig[*ToyControllerConfig](c, other)
 }

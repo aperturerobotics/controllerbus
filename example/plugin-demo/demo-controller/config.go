@@ -4,7 +4,6 @@ import (
 	"time"
 
 	"github.com/aperturerobotics/controllerbus/config"
-	"google.golang.org/protobuf/proto"
 )
 
 // ConfigID is the string used to identify this config object.
@@ -26,8 +25,8 @@ func (c *Config) GetConfigID() string {
 }
 
 // EqualsConfig checks if the other config is equal.
-func (c *Config) EqualsConfig(other config.Config) bool {
-	return proto.Equal(c, other)
+func (c *Config) EqualsConfig(oc config.Config) bool {
+	return config.EqualsConfig[*Config](c, oc)
 }
 
 // ParseExitAfterDur parses the exit after duration if set.

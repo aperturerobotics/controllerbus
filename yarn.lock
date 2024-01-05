@@ -1394,7 +1394,7 @@ it-foreach@^2.0.3:
   dependencies:
     it-peekable "^3.0.0"
 
-it-length-prefixed@^9.0.4:
+it-length-prefixed@^9.0.3, it-length-prefixed@^9.0.4:
   version "9.0.4"
   resolved "https://registry.yarnpkg.com/it-length-prefixed/-/it-length-prefixed-9.0.4.tgz#8096c3270420fe8abaa920c7b4d5e5895144008e"
   integrity sha512-lz28fykbG0jq7s5XtvlzGxO5BeSOw6ikymkRllxjL21V5VKLcvB4pHr9wPvEnsAJ2et1xpOk3BRTMq9XrhgKsg==
@@ -1986,6 +1986,29 @@ sprintf-js@~1.0.2:
   integrity sha512-D9cPgkvLlV3t3IzL0D0YLvGA9Ahk4PcvVwUbN0dSGr1aP0Nrt4AEnTUbuGvquEC0mA64Gqt1fzirlRs5ibXx8g==
 
 starpc@^0.22.4:
+  version "0.22.4"
+  resolved "https://registry.yarnpkg.com/starpc/-/starpc-0.22.4.tgz#920d2ae6277a333cb039f5ab14fd8208ac3f4eac"
+  integrity sha512-bbxS4UrToSewU0m2KVvL1lpyhTHUcJPkjn5Z2oexnyEr0q1KuXnOM0A/GVqd4F5fRa124cZ8FLanhYPotpigfg==
+  dependencies:
+    "@aptre/it-ws" "^1.0.0"
+    "@chainsafe/libp2p-yamux" "^5.0.0"
+    "@libp2p/interface" "^0.1.2"
+    event-iterator "^2.0.0"
+    is-promise "^4.0.0"
+    isomorphic-ws "^5.0.0"
+    it-first "^3.0.3"
+    it-length-prefixed "^9.0.3"
+    it-pipe "^3.0.1"
+    it-pushable "^3.2.3"
+    it-stream-types "^2.0.1"
+    long "^5.2.3"
+    memoize-one "^6.0.0"
+    patch-package "^8.0.0"
+    protobufjs "^7.2.5"
+    uint8arraylist "^2.4.7"
+    ws "^8.15.1"
+
+starpc@^0.22.5:
   version "0.22.5"
   resolved "https://registry.yarnpkg.com/starpc/-/starpc-0.22.5.tgz#ddfbfa0fe233af263708f0b01c8184d17de1e839"
   integrity sha512-SJzDU6iNCt81YT33uIOs7J4P07xOPrnsaca91mpFJfIA5I6wzeJi/zc2lsY1tNEX+g8PfNCW5LE/6rb43JzKUQ==
@@ -2092,7 +2115,7 @@ ts-proto-descriptors@1.15.0:
     long "^5.2.3"
     protobufjs "^7.2.4"
 
-ts-proto@^1.165.2:
+ts-proto@^1.166.2:
   version "1.166.2"
   resolved "https://registry.yarnpkg.com/ts-proto/-/ts-proto-1.166.2.tgz#6408951c0a15f952855a2e40899b84b5b74df539"
   integrity sha512-ygzeKHZLPbschsqFKmEY1XIJTIIs3k35n3/ZUkz0nF/a/C6x7onITlU7GQBqXmiVPiAvzbT5n/JElrGBVVmvxQ==

@@ -47,14 +47,14 @@
     "patch-package": "^8.0.0",
     "prettier": "^3.0.1",
     "ts-poet": "6.6.0",
-    "ts-proto": "^1.165.2",
+    "ts-proto": "^1.166.2",
     "typescript": "^5.2.2"
   },
   "dependencies": {
     "bufferutil": "^4.0.8",
     "long": "^5.2.3",
     "protobufjs": "^7.2.4",
-    "starpc": "^0.22.4",
+    "starpc": "^0.22.5",
     "utf-8-validate": "^6.0.3"
   }
 }
