@@ -1,6 +1,7 @@
 package config
 
 import (
+	"github.com/aperturerobotics/util/vtcompare"
 	"google.golang.org/protobuf/proto"
 )
 
@@ -43,4 +44,9 @@ type Debuggable interface {
 	// This should be something like param1="test", param2="test".
 	// This is not necessarily unique, and is primarily intended for display.
 	GetDebugVals() DebugValues
+}
+
+// EqualsConfig implements EqualsConfig assuming both Config are the same type and have VTEqual.
+func EqualsConfig[T vtcompare.EqualVT[T]](c1, c2 T) bool {
+	return vtcompare.IsEqualVT[T](c1, c2)
 }

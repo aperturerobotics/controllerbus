@@ -20,7 +20,7 @@ require (
 require (
 	github.com/Jeffail/gabs/v2 v2.7.0 // indirect
 	github.com/aperturerobotics/starpc v0.22.5 // indirect
-	github.com/aperturerobotics/util v1.11.1 // indirect
+	github.com/aperturerobotics/util v1.11.3 // indirect
 	github.com/cenkalti/backoff v2.2.1+incompatible // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.2 // indirect
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.2.0 // indirect
@@ -44,12 +44,12 @@ require (
 	github.com/multiformats/go-varint v0.0.7 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/spaolacci/murmur3 v1.1.1-0.20190317074736-539464a789e9 // indirect
-	github.com/urfave/cli/v2 v2.26.0 // indirect
+	github.com/urfave/cli/v2 v2.27.0 // indirect
 	github.com/valyala/fastjson v1.6.4 // indirect
 	github.com/xrash/smetrics v0.0.0-20201216005158-039620a65673 // indirect
 	github.com/zeebo/blake3 v0.2.3 // indirect
 	golang.org/x/crypto v0.17.0 // indirect
-	golang.org/x/exp v0.0.0-20231219180239-dc181d75b848 // indirect
+	golang.org/x/exp v0.0.0-20231226003508-02704c960a9b // indirect
 	golang.org/x/mod v0.14.0 // indirect
 	golang.org/x/sys v0.15.0 // indirect
 	golang.org/x/tools v0.16.1 // indirect
