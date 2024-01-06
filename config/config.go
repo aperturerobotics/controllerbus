@@ -57,3 +57,12 @@ func EqualsConfig[T vtcompare.EqualVT[T]](c1, c2 Config) bool {
 func IsEqualVT[T vtcompare.EqualVT[T]](c1, c2 T) bool {
 	return vtcompare.IsEqualVT[T](c1, c2)
 }
+
+// MergeDebugVals merges multiple DebugValues into the first DebugValues passed.
+func MergeDebugVals(to DebugValues, from ...DebugValues) {
+	for _, f := range from {
+		for k, v := range f {
+			to[k] = append(to[k], v...)
+		}
+	}
+}
