@@ -274,9 +274,9 @@
     uint8arraylist "^2.4.3"
 
 "@libp2p/interface@^1.0.0":
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/@libp2p/interface/-/interface-1.1.0.tgz#ad93c8834ab236da2f48c0656cd7c97cc99db6db"
-  integrity sha512-URIKSFtaliBGA8sIg/MGfyjIo5h4jAdfuZl6dXXXmtdfC3X0rry95YuLNYzXtGMuxG/X+pbVht3fykHvPiXUhg==
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/@libp2p/interface/-/interface-1.1.1.tgz#f37ea4930bd74e1299fbcafa49fdab39a28abba9"
+  integrity sha512-g6xgF+q38ZDTRkjuJfuOByS4N0zGld+VPRiWPXYX8wA/9vS6lqJwKUoC6V33KUhP/zXHCkJaSD6z94fUbNM8vw==
   dependencies:
     "@multiformats/multiaddr" "^12.1.10"
     it-pushable "^3.2.1"
@@ -394,9 +394,9 @@
   integrity sha512-Klz949h02Gz2uZCMGwDUSDS1YBlTdDDgbWHi+81l29tQALUtvz4rAYi5uoVhE5Lagoq6DeqAUlbrHvW/mXDgdQ==
 
 "@types/node@*", "@types/node@>=13.7.0":
-  version "20.10.6"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-20.10.6.tgz#a3ec84c22965802bf763da55b2394424f22bfbb5"
-  integrity sha512-Vac8H+NlRNNlAmDfGUP7b5h/KA+AtWIzuXy0E6OyP8f1tCLYAtPvKRRDJjAPqhpCb0t6U2j7/xqAuLEebW2kiw==
+  version "20.11.0"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-20.11.0.tgz#8e0b99e70c0c1ade1a86c4a282f7b7ef87c9552f"
+  integrity sha512-o9bjXmDNcF7GbM4CNQpmi+TutCgap/K3w1JyKgxAjqx41zp9qlIAVFi0IhCNsJcXolEqLWhbFbEeL0PvYm4pcQ==
   dependencies:
     undici-types "~5.26.4"
 
@@ -1641,9 +1641,9 @@ multiformats@^12.0.1:
   integrity sha512-eajQ/ZH7qXZQR2AgtfpmSMizQzmyYVmCql7pdhldPuYQi4atACekbJaQplk6dWyIi10jCaFnd6pqvcEFXjbaJw==
 
 multiformats@^13.0.0:
-  version "13.0.0"
-  resolved "https://registry.yarnpkg.com/multiformats/-/multiformats-13.0.0.tgz#97f3341b16c34716a14518d178ea0c190e987c32"
-  integrity sha512-xiIB0p7EKmETm3wyKedOg/xuyQ18PoWwXCzzgpZAiDxL9ktl3XTh8AqoDT5kAqRg+DU48XAGPsUJL2Rn6Bx3Lw==
+  version "13.0.1"
+  resolved "https://registry.yarnpkg.com/multiformats/-/multiformats-13.0.1.tgz#c0622affa5171189eacd57c06f977195ca7acb08"
+  integrity sha512-bt3R5iXe2O8xpp3wkmQhC73b/lC4S2ihU8Dndwcsysqbydqb8N+bpP116qMcClZ17g58iSIwtXUTcg2zT4sniA==
 
 multimatch@^5.0.0:
   version "5.0.0"
@@ -1822,9 +1822,9 @@ prelude-ls@^1.2.1:
   integrity sha512-vkcDPrRZo1QZLbn5RLGPpg/WmIQ65qoWWhcGKf/b5eplkkarX0m9z8ppCat4mlOqUsWpyNuYgO3VRyrYHSzX5g==
 
 prettier@^3.0.1:
-  version "3.1.1"
-  resolved "https://registry.yarnpkg.com/prettier/-/prettier-3.1.1.tgz#6ba9f23165d690b6cbdaa88cb0807278f7019848"
-  integrity sha512-22UbSzg8luF4UuZtzgiUOfcGM8s4tjBv6dJRT7j275NXsy2jb4aJa4NNveul5x4eqlF1wuhuR2RElK71RvmVaw==
+  version "3.2.2"
+  resolved "https://registry.yarnpkg.com/prettier/-/prettier-3.2.2.tgz#96e580f7ca9c96090ad054616c0c4597e2844b65"
+  integrity sha512-HTByuKZzw7utPiDO523Tt2pLtEyK7OibUD9suEJQrPUCYQqrHr74GGX6VidMrovbf/I50mPqr8j/II6oBAuc5A==
 
 progress-events@^1.0.0:
   version "1.0.0"
@@ -2009,9 +2009,9 @@ starpc@^0.22.4:
     ws "^8.15.1"
 
 starpc@^0.22.5:
-  version "0.22.5"
-  resolved "https://registry.yarnpkg.com/starpc/-/starpc-0.22.5.tgz#ddfbfa0fe233af263708f0b01c8184d17de1e839"
-  integrity sha512-SJzDU6iNCt81YT33uIOs7J4P07xOPrnsaca91mpFJfIA5I6wzeJi/zc2lsY1tNEX+g8PfNCW5LE/6rb43JzKUQ==
+  version "0.22.6"
+  resolved "https://registry.yarnpkg.com/starpc/-/starpc-0.22.6.tgz#e11af333587073a87a0d2138666198128930a5b1"
+  integrity sha512-nXVd30tX6Ae5XFSH0jGSrY//Vub7PaCFcDIrosHOVH2R9QAbqSFE+a0t+bwDGqjAguZENac/Svuv7sviGR18NQ==
   dependencies:
     "@aptre/it-ws" "^1.0.0"
     "@chainsafe/libp2p-yamux" "^5.0.0"
