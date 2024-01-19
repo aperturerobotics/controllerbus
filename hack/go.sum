@@ -73,8 +73,8 @@ github.com/alingse/asasalint v0.0.11 h1:SFwnQXJ49Kx/1GghOFz1XGqHYKp21Kq1nHad/0WQ
 github.com/alingse/asasalint v0.0.11/go.mod h1:nCaoMhw7a9kSJObvQyVzNTPBDbNpdocqrSP7t/cW5+I=
 github.com/aperturerobotics/goprotowrap v0.3.0 h1:JLQ/1zVRdm2qwfeK7bPxWPg5fpTLlzovDUom0vBgcgM=
 github.com/aperturerobotics/goprotowrap v0.3.0/go.mod h1:ehsRFLviAKk5oiZK+i5oL4juhTYaGhaMrURiqY+ttLo=
-github.com/aperturerobotics/protobuf-go v1.31.1-0.20231004004114-bf10d4f3cd42 h1:umqEpzvBzfVydH+g1xP9WSWsf6AV2n0IjfbGnmZS3PY=
-github.com/aperturerobotics/protobuf-go v1.31.1-0.20231004004114-bf10d4f3cd42/go.mod h1:HV8QOd/L58Z+nl8r43ehVNZIU/HEI6OcFqwMG9pJV4I=
+github.com/aperturerobotics/protobuf-go v1.32.1-0.20240118233629-6aeee82c476f h1:mnmO0JHfvlE/yK2kiKQ/Q2aYhCETkl6FP07rcmvoBKw=
+github.com/aperturerobotics/protobuf-go v1.32.1-0.20240118233629-6aeee82c476f/go.mod h1:c6P6GXX6sHbq/GpV6MGZEdwhWPcYBgnhAHhKbcUYpos=
 github.com/aperturerobotics/starpc v0.22.6 h1:9e+hc3m3ppBNry4gXqE5iz417URxCUvWOUCai4L9+4k=
 github.com/aperturerobotics/starpc v0.22.6/go.mod h1:h7IvwvtIPSm3bovqqb5YRBaxUjhYUfMSMetX+4DeU2Q=
 github.com/aperturerobotics/util v1.11.3 h1:qg7TTe1L/rtoENssNKwz+VMeA3CCDVQ5SnYWig6WMOk=

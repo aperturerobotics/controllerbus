@@ -4,7 +4,7 @@ go 1.21
 
 replace github.com/aperturerobotics/controllerbus => ../
 
-replace google.golang.org/protobuf => github.com/aperturerobotics/protobuf-go v1.31.1-0.20231004004114-bf10d4f3cd42 // aperture
+replace google.golang.org/protobuf => github.com/aperturerobotics/protobuf-go v1.32.1-0.20240118233629-6aeee82c476f // aperture
 
 require (
 	github.com/golangci/golangci-lint v1.53.3
