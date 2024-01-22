@@ -33,14 +33,26 @@ func (b *boilerplateResolver) Resolve(
 	ctx context.Context,
 	handler directive.ResolverHandler,
 ) error {
+	// Call a callback when the resolver is removed
+	handler.AddResolverRemovedCallback(func() {
+		b.c.le.Info("boilerplate resolver removed")
+	})
+
 	fullMsg := fmt.Sprintf(
 		"logging message from boilerplate directive: %s",
 		b.dir.BoilerplateMessage(),
 	)
 	b.c.le.Info(fullMsg)
-	handler.AddValue(&boilerplate_v1.BoilerplateResult{
+
+	valID, _ := handler.AddValue(&boilerplate_v1.BoilerplateResult{
 		PrintedLen: uint32(len(fullMsg)),
 	})
+
+	// call a callback when the value is removed
+	handler.AddValueRemovedCallback(valID, func() {
+		b.c.le.Info("boilerplate resolver value removed")
+	})
+
 	return nil
 }
 

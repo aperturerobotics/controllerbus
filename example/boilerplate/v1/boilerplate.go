@@ -50,7 +50,7 @@ func (b *Boilerplate) GetValueOptions() directive.ValueOptions {
 
 		// UnrefDisposeDur is the duration to wait to dispose a directive after all
 		// references have been released.
-		UnrefDisposeDur: time.Second,
+		UnrefDisposeDur: time.Millisecond * 10,
 	}
 }
 

@@ -3,6 +3,7 @@ package boilerplate_controller
 import (
 	"context"
 	"testing"
+	"time"
 
 	"github.com/aperturerobotics/controllerbus/bus"
 	"github.com/aperturerobotics/controllerbus/controller/resolver"
@@ -46,4 +47,8 @@ func TestBoilerplateController(t *testing.T) {
 		t.Fatalf("expected length 55 got %d", plen)
 	}
 	t.Log("successfully executed directive")
+
+	// Give a moment to allow the removed callbacks to fire
+	// This happens after UnrefDisposeDur
+	<-time.After(time.Millisecond * 100)
 }

@@ -105,6 +105,28 @@ func (r *resolverHandler) AddValueRemovedCallback(id uint32, cb func()) func() {
 	return relFn
 }
 
+// AddResolverRemovedCallback adds a callback that will be called when the
+// directive resolver is removed.
+func (r *resolverHandler) AddResolverRemovedCallback(cb func()) func() {
+	emptyFn := func() {}
+	if cb == nil {
+		return emptyFn
+	}
+
+	r.r.di.c.mtx.Lock()
+	var relFn func()
+	var found bool
+	if r.r.ctx == r.ctx {
+		relFn, found = r.r.di.addResolverRemovedCallbackLocked(r.r, cb)
+	}
+	r.r.di.c.mtx.Unlock()
+	if !found {
+		cb()
+		return emptyFn
+	}
+	return relFn
+}
+
 // executeResolver is the goroutine to execute the resolver.
 func (r *resolverHandler) executeResolver(ctx context.Context, exitedCh chan<- struct{}, waitCh <-chan struct{}) {
 	defer close(exitedCh)
