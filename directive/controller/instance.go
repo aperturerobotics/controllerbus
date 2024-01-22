@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/url"
 	"runtime/debug"
+	"slices"
 	"sync/atomic"
 	"time"
 
@@ -424,6 +425,32 @@ func (i *directiveInstance) addValueRemovedCallbackLocked(res *resolver, valID u
 	return nil, nil, false
 }
 
+// addResolverRemovedCallbackLocked adds a callback to be called when the given resolver is removed.
+// returns nil, nil, false if the resolver was already removed
+func (i *directiveInstance) addResolverRemovedCallbackLocked(res *resolver, cb func()) (func(), bool) {
+	if !slices.Contains(i.res, res) {
+		return nil, false
+	}
+
+	rel := newCallback(cb)
+	res.rels = append(res.rels, rel)
+	relLocked := func() {
+		if !rel.released.Swap(true) {
+			for k := 0; k < len(res.rels); k++ {
+				if res.rels[k] == rel {
+					res.rels = append(res.rels[:k], res.rels[k+1:]...)
+					break
+				}
+			}
+		}
+	}
+	return func() {
+		i.c.mtx.Lock()
+		defer i.c.mtx.Unlock()
+		relLocked()
+	}, true
+}
+
 // onValuesRemovedLocked is called after removing values from a resolver.
 func (i *directiveInstance) onValuesRemovedLocked(res *resolver, vals ...*value) {
 	var cbs []func()
@@ -574,24 +601,46 @@ func (i *directiveInstance) removeLocked(diIdx int) {
 		_ = i.destroyTimer.Stop()
 		i.destroyTimer = nil
 	}
+
 	// determine index in list (if necessary)
 	if diIdx < 0 {
-		for idx, di := range i.c.dir {
-			if di == i {
-				diIdx = idx
-				break
-			}
-		}
+		diIdx = slices.Index(i.c.dir, i)
 		if diIdx < 0 {
 			// not found
 			return
 		}
 	}
+
 	// remove from list of instances
 	i.logger().Debug("removed directive")
 	i.c.dir = append(i.c.dir[:diIdx], i.c.dir[diIdx+1:]...)
-	// clear everything else
+
+	// Clear all idle callbacks
+	for _, idle := range i.idles {
+		idle.released.Store(true)
+	}
+	i.idles = nil
+
+	// Remove all resolvers and all values emitted by those resolvers.
+	for len(i.res) != 0 {
+		resIdx := len(i.res) - 1
+		i.removeResolverLocked(resIdx, i.res[resIdx])
+	}
+	for _, res := range i.res {
+		if res.ctxCancel != nil {
+			res.ctxCancel()
+		}
+		res.ctx, res.ctxCancel = nil, nil
+	}
+	i.res = nil
+
+	// Call directive release callbacks and ref release callbacks
 	var cbs []func()
+	for _, cb := range i.rels {
+		if !cb.released.Swap(true) && cb.cb != nil {
+			cbs = append(cbs, cb.cb)
+		}
+	}
 	for _, ref := range i.refs {
 		ref := ref
 		if !ref.released.Swap(true) && ref.h != nil {
@@ -600,25 +649,9 @@ func (i *directiveInstance) removeLocked(diIdx int) {
 			})
 		}
 	}
-	for _, cb := range i.rels {
-		if !cb.released.Swap(true) && cb.cb != nil {
-			cbs = append(cbs, cb.cb)
-		}
-	}
 	i.rels = nil
 	i.callCallbacksLocked(cbs...)
 	i.refs = nil
-	for _, res := range i.res {
-		if res.ctxCancel != nil {
-			res.ctxCancel()
-		}
-		res.ctx, res.ctxCancel = nil, nil
-	}
-	i.res = nil
-	for _, idle := range i.idles {
-		idle.released.Store(true)
-	}
-	i.idles = nil
 }
 
 // removeHandlerLocked removes all resolvers associated with the handler.
@@ -639,12 +672,7 @@ func (i *directiveInstance) removeHandlerLocked(hnd *handler) {
 func (i *directiveInstance) removeResolverLocked(resIdx int, rres *resolver) {
 	// search for the resolver in the list if necessary
 	if resIdx < 0 {
-		for i, res := range i.res {
-			if res == rres {
-				resIdx = i
-				break
-			}
-		}
+		resIdx = slices.Index(i.res, rres)
 		if resIdx < 0 {
 			return
 		}
@@ -658,6 +686,15 @@ func (i *directiveInstance) removeResolverLocked(resIdx int, rres *resolver) {
 	vals := rres.vals
 	rres.vals = nil
 	i.onValuesRemovedLocked(rres, vals...)
+	// call the resolver removed callbacks
+	var cbs []func()
+	for _, cb := range rres.rels {
+		if !cb.released.Swap(true) && cb.cb != nil {
+			cbs = append(cbs, cb.cb)
+		}
+	}
+	rres.rels = nil
+	i.callCallbacksLocked(cbs...)
 }
 
 // callCallbacksLocked calls the refsCbs list or adds to queue

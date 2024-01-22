@@ -23,6 +23,8 @@ type resolver struct {
 	// exitedCh is closed when the routine running with ctx exits
 	// may be nil if ctx == nil
 	exitedCh <-chan struct{}
+	// rels contains all release callbacks
+	rels []*callback[func()]
 	// vals are the attached values
 	// sorted by id
 	vals []*value

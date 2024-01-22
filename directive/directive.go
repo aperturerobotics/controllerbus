@@ -291,12 +291,22 @@ type ResolverHandler interface {
 	// given value id is disposed or removed.
 	//
 	// The callback will be called if the value is removed for any reason,
-	// including if the parent handler (controller) is removed.
+	// including if the parent resolver, handler, or directive are removed.
 	//
 	// The callback might be called immediately if the value was already removed.
 	//
 	// Returns a release function to clear the callback early.
 	AddValueRemovedCallback(id uint32, cb func()) func()
+	// AddResolverRemovedCallback adds a callback that will be called when the
+	// directive resolver is removed.
+	//
+	// The callback will be called if the resolver is removed for any reason,
+	// including if the parent resolver, handler, or directive are removed.
+	//
+	// The callback might be called immediately if the resolver was already removed.
+	//
+	// Returns a release function to clear the callback early.
+	AddResolverRemovedCallback(cb func()) func()
 }
 
 // Resolver resolves values for directives.
