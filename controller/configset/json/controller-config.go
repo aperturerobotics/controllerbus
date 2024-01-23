@@ -9,15 +9,14 @@ import (
 	"github.com/ghodss/yaml"
 )
 
-// ControllerConfig implements the JSON unmarshaling logic for a configset
-// ControllerConfig.
+// ControllerConfig implements the JSON unmarshaling logic.
 type ControllerConfig struct {
 	// Rev is the revision number.
 	Rev uint64 `json:"rev,omitempty"`
 	// Id is the configuration ID.
 	Id string `json:"id"`
 	// Config is the configuration object.
-	Config *Config `json:"config"`
+	Config *Config `json:"config,omitempty"`
 }
 
 // NewControllerConfig builds a new controller config.
@@ -50,20 +49,20 @@ func (c *ControllerConfig) Resolve(ctx context.Context, b bus.Bus) (configset.Co
 	if c == nil {
 		return nil, nil
 	}
-	if c.Config == nil {
-		return nil, errors.New("config was not specified")
-	}
 	if c.Id == "" {
 		return nil, errors.New("config id was not specified")
 	}
 
+	if c.Config == nil {
+		c.Config = &Config{}
+	}
 	if err := c.Config.Resolve(ctx, c.Id, b); err != nil {
 		return nil, err
 	}
-
-	if c.Config.GetConfig() == nil {
-		return nil, errors.New("config parsed to null")
+	conf := c.Config.underlying
+	if conf == nil {
+		return nil, errors.New("config cannot be nil")
 	}
 
-	return configset.NewControllerConfig(c.Rev, c.Config.GetConfig()), nil
+	return configset.NewControllerConfig(c.Rev, conf), nil
 }

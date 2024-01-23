@@ -12,8 +12,7 @@ import (
 	// "github.com/aperturerobotics/controllerbus/controller/configset"
 )
 
-// Config implements the JSON unmarshaling and marshaling logic for a configset
-// Config.
+// Config implements JSON unmarshaling and marshaling logic.
 type Config struct {
 	pendingParseData string
 	underlying       config.Config
@@ -31,6 +30,10 @@ func NewConfigWithJSON(data string) *Config {
 
 // Resolve constructs the underlying config from the pending parse data.
 func (c *Config) Resolve(ctx context.Context, configID string, b bus.Bus) error {
+	if c == nil {
+		return errors.New("cannot resolve nil config")
+	}
+
 	configCtorDir := resolver.NewLoadConfigConstructorByID(configID)
 	configCtorVal, _, configCtorRef, err := bus.ExecOneOff(ctx, b, configCtorDir, nil, nil)
 	if err != nil {
@@ -75,7 +78,7 @@ func (c *Config) GetConfig() config.Config {
 }
 
 // _ is a type assertion
-var _ json.Unmarshaler = ((*Config)(nil))
-
-// _ is a type assertion
-var _ json.Marshaler = ((*Config)(nil))
+var (
+	_ json.Unmarshaler = ((*Config)(nil))
+	_ json.Marshaler   = ((*Config)(nil))
+)
