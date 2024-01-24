@@ -5,5 +5,7 @@ import (
 )
 
 func TestLoadController(t *testing.T) {
-	execToy()
+	if err := execToy(); err != nil {
+		t.Fatal(err.Error())
+	}
 }
