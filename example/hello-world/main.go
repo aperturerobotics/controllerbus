@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"os"
 
 	"github.com/aperturerobotics/controllerbus/bus/inmem"
 	"github.com/aperturerobotics/controllerbus/controller/loader"
@@ -9,7 +10,14 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func execToy() {
+func main() {
+	if err := execToy(); err != nil {
+		os.Stderr.WriteString(err.Error() + "\n")
+		os.Exit(1)
+	}
+}
+
+func execToy() error {
 	ctx := context.Background()
 	log := logrus.New()
 	log.SetLevel(logrus.DebugLevel)
@@ -21,16 +29,20 @@ func execToy() {
 	// Loader controller constructs and executes controllers
 	cl, err := loader.NewController(le, b)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
-	// Execute the loader controller, it never exits.
-	go func() {
-		_ = b.ExecuteController(ctx, cl)
-	}()
+	// Execute the loader controller
+	releaseCl, err := b.AddController(ctx, cl, nil)
+	if err != nil {
+		return err
+	}
+	// releaseCl() would remove the loader controller
+	defer releaseCl()
+
 	le.Debug("loader controller attached")
 
-	// Issue load directive for toy controller.
+	// Issue directive to run the toy controller.
 	loadToy := loader.NewExecController(NewToyFactory(), &ToyControllerConfig{
 		Name: "world",
 	})
@@ -43,8 +55,6 @@ func execToy() {
 	tc := ctrl.(*ToyController)
 	le.Debug("toy controller resolved")
 	tc.SayHello()
-}
 
-func main() {
-	execToy()
+	return nil
 }
