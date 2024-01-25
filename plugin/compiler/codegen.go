@@ -336,7 +336,7 @@ func BuildPlugin(ctx context.Context, le *logrus.Entry, packageSearchPath, outpu
 		}()
 	}
 
-	if err := os.MkdirAll(codegenDir, 0755); err != nil {
+	if err := os.MkdirAll(codegenDir, 0o755); err != nil {
 		return err
 	}
 
@@ -358,7 +358,7 @@ func BuildPlugin(ctx context.Context, le *logrus.Entry, packageSearchPath, outpu
 
 	outputPath, err = filepath.Abs(outputPath)
 	if err == nil {
-		err = os.MkdirAll(path.Dir(outputPath), 0755)
+		err = os.MkdirAll(path.Dir(outputPath), 0o755)
 	}
 	if err != nil {
 		return err

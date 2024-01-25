@@ -90,7 +90,7 @@ func (m *ModuleCompiler) GenerateModules(analysis *Analysis, pluginBinaryVersion
 
 	codegenModulesPluginPath := filepath.Join(codegenModulesBaseDir, codegenModulesPluginName)
 	codegenModulesPluginPathBin := filepath.Join(codegenModulesPluginPath, "bin")
-	if err := os.MkdirAll(codegenModulesPluginPathBin, 0755); err != nil {
+	if err := os.MkdirAll(codegenModulesPluginPathBin, 0o755); err != nil {
 		return err
 	}
 
@@ -155,7 +155,7 @@ func (m *ModuleCompiler) GenerateModules(analysis *Analysis, pluginBinaryVersion
 				return err
 			}
 		}
-		if err := os.MkdirAll(codegenModDir, 0755); err != nil {
+		if err := os.MkdirAll(codegenModDir, 0o755); err != nil {
 			return err
 		}
 		moduleCodegenPaths[srcMod.Path] = codegenModDir
@@ -273,7 +273,7 @@ func (m *ModuleCompiler) GenerateModules(analysis *Analysis, pluginBinaryVersion
 		if err := os.WriteFile(
 			codegenModFile,
 			destGoMod,
-			0644,
+			0o644,
 		); err != nil {
 			return err
 		}
@@ -357,10 +357,10 @@ func (m *ModuleCompiler) GenerateModules(analysis *Analysis, pluginBinaryVersion
 			if err != nil {
 				return err
 			}
-			if err := os.MkdirAll(pkgCodeOutDirPath, 0755); err != nil {
+			if err := os.MkdirAll(pkgCodeOutDirPath, 0o755); err != nil {
 				return err
 			}
-			err = os.WriteFile(pkgCodeOutPath, outData, 0644)
+			err = os.WriteFile(pkgCodeOutPath, outData, 0o644)
 			if err != nil {
 				return err
 			}
@@ -371,7 +371,7 @@ func (m *ModuleCompiler) GenerateModules(analysis *Analysis, pluginBinaryVersion
 	if err != nil {
 		return err
 	}
-	err = os.WriteFile(outPluginModFilePath, pluginGoMod, 0644)
+	err = os.WriteFile(outPluginModFilePath, pluginGoMod, 0o644)
 	if err != nil {
 		return err
 	}
@@ -427,7 +427,7 @@ func (m *ModuleCompiler) GenerateModules(analysis *Analysis, pluginBinaryVersion
 			"\nvar HotPluginBuildUUID = `"+buildPrefix+"`\n",
 		)...)
 	}
-	if err := os.WriteFile(outPluginCodeFilePath, pluginCodeData, 0644); err != nil {
+	if err := os.WriteFile(outPluginCodeFilePath, pluginCodeData, 0o644); err != nil {
 		return err
 	}
 

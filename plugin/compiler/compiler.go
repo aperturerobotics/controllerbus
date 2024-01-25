@@ -14,8 +14,10 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-const buildTag = "controllerbus_plugin"
-const buildHashConstTag = "{buildHash}"
+const (
+	buildTag          = "controllerbus_plugin"
+	buildHashConstTag = "{buildHash}"
+)
 
 // CompilePluginFromFile compiles the plugin from the gfile.
 //
@@ -34,7 +36,7 @@ func CompilePluginFromFile(
 		return err
 	}
 	// write the intermediate go file
-	if err := os.WriteFile(intermediateGoFile, dat, 0644); err != nil {
+	if err := os.WriteFile(intermediateGoFile, dat, 0o644); err != nil {
 		return err
 	}
 	// build the intermediate output dir
@@ -101,12 +103,12 @@ func CompilePluginFromFile(
 	}
 
 	// add the build ID to the code to make it unique
-	interFile, err := os.OpenFile(intermediateGoFile, os.O_WRONLY|os.O_APPEND, 0644)
+	interFile, err := os.OpenFile(intermediateGoFile, os.O_WRONLY|os.O_APPEND, 0o644)
 	if err != nil {
 		return err
 	}
 	_, _ = interFile.Write([]byte("\nvar HotPluginBuildUUID = `" + hashStr + "`\n"))
-	if err := os.WriteFile(intermediateGoFile, dat, 0644); err != nil {
+	if err := os.WriteFile(intermediateGoFile, dat, 0o644); err != nil {
 		return err
 	}
 

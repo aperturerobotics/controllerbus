@@ -50,10 +50,10 @@ func run(ctx context.Context, le *logrus.Entry) error {
 	if err := os.RemoveAll(codegenDirPath); err != nil && !os.IsNotExist(err) {
 		return err
 	}
-	if err := os.MkdirAll(codegenDirPath, 0755); err != nil {
+	if err := os.MkdirAll(codegenDirPath, 0o755); err != nil {
 		return err
 	}
-	if err := os.MkdirAll(path.Dir(outputPath), 0755); err != nil {
+	if err := os.MkdirAll(path.Dir(outputPath), 0o755); err != nil {
 		return err
 	}
 

@@ -14,7 +14,7 @@ func copyFileFromTo(src, dest string) error {
 	}
 	defer ofile.Close()
 
-	outFileFd, err := os.OpenFile(dest, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
+	outFileFd, err := os.OpenFile(dest, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0o644)
 	if err != nil {
 		return err
 	}

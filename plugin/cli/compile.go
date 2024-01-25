@@ -66,7 +66,7 @@ func (c *CompilerArgs) setupCompiler(
 		return nil, nil, rel, err
 	}
 
-	if err := os.MkdirAll(codegenDirPath, 0755); err != nil {
+	if err := os.MkdirAll(codegenDirPath, 0o755); err != nil {
 		return nil, nil, rel, err
 	}
 
@@ -129,7 +129,7 @@ func (c *CompilerArgs) runCompileOnce(cctx *cli.Context) error {
 
 	outputPath, err := filepath.Abs(c.OutputPath)
 	if err == nil {
-		err = os.MkdirAll(path.Dir(outputPath), 0755)
+		err = os.MkdirAll(path.Dir(outputPath), 0o755)
 	}
 	if err != nil {
 		return err

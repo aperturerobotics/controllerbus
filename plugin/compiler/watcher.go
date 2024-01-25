@@ -103,7 +103,7 @@ func (w *Watcher) WatchCompilePlugin(
 
 		// pass 1: codegen + build with static build prefix.
 		passBinDir := filepath.Join(pluginCodegenPath, "bin")
-		if err := os.MkdirAll(passBinDir, 0755); err != nil {
+		if err := os.MkdirAll(passBinDir, 0o755); err != nil {
 			return nil, err
 		}
 

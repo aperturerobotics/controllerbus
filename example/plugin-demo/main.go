@@ -78,7 +78,7 @@ func run(ctx context.Context, le *logrus.Entry) error {
 	}
 
 	le.Info("compiling example package")
-	if err := os.MkdirAll(codegenDirPath, 0755); err != nil {
+	if err := os.MkdirAll(codegenDirPath, 0o755); err != nil {
 		return err
 	}
 
