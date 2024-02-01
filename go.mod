@@ -10,7 +10,7 @@ replace (
 require (
 	github.com/Jeffail/gabs/v2 v2.7.0
 	github.com/aperturerobotics/starpc v0.22.7 // latest
-	github.com/aperturerobotics/util v1.13.1 // latest
+	github.com/aperturerobotics/util v1.13.2 // latest
 	github.com/blang/semver v3.5.1+incompatible
 	github.com/cenkalti/backoff v2.2.1+incompatible
 	github.com/fsnotify/fsnotify v1.7.0
