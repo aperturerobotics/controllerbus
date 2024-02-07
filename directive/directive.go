@@ -257,6 +257,12 @@ type Instance interface {
 // Value satisfies a directive.
 type Value interface{}
 
+// ComparableValue is a type constraint for a comparable Value.
+type ComparableValue interface {
+	Value
+	comparable
+}
+
 // AttachedValue is a value with some metadata.
 type AttachedValue interface {
 	// GetValueID returns the value ID.

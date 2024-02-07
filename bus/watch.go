@@ -1,9 +1,6 @@
 package bus
 
 import (
-	"context"
-	"sync"
-
 	"github.com/aperturerobotics/controllerbus/directive"
 	"github.com/aperturerobotics/util/ccontainer"
 	"github.com/aperturerobotics/util/routine"
@@ -45,20 +42,23 @@ func ExecOneOffWatchCtr(
 
 // ExecOneOffWatchRoutine executes a one-off directive and watches for changes.
 //
-// Calls SetRoutine on the routine container.
+// Calls SetState on the routine container.
 // The routine will be restarted when the value changes.
 // The routine will not start until SetContext is called on the routine container.
 // If the routine returns nil or any error, the function returns that value.
 // If the routine context is canceled, return context.Canceled.
 // If the directive is disposed, the routine will return ErrDirectiveDisposed.
-func ExecOneOffWatchRoutine[T directive.Value](
-	routineCtr *routine.RoutineContainer,
+func ExecOneOffWatchRoutine[T directive.ComparableValue](
+	routineCtr *routine.StateRoutineContainer[T],
 	b Bus,
 	dir directive.Directive,
-	cb func(ctx context.Context, value T) error,
 ) (directive.Instance, directive.Reference, error) {
-	var mtx sync.Mutex
+	type attachedValue struct {
+		vid uint32
+		val T
+	}
 	var currValueID uint32
+	vals := make(map[uint32]attachedValue, 1)
 
 	di, ref, err := b.AddDirective(
 		dir,
@@ -68,27 +68,38 @@ func ExecOneOffWatchRoutine[T directive.Value](
 				if !ok {
 					return
 				}
-				mtx.Lock()
-				currValueID = av.GetValueID()
-				routineCtr.SetRoutine(func(ctx context.Context) error {
-					return cb(ctx, val)
-				})
-				mtx.Unlock()
+				vid := av.GetValueID()
+				vals[vid] = attachedValue{vid: vid, val: val}
+				if currValueID == 0 {
+					currValueID = vid
+					routineCtr.SetState(val)
+				}
 			},
 			func(av directive.AttachedValue) {
-				mtx.Lock()
-				if currValueID == av.GetValueID() {
-					routineCtr.SetRoutine(nil)
+				_, ok := av.GetValue().(T)
+				if !ok {
+					return
 				}
-				mtx.Unlock()
+				vid := av.GetValueID()
+				delete(vals, vid)
+				if currValueID != vid {
+					return
+				}
+				currValueID = 0
+				for _, v := range vals {
+					routineCtr.SetState(v.val)
+					currValueID = v.vid
+					break
+				}
+				if currValueID == 0 {
+					var empty T
+					routineCtr.SetState(empty)
+				}
 			},
 			func() {
-				mtx.Lock()
 				currValueID = 0
-				routineCtr.SetRoutine(func(ctx context.Context) error {
-					return ErrDirectiveDisposed
-				})
-				mtx.Unlock()
+				var empty T
+				routineCtr.SetState(empty)
 			},
 		),
 	)
