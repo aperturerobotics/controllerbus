@@ -6,59 +6,18 @@ import (
 	"github.com/aperturerobotics/util/routine"
 )
 
-// ExecOneOffWatchCtr executes a one-off directive and watches for changes.
-// Stores the latest value into the ccontainer.
-// Continues to watch for changes until the directive is released.
-func ExecOneOffWatchCtr(
-	ctr *ccontainer.CContainer[*directive.AttachedValue],
-	b Bus,
-	dir directive.Directive,
-) (
-	directive.Instance,
-	directive.Reference,
-	error,
-) {
-	di, ref, err := b.AddDirective(
-		dir,
-		NewCallbackHandler(
-			func(av directive.AttachedValue) {
-				ctr.SetValue(&av)
-			},
-			func(av directive.AttachedValue) {
-				ctr.SwapValue(func(val *directive.AttachedValue) *directive.AttachedValue {
-					if val != nil && (*val).GetValueID() == av.GetValueID() {
-						val = nil
-					}
-					return val
-				})
-			},
-			func() {
-				ctr.SetValue(nil)
-			},
-		),
-	)
-	return di, ref, err
-}
-
-// ExecOneOffWatchRoutine executes a one-off directive and watches for changes.
-//
-// Calls SetState on the routine container.
-// The routine will be restarted when the value changes.
-// The routine will not start until SetContext is called on the routine container.
-// If the routine returns nil or any error, the function returns that value.
-// If the routine context is canceled, return context.Canceled.
-// If the directive is disposed, the routine will return ErrDirectiveDisposed.
-func ExecOneOffWatchRoutine[T directive.ComparableValue](
-	routineCtr *routine.StateRoutineContainer[T],
+// ExecOneOffWatchCb executes a one-off directive and watches for changes.
+// Selects one value from the result.
+// Calls the callback when the selected value changes.
+// Calls with nil when the value becomes unset.
+// If the callback returns false, the value is rejected, and the next value will be used instead.
+func ExecOneOffWatchCb[T directive.ComparableValue](
+	cb func(val directive.TypedAttachedValue[T]) bool,
 	b Bus,
 	dir directive.Directive,
 ) (directive.Instance, directive.Reference, error) {
-	type attachedValue struct {
-		vid uint32
-		val T
-	}
 	var currValueID uint32
-	vals := make(map[uint32]attachedValue, 1)
+	vals := make(map[uint32]directive.TypedAttachedValue[T], 1)
 
 	di, ref, err := b.AddDirective(
 		dir,
@@ -69,10 +28,15 @@ func ExecOneOffWatchRoutine[T directive.ComparableValue](
 					return
 				}
 				vid := av.GetValueID()
-				vals[vid] = attachedValue{vid: vid, val: val}
+				tav := directive.NewTypedAttachedValue[T](vid, val)
+				vals[vid] = tav
 				if currValueID == 0 {
 					currValueID = vid
-					routineCtr.SetState(val)
+					if cb != nil && !cb(tav) {
+						// Callback rejected the value
+						delete(vals, vid)
+						currValueID = 0
+					}
 				}
 			},
 			func(av directive.AttachedValue) {
@@ -86,20 +50,25 @@ func ExecOneOffWatchRoutine[T directive.ComparableValue](
 					return
 				}
 				currValueID = 0
-				for _, v := range vals {
-					routineCtr.SetState(v.val)
-					currValueID = v.vid
+				for valID, v := range vals {
+					currValueID = valID
+					if cb != nil && !cb(v) {
+						// Callback rejected the value
+						currValueID = 0
+						delete(vals, valID)
+						continue
+					}
 					break
 				}
 				if currValueID == 0 {
-					var empty T
-					routineCtr.SetState(empty)
+					cb(nil)
 				}
 			},
 			func() {
-				currValueID = 0
-				var empty T
-				routineCtr.SetState(empty)
+				if currValueID != 0 {
+					currValueID = 0
+					cb(nil)
+				}
 			},
 		),
 	)
@@ -107,37 +76,63 @@ func ExecOneOffWatchRoutine[T directive.ComparableValue](
 	return di, ref, err
 }
 
+// ExecOneOffWatchCtr executes a one-off directive and watches for changes.
+// Stores the latest value into the ccontainer.
+// Continues to watch for changes until the directive is released.
+func ExecOneOffWatchCtr[T directive.ComparableValue](
+	ctr *ccontainer.CContainer[T],
+	b Bus,
+	dir directive.Directive,
+) (
+	directive.Instance,
+	directive.Reference,
+	error,
+) {
+	return ExecOneOffWatchCb[T](func(val directive.TypedAttachedValue[T]) bool {
+		ctr.SetValue(val.GetValue())
+		return true
+	}, b, dir)
+}
+
+// ExecOneOffWatchRoutine executes a one-off directive and watches for changes.
+//
+// Calls SetState on the routine container.
+// The routine will be restarted when the value changes.
+// Note: the routine will not start until SetContext and SetStateRoutine are called on the routine container.
+func ExecOneOffWatchRoutine[T directive.ComparableValue](
+	routineCtr *routine.StateRoutineContainer[T],
+	b Bus,
+	dir directive.Directive,
+) (directive.Instance, directive.Reference, error) {
+	return ExecOneOffWatchCb[T](func(val directive.TypedAttachedValue[T]) bool {
+		routineCtr.SetState(val.GetValue())
+		return true
+	}, b, dir)
+}
+
 // ExecOneOffWatchCh executes a one-off directive and watches for changes.
 // Returns a channel with size 1 which will hold the latest value.
 // Continues to watch for changes until the directive is released.
-func ExecOneOffWatchCh(
+func ExecOneOffWatchCh[T directive.ComparableValue](
 	b Bus,
 	dir directive.Directive,
-) (<-chan directive.AttachedValue, directive.Instance, directive.Reference, error) {
-	valCh := make(chan directive.AttachedValue, 1)
-	di, ref, err := b.AddDirective(
-		dir,
-		NewCallbackHandler(
-			func(av directive.AttachedValue) {
-			PushLoop:
-				for {
-					select {
-					case valCh <- av:
-						break PushLoop
-					default:
-					}
-					select {
-					case <-valCh:
-						// remove old value
-					default:
-					}
-				}
-			},
-			nil,
-			func() {
-				close(valCh)
-			},
-		),
-	)
-	return valCh, di, ref, err
+) (<-chan directive.TypedAttachedValue[T], directive.Instance, directive.Reference, error) {
+	valCh := make(chan directive.TypedAttachedValue[T], 1)
+	di, diRef, err := ExecOneOffWatchCb[T](func(val directive.TypedAttachedValue[T]) bool {
+		for {
+			select {
+			case valCh <- val:
+				return true
+			default:
+			}
+			select {
+			case <-valCh:
+			default:
+			}
+		}
+	}, b, dir)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	return valCh, di, diRef, nil
 }

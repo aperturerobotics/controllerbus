@@ -271,6 +271,68 @@ type AttachedValue interface {
 	GetValue() Value
 }
 
+// NewAttachedValue constructs a new typed attached value.
+func NewAttachedValue(vid uint32, val Value) AttachedValue {
+	return &attachedValue{
+		vid: vid,
+		val: val,
+	}
+}
+
+// attachedValue implements TypedAttachedValue
+type attachedValue struct {
+	vid uint32
+	val Value
+}
+
+// GetValueID returns the value ID.
+func (t *attachedValue) GetValueID() uint32 {
+	return t.vid
+}
+
+// GetValue returns the value.
+func (t *attachedValue) GetValue() Value {
+	return t.val
+}
+
+// _ is a type assertion
+var _ AttachedValue = &attachedValue{}
+
+// TypedAttachedValue is a typed value with some metadata.
+type TypedAttachedValue[T ComparableValue] interface {
+	// GetValueID returns the value ID.
+	GetValueID() uint32
+	// GetValue returns the value.
+	GetValue() T
+}
+
+// NewTypedAttachedValue constructs a new typed attached value.
+func NewTypedAttachedValue[T ComparableValue](vid uint32, val T) TypedAttachedValue[T] {
+	return &typedAttachedValue[T]{
+		vid: vid,
+		val: val,
+	}
+}
+
+// typedAttachedValue implements TypedAttachedValue
+type typedAttachedValue[T ComparableValue] struct {
+	vid uint32
+	val T
+}
+
+// GetValueID returns the value ID.
+func (t *typedAttachedValue[T]) GetValueID() uint32 {
+	return t.vid
+}
+
+// GetValue returns the value.
+func (t *typedAttachedValue[T]) GetValue() T {
+	return t.val
+}
+
+// _ is a type assertion
+var _ TypedAttachedValue[int] = &typedAttachedValue[int]{}
+
 // ResolverHandler handles values emitted by the resolver.
 type ResolverHandler interface {
 	// AddValue adds a value to the result, returning success and an ID. If

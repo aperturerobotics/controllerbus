@@ -72,7 +72,7 @@ func (c *runningController) Execute(ctx context.Context) (rerr error) {
 		// execute the controller with the current config
 		execDir := resolver.NewLoadControllerWithConfig(ctrlConf)
 		c.le.Debug("executing controller")
-		updValCh, _, execRef, err := bus.ExecOneOffWatchCh(c.c.bus, execDir)
+		updValCh, updValDir, execRef, err := bus.ExecOneOffWatchCh[resolver.LoadControllerWithConfigValue](c.c.bus, execDir)
 		if err != nil {
 			if err == context.Canceled {
 				return err
@@ -81,13 +81,21 @@ func (c *runningController) Execute(ctx context.Context) (rerr error) {
 			err = errors.Wrap(err, "exec controller")
 		}
 
-		c.mtx.Lock()
-		c.state.ctrl = nil
-		c.state.err = err
-		c.state.conf = conf
-		s := c.state
-		c.pushState(&s)
-		c.mtx.Unlock()
+		disposed := make(chan struct{})
+		disposeCb := updValDir.AddDisposeCallback(func() {
+			close(disposed)
+		})
+
+		clearState := func() {
+			c.mtx.Lock()
+			c.state.ctrl = nil
+			c.state.err = err
+			c.state.conf = conf
+			s := c.state
+			c.pushState(&s)
+			c.mtx.Unlock()
+		}
+		clearState()
 
 	RecheckStateLoop:
 		for {
@@ -97,15 +105,14 @@ func (c *runningController) Execute(ctx context.Context) (rerr error) {
 			case <-c.confRestartCh:
 				c.le.Info("restarting with new config")
 				break RecheckStateLoop
-			case aval, avalOk := <-updValCh:
-				if !avalOk {
-					break RecheckStateLoop
+			case <-disposed:
+				break RecheckStateLoop
+			case aval := <-updValCh:
+				if aval == nil {
+					clearState()
+					continue RecheckStateLoop
 				}
-				uval, ok := aval.GetValue().(resolver.LoadControllerWithConfigValue)
-				if !ok {
-					c.le.Warn("received load controller with config value of unknown type")
-					continue
-				}
+				uval := aval.GetValue()
 				c.mtx.Lock()
 				uerr := uval.GetError()
 				if uerr != nil && uerr != c.state.err {
@@ -120,6 +127,7 @@ func (c *runningController) Execute(ctx context.Context) (rerr error) {
 			}
 		}
 		execRef.Release()
+		disposeCb()
 		c.mtx.Lock()
 		conf = c.conf
 		if c.state.ctrl != nil || c.state.conf != conf {

@@ -15,6 +15,7 @@ require (
 	github.com/aperturerobotics/controllerbus v0.30.9
 	github.com/blang/semver v3.5.1+incompatible
 	github.com/pkg/errors v0.9.1
+	github.com/planetscale/vtprotobuf v0.6.0
 	github.com/sirupsen/logrus v1.9.3
 	google.golang.org/protobuf v1.32.0
 )
@@ -44,7 +45,6 @@ require (
 	github.com/multiformats/go-multihash v0.2.3 // indirect
 	github.com/multiformats/go-multistream v0.5.0 // indirect
 	github.com/multiformats/go-varint v0.0.7 // indirect
-	github.com/planetscale/vtprotobuf v0.6.0 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/spaolacci/murmur3 v1.1.1-0.20190317074736-539464a789e9 // indirect
 	github.com/urfave/cli/v2 v2.27.1 // indirect
