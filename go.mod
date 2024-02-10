@@ -9,8 +9,8 @@ replace (
 
 require (
 	github.com/Jeffail/gabs/v2 v2.7.0
-	github.com/aperturerobotics/starpc v0.23.1 // latest
-	github.com/aperturerobotics/util v1.13.3 // latest
+	github.com/aperturerobotics/starpc v0.23.2 // latest
+	github.com/aperturerobotics/util v1.13.4 // latest
 	github.com/blang/semver v3.5.1+incompatible
 	github.com/cenkalti/backoff v2.2.1+incompatible
 	github.com/fsnotify/fsnotify v1.7.0
