@@ -22,7 +22,7 @@ require (
 
 require (
 	github.com/Jeffail/gabs/v2 v2.7.0 // indirect
-	github.com/aperturerobotics/starpc v0.22.8 // indirect
+	github.com/aperturerobotics/starpc v0.23.1 // indirect
 	github.com/aperturerobotics/util v1.13.3 // indirect
 	github.com/cenkalti/backoff v2.2.1+incompatible // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.2 // indirect
@@ -53,7 +53,7 @@ require (
 	github.com/zeebo/blake3 v0.2.3 // indirect
 	golang.org/x/crypto v0.17.0 // indirect
 	golang.org/x/exp v0.0.0-20240205201215-2c58cdc269a3 // indirect
-	golang.org/x/mod v0.14.0 // indirect
+	golang.org/x/mod v0.15.0 // indirect
 	golang.org/x/sys v0.16.0 // indirect
 	golang.org/x/tools v0.17.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect

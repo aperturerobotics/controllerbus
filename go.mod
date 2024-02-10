@@ -9,7 +9,7 @@ replace (
 
 require (
 	github.com/Jeffail/gabs/v2 v2.7.0
-	github.com/aperturerobotics/starpc v0.22.8 // latest
+	github.com/aperturerobotics/starpc v0.23.1 // latest
 	github.com/aperturerobotics/util v1.13.3 // latest
 	github.com/blang/semver v3.5.1+incompatible
 	github.com/cenkalti/backoff v2.2.1+incompatible
@@ -17,6 +17,7 @@ require (
 	github.com/ghodss/yaml v1.0.0
 	github.com/mr-tron/base58 v1.2.0
 	github.com/pkg/errors v0.9.1
+	github.com/planetscale/vtprotobuf v0.6.0
 	github.com/sergi/go-diff v1.3.1
 	github.com/sirupsen/logrus v1.9.3
 	github.com/urfave/cli/v2 v2.27.1
@@ -28,8 +29,6 @@ require (
 	google.golang.org/protobuf v1.32.0
 	mvdan.cc/gofumpt v0.6.0
 )
-
-require github.com/planetscale/vtprotobuf v0.6.0
 
 require (
 	github.com/cpuguy83/go-md2man/v2 v2.0.2 // indirect
