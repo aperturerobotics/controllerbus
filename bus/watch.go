@@ -89,7 +89,12 @@ func ExecOneOffWatchCtr[T directive.ComparableValue](
 	error,
 ) {
 	return ExecOneOffWatchCb[T](func(val directive.TypedAttachedValue[T]) bool {
-		ctr.SetValue(val.GetValue())
+		if val == nil {
+			var empty T
+			ctr.SetValue(empty)
+		} else {
+			ctr.SetValue(val.GetValue())
+		}
 		return true
 	}, b, dir)
 }
@@ -105,7 +110,12 @@ func ExecOneOffWatchRoutine[T directive.ComparableValue](
 	dir directive.Directive,
 ) (directive.Instance, directive.Reference, error) {
 	return ExecOneOffWatchCb[T](func(val directive.TypedAttachedValue[T]) bool {
-		routineCtr.SetState(val.GetValue())
+		if val == nil {
+			var empty T
+			routineCtr.SetState(empty)
+		} else {
+			routineCtr.SetState(val.GetValue())
+		}
 		return true
 	}, b, dir)
 }
