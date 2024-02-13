@@ -10,7 +10,7 @@ replace (
 require (
 	github.com/Jeffail/gabs/v2 v2.7.0
 	github.com/aperturerobotics/starpc v0.23.2 // latest
-	github.com/aperturerobotics/util v1.13.4 // latest
+	github.com/aperturerobotics/util v1.13.5 // latest
 	github.com/blang/semver v3.5.1+incompatible
 	github.com/cenkalti/backoff v2.2.1+incompatible
 	github.com/fsnotify/fsnotify v1.7.0
@@ -25,7 +25,7 @@ require (
 	github.com/zeebo/blake3 v0.2.3
 	golang.org/x/exp v0.0.0-20240205201215-2c58cdc269a3
 	golang.org/x/mod v0.15.0
-	golang.org/x/tools v0.17.0
+	golang.org/x/tools v0.18.0
 	google.golang.org/protobuf v1.32.0
 	mvdan.cc/gofumpt v0.6.0
 )
@@ -52,7 +52,7 @@ require (
 	github.com/spaolacci/murmur3 v1.1.1-0.20190317074736-539464a789e9 // indirect
 	github.com/xrash/smetrics v0.0.0-20201216005158-039620a65673 // indirect
 	golang.org/x/crypto v0.17.0 // indirect
-	golang.org/x/sys v0.16.0 // indirect
+	golang.org/x/sys v0.17.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	lukechampine.com/blake3 v1.2.1 // indirect
 	nhooyr.io/websocket v1.8.10 // indirect
