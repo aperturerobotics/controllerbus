@@ -22,8 +22,8 @@ require (
 
 require (
 	github.com/Jeffail/gabs/v2 v2.7.0 // indirect
-	github.com/aperturerobotics/starpc v0.23.1 // indirect
-	github.com/aperturerobotics/util v1.13.3 // indirect
+	github.com/aperturerobotics/starpc v0.23.2 // indirect
+	github.com/aperturerobotics/util v1.13.6 // indirect
 	github.com/cenkalti/backoff v2.2.1+incompatible // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.2 // indirect
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.2.0 // indirect
@@ -54,8 +54,8 @@ require (
 	golang.org/x/crypto v0.17.0 // indirect
 	golang.org/x/exp v0.0.0-20240205201215-2c58cdc269a3 // indirect
 	golang.org/x/mod v0.15.0 // indirect
-	golang.org/x/sys v0.16.0 // indirect
-	golang.org/x/tools v0.17.0 // indirect
+	golang.org/x/sys v0.17.0 // indirect
+	golang.org/x/tools v0.18.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	lukechampine.com/blake3 v1.2.1 // indirect
 	mvdan.cc/gofumpt v0.6.0 // indirect
