@@ -6,6 +6,8 @@ github.com/aperturerobotics/protobuf-go v1.32.1-0.20240118233629-6aeee82c476f h1
 github.com/aperturerobotics/protobuf-go v1.32.1-0.20240118233629-6aeee82c476f/go.mod h1:c6P6GXX6sHbq/GpV6MGZEdwhWPcYBgnhAHhKbcUYpos=
 github.com/aperturerobotics/starpc v0.23.2 h1:TAkKD6A7egIF+PCD7zkx3xqqkTct42h5LInkC+dAaVo=
 github.com/aperturerobotics/starpc v0.23.2/go.mod h1:zCUZPLz+bxqF7YwVhh53tYfmJL2F0zXYvHwwaU5bBwU=
+github.com/aperturerobotics/starpc v0.25.4 h1:0FeMTCTuauogequ1lFcYfC310PMZzPYoqHu9h8xNR04=
+github.com/aperturerobotics/starpc v0.25.4/go.mod h1:Ua54S7KHLw7Rmy1UxQgyi3W4c3Bw5A1QsEoh1xb1yAw=
 github.com/aperturerobotics/util v1.13.6 h1:8FKBjj+vs23QZBiwkGod5WUY19Cisda48Rbg1zaqzZU=
 github.com/aperturerobotics/util v1.13.6/go.mod h1:8AfpGb9RJqUItLBb5ec3sprpl9swYyHlgOw0HzkE+S8=
 github.com/blang/semver v3.5.1+incompatible h1:cQNTCjp13qL8KC3Nbxr/y2Bqb63oX6wdnnjpJbkM4JQ=
@@ -104,6 +106,8 @@ golang.org/x/crypto v0.17.0 h1:r8bRNjWL3GshPW3gkd+RpvzWrZAwPS49OmTGZ/uhM4k=
 golang.org/x/crypto v0.17.0/go.mod h1:gCAAfMLgwOJRpTjQ2zCCt2OcSfYMTeZVSRtQlPC7Nq4=
 golang.org/x/exp v0.0.0-20240205201215-2c58cdc269a3 h1:/RIbNt/Zr7rVhIkQhooTxCxFcdWLGIKnZA4IXNFSrvo=
 golang.org/x/exp v0.0.0-20240205201215-2c58cdc269a3/go.mod h1:idGWGoKP1toJGkd5/ig9ZLuPcZBC3ewk7SzmH0uou08=
+golang.org/x/exp v0.0.0-20240213143201-ec583247a57a h1:HinSgX1tJRX3KsL//Gxynpw5CTOAIPhgL4W8PNiIpVE=
+golang.org/x/exp v0.0.0-20240213143201-ec583247a57a/go.mod h1:CxmFvTBINI24O/j8iY7H1xHzx2i4OsyguNBmN/uPtqc=
 golang.org/x/mod v0.15.0 h1:SernR4v+D55NyBH2QiEQrlBAnj1ECL6AGrA5+dPaMY8=
 golang.org/x/mod v0.15.0/go.mod h1:hTbmBsO62+eylJbnUtE2MGJUyE7QWk4xUqPFrRgJ+7c=
 golang.org/x/sync v0.6.0 h1:5BMeUDZ7vkXGfEr1x9B4bRcTH4lpkTkpdh0T/J+qjbQ=
