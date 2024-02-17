@@ -8,6 +8,8 @@ github.com/aperturerobotics/starpc v0.23.2 h1:TAkKD6A7egIF+PCD7zkx3xqqkTct42h5LI
 github.com/aperturerobotics/starpc v0.23.2/go.mod h1:zCUZPLz+bxqF7YwVhh53tYfmJL2F0zXYvHwwaU5bBwU=
 github.com/aperturerobotics/starpc v0.25.4 h1:0FeMTCTuauogequ1lFcYfC310PMZzPYoqHu9h8xNR04=
 github.com/aperturerobotics/starpc v0.25.4/go.mod h1:Ua54S7KHLw7Rmy1UxQgyi3W4c3Bw5A1QsEoh1xb1yAw=
+github.com/aperturerobotics/starpc v0.25.5 h1:TaxZYAZhMgA97CQMMeT3XGm0y9F8zKk39CJK6x2cNLQ=
+github.com/aperturerobotics/starpc v0.25.5/go.mod h1:Ua54S7KHLw7Rmy1UxQgyi3W4c3Bw5A1QsEoh1xb1yAw=
 github.com/aperturerobotics/util v1.13.6 h1:8FKBjj+vs23QZBiwkGod5WUY19Cisda48Rbg1zaqzZU=
 github.com/aperturerobotics/util v1.13.6/go.mod h1:8AfpGb9RJqUItLBb5ec3sprpl9swYyHlgOw0HzkE+S8=
 github.com/blang/semver v3.5.1+incompatible h1:cQNTCjp13qL8KC3Nbxr/y2Bqb63oX6wdnnjpJbkM4JQ=
