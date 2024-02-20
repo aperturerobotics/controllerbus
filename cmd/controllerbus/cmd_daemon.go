@@ -14,7 +14,6 @@ import (
 	"github.com/aperturerobotics/controllerbus/controller/resolver"
 	"github.com/aperturerobotics/controllerbus/core"
 	boilerplate_controller "github.com/aperturerobotics/controllerbus/example/boilerplate/controller"
-	hot_loader_filesystem "github.com/aperturerobotics/controllerbus/plugin/loader/shared-library/filesystem"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
@@ -56,23 +55,18 @@ func runDaemon(c *cli.Context) error {
 	if err != nil {
 		return err
 	}
-	sr.AddFactory(hot_loader_filesystem.NewFactory(b))
 	sr.AddFactory(api_controller.NewFactory(b))
 	sr.AddFactory(boilerplate_controller.NewFactory(b))
 
 	// Construct hot loader
 	if pluginDir != "" {
-		_, hlRef, err := b.AddDirective(
-			resolver.NewLoadControllerWithConfig(&hot_loader_filesystem.Config{
-				Dir:   pluginDir,
-				Watch: true,
-			}),
-			nil,
-		)
+		hlRef, err := addHotLoader(b, sr)
 		if err != nil {
-			return errors.Wrap(err, "construct plugin loading controller")
+			return err
 		}
-		defer hlRef.Release()
+		if hlRef != nil {
+			defer hlRef.Release()
+		}
 	}
 
 	// ConfigSet controller

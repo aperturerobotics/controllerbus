@@ -16,7 +16,7 @@ type Factory struct {
 	bus bus.Bus
 }
 
-// NewFactory builds a UDP transport factory.
+// NewFactory builds a bus API factory.
 func NewFactory(bus bus.Bus) *Factory {
 	return &Factory{bus: bus}
 }
