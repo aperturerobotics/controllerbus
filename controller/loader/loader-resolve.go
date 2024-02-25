@@ -46,7 +46,7 @@ func (c *Controller) resolveExecController(
 ) ([]directive.Resolver, error) {
 	// Check if the ExecController is meant for / compatible with us.
 	// In this case, we handle all ExecController requests.
-	return directive.Resolvers(newResolver(ctx, di, dir, c)), nil
+	return directive.R(newResolver(ctx, di, dir, c), nil)
 }
 
 // Resolve resolves the values.
@@ -69,16 +69,10 @@ func (c *resolver) Resolve(ctx context.Context, vh directive.ResolverHandler) er
 	le := c.controller.le.WithField("config", configID)
 	bus := c.controller.bus
 
-	ci, ciErr := factory.Construct(config, controller.ConstructOpts{
-		Logger: le,
-	})
-	if ciErr != nil {
-		return ciErr
-	}
-
 	// execute the controller w/ retry backoff.
 	var lastErr error
 	var execNextBo time.Duration
+	var ci controller.Controller
 	for {
 		// if lastErr == nil: first run
 		if lastErr != nil {
@@ -120,6 +114,15 @@ func (c *resolver) Resolve(ctx context.Context, vh directive.ResolverHandler) er
 		// type assertion
 		t1 := time.Now()
 
+		// construct controller
+		le.Debug("starting controller")
+		ci, lastErr = factory.Construct(config, controller.ConstructOpts{
+			Logger: le,
+		})
+		if lastErr != nil {
+			continue
+		}
+
 		// emit the value
 		vid, vidOk := vh.AddValue(NewExecControllerValue(
 			t1,
@@ -128,7 +131,7 @@ func (c *resolver) Resolve(ctx context.Context, vh directive.ResolverHandler) er
 			nil,
 		))
 
-		le.Debug("starting controller")
+		// run execute
 		execErr := bus.ExecuteController(c.ctx, ci)
 		le := le.WithField("exec-time", time.Since(t1).String())
 		ctxCanceled := ctx.Err() != nil

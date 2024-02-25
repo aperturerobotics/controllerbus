@@ -73,6 +73,10 @@ func (d *loadControllerWithConfig) Validate() error {
 		return errors.New("config cannot be nil")
 	}
 
+	if err := d.config.Validate(); err != nil {
+		return err
+	}
+
 	return nil
 }
 
