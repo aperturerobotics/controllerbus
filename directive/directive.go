@@ -333,8 +333,8 @@ func (t *typedAttachedValue[T]) GetValue() T {
 // _ is a type assertion
 var _ TypedAttachedValue[int] = &typedAttachedValue[int]{}
 
-// ResolverHandler handles values emitted by the resolver.
-type ResolverHandler interface {
+// ValueHandler handles values emitted by a resolver.
+type ValueHandler interface {
 	// AddValue adds a value to the result, returning success and an ID. If
 	// AddValue returns false, value was rejected. A rejected value should be
 	// released immediately. If the value limit is reached, the value may not be
@@ -345,16 +345,22 @@ type ResolverHandler interface {
 	// RemoveValue removes a value from the result, returning found.
 	// It is safe to call this function even if the resolver is canceled.
 	RemoveValue(id uint32) (val Value, found bool)
+	// CountValues returns the number of values that were set.
+	// if allResolvers=false, returns the number set by this handler.
+	// if allResolvers=true, returns the number set by all resolvers.
+	CountValues(allResolvers bool) int
+	// ClearValues removes any values that were set by this handler.
+	// Returns list of value IDs that were removed.
+	ClearValues() []uint32
+}
+
+// ResolverHandler handles values emitted by the resolver and provides utils for the resolver.
+type ResolverHandler interface {
+	ValueHandler
+
 	// MarkIdle marks the resolver as idle.
 	// If the resolver returns nil or an error, it's also marked as idle.
 	MarkIdle()
-	// CountValues returns the number of values that were set.
-	// if allResolvers=false, returns the number set by this ResolverHandler.
-	// if allResolvers=true, returns the number set by all resolvers.
-	CountValues(allResolvers bool) int
-	// ClearValues removes any values that were set by this ResolverHandler.
-	// Returns list of value IDs that were removed.
-	ClearValues() []uint32
 	// AddValueRemovedCallback adds a callback that will be called when the
 	// given value id is disposed or removed.
 	//
