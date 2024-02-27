@@ -361,6 +361,7 @@ type ResolverHandler interface {
 	// MarkIdle marks the resolver as idle.
 	// If the resolver returns nil or an error, it's also marked as idle.
 	MarkIdle()
+
 	// AddValueRemovedCallback adds a callback that will be called when the
 	// given value id is disposed or removed.
 	//
@@ -371,6 +372,7 @@ type ResolverHandler interface {
 	//
 	// Returns a release function to clear the callback early.
 	AddValueRemovedCallback(id uint32, cb func()) func()
+
 	// AddResolverRemovedCallback adds a callback that will be called when the
 	// directive resolver is removed.
 	//
@@ -381,6 +383,21 @@ type ResolverHandler interface {
 	//
 	// Returns a release function to clear the callback early.
 	AddResolverRemovedCallback(cb func()) func()
+
+	// AddResolver adds a resolver as a child of the current resolver.
+	//
+	// The child resolver will be removed if the parent handler is removed.
+	//
+	// The callback will be called if the child resolver is removed for any
+	// reason, including if the parent resolver, handler, or directive are
+	// removed.
+	//
+	// The callback might be called immediately if the child resolver was
+	// already removed or not created.
+	//
+	// Returns a release function to clear and stop the resolver early.
+	// Does nothing if res == nil returning an empty release func.
+	AddResolver(res Resolver, cb func()) func()
 }
 
 // Resolver resolves values for directives.

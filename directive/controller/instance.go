@@ -451,6 +451,26 @@ func (i *directiveInstance) addResolverRemovedCallbackLocked(res *resolver, cb f
 	}, true
 }
 
+// attachStartSubResolverLocked adds and starts a sub-resolver for a parent resolver.
+// returns nil, nil, false if the resolver was already removed
+func (i *directiveInstance) attachStartSubResolverLocked(res *resolver, subRes directive.Resolver, removedCb func()) (func(), bool) {
+	if !slices.Contains(i.res, res) || res.hnd.rel.Load() || i.released.Load() {
+		return nil, false
+	}
+
+	subResReg := newResolver(i, res.hnd, subRes)
+	if removedCb != nil {
+		subResReg.rels = append(subResReg.rels, newCallback(removedCb))
+	}
+	i.attachStartResolverLocked(subResReg)
+
+	return func() {
+		i.c.mtx.Lock()
+		defer i.c.mtx.Unlock()
+		i.removeResolverLocked(-1, subResReg)
+	}, true
+}
+
 // onValuesRemovedLocked is called after removing values from a resolver.
 func (i *directiveInstance) onValuesRemovedLocked(res *resolver, vals ...*value) {
 	var cbs []func()

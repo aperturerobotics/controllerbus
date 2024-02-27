@@ -109,7 +109,7 @@ func (c *resolver) Resolve(ctx context.Context, vh directive.ResolverHandler) er
 				}
 			}
 		}
-		lastErr = nil
+		// lastErr = nil
 
 		// type assertion
 		t1 := time.Now()

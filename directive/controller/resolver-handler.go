@@ -127,6 +127,46 @@ func (r *resolverHandler) AddResolverRemovedCallback(cb func()) func() {
 	return relFn
 }
 
+// AddResolver adds a resolver as a child of the current resolver.
+//
+// The child resolver will be removed if the parent handler is removed.
+//
+// The callback will be called if the child resolver is removed for any
+// reason, including if the parent resolver, handler, or directive are
+// removed.
+//
+// The callback might be called immediately if the child resolver was
+// already removed or not created.
+//
+// Returns a release function to clear and stop the resolver early.
+// Does nothing if res == nil returning an empty release func.
+func (r *resolverHandler) AddResolver(res directive.Resolver, removedCb func()) func() {
+	emptyFn := func() {}
+	if res == nil {
+		if removedCb != nil {
+			removedCb()
+		}
+		return emptyFn
+	}
+
+	r.r.di.c.mtx.Lock()
+	// only start the sub-resolver if this one has not been canceled.
+	var relFn func()
+	var found bool
+	if r.r.ctx == r.ctx {
+		relFn, found = r.r.di.attachStartSubResolverLocked(r.r, res, removedCb)
+	}
+	r.r.di.c.mtx.Unlock()
+	if !found {
+		if removedCb != nil {
+			removedCb()
+		}
+		return emptyFn
+	}
+	return relFn
+
+}
+
 // executeResolver is the goroutine to execute the resolver.
 func (r *resolverHandler) executeResolver(ctx context.Context, exitedCh chan<- struct{}, waitCh <-chan struct{}) {
 	defer close(exitedCh)
