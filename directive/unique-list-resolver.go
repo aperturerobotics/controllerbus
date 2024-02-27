@@ -20,7 +20,7 @@ type UniqueListResolver[K, V comparable] struct {
 // NewUniqueListResolver constructs a new UniqueListResolver.
 func NewUniqueListResolver[K, V comparable](
 	getKey func(v V) K,
-	cmp func(a V, b V) bool,
+	cmp func(k K, a, b V) bool,
 	hnd ValueHandler,
 ) *UniqueListResolver[K, V] {
 	valueIds := make(map[K]uint32)
