@@ -1,6 +1,8 @@
 package bus
 
 import (
+	"context"
+
 	"github.com/aperturerobotics/controllerbus/directive"
 	"github.com/aperturerobotics/util/ccontainer"
 	"github.com/aperturerobotics/util/routine"
@@ -145,4 +147,64 @@ func ExecOneOffWatchCh[T directive.ComparableValue](
 		return nil, nil, nil, err
 	}
 	return valCh, di, diRef, nil
+}
+
+// ExecWatchEffect calls a callback for each value resolved for a directive.
+//
+// The callback can return an optional function to call when the value was removed.
+// The callback can return an error to terminate the watch.
+func ExecWatchEffect[T directive.ComparableValue](
+	cb func(val directive.TypedAttachedValue[T]) (func(), error),
+	b Bus,
+	dir directive.Directive,
+) (directive.Instance, directive.Reference, error) {
+	valRels := make(map[uint32]func(), 1)
+	errCh := make(chan error, 1)
+	handleErr := func(err error) {
+		if err != nil && err != context.Canceled {
+			select {
+			case errCh <- err:
+			default:
+			}
+		}
+	}
+
+	di, ref, err := b.AddDirective(
+		dir,
+		NewCallbackHandler(
+			func(av directive.AttachedValue) {
+				val, ok := av.GetValue().(T)
+				if !ok {
+					return
+				}
+				vid := av.GetValueID()
+				tav := directive.NewTypedAttachedValue[T](vid, val)
+				rel, err := cb(tav)
+				handleErr(err)
+				if rel != nil {
+					valRels[vid] = rel
+				}
+			},
+			func(av directive.AttachedValue) {
+				_, ok := av.GetValue().(T)
+				if !ok {
+					return
+				}
+				vid := av.GetValueID()
+				rel := valRels[vid]
+				if rel != nil {
+					delete(valRels, vid)
+					rel()
+				}
+			},
+			func() {
+				for k, v := range valRels {
+					v()
+					delete(valRels, k)
+				}
+			},
+		),
+	)
+
+	return di, ref, err
 }
