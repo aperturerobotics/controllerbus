@@ -153,21 +153,13 @@ func ExecOneOffWatchCh[T directive.ComparableValue](
 //
 // The callback can return an optional function to call when the value was removed.
 // The callback can return an error to terminate the watch.
+// The callback will continue to be called until the ref is removed.
 func ExecWatchEffect[T directive.ComparableValue](
-	cb func(val directive.TypedAttachedValue[T]) (func(), error),
+	cb func(val directive.TypedAttachedValue[T]) func(),
 	b Bus,
 	dir directive.Directive,
 ) (directive.Instance, directive.Reference, error) {
 	valRels := make(map[uint32]func(), 1)
-	errCh := make(chan error, 1)
-	handleErr := func(err error) {
-		if err != nil && err != context.Canceled {
-			select {
-			case errCh <- err:
-			default:
-			}
-		}
-	}
 
 	di, ref, err := b.AddDirective(
 		dir,
@@ -179,8 +171,7 @@ func ExecWatchEffect[T directive.ComparableValue](
 				}
 				vid := av.GetValueID()
 				tav := directive.NewTypedAttachedValue[T](vid, val)
-				rel, err := cb(tav)
-				handleErr(err)
+				rel := cb(tav)
 				if rel != nil {
 					valRels[vid] = rel
 				}
