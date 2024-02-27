@@ -1,10 +1,10 @@
 package directive
 
 import (
-	"github.com/aperturerobotics/util/keyedlist"
+	"github.com/aperturerobotics/util/unique"
 )
 
-// KeyedListResolver accepts and de-duplicates a list of keyed objects.
+// UniqueListResolver accepts and de-duplicates a list of keyed objects.
 // The objects are emitted to the ValueHandler.
 // If an object changes, the old value is removed & replaced.
 //
@@ -13,19 +13,19 @@ import (
 //
 // K is the key type
 // V is the value type
-type KeyedListResolver[K, V comparable] struct {
-	*keyedlist.KeyedList[K, V]
+type UniqueListResolver[K, V comparable] struct {
+	*unique.KeyedList[K, V]
 }
 
-// NewKeyedListResolver constructs a new KeyedListResolver.
-func NewKeyedListResolver[K, V comparable](
+// NewUniqueListResolver constructs a new UniqueListResolver.
+func NewUniqueListResolver[K, V comparable](
 	getKey func(v V) K,
 	cmp func(a V, b V) bool,
 	hnd ValueHandler,
-) *KeyedListResolver[K, V] {
+) *UniqueListResolver[K, V] {
 	valueIds := make(map[K]uint32)
-	return &KeyedListResolver[K, V]{
-		KeyedList: keyedlist.NewKeyedList[K, V](
+	return &UniqueListResolver[K, V]{
+		KeyedList: unique.NewKeyedList[K, V](
 			getKey,
 			cmp,
 			func(k K, v V, added bool, removed bool) {
