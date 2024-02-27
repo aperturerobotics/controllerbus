@@ -1,8 +1,6 @@
 package bus
 
 import (
-	"context"
-
 	"github.com/aperturerobotics/controllerbus/directive"
 	"github.com/aperturerobotics/util/ccontainer"
 	"github.com/aperturerobotics/util/routine"
