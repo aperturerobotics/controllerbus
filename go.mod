@@ -9,7 +9,7 @@ replace (
 
 require (
 	github.com/Jeffail/gabs/v2 v2.7.0
-	github.com/aperturerobotics/starpc v0.26.2 // latest
+	github.com/aperturerobotics/starpc v0.27.0 // latest
 	github.com/aperturerobotics/util v1.14.1 // latest
 	github.com/blang/semver v3.5.1+incompatible
 	github.com/cenkalti/backoff v2.2.1+incompatible
