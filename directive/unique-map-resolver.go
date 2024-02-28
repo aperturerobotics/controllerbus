@@ -114,7 +114,6 @@ func NewUniqueMapXfrmResolver[K, V comparable, O any](
 						valueIds[k] = valID
 					}
 				}
-				return
 			},
 			// set initial to nil so we generate the AddValue calls.
 			nil,
