@@ -74,6 +74,9 @@ func (c *resolver) Resolve(ctx context.Context, vh directive.ResolverHandler) er
 	var execNextBo time.Duration
 	var ci controller.Controller
 	for {
+		// Clear any old values
+		_ = vh.ClearValues()
+
 		// if lastErr == nil: first run
 		if lastErr != nil {
 			execNextBo = execBackoff.NextBackOff()
@@ -84,6 +87,7 @@ func (c *resolver) Resolve(ctx context.Context, vh directive.ResolverHandler) er
 			execNextBo = 0
 		}
 
+		// if we need to wait for a backoff
 		if execNextBo != 0 {
 			le.
 				WithField("backoff-duration", execNextBo.String()).
@@ -109,13 +113,9 @@ func (c *resolver) Resolve(ctx context.Context, vh directive.ResolverHandler) er
 				}
 			}
 		}
-		// lastErr = nil
-
-		// type assertion
-		t1 := time.Now()
 
 		// construct controller
-		le.Debug("starting controller")
+		t1 := time.Now()
 		ci, lastErr = factory.Construct(config, controller.ConstructOpts{
 			Logger: le,
 		})
@@ -132,32 +132,45 @@ func (c *resolver) Resolve(ctx context.Context, vh directive.ResolverHandler) er
 		))
 
 		// run execute
+		le.Debug("starting controller")
 		execErr := bus.ExecuteController(c.ctx, ci)
+
 		le := le.WithField("exec-time", time.Since(t1).String())
 		ctxCanceled := ctx.Err() != nil
 		if execErr != nil && (!ctxCanceled || execErr != context.Canceled) {
 			le.WithError(execErr).Warn("controller exited with error")
 			lastErr = execErr
 		} else {
+			// controller was canceled or returned nil error
 			le.Debug("controller exited normally")
 		}
+
+		// context was canceled, return now.
 		if ctxCanceled {
+			_ = vh.ClearValues()
 			bus.RemoveController(ci)
 			return context.Canceled
 		}
-		// note: if context canceled, loop once more to check.
-		if execErr == nil {
-			// controller Execute() is complete.
-			// note: we need to take care to RemoveController in this case.
+
+		// an error occurred, try again.
+		if execErr != nil {
+			continue
+		}
+
+		// controller Execute() is complete.
+		// note: we need to take care to RemoveController later
+		if vidOk {
+			// value was added
 			vh.AddValueRemovedCallback(vid, func() {
 				bus.RemoveController(ci)
 			})
-			return nil
+		} else {
+			// value was not accepted
+			vh.AddResolverRemovedCallback(func() {
+				bus.RemoveController(ci)
+			})
 		}
-		// remove old value, will be replaced next loop.
-		if vidOk {
-			vh.RemoveValue(vid)
-		}
+		return nil
 	}
 }
 
