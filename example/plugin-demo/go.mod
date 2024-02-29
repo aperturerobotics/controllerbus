@@ -22,8 +22,8 @@ require (
 
 require (
 	github.com/Jeffail/gabs/v2 v2.7.0 // indirect
-	github.com/aperturerobotics/starpc v0.26.2 // indirect
-	github.com/aperturerobotics/util v1.14.1 // indirect
+	github.com/aperturerobotics/starpc v0.27.0 // indirect
+	github.com/aperturerobotics/util v1.14.3 // indirect
 	github.com/cenkalti/backoff v2.2.1+incompatible // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.2 // indirect
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.2.0 // indirect

@@ -192,3 +192,70 @@ func ExecOneOffWithFilter(
 		}
 	}
 }
+
+// ExecOneOffTyped executes a one-off directive with a value type.
+//
+// idleCb is called when idle with the list of resolver errors.
+// idleCb should return (wait, error): if wait=true, continues to wait.
+// if idleCb is nil: continues to wait when the directive becomes idle
+// errs is the list of errors from the resolvers (if any)
+//
+// If any resolvers return an error, returns that error.
+// valDisposeCb is called if the value is no longer valid.
+// valDisposeCb might be called multiple times.
+// If err != nil, ref == nil.
+func ExecOneOffTyped[T comparable](
+	ctx context.Context,
+	bus Bus,
+	dir directive.Directive,
+	idleCb ExecIdleCallback,
+	valDisposeCallback func(),
+) (directive.TypedAttachedValue[T], directive.Instance, directive.Reference, error) {
+	return ExecOneOffWithFilterTyped[T](ctx, bus, dir, idleCb, valDisposeCallback, nil)
+}
+
+// ExecOneOffWithFilterTyped executes a one-off directive with a filter cb.
+//
+// Waits until the callback returns true before returning a value.
+// valDisposeCb is called if the value is no longer valid.
+// valDisposeCb might be called multiple times.
+//
+// idleCb is called when idle with the list of resolver errors.
+// idleCb should return (wait, error): if wait=true, continues to wait.
+// if idleCb is nil: continues to wait when the directive becomes idle
+// errs is the list of errors from the resolvers (if any)
+//
+// If err != nil, ref == nil.
+func ExecOneOffWithFilterTyped[T comparable](
+	ctx context.Context,
+	bus Bus,
+	dir directive.Directive,
+	idleCb ExecIdleCallback,
+	valDisposeCallback func(),
+	filterCb func(val directive.TypedAttachedValue[T]) (bool, error),
+) (directive.TypedAttachedValue[T], directive.Instance, directive.Reference, error) {
+	av, di, ref, err := ExecOneOffWithFilter(
+		ctx,
+		bus,
+		dir,
+		idleCb,
+		valDisposeCallback,
+		func(val directive.AttachedValue) (bool, error) {
+			tval, ok := val.GetValue().(T)
+			if !ok {
+				return false, nil
+			}
+			if filterCb != nil {
+				return filterCb(directive.NewTypedAttachedValue[T](val.GetValueID(), tval))
+			}
+			return true, nil
+		},
+	)
+	if err != nil || ref == nil {
+		return nil, di, ref, err
+	}
+
+	// we type asserted in filterCb above.
+	avVal := av.GetValue().(T)
+	return directive.NewTypedAttachedValue[T](av.GetValueID(), avVal), di, ref, nil
+}
