@@ -95,6 +95,7 @@ func (c *Controller) Execute(ctx context.Context) error {
 // Close releases any resources used by the controller.
 // Error indicates any issue encountered releasing.
 func (c *Controller) Close() error {
+	c.le.Debug("boilerplate controller closed")
 	return nil
 }
 

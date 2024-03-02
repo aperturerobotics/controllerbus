@@ -16,6 +16,7 @@ type Controller interface {
 	// Execute executes the controller goroutine.
 	// Returning nil ends execution.
 	// Returning an error triggers a retry with backoff.
+	// Retry will NOT re-construct the controller, just re-start Execute.
 	Execute(ctx context.Context) error
 	// Close releases any resources used by the controller.
 	// Error indicates any issue encountered releasing.

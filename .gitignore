@@ -26,3 +26,4 @@ vendor/
 debug.test
 __debug*
 .aider*
+*.test

@@ -73,6 +73,16 @@ func (c *resolver) Resolve(ctx context.Context, vh directive.ResolverHandler) er
 	var lastErr error
 	var execNextBo time.Duration
 	var ci controller.Controller
+	closeCi := func() {
+		if ci == nil {
+			return
+		}
+		err := ci.Close()
+		if err != nil && err != context.Canceled {
+			le.WithError(err).Warn("controller close returned an error")
+		}
+	}
+
 	for {
 		// Clear any old values
 		_ = vh.ClearValues()
@@ -81,6 +91,7 @@ func (c *resolver) Resolve(ctx context.Context, vh directive.ResolverHandler) er
 		if lastErr != nil {
 			execNextBo = execBackoff.NextBackOff()
 			if execNextBo == backoff.Stop {
+				closeCi()
 				return errors.Wrap(lastErr, "backoff timeout exceeded")
 			}
 		} else {
@@ -106,6 +117,7 @@ func (c *resolver) Resolve(ctx context.Context, vh directive.ResolverHandler) er
 
 			select {
 			case <-ctx.Done():
+				closeCi()
 				return ctx.Err()
 			case <-boTimer.C:
 				if vidOk {
@@ -114,13 +126,21 @@ func (c *resolver) Resolve(ctx context.Context, vh directive.ResolverHandler) er
 			}
 		}
 
-		// construct controller
+		// construct controller (once)
 		t1 := time.Now()
-		ci, lastErr = factory.Construct(config, controller.ConstructOpts{
-			Logger: le,
-		})
-		if lastErr != nil {
-			continue
+		if ci == nil {
+			ci, lastErr = factory.Construct(config, controller.ConstructOpts{
+				Logger: le,
+			})
+			if lastErr != nil {
+				ci = nil
+				continue
+			}
+			if ci == nil {
+				err := errors.New("controller construct returned nil")
+				le.Warn(err.Error())
+				return err
+			}
 		}
 
 		// emit the value
@@ -149,6 +169,7 @@ func (c *resolver) Resolve(ctx context.Context, vh directive.ResolverHandler) er
 		if ctxCanceled {
 			_ = vh.ClearValues()
 			bus.RemoveController(ci)
+			closeCi()
 			return context.Canceled
 		}
 
@@ -160,14 +181,14 @@ func (c *resolver) Resolve(ctx context.Context, vh directive.ResolverHandler) er
 		// controller Execute() is complete.
 		// note: we need to take care to RemoveController later
 		if vidOk {
-			// value was added
 			vh.AddValueRemovedCallback(vid, func() {
 				bus.RemoveController(ci)
+				closeCi()
 			})
 		} else {
-			// value was not accepted
 			vh.AddResolverRemovedCallback(func() {
 				bus.RemoveController(ci)
+				closeCi()
 			})
 		}
 		return nil
