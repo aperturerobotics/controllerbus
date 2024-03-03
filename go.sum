@@ -6,6 +6,8 @@ github.com/aperturerobotics/protobuf-go v1.32.1-0.20240118233629-6aeee82c476f h1
 github.com/aperturerobotics/protobuf-go v1.32.1-0.20240118233629-6aeee82c476f/go.mod h1:c6P6GXX6sHbq/GpV6MGZEdwhWPcYBgnhAHhKbcUYpos=
 github.com/aperturerobotics/starpc v0.27.0 h1:z9iqFQsAAZWYF9WBiX8bLbWElLfIe8vr1JLn2in2tpQ=
 github.com/aperturerobotics/starpc v0.27.0/go.mod h1:UfsmoLElTAVrjUTzAhuqCYhPboPBZ8BqPgNkQ74NMhs=
+github.com/aperturerobotics/starpc v0.27.2 h1:S5fUo9ila01XtE2zMB9qLvm/dTZhl+4EQK+XXQkiZbA=
+github.com/aperturerobotics/starpc v0.27.2/go.mod h1:CIhS3mfMjNui/8xjAOq51DbR2khw8sYEe7yLgIv5tD4=
 github.com/aperturerobotics/util v1.14.3 h1:tn8eET9vlFwnveFY+rt4VbbMertQW8dcd+V5fK7SyHo=
 github.com/aperturerobotics/util v1.14.3/go.mod h1:1+G2THhT7VCmR7xeRlqDnyEtRFvONWoPft19xTHvbyk=
 github.com/blang/semver v3.5.1+incompatible h1:cQNTCjp13qL8KC3Nbxr/y2Bqb63oX6wdnnjpJbkM4JQ=
