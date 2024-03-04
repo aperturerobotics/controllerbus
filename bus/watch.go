@@ -149,6 +149,10 @@ func ExecOneOffWatchCh[T directive.ComparableValue](
 
 // ExecWatchEffect calls a callback for each value resolved for a directive.
 //
+// NOTE: The callbacks are run as part of the Directive Value callback and
+// should return as quickly as possible to avoid blocking the other directive
+// value callbacks.
+//
 // The callback can return an optional function to call when the value was removed.
 // The callback can return an error to terminate the watch.
 // The callback will continue to be called until the ref is removed.
@@ -195,6 +199,66 @@ func ExecWatchEffect[T directive.ComparableValue](
 		),
 	)
 
+	return di, ref, err
+}
+
+// ExecWatchTransformEffect calls a callback to transform each value resolved
+// for a directive, then calls a function with each transformed value.
+//
+// NOTE: The callbacks are run as part of the Directive Value callback and
+// should return as quickly as possible to avoid blocking the other directive
+// value callbacks.
+//
+// The transform callback can return nil, false to reject the value.
+// The callback can return an optional function to call when the value was removed.
+// The callback can return an error to terminate the watch.
+// The callback will continue to be called until the ref is removed.
+func ExecWatchTransformEffect[T, E directive.ComparableValue](
+	transform func(val directive.TypedAttachedValue[T]) (E, bool),
+	effect func(val directive.TypedAttachedValue[T], xfrm E) func(),
+	b Bus,
+	dir directive.Directive,
+) (directive.Instance, directive.Reference, error) {
+	valRels := make(map[uint32]func(), 1)
+	di, ref, err := b.AddDirective(
+		dir,
+		NewCallbackHandler(
+			func(av directive.AttachedValue) {
+				val, ok := av.GetValue().(T)
+				if !ok {
+					return
+				}
+				vid := av.GetValueID()
+				tav := directive.NewTypedAttachedValue[T](vid, val)
+				xfrm, ok := transform(tav)
+				if !ok {
+					return
+				}
+				rel := effect(tav, xfrm)
+				if rel != nil {
+					valRels[vid] = rel
+				}
+			},
+			func(av directive.AttachedValue) {
+				_, ok := av.GetValue().(T)
+				if !ok {
+					return
+				}
+				vid := av.GetValueID()
+				rel := valRels[vid]
+				if rel != nil {
+					delete(valRels, vid)
+					rel()
+				}
+			},
+			func() {
+				for k, v := range valRels {
+					v()
+					delete(valRels, k)
+				}
+			},
+		),
+	)
 	return di, ref, err
 }
 
