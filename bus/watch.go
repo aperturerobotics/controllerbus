@@ -197,3 +197,26 @@ func ExecWatchEffect[T directive.ComparableValue](
 
 	return di, ref, err
 }
+
+// ExecOneOffWatchEffect calls a callback for a single value resolved for a directive.
+//
+// The callback can return an optional function to call when the value was removed.
+// The callback can return an error to terminate the watch.
+// The callback will continue to be called until the ref is removed.
+func ExecOneOffWatchEffect[T directive.ComparableValue](
+	cb func(val directive.TypedAttachedValue[T]) func(),
+	b Bus,
+	dir directive.Directive,
+) (directive.Instance, directive.Reference, error) {
+	var currRel func()
+	return ExecOneOffWatchCb(func(val directive.TypedAttachedValue[T]) bool {
+		if currRel != nil {
+			currRel()
+			currRel = nil
+		}
+		if val != nil {
+			currRel = cb(val)
+		}
+		return true
+	}, b, dir)
+}
