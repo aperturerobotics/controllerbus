@@ -263,9 +263,8 @@ func ExecWatchTransformEffect[T, E directive.ComparableValue](
 
 	transforms := keyed.NewKeyed[uint32, directive.TypedAttachedValue[T]](
 		func(key uint32) (keyed.Routine, directive.TypedAttachedValue[T]) {
-			mtx.Lock()
+			// NOTE: no mtx.Lock here since we already locked before SetKey below!
 			val, exists := vals[key]
-			mtx.Unlock()
 			if !exists {
 				return nil, val
 			}
