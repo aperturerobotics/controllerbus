@@ -329,6 +329,8 @@ func ExecOneOffWatchEffect[T directive.ComparableValue](
 // functions so far, and should select which value to emit to the effect based
 // on a stable sort. It can return an index in the slice or -1 to select none.
 //
+// If selectValue is nil, the first returned value (lowest value id) will be used.
+//
 // The callback will be called with the most recently selected value.
 // The callback can return an optional function to call when the value was removed or changed.
 // The callback will continue to be called until the ref is removed.
@@ -354,7 +356,11 @@ func ExecOneOffWatchTransformEffect[T, E directive.ComparableValue](
 	maybeCallEffect := func() {
 		var selectedValID uint32
 		var selectedVal directive.TransformedAttachedValue[T, E]
-		valueIdx := selectValue(xfrmVals)
+
+		var valueIdx int
+		if selectValue != nil {
+			valueIdx = selectValue(xfrmVals)
+		}
 		if valueIdx >= 0 && valueIdx < len(xfrmVals) {
 			selectedVal = xfrmVals[valueIdx]
 			selectedValID = selectedVal.GetValueID()
