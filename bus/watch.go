@@ -346,7 +346,7 @@ func ExecOneOffWatchTransformEffect[T, E directive.ComparableValue](
 	var mtx sync.Mutex
 	var xfrmVals []directive.TransformedAttachedValue[T, E]
 	sortXfrmVals := func() {
-		slices.SortStableFunc(xfrmVals, func(a, b directive.TransformedAttachedValue[T, E]) int {
+		slices.SortFunc(xfrmVals, func(a, b directive.TransformedAttachedValue[T, E]) int {
 			return int(a.GetValueID() - b.GetValueID())
 		})
 	}
