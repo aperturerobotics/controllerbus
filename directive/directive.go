@@ -333,6 +333,36 @@ func (t *typedAttachedValue[T]) GetValue() T {
 // _ is a type assertion
 var _ TypedAttachedValue[int] = &typedAttachedValue[int]{}
 
+// TransformedAttachedValue is an AttachedValue with a transformed value.
+type TransformedAttachedValue[T, E ComparableValue] interface {
+	TypedAttachedValue[T]
+
+	// GetTransformedValue returns the transformed value.
+	GetTransformedValue() E
+}
+
+// transformedAttachedValue is an AttachedValue with a transformed value.
+type transformedAttachedValue[T, E ComparableValue] struct {
+	TypedAttachedValue[T]
+	xfrm E
+}
+
+// NewTransformedAttachedValue builds a new TransformedAttachedValue.
+func NewTransformedAttachedValue[T, E ComparableValue](
+	tav TypedAttachedValue[T],
+	xfrm E,
+) TransformedAttachedValue[T, E] {
+	return &transformedAttachedValue[T, E]{TypedAttachedValue: tav, xfrm: xfrm}
+}
+
+// GetTransformedValue returns the transformed value.
+func (v *transformedAttachedValue[T, E]) GetTransformedValue() E {
+	return v.xfrm
+}
+
+// _ is a type assertion
+var _ TransformedAttachedValue[int, int] = ((*transformedAttachedValue[int, int])(nil))
+
 // ValueHandler handles values emitted by a resolver.
 type ValueHandler interface {
 	// AddValue adds a value to the result, returning success and an ID. If
