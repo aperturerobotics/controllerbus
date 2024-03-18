@@ -8,7 +8,7 @@ import (
 	"github.com/aperturerobotics/controllerbus/directive"
 )
 
-// BusBridgeResolver resolves directives by forwarding to antihero bus.
+// BusBridgeResolver resolves directives by forwarding to another bus.
 type BusBridgeResolver struct {
 	// target is the target bus
 	target bus.Bus
