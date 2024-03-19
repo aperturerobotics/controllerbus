@@ -6,6 +6,8 @@ github.com/aperturerobotics/protobuf-go v1.32.1-0.20240118233629-6aeee82c476f h1
 github.com/aperturerobotics/protobuf-go v1.32.1-0.20240118233629-6aeee82c476f/go.mod h1:c6P6GXX6sHbq/GpV6MGZEdwhWPcYBgnhAHhKbcUYpos=
 github.com/aperturerobotics/starpc v0.27.2 h1:S5fUo9ila01XtE2zMB9qLvm/dTZhl+4EQK+XXQkiZbA=
 github.com/aperturerobotics/starpc v0.27.2/go.mod h1:CIhS3mfMjNui/8xjAOq51DbR2khw8sYEe7yLgIv5tD4=
+github.com/aperturerobotics/starpc v0.27.3 h1:spXXh7FsNd32dIOnBElRWQeYSAJLIulVz3xI6O+ezGg=
+github.com/aperturerobotics/starpc v0.27.3/go.mod h1:pAETN2gY3W2i+A7CGZgFMvc594H3HN65VMylF8Fp8eY=
 github.com/aperturerobotics/util v1.15.2 h1:3J9o/kK8gEVR7xWE+J0ih5s+wE+6lFNN5WUWWI4Ogak=
 github.com/aperturerobotics/util v1.15.2/go.mod h1:NW+A6UUfEv+BsLrfnqwXR9g6CO97Hwe+1En9zGeW1so=
 github.com/blang/semver v3.5.1+incompatible h1:cQNTCjp13qL8KC3Nbxr/y2Bqb63oX6wdnnjpJbkM4JQ=
@@ -45,10 +47,14 @@ github.com/libp2p/go-buffer-pool v0.1.0 h1:oK4mSFcQz7cTQIfqbe4MIj9gLW+mnanjyFtc6
 github.com/libp2p/go-buffer-pool v0.1.0/go.mod h1:N+vh8gMqimBzdKkSMVuydVDq+UV5QTWy5HSiZacSbPg=
 github.com/libp2p/go-libp2p v0.33.0 h1:yTPSr8sJRbfeEYXyeN8VPVSlTlFjtMUwGDRniwaf/xQ=
 github.com/libp2p/go-libp2p v0.33.0/go.mod h1:RIJFRQVUBKy82dnW7J5f1homqqv6NcsDJAl3e7CRGfE=
+github.com/libp2p/go-libp2p v0.33.1 h1:tvJl9b9M6nSLBtZSXSguq+/lRhRj2oLRkyhBmQNMFLA=
+github.com/libp2p/go-libp2p v0.33.1/go.mod h1:zOUTMjG4I7TXwMndNyOBn/CNtVBLlvBlnxfi+8xzx+E=
 github.com/libp2p/go-libp2p-testing v0.12.0 h1:EPvBb4kKMWO29qP4mZGyhVzUyR25dvfUIK5WDu6iPUA=
 github.com/libp2p/go-libp2p-testing v0.12.0/go.mod h1:KcGDRXyN7sQCllucn1cOOS+Dmm7ujhfEyXQL5lvkcPg=
 github.com/libp2p/go-yamux/v4 v4.0.2-0.20240206065824-7222fbc3459d h1:Lag2VlBLRAiYKMnbIJGSDFmfSIoaeQRZ3wJXt91ZWV8=
 github.com/libp2p/go-yamux/v4 v4.0.2-0.20240206065824-7222fbc3459d/go.mod h1:OsNeDpmxccy93bUsruLEdsqIuO1VbBOFsQ4c4GfwenE=
+github.com/libp2p/go-yamux/v4 v4.0.2-0.20240314112558-188b1fda7dc9 h1:8tAUqfDLYiZnTHlSQvA3wgGdqMSj8F5HBfAOnyARdR4=
+github.com/libp2p/go-yamux/v4 v4.0.2-0.20240314112558-188b1fda7dc9/go.mod h1:PGP+3py2ZWDKABvqstBZtMnixEHNC7U/odnGylzur5o=
 github.com/minio/sha256-simd v1.0.1 h1:6kaan5IFmwTNynnKKpDHe6FWHohJOHhCPchzK49dzMM=
 github.com/minio/sha256-simd v1.0.1/go.mod h1:Pz6AKMiUdngCLpeTL/RJY1M9rUuPMYujV5xJjtbRSN8=
 github.com/mr-tron/base58 v1.2.0 h1:T/HDJBh4ZCPbU39/+c3rRvE0uKBQlU27+QI8LJ4t64o=
