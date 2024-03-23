@@ -36,7 +36,7 @@ export const Config = {
     message: Config,
     writer: _m0.Writer = _m0.Writer.create(),
   ): _m0.Writer {
-    if (message.enableExecController === true) {
+    if (message.enableExecController !== false) {
       writer.uint32(8).bool(message.enableExecController)
     }
     return writer
@@ -110,7 +110,7 @@ export const Config = {
 
   toJSON(message: Config): unknown {
     const obj: any = {}
-    if (message.enableExecController === true) {
+    if (message.enableExecController !== false) {
       obj.enableExecController = message.enableExecController
     }
     return obj

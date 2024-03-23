@@ -269,7 +269,6 @@ func ExecWatchTransformEffect[T, E directive.ComparableValue](
 				return nil, val
 			}
 			return wrapTransform(val), val
-
 		},
 		keyedOpts...,
 	)

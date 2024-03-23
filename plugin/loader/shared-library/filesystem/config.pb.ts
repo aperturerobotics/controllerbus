@@ -24,7 +24,7 @@ export const Config = {
     if (message.dir !== '') {
       writer.uint32(10).string(message.dir)
     }
-    if (message.watch === true) {
+    if (message.watch !== false) {
       writer.uint32(16).bool(message.watch)
     }
     return writer
@@ -107,7 +107,7 @@ export const Config = {
     if (message.dir !== '') {
       obj.dir = message.dir
     }
-    if (message.watch === true) {
+    if (message.watch !== false) {
       obj.watch = message.watch
     }
     return obj

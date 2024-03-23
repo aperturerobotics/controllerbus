@@ -300,7 +300,7 @@ export const ControllerConfig = {
     if (message.id !== '') {
       writer.uint32(10).string(message.id)
     }
-    if (!message.rev.isZero()) {
+    if (!message.rev.equals(Long.UZERO)) {
       writer.uint32(16).uint64(message.rev)
     }
     if (message.config.length !== 0) {
@@ -398,7 +398,7 @@ export const ControllerConfig = {
     if (message.id !== '') {
       obj.id = message.id
     }
-    if (!message.rev.isZero()) {
+    if (!message.rev.equals(Long.UZERO)) {
       obj.rev = (message.rev || Long.UZERO).toString()
     }
     if (message.config.length !== 0) {

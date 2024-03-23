@@ -4,7 +4,7 @@ go 1.21
 
 replace github.com/aperturerobotics/controllerbus => ../
 
-replace google.golang.org/protobuf => github.com/aperturerobotics/protobuf-go v1.32.1-0.20240118233629-6aeee82c476f // aperture
+replace google.golang.org/protobuf => github.com/aperturerobotics/protobuf-go v1.33.1-0.20240322235918-b46c9358eab6 // aperture
 
 require (
 	github.com/golangci/golangci-lint v1.55.2
@@ -15,7 +15,7 @@ require (
 
 require (
 	github.com/aperturerobotics/controllerbus v0.33.2
-	github.com/aperturerobotics/goprotowrap v0.3.0
+	github.com/aperturerobotics/goprotowrap v0.3.1 // master
 	github.com/aperturerobotics/starpc v0.27.2
 )
 
@@ -77,7 +77,7 @@ require (
 	github.com/go-xmlfmt/xmlfmt v1.1.2 // indirect
 	github.com/gobwas/glob v0.2.3 // indirect
 	github.com/gofrs/flock v0.8.1 // indirect
-	github.com/golang/protobuf v1.5.3 // indirect
+	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/golangci/check v0.0.0-20180506172741-cfe4005ccda2 // indirect
 	github.com/golangci/dupl v0.0.0-20180902072040-3e9179ac440a // indirect
 	github.com/golangci/go-misc v0.0.0-20220329215616-d24fe342adfe // indirect

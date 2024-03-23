@@ -100,7 +100,7 @@ export const ExecControllerRequest = {
     if (message.configSetYaml !== '') {
       writer.uint32(18).string(message.configSetYaml)
     }
-    if (message.configSetYamlOverwrite === true) {
+    if (message.configSetYamlOverwrite !== false) {
       writer.uint32(24).bool(message.configSetYamlOverwrite)
     }
     return writer
@@ -205,7 +205,7 @@ export const ExecControllerRequest = {
     if (message.configSetYaml !== '') {
       obj.configSetYaml = message.configSetYaml
     }
-    if (message.configSetYamlOverwrite === true) {
+    if (message.configSetYamlOverwrite !== false) {
       obj.configSetYamlOverwrite = message.configSetYamlOverwrite
     }
     return obj

@@ -164,7 +164,6 @@ func (r *resolverHandler) AddResolver(res directive.Resolver, removedCb func()) 
 		return emptyFn
 	}
 	return relFn
-
 }
 
 // executeResolver is the goroutine to execute the resolver.
