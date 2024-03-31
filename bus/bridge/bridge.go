@@ -61,7 +61,7 @@ func (b *BusBridge) Execute(ctx context.Context) error {
 
 // HandleDirective asks if the handler can resolve the directive.
 // If it can, it returns a resolver. If not, returns nil.
-// Any exceptional errors are returned for logging.
+// Any unexpected errors are returned for logging.
 // It is safe to add a reference to the directive during this call.
 // The context passed is canceled when the directive instance expires.
 func (b *BusBridge) HandleDirective(ctx context.Context, di directive.Instance) ([]directive.Resolver, error) {

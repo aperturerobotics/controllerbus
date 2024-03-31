@@ -10,7 +10,7 @@ replace (
 require (
 	github.com/Jeffail/gabs/v2 v2.7.0
 	github.com/aperturerobotics/starpc v0.27.3 // latest
-	github.com/aperturerobotics/util v1.15.2 // latest
+	github.com/aperturerobotics/util v1.15.3 // latest
 	github.com/blang/semver v3.5.1+incompatible
 	github.com/cenkalti/backoff v2.2.1+incompatible
 	github.com/fsnotify/fsnotify v1.7.0
@@ -23,7 +23,7 @@ require (
 	github.com/urfave/cli/v2 v2.27.1
 	github.com/valyala/fastjson v1.6.4
 	github.com/zeebo/blake3 v0.2.3
-	golang.org/x/exp v0.0.0-20240318143956-a85f2c67cd81
+	golang.org/x/exp v0.0.0-20240325151524-a685a6edb6d8
 	golang.org/x/mod v0.16.0
 	golang.org/x/tools v0.19.0
 	google.golang.org/protobuf v1.33.0
