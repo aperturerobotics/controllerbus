@@ -17,7 +17,7 @@ func MarshalYAML(cs configset.ConfigSet) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return yaml.JSONToYAML([]byte(jdat))
+	return yaml.JSONToYAML(jdat)
 }
 
 // UnmarshalYAML unmarshals a yaml to a config set, optionally overwriting existing.

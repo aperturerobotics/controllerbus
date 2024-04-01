@@ -15,21 +15,21 @@ import (
 // if useCtx is set, uses the refcount resolver context to start the refcount container.
 // If buildValue is set, will be called with the values.
 // if buildValue returns nil, nil, ignores the value.
-type RefCountResolver[T comparable] struct {
+type RefCountResolver[T comparable, R ComparableValue] struct {
 	rc         *refcount.RefCount[T]
 	useCtx     bool
-	buildValue func(ctx context.Context, val T) (Value, error)
+	buildValue func(ctx context.Context, val T) (R, error)
 }
 
 // NewRefCountResolver constructs a new RefCountResolver.
 //
 // if useCtx is set, uses the refcount resolver context to start the refcount container.
-func NewRefCountResolver[T comparable](
+func NewRefCountResolver[T comparable, R ComparableValue](
 	rc *refcount.RefCount[T],
 	useCtx bool,
-	buildValue func(ctx context.Context, val T) (Value, error),
-) *RefCountResolver[T] {
-	return &RefCountResolver[T]{
+	buildValue func(ctx context.Context, val T) (R, error),
+) *RefCountResolver[T, R] {
+	return &RefCountResolver[T, R]{
 		rc:         rc,
 		useCtx:     useCtx,
 		buildValue: buildValue,
@@ -37,7 +37,7 @@ func NewRefCountResolver[T comparable](
 }
 
 // Resolve resolves the values, emitting them to the handler.
-func (r *RefCountResolver[T]) Resolve(ctx context.Context, handler ResolverHandler) error {
+func (r *RefCountResolver[T, R]) Resolve(ctx context.Context, handler ResolverHandler) error {
 	return r.rc.Access(ctx, r.useCtx, func(ctx context.Context, tval T) error {
 		var val Value = tval
 		if r.buildValue != nil {
@@ -58,4 +58,4 @@ func (r *RefCountResolver[T]) Resolve(ctx context.Context, handler ResolverHandl
 }
 
 // _ is a type assertion
-var _ Resolver = ((*RefCountResolver[int])(nil))
+var _ Resolver = ((*RefCountResolver[int, Value])(nil))

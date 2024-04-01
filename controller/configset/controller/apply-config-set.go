@@ -94,7 +94,8 @@ func (r *applyConfigSetResolver) Resolve(
 			if v != 0 {
 				handler.RemoveValue(v)
 			}
-			id, accepted := handler.AddValue(configset.ApplyConfigSetValue(st))
+			var val configset.ApplyConfigSetValue = st
+			id, accepted := handler.AddValue(val)
 			if accepted {
 				r.refs[ref] = id
 			} else {

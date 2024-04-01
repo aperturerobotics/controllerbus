@@ -94,7 +94,8 @@ func (r *lookupConfigSetResolver) Resolve(
 			if v != 0 {
 				handler.RemoveValue(v)
 			}
-			id, accepted := handler.AddValue(configset.LookupConfigSetValue(st))
+			var val configset.LookupConfigSetValue = st
+			id, accepted := handler.AddValue(val)
 			if accepted {
 				r.refs[ref] = id
 			} else {

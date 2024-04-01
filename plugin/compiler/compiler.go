@@ -64,7 +64,7 @@ func CompilePluginFromFile(
 		return err
 	}
 
-	// start the go compiler excecution #1
+	// start the go compiler execution #1
 	intermediateOutFile1 := path.Join(tmpName, "pass-1.cbus.so")
 	ecmd = exec.ExecGoCompiler(
 		"build", "-v",

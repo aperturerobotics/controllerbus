@@ -3,7 +3,7 @@ package plugin_compiler
 import (
 	"bytes"
 	"context"
-	"crypto/sha1"
+	"crypto/sha256"
 	"fmt"
 	"go/ast"
 	"go/build"
@@ -135,8 +135,8 @@ func (m *ModuleCompiler) GenerateModules(analysis *Analysis, pluginBinaryVersion
 
 		moduleOutpPath := path.Clean("/" + srcMod.Path)[1:]
 		if moduleOutpPath == "" {
-			shaSum := sha1.Sum([]byte(srcMod.GoMod))
-			moduleOutpPath = "module-" + base58.Encode(shaSum[:])
+			shaSum := sha256.Sum256([]byte(srcMod.GoMod))
+			moduleOutpPath = "module-" + base58.Encode(shaSum[:20])
 		}
 
 		modPathAbs := path.Dir(mod.GoMod)

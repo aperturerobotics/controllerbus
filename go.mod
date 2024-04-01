@@ -1,6 +1,6 @@
 module github.com/aperturerobotics/controllerbus
 
-go 1.21
+go 1.22
 
 replace (
 	github.com/sirupsen/logrus => github.com/aperturerobotics/logrus v1.9.4-0.20240119050608-13332fb58195 // aperture
@@ -10,7 +10,7 @@ replace (
 require (
 	github.com/Jeffail/gabs/v2 v2.7.0
 	github.com/aperturerobotics/starpc v0.27.3 // latest
-	github.com/aperturerobotics/util v1.15.3 // latest
+	github.com/aperturerobotics/util v1.16.0 // latest
 	github.com/blang/semver v3.5.1+incompatible
 	github.com/cenkalti/backoff v2.2.1+incompatible
 	github.com/fsnotify/fsnotify v1.7.0

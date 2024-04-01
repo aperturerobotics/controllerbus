@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"os"
 	"path"
+	"time"
 )
 
 func run() error {
@@ -12,15 +13,16 @@ func run() error {
 		return err
 	}
 
-	http.HandleFunc("/wasm_exec.js", func(rw http.ResponseWriter, req *http.Request) {
+	mux := http.NewServeMux()
+	mux.HandleFunc("/wasm_exec.js", func(rw http.ResponseWriter, req *http.Request) {
 		rw.Header().Set("Content-Type", "text/javascript")
 		http.ServeFile(rw, req, path.Join(wd, "../wasm_exec.js"))
 	})
-	http.HandleFunc("/example.wasm", func(rw http.ResponseWriter, req *http.Request) {
+	mux.HandleFunc("/example.wasm", func(rw http.ResponseWriter, req *http.Request) {
 		rw.Header().Set("Content-Type", "application/wasm")
 		http.ServeFile(rw, req, path.Join(wd, "../example.wasm"))
 	})
-	http.HandleFunc("/", func(rw http.ResponseWriter, req *http.Request) {
+	mux.HandleFunc("/", func(rw http.ResponseWriter, req *http.Request) {
 		switch req.URL.Path {
 		case "/":
 		case "/index.html":
@@ -33,7 +35,8 @@ func run() error {
 
 	// Start HTTP server
 	os.Stderr.WriteString("listening on :5000\n")
-	return http.ListenAndServe(":5000", nil)
+	server := &http.Server{Addr: ":5000", Handler: mux, ReadHeaderTimeout: time.Second * 10}
+	return server.ListenAndServe()
 }
 
 func main() {

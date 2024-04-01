@@ -22,4 +22,8 @@ import (
 	_ "github.com/psampaz/go-mod-outdated"
 	// _ imports protoc-gen-starpc
 	_ "github.com/aperturerobotics/starpc/cmd/protoc-gen-go-starpc"
+	// _ imports goimports
+	_ "golang.org/x/tools/cmd/goimports"
+	// _ imports gofumpt
+	_ "mvdan.cc/gofumpt"
 )
