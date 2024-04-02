@@ -23,8 +23,15 @@ type RefCountResolver[T comparable, R ComparableValue] struct {
 
 // NewRefCountResolver constructs a new RefCountResolver.
 //
+// This is the simplified constructor, use NewRefCountResolverWithXfrm to transform the value.
+func NewRefCountResolver[T comparable](rc *refcount.RefCount[T]) *RefCountResolver[T, T] {
+	return NewRefCountResolverWithXfrm[T, T](rc, false, nil)
+}
+
+// NewRefCountResolverWithXfrm constructs a new RefCountResolver with a transform func.
+//
 // if useCtx is set, uses the refcount resolver context to start the refcount container.
-func NewRefCountResolver[T comparable, R ComparableValue](
+func NewRefCountResolverWithXfrm[T comparable, R ComparableValue](
 	rc *refcount.RefCount[T],
 	useCtx bool,
 	buildValue func(ctx context.Context, val T) (R, error),
