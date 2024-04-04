@@ -246,7 +246,7 @@ func ExecOneOffWithFilterTyped[T comparable](
 				return false, nil
 			}
 			if filterCb != nil {
-				return filterCb(directive.NewTypedAttachedValue[T](val.GetValueID(), tval))
+				return filterCb(directive.NewTypedAttachedValue(val.GetValueID(), tval))
 			}
 			return true, nil
 		},
@@ -257,5 +257,90 @@ func ExecOneOffWithFilterTyped[T comparable](
 
 	// we type asserted in filterCb above.
 	avVal := av.GetValue().(T)
-	return directive.NewTypedAttachedValue[T](av.GetValueID(), avVal), di, ref, nil
+	return directive.NewTypedAttachedValue(av.GetValueID(), avVal), di, ref, nil
+}
+
+// ExecOneOffXfrm executes a one-off directive with a transformation filter cb.
+//
+// Waits until the callback returns true and nil err before returning.
+// valDisposeCb is called if the value is no longer valid.
+// valDisposeCb might be called multiple times.
+//
+// idleCb is called when idle with the list of resolver errors.
+// idleCb should return (wait, error): if wait=true, continues to wait.
+// if idleCb is nil: continues to wait when the directive becomes idle
+// errs is the list of errors from the resolvers (if any)
+//
+// If err != nil, ref == nil.
+func ExecOneOffXfrm(
+	ctx context.Context,
+	bus Bus,
+	dir directive.Directive,
+	idleCb ExecIdleCallback,
+	valDisposeCallback func(),
+	xfrmCb func(val directive.AttachedValue) (directive.Value, bool, error),
+) (directive.Value, directive.AttachedValue, directive.Instance, directive.Reference, error) {
+	var xfrm directive.Value
+	av, di, ref, err := ExecOneOffWithFilter(
+		ctx,
+		bus,
+		dir,
+		idleCb,
+		valDisposeCallback,
+		func(val directive.AttachedValue) (bool, error) {
+			var ok bool
+			xval, ok, err := xfrmCb(val)
+			if !ok || err != nil {
+				return false, err
+			}
+			xfrm = xval
+			return true, nil
+		},
+	)
+	return xfrm, av, di, ref, err
+}
+
+// ExecOneOffXfrmTyped executes a one-off directive with a transformation filter cb.
+//
+// Waits until the callback returns true and nil err before returning.
+// valDisposeCb is called if the value is no longer valid.
+// valDisposeCb might be called multiple times.
+//
+// idleCb is called when idle with the list of resolver errors.
+// idleCb should return (wait, error): if wait=true, continues to wait.
+// if idleCb is nil: continues to wait when the directive becomes idle
+// errs is the list of errors from the resolvers (if any)
+//
+// If err != nil, ref == nil.
+func ExecOneOffXfrmTyped[T, R directive.ComparableValue](
+	ctx context.Context,
+	bus Bus,
+	dir directive.Directive,
+	idleCb ExecIdleCallback,
+	valDisposeCallback func(),
+	xfrmCb func(val directive.TypedAttachedValue[T]) (R, bool, error),
+) (R, directive.TypedAttachedValue[T], directive.Instance, directive.Reference, error) {
+	var xfrm R
+	av, di, ref, err := ExecOneOffWithFilterTyped(
+		ctx,
+		bus,
+		dir,
+		idleCb,
+		valDisposeCallback,
+		func(val directive.TypedAttachedValue[T]) (bool, error) {
+			var ok bool
+			xval, ok, err := xfrmCb(val)
+			if !ok || err != nil {
+				return false, err
+			}
+			xfrm = xval
+			return true, nil
+		},
+	)
+	if err != nil || av == nil {
+		// ensure xfrm is empty too
+		var empty R
+		xfrm = empty
+	}
+	return xfrm, av, di, ref, err
 }
