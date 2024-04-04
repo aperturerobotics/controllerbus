@@ -260,7 +260,7 @@ func ExecOneOffWithFilterTyped[T comparable](
 	return directive.NewTypedAttachedValue(av.GetValueID(), avVal), di, ref, nil
 }
 
-// ExecOneOffXfrm executes a one-off directive with a transformation filter cb.
+// ExecOneOffWithXfrm executes a one-off directive with a transformation filter cb.
 //
 // Waits until the callback returns true and nil err before returning.
 // valDisposeCb is called if the value is no longer valid.
@@ -272,7 +272,7 @@ func ExecOneOffWithFilterTyped[T comparable](
 // errs is the list of errors from the resolvers (if any)
 //
 // If err != nil, ref == nil.
-func ExecOneOffXfrm(
+func ExecOneOffWithXfrm(
 	ctx context.Context,
 	bus Bus,
 	dir directive.Directive,
@@ -300,7 +300,7 @@ func ExecOneOffXfrm(
 	return xfrm, av, di, ref, err
 }
 
-// ExecOneOffXfrmTyped executes a one-off directive with a transformation filter cb.
+// ExecOneOffWithXfrmTyped executes a one-off directive with a transformation filter cb.
 //
 // Waits until the callback returns true and nil err before returning.
 // valDisposeCb is called if the value is no longer valid.
@@ -312,7 +312,7 @@ func ExecOneOffXfrm(
 // errs is the list of errors from the resolvers (if any)
 //
 // If err != nil, ref == nil.
-func ExecOneOffXfrmTyped[T, R directive.ComparableValue](
+func ExecOneOffWithXfrmTyped[T, R directive.ComparableValue](
 	ctx context.Context,
 	bus Bus,
 	dir directive.Directive,
