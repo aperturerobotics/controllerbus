@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"errors"
 
 	"github.com/aperturerobotics/controllerbus/config"
@@ -38,7 +39,11 @@ func (f *ToyFactory) ConstructConfig() config.Config {
 }
 
 // Construct constructs the associated controller given configuration.
-func (f *ToyFactory) Construct(c config.Config, opts controller.ConstructOpts) (controller.Controller, error) {
+func (f *ToyFactory) Construct(
+	ctx context.Context,
+	c config.Config,
+	opts controller.ConstructOpts,
+) (controller.Controller, error) {
 	conf, ok := c.(*ToyControllerConfig)
 	if !ok {
 		return nil, errors.New("wrong type of config")

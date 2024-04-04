@@ -44,10 +44,11 @@ func (s *StaticPluginFactory) GetFactoryContext() context.Context {
 
 // Construct constructs the associated controller given configuration.
 func (s *StaticPluginFactory) Construct(
+	ctx context.Context,
 	conf config.Config,
 	opts controller.ConstructOpts,
 ) (controller.Controller, error) {
-	subController, err := s.Factory.Construct(conf, opts)
+	subController, err := s.Factory.Construct(ctx, conf, opts)
 	if err != nil {
 		return subController, err
 	}

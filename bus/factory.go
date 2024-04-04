@@ -1,6 +1,8 @@
 package bus
 
 import (
+	"context"
+
 	"github.com/aperturerobotics/controllerbus/config"
 	"github.com/aperturerobotics/controllerbus/controller"
 	"github.com/blang/semver"
@@ -45,7 +47,11 @@ func (f *BusFactory[T, C]) ConstructConfig() config.Config {
 }
 
 // Construct constructs the associated controller given configuration.
-func (f *BusFactory[T, C]) Construct(cc config.Config, opts controller.ConstructOpts) (controller.Controller, error) {
+func (f *BusFactory[T, C]) Construct(
+	ctx context.Context,
+	cc config.Config,
+	opts controller.ConstructOpts,
+) (controller.Controller, error) {
 	conf, ok := cc.(T)
 	if !ok {
 		expected := f.configID

@@ -129,9 +129,11 @@ func (c *resolver) Resolve(ctx context.Context, vh directive.ResolverHandler) er
 		// construct controller (once)
 		t1 := time.Now()
 		if ci == nil {
-			ci, lastErr = factory.Construct(config, controller.ConstructOpts{
-				Logger: le,
-			})
+			ci, lastErr = factory.Construct(
+				ctx,
+				config,
+				controller.ConstructOpts{Logger: le},
+			)
 			if lastErr != nil {
 				ci = nil
 				continue

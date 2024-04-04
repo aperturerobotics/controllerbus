@@ -33,7 +33,7 @@ type Factory interface {
 	// ConstructConfig constructs an instance of the controller configuration.
 	ConstructConfig() config.Config
 	// Construct constructs the associated controller given configuration.
-	Construct(config.Config, ConstructOpts) (Controller, error)
+	Construct(context.Context, config.Config, ConstructOpts) (Controller, error)
 	// GetVersion returns the version of this controller.
 	GetVersion() semver.Version
 }
