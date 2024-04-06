@@ -110,10 +110,6 @@ func (c *Controller) AddDirective(
 		for _, res := range resolvers {
 			di.attachStartResolverLocked(res)
 		}
-		if di.countRunningResolversLocked() == 0 {
-			// mark idle now that ready=true
-			di.handleIdleLocked()
-		}
 	}
 
 	return di, diRef, nil

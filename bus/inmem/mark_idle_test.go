@@ -32,8 +32,12 @@ func (c *markIdleCtrl) HandleDirective(ctx context.Context, di directive.Instanc
 type markIdleRes struct{}
 
 func (m *markIdleRes) Resolve(ctx context.Context, handler directive.ResolverHandler) error {
-	handler.MarkIdle()
+	handler.MarkIdle(true)
+
+	// NOTE: we are specifically testing a resolver that does not exit here.
+	// normally resolve would return at this point.
 	<-ctx.Done()
+
 	return ctx.Err()
 }
 

@@ -20,20 +20,27 @@ func ExecWaitValue[T directive.Value](
 	ctx context.Context,
 	b Bus,
 	dir directive.Directive,
-	idleCb func(errs []error) (bool, error),
+	idleCb func(isIdle bool, errs []error) (bool, error),
 	valDisposeCallback func(),
 	checkCb func(val T) (bool, error),
 ) (T, directive.Instance, directive.Reference, error) {
-	av, avDi, avRef, err := ExecOneOffWithFilter(ctx, b, dir, idleCb, valDisposeCallback, func(val directive.AttachedValue) (bool, error) {
-		v, vOk := val.GetValue().(T)
-		if !vOk {
-			return false, nil
-		}
-		if checkCb == nil {
-			return true, nil
-		}
-		return checkCb(v)
-	})
+	av, avDi, avRef, err := ExecOneOffWithFilter(
+		ctx,
+		b,
+		dir,
+		idleCb,
+		valDisposeCallback,
+		func(val directive.AttachedValue) (bool, error) {
+			v, vOk := val.GetValue().(T)
+			if !vOk {
+				return false, nil
+			}
+			if checkCb == nil {
+				return true, nil
+			}
+			return checkCb(v)
+		},
+	)
 	if err != nil || av == nil {
 		if avRef != nil {
 			avRef.Release()

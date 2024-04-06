@@ -40,15 +40,15 @@ func (r *resolverHandler) RemoveValue(id uint32) (val directive.Value, found boo
 	return r.r.di.removeValueLocked(r.r, id)
 }
 
-// MarkIdle marks the resolver as idle.
+// MarkIdle marks the resolver as idle or not idle.
 // If the resolver returns nil or an error, it's also marked as idle.
-func (r *resolverHandler) MarkIdle() {
+func (r *resolverHandler) MarkIdle(idle bool) {
 	r.r.di.c.mtx.Lock()
 	defer r.r.di.c.mtx.Unlock()
 	if r.r.ctx != r.ctx {
 		return
 	}
-	r.r.markIdleLocked()
+	r.r.setIdleLocked(idle)
 }
 
 // CountValues returns the number of values that were set.
@@ -186,7 +186,7 @@ func (r *resolverHandler) executeResolver(ctx context.Context, exitedCh chan<- s
 	}
 	r.r.exited = true
 	r.r.err = err
-	r.r.markIdleLocked()
+	r.r.setIdleLocked(true)
 }
 
 // _ is a type assertion.

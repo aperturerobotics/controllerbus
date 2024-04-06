@@ -203,9 +203,9 @@ type ReferenceHandler interface {
 	HandleInstanceDisposed(Instance)
 }
 
-// IdleCallback is called when the directive becomes idle.
+// IdleCallback is called when the directive becomes idle or not-idle.
 // Errs is the list of non-nil resolver errors.
-type IdleCallback func(errs []error)
+type IdleCallback func(isIdle bool, errs []error)
 
 // Instance tracks a directive with reference counts and resolution state.
 type Instance interface {
@@ -238,8 +238,8 @@ type Instance interface {
 	// Returns a callback release function.
 	AddDisposeCallback(cb func()) func()
 
-	// AddIdleCallback adds a callback that will be called when the directive becomes idle.
-	// May be called multiple times if the directive is restarted.
+	// AddIdleCallback adds a callback that will be called when the idle state changes.
+	// Called immediately with the initial state.
 	// Returns a callback release function.
 	AddIdleCallback(cb IdleCallback) func()
 
@@ -388,9 +388,9 @@ type ValueHandler interface {
 type ResolverHandler interface {
 	ValueHandler
 
-	// MarkIdle marks the resolver as idle.
+	// MarkIdle marks the resolver as idle or not-idle.
 	// If the resolver returns nil or an error, it's also marked as idle.
-	MarkIdle()
+	MarkIdle(idle bool)
 
 	// AddValueRemovedCallback adds a callback that will be called when the
 	// given value id is disposed or removed.
