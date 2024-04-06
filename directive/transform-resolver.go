@@ -110,30 +110,22 @@ func (r *TransformResolver[T]) Resolve(ctx context.Context, handler ResolverHand
 	defer handler.ClearValues()
 	defer ref.Release()
 
-	defer di.AddIdleCallback(func(errs []error) {
+	defer di.AddIdleCallback(func(isIdle bool, errs []error) {
 		for _, err := range errs {
 			if err != nil {
-				select {
-				case errCh <- err:
-				default:
-				}
+				pushErr(err)
 				return
 			}
 		}
 
-		errCh <- nil
+		handler.MarkIdle(isIdle)
 	})()
 
-	for {
-		select {
-		case <-ctx.Done():
-			return context.Canceled
-		case err := <-errCh:
-			if err != nil {
-				return err
-			}
-			handler.MarkIdle()
-		}
+	select {
+	case <-ctx.Done():
+		return context.Canceled
+	case err := <-errCh:
+		return err
 	}
 }
 

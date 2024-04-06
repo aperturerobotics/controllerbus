@@ -58,6 +58,9 @@ type directiveInstance struct {
 	// valCtr is the ID of the next value
 	// note: the first value ID is 1, not 0
 	valCtr uint32
+	// idle indicates there are no running resolvers
+	// call the idle callbacks if/when this changes
+	idle bool
 	// full indicates we have more than MaxValueCap values.
 	full bool
 }
@@ -271,8 +274,9 @@ func (i *directiveInstance) handleFullLocked() {
 		return
 	}
 
-	var becameIdle bool
+	// mark as full
 	i.full = true
+
 	// we have enough values, reaching the maxVals cap
 	// mark resolvers with values as idle
 	// cancel non-idle resolvers with no values
@@ -285,13 +289,11 @@ func (i *directiveInstance) handleFullLocked() {
 			res.updateContextLocked(nil)
 		} else {
 			res.idle = true
-			becameIdle = true
 		}
 	}
+
 	// check if the directive became idle
-	if becameIdle {
-		i.handleIdleLocked()
-	}
+	i.handleIdleStateLocked()
 }
 
 // handleNotFullLocked handles going below the max value cap.
@@ -325,18 +327,30 @@ func (i *directiveInstance) checkFullLocked() {
 	}
 }
 
-// handleIdleLocked is called when the instance becomes idle while i.c.mtx is locked
-func (i *directiveInstance) handleIdleLocked() {
+// checkIdleLocked checks if there are any running resolvers
+func (i *directiveInstance) checkIdleLocked() bool {
+	return i.countRunningResolversLocked() == 0
+}
+
+// handleIdleStateLocked checks if the idle state of the instance changes & handles that if so.
+func (i *directiveInstance) handleIdleStateLocked() {
+	idle := i.checkIdleLocked()
+	if i.idle == idle {
+		return
+	}
+	i.idle = idle
+
 	if len(i.idles) == 0 {
 		return
 	}
+
 	errs := i.getResolverErrsLocked()
 	var cbs []func()
-	for _, idle := range i.idles {
-		if !idle.released.Load() && idle.cb != nil {
-			idle := idle
+	for _, idleCb := range i.idles {
+		if !idleCb.released.Load() && idleCb.cb != nil {
+			idleCbFn := idleCb.cb
 			cbs = append(cbs, func() {
-				idle.cb(errs)
+				idleCbFn(idle, errs)
 			})
 		}
 	}
@@ -519,21 +533,21 @@ func (i *directiveInstance) AddDisposeCallback(cb func()) func() {
 	}
 }
 
-// AddIdleCallback adds a callback that will be called when idle.
+// AddIdleCallback adds a callback that will be called when the idle state changes.
+// Called immediately with the initial state.
 // Returns a callback release function.
 func (i *directiveInstance) AddIdleCallback(cb directive.IdleCallback) func() {
 	i.c.mtx.Lock()
+	defer i.c.mtx.Unlock()
+
 	rel := newCallback(cb)
 	i.idles = append(i.idles, rel)
-	isIdle := i.ready && i.countRunningResolversLocked() == 0
-	var errs []error
-	if isIdle {
-		errs = i.getResolverErrsLocked()
-	}
-	i.c.mtx.Unlock()
-	if isIdle {
-		cb(errs)
-	}
+	isIdle := i.ready && i.checkIdleLocked()
+	errs := i.getResolverErrsLocked()
+	i.callCallbacksLocked(func() {
+		cb(isIdle, errs)
+	})
+
 	return func() {
 		if !rel.released.Swap(true) {
 			i.c.mtx.Lock()
@@ -607,6 +621,7 @@ func (i *directiveInstance) attachStartResolverLocked(res *resolver) {
 		res.updateContextLocked(nil)
 	} else {
 		res.updateContextLocked(&i.ctx)
+		i.handleIdleStateLocked()
 	}
 }
 
@@ -715,6 +730,8 @@ func (i *directiveInstance) removeResolverLocked(resIdx int, rres *resolver) {
 	}
 	rres.rels = nil
 	i.callCallbacksLocked(cbs...)
+	// check if the idle state changed
+	i.handleIdleStateLocked()
 }
 
 // callCallbacksLocked calls the refsCbs list or adds to queue

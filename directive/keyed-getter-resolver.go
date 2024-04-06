@@ -75,7 +75,7 @@ func (r *KeyedGetterResolver[K, V]) Resolve(ctx context.Context, handler Resolve
 		}
 
 		// wait for the broadcast or context to be canceled
-		handler.MarkIdle()
+		handler.MarkIdle(true)
 		select {
 		case <-ctx.Done():
 		case <-wait:

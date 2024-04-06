@@ -57,7 +57,7 @@ func (r *RefCountResolver[T, R]) Resolve(ctx context.Context, handler ResolverHa
 		if val != nil {
 			_, _ = handler.AddValue(val)
 		}
-		handler.MarkIdle()
+		handler.MarkIdle(true)
 		<-ctx.Done()
 		handler.ClearValues()
 		return context.Canceled

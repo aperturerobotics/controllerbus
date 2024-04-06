@@ -52,7 +52,6 @@ func ExecCollectValues[T directive.Value](
 					return
 				}
 				bcast.HoldLock(func(broadcast func(), getWaitCh func() <-chan struct{}) {
-					idle = false
 					if !returned {
 						// we can append without re-allocating.
 						vals = append(vals, val)
@@ -68,7 +67,6 @@ func ExecCollectValues[T directive.Value](
 				}
 				var cb func()
 				bcast.HoldLock(func(broadcast func(), getWaitCh func() <-chan struct{}) {
-					idle = false
 					id := v.GetValueID()
 					for i, valID := range valIDs {
 						if valID == id {
@@ -117,20 +115,23 @@ func ExecCollectValues[T directive.Value](
 		return nil, nil, nil, err
 	}
 
-	defer di.AddIdleCallback(func(errs []error) {
+	defer di.AddIdleCallback(func(isIdle bool, errs []error) {
 		bcast.HoldLock(func(broadcast func(), getWaitCh func() <-chan struct{}) {
+			// if the resolver already returned an error, do nothing.
 			if resErr != nil {
 				return
+			}
+			if idle != isIdle {
+				idle = isIdle
+				broadcast()
 			}
 			for _, err := range errs {
 				if err != nil {
 					resErr = err
+					broadcast()
 					break
 				}
 			}
-			// idle
-			idle = true
-			broadcast()
 		})
 	})()
 

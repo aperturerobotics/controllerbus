@@ -70,7 +70,7 @@ func (r *KeyedRefCountResolver[K, V]) Resolve(ctx context.Context, handler Resol
 	}
 
 	// mark idle & wait for ctx to be canceled
-	handler.MarkIdle()
+	handler.MarkIdle(true)
 	<-ctx.Done()
 	handler.ClearValues()
 	return context.Canceled

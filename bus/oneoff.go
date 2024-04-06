@@ -2,7 +2,6 @@ package bus
 
 import (
 	"context"
-	"sync"
 
 	"github.com/aperturerobotics/controllerbus/directive"
 	"github.com/aperturerobotics/util/broadcast"
@@ -10,17 +9,17 @@ import (
 
 // ExecIdleCallback is an idle callback for ExecOneOffWithFilter.
 //
-// idleCb is called when idle with the list of resolver errors.
+// idleCb is called with the idle state and list of resolver errors.
 // idleCb should return (wait, error): if wait=true, continues to wait.
 // if idleCb is nil: continues to wait when the directive becomes idle
 // errs is the list of errors from the resolvers (if any)
-type ExecIdleCallback func(errs []error) (bool, error)
+type ExecIdleCallback func(isIdle bool, errs []error) (bool, error)
 
 // WaitWhenIdle returns an ExecIdleCallback that waits when the directive becomes idle.
 //
 // if ignoreErrors is false, returns any non-nil resolver error that occurs.
 func WaitWhenIdle(ignoreErrors bool) ExecIdleCallback {
-	return func(errs []error) (bool, error) {
+	return func(isIdle bool, errs []error) (bool, error) {
 		if !ignoreErrors {
 			for _, err := range errs {
 				if err != nil {
@@ -34,7 +33,10 @@ func WaitWhenIdle(ignoreErrors bool) ExecIdleCallback {
 
 // ReturnWhenIdle returns an ExecIdleCallback that returns when the directive becomes idle.
 func ReturnWhenIdle() ExecIdleCallback {
-	return func(errs []error) (bool, error) {
+	return func(isIdle bool, errs []error) (bool, error) {
+		if !isIdle {
+			return true, nil
+		}
 		for _, err := range errs {
 			if err != nil {
 				return false, err
@@ -81,7 +83,7 @@ func ExecOneOff(
 //
 // idleCb is called when idle with the list of resolver errors.
 // idleCb should return (wait, error): if wait=true, continues to wait.
-// if idleCb is nil: continues to wait when the directive becomes idle
+// if idleCb is nil: if the directive becomes idle & any resolvers failed, returns the resolver error.
 // errs is the list of errors from the resolvers (if any)
 //
 // If err != nil, ref == nil.
@@ -94,7 +96,6 @@ func ExecOneOffWithFilter(
 	filterCb func(val directive.AttachedValue) (bool, error),
 ) (directive.AttachedValue, directive.Instance, directive.Reference, error) {
 	// mtx, bcast guard these variables
-	var mtx sync.Mutex
 	var bcast broadcast.Broadcast
 
 	var val directive.AttachedValue
@@ -102,6 +103,7 @@ func ExecOneOffWithFilter(
 	var idle, wait bool
 
 	if idleCb == nil {
+		// register a callback to catch any resolver errors
 		idleCb = WaitWhenIdle(false)
 	}
 
@@ -109,40 +111,41 @@ func ExecOneOffWithFilter(
 		dir,
 		NewCallbackHandler(
 			func(v directive.AttachedValue) {
-				mtx.Lock()
-				if val == nil && resErr == nil {
-					ok := filterCb == nil
-					if !ok {
-						ok, resErr = filterCb(v)
-						if resErr != nil {
-							bcast.Broadcast()
+				bcast.HoldLock(func(broadcast func(), getWaitCh func() <-chan struct{}) {
+					if val == nil && resErr == nil {
+						ok := filterCb == nil
+						if !ok {
+							ok, resErr = filterCb(v)
+							if resErr != nil {
+								broadcast()
+							}
+						}
+						if ok && resErr == nil {
+							val = v
+							broadcast()
 						}
 					}
-					if ok && resErr == nil {
-						val = v
-						bcast.Broadcast()
-					}
-				}
-				mtx.Unlock()
+				})
 			},
 			func(v directive.AttachedValue) {
 				if valDisposeCallback == nil {
 					return
 				}
-				mtx.Lock()
-				valueRemoved := val != nil && val.GetValueID() == v.GetValueID()
-				mtx.Unlock()
+				var valueRemoved bool
+				bcast.HoldLock(func(broadcast func(), getWaitCh func() <-chan struct{}) {
+					valueRemoved = val != nil && val.GetValueID() == v.GetValueID()
+				})
 				if valueRemoved {
 					valDisposeCallback()
 				}
 			},
 			func() {
-				mtx.Lock()
-				if resErr != nil && !idle {
-					resErr = ErrDirectiveDisposed
-					bcast.Broadcast()
-				}
-				mtx.Unlock()
+				bcast.HoldLock(func(broadcast func(), getWaitCh func() <-chan struct{}) {
+					if resErr == nil {
+						resErr = ErrDirectiveDisposed
+						broadcast()
+					}
+				})
 				if valDisposeCallback != nil {
 					valDisposeCallback()
 				}
@@ -156,33 +159,31 @@ func ExecOneOffWithFilter(
 		return nil, nil, nil, err
 	}
 
-	defer di.AddIdleCallback(func(errs []error) {
-		mtx.Lock()
-		defer mtx.Unlock()
-		if resErr != nil {
-			return
-		}
-		// idle
-		idle = true
-		wait, resErr = idleCb(errs)
-		bcast.Broadcast()
+	defer di.AddIdleCallback(func(isIdle bool, errs []error) {
+		bcast.HoldLock(func(broadcast func(), getWaitCh func() <-chan struct{}) {
+			// idle or errors list changed
+			idle = isIdle
+			wait, resErr = idleCb(idle, errs)
+			broadcast()
+		})
 	})()
 
 	for {
-		mtx.Lock()
-		if val != nil {
-			val, ref := val, ref // copy
-			mtx.Unlock()
-			return val, di, ref, nil
+		var currVal directive.AttachedValue
+		var currResErr error
+		var currIdle, currWait bool
+		var waitCh <-chan struct{}
+		bcast.HoldLock(func(broadcast func(), getWaitCh func() <-chan struct{}) {
+			waitCh = getWaitCh()
+			currVal, currResErr, currIdle, currWait = val, resErr, idle, wait
+		})
+		if currVal != nil {
+			return currVal, di, ref, nil
 		}
-		if resErr != nil || (idle && !wait) {
-			err, ref := resErr, ref
-			mtx.Unlock()
+		if currResErr != nil || (currIdle && !currWait) {
 			ref.Release()
-			return nil, nil, nil, err
+			return nil, nil, nil, currResErr
 		}
-		waitCh := bcast.GetWaitCh()
-		mtx.Unlock()
 
 		select {
 		case <-ctx.Done():

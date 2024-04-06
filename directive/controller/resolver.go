@@ -64,28 +64,27 @@ func (r *resolver) updateContextLocked(ctx *context.Context) {
 		r.ctx, r.ctxCancel = nil, nil
 	}
 	if ctx == nil {
-		r.markIdleLocked()
-		r.idle, r.exited = true, true
+		r.exited = true
+		r.setIdleLocked(true)
 	} else {
 		// start resolver with new context
 		exitedCh := make(chan struct{})
 		waitCh := r.exitedCh
 		r.exitedCh = exitedCh
 		r.err = nil
-		r.idle, r.exited, r.stopped = false, false, false
+		r.exited, r.stopped = false, false
+		r.setIdleLocked(false)
 		r.ctx, r.ctxCancel = context.WithCancel(*ctx)
 		hnd := &resolverHandler{r: r, ctx: r.ctx}
 		go hnd.executeResolver(r.ctx, exitedCh, waitCh)
 	}
 }
 
-// markIdleLocked marks the resolver as idle while di.c.mtx is locked
-func (r *resolver) markIdleLocked() {
-	if !r.idle {
-		r.idle = true
-		// if just became idle:
-		if r.di.countRunningResolversLocked() == 0 {
-			r.di.handleIdleLocked()
-		}
+// updateIdleLocked marks the resolver idle state while di.c.mtx is locked
+func (r *resolver) setIdleLocked(idle bool) {
+	if r.idle == idle {
+		return
 	}
+	r.idle = idle
+	r.di.handleIdleStateLocked()
 }
