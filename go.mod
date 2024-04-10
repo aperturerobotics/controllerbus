@@ -9,7 +9,7 @@ replace (
 
 require (
 	github.com/aperturerobotics/starpc v0.28.0 // latest
-	github.com/aperturerobotics/util v1.16.4 // latest
+	github.com/aperturerobotics/util v1.16.5 // latest
 )
 
 require (

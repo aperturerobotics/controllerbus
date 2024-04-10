@@ -457,7 +457,7 @@ func (m *ModuleCompiler) CompilePlugin(outFile string) error {
 	defer os.RemoveAll(tmpName)
 
 	// go 1.16: to generate go.sum files, it's now necessary to run this explicitly
-	ecmd := exec.ExecGoTidyModules()
+	ecmd := exec.NewCmd("go", "mod", "tidy")
 	ecmd.Dir = pluginDirAbs
 	le.
 		WithField("work-dir", ecmd.Dir).
@@ -467,7 +467,8 @@ func (m *ModuleCompiler) CompilePlugin(outFile string) error {
 	}
 
 	// start the go compiler execution
-	ecmd = exec.ExecGoCompiler(
+	ecmd = exec.NewCmd(
+		"go",
 		"build", "-v", "-trimpath",
 		"-buildmode=plugin",
 		"-buildvcs=false",

@@ -56,7 +56,7 @@ func CompilePluginFromFile(
 	// second time with the plugin path including the hash.
 
 	// go 1.16: to generate go.sum files, it's now necessary to run this explicitly
-	ecmd := exec.ExecGoTidyModules()
+	ecmd := exec.NewCmd("go", "mod", "tidy")
 	le.
 		WithField("work-dir", ecmd.Dir).
 		Debugf("running go mod tidy: %s", ecmd.String())
@@ -66,7 +66,8 @@ func CompilePluginFromFile(
 
 	// start the go compiler execution #1
 	intermediateOutFile1 := path.Join(tmpName, "pass-1.cbus.so")
-	ecmd = exec.ExecGoCompiler(
+	ecmd = exec.NewCmd(
+		"go",
 		"build", "-v",
 		"-buildmode=plugin",
 		"-tags",
@@ -114,7 +115,8 @@ func CompilePluginFromFile(
 
 	// start the go compiler execution #2
 	intermediateOutFile2 := path.Join(tmpName, "pass-2.cbus.so")
-	ecmd = exec.ExecGoCompiler(
+	ecmd = exec.NewCmd(
+		"go",
 		"build", "-v", "-trimpath",
 		"-buildmode=plugin",
 		"-tags",
