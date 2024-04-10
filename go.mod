@@ -9,7 +9,7 @@ replace (
 
 require (
 	github.com/aperturerobotics/starpc v0.28.0 // latest
-	github.com/aperturerobotics/util v1.16.2 // latest
+	github.com/aperturerobotics/util v1.16.4 // latest
 )
 
 require (
@@ -26,7 +26,7 @@ require (
 	github.com/urfave/cli/v2 v2.27.1
 	github.com/valyala/fastjson v1.6.4
 	github.com/zeebo/blake3 v0.2.3
-	golang.org/x/exp v0.0.0-20240404231335-c0f41cb1a7a0
+	golang.org/x/exp v0.0.0-20240409090435-93d18d7e34b8
 	golang.org/x/mod v0.17.0
 	golang.org/x/tools v0.20.0
 	google.golang.org/protobuf v1.33.0

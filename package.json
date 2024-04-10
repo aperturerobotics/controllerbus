@@ -44,11 +44,11 @@
     "singleQuote": true
   },
   "devDependencies": {
-    "@aperturerobotics/ts-common": "0.8.7",
+    "@aperturerobotics/ts-common": "0.9.0",
     "depcheck": "^1.4.7",
     "patch-package": "^8.0.0",
     "prettier": "^3.0.1",
-    "ts-poet": "6.7.0",
+    "ts-poet": "6.8.0",
     "ts-proto": "^1.171.0",
     "typescript": "^5.2.2"
   },
