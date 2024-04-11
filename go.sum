@@ -6,6 +6,8 @@ github.com/aperturerobotics/protobuf-go v1.33.1-0.20240411062030-e36f75e0a3b8 h1
 github.com/aperturerobotics/protobuf-go v1.33.1-0.20240411062030-e36f75e0a3b8/go.mod h1:c6P6GXX6sHbq/GpV6MGZEdwhWPcYBgnhAHhKbcUYpos=
 github.com/aperturerobotics/starpc v0.28.0 h1:axzzg+NVmnuIUQ45+XP2PY+JRiJdrYBn7MPos6gOldw=
 github.com/aperturerobotics/starpc v0.28.0/go.mod h1:Ie+AE8AikN3Xs/c5jB0F6wTjxfdlAFTd6U64exVWsTA=
+github.com/aperturerobotics/starpc v0.28.1 h1:LxWUrRZhvZRZeeyWEWu3RNFoCyx9M6/TpNPfLKpul5c=
+github.com/aperturerobotics/starpc v0.28.1/go.mod h1:nFkiJ9LcjeZDY0rhm4ogIGVGV8KEWL85xBypG3blBeM=
 github.com/aperturerobotics/util v1.16.5 h1:zW6l07O1cCZMG+cbE08D5gv6p/tYfGipGRO5WaXpd1c=
 github.com/aperturerobotics/util v1.16.5/go.mod h1:UzxQN3nK8D+T7ruiBqvNiZOuEerkgsM1fN8eAvjsIMo=
 github.com/blang/semver v3.5.1+incompatible h1:cQNTCjp13qL8KC3Nbxr/y2Bqb63oX6wdnnjpJbkM4JQ=
@@ -129,3 +131,5 @@ mvdan.cc/gofumpt v0.6.0 h1:G3QvahNDmpD+Aek/bNOLrFR2XC6ZAdo62dZu65gmwGo=
 mvdan.cc/gofumpt v0.6.0/go.mod h1:4L0wf+kgIPZtcCWXynNS2e6bhmj73umwnuXSZarixzA=
 nhooyr.io/websocket v1.8.10 h1:mv4p+MnGrLDcPlBoWsvPP7XCzTYMXP9F9eIGoKbgx7Q=
 nhooyr.io/websocket v1.8.10/go.mod h1:rN9OFWIUwuxg4fR5tELlYC04bXYowCP9GX47ivo2l+c=
+nhooyr.io/websocket v1.8.11 h1:f/qXNc2/3DpoSZkHt1DQu6rj4zGC8JmkkLkWss0MgN0=
+nhooyr.io/websocket v1.8.11/go.mod h1:rN9OFWIUwuxg4fR5tELlYC04bXYowCP9GX47ivo2l+c=
