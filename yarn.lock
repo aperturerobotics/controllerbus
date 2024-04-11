@@ -7,10 +7,10 @@
   resolved "https://registry.yarnpkg.com/@aashutoshrathi/word-wrap/-/word-wrap-1.2.6.tgz#bd9154aec9983f77b3a034ecaa015c2e4201f6cf"
   integrity sha512-1Yjs2SvM8TflER/OD3cOjhWWOZb58A2t7wpE2S9XfBYTiIl+XFhQG2bjy4Pu1I+EAlCNUzRDYDdFwFYUKvXcIA==
 
-"@aperturerobotics/ts-common@0.9.0":
-  version "0.9.0"
-  resolved "https://registry.yarnpkg.com/@aperturerobotics/ts-common/-/ts-common-0.9.0.tgz#33360e8ac0d41311f9ee25c4aaa99d25890eef37"
-  integrity sha512-GKwMliV/UHIpzmomKBqZqQpLn+tVTdSUpDbbx9XHgmnqLdeYQRkypla0BpvW2x4/ymI6N2STXlEIhEHj50UCmQ==
+"@aperturerobotics/ts-common@0.9.1":
+  version "0.9.1"
+  resolved "https://registry.yarnpkg.com/@aperturerobotics/ts-common/-/ts-common-0.9.1.tgz#2799745db349ed4852b8d1841d544642ed2971b3"
+  integrity sha512-KpwZc8tCgXqKA+bVvSyl72wjyW419TTyi8qbBfcOJl8wxGyqFq4h9pZ6B22bleWT9qqFuwUyqnuieJmrjpg+uA==
   dependencies:
     "@typescript-eslint/eslint-plugin" "^7.3.1"
     "@typescript-eslint/parser" "^7.3.1"
@@ -2082,9 +2082,9 @@ sprintf-js@~1.0.2:
   integrity sha512-D9cPgkvLlV3t3IzL0D0YLvGA9Ahk4PcvVwUbN0dSGr1aP0Nrt4AEnTUbuGvquEC0mA64Gqt1fzirlRs5ibXx8g==
 
 starpc@^0.28.0:
-  version "0.28.0"
-  resolved "https://registry.yarnpkg.com/starpc/-/starpc-0.28.0.tgz#52faabdbad0b4d8d883d27b69ee07d3ab4ce4dac"
-  integrity sha512-GQfgVGiTPORWYfk91PMP3/6rdrOPiixZLvcxW3Sw0IDE4fZtm2hPk5KUUwFWWAR2Yj0H/j54fKUw1QXqQAVY/w==
+  version "0.28.1"
+  resolved "https://registry.yarnpkg.com/starpc/-/starpc-0.28.1.tgz#60a4a58b18ecbbd42b483468df4aa2f9871e39d7"
+  integrity sha512-hBpMRK7XDhawrjruXOtZ+ch75fo4jV+fUcvcZngBb4j69zbUIHVLPWJQyVBaqlQOx/PJuUXT4q1Hykr28Pu2pQ==
   dependencies:
     "@aptre/it-ws" "^1.0.0"
     "@chainsafe/libp2p-yamux" "^6.0.2"
@@ -2173,7 +2173,14 @@ ts-api-utils@^1.3.0:
   resolved "https://registry.yarnpkg.com/ts-api-utils/-/ts-api-utils-1.3.0.tgz#4b490e27129f1e8e686b45cc4ab63714dc60eea1"
   integrity sha512-UQMIo7pb8WRomKR1/+MFVLTroIvDVtMX3K6OUir8ynLyzB8Jeriont2bTAtmNPa1ekAgN7YPDyf6V+ygrdU+eQ==
 
-ts-poet@6.8.0, ts-poet@^6.7.0:
+ts-poet@6.8.1:
+  version "6.8.1"
+  resolved "https://registry.yarnpkg.com/ts-poet/-/ts-poet-6.8.1.tgz#7202e9fda7ad428ae7b42cfa19291e77e23cfc51"
+  integrity sha512-uqdjJGnQQjBwUeJggUi4o8VhRjUmEdRfo+uqEL+K8w7mKPfLUFAQ1dSURyhFfbA4T/cWPh8Xa7iBgO7jJNsc1A==
+  dependencies:
+    dprint-node "^1.0.8"
+
+ts-poet@^6.7.0:
   version "6.8.0"
   resolved "https://registry.yarnpkg.com/ts-poet/-/ts-poet-6.8.0.tgz#fb7304165bf84c764b71d471e7ac9c152d4ca586"
   integrity sha512-mjmr0JCUK1l3wyQyJFz6a2KF0iw8Mf5ADOIDEQTWWCsqpGEbJds/fOMA4BHlySc4RlQpGNFABo9JS5TNE9DD3w==
@@ -2206,9 +2213,9 @@ type-check@^0.4.0, type-check@~0.4.0:
     prelude-ls "^1.2.1"
 
 typescript@^5.2.2:
-  version "5.4.4"
-  resolved "https://registry.yarnpkg.com/typescript/-/typescript-5.4.4.tgz#eb2471e7b0a5f1377523700a21669dce30c2d952"
-  integrity sha512-dGE2Vv8cpVvw28v8HCPqyb08EzbBURxDpuhJvTrusShUfGnhHBafDsLdS1EhhxyL6BJQE+2cT3dDPAv+MQ6oLw==
+  version "5.4.5"
+  resolved "https://registry.yarnpkg.com/typescript/-/typescript-5.4.5.tgz#42ccef2c571fdbd0f6718b1d1f5e6e5ef006f611"
+  integrity sha512-vcI4UpRgg81oIRUFwR0WSIHKt11nJ7SAVlYNIu+QpqeyXP+gpQJy/Z4+F0aGxSE4MqwjyXvW/TzgkLAx2AGHwQ==
 
 uint8-varint@^2.0.1:
   version "2.0.4"

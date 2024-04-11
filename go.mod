@@ -8,7 +8,7 @@ replace (
 )
 
 require (
-	github.com/aperturerobotics/starpc v0.28.0 // latest
+	github.com/aperturerobotics/starpc v0.28.1 // latest
 	github.com/aperturerobotics/util v1.16.5 // latest
 )
 
@@ -59,5 +59,5 @@ require (
 	golang.org/x/sys v0.19.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	lukechampine.com/blake3 v1.2.1 // indirect
-	nhooyr.io/websocket v1.8.10 // indirect
+	nhooyr.io/websocket v1.8.11 // indirect
 )
