@@ -1,13 +1,11 @@
 github.com/Jeffail/gabs/v2 v2.7.0 h1:Y2edYaTcE8ZpRsR2AtmPu5xQdFDIthFG0jYhu5PY8kg=
 github.com/Jeffail/gabs/v2 v2.7.0/go.mod h1:dp5ocw1FvBBQYssgHsG7I1WYsiLRtkUaB1FEtSwvNUw=
-github.com/aperturerobotics/protobuf-go-lite v0.4.8 h1:5m0pOfli1iXRHw55t0kyvSMIpcZEY4YFnh9NrQtx7yM=
-github.com/aperturerobotics/protobuf-go-lite v0.4.8/go.mod h1:wRZn4YydbTn8Bdx4NB6ms0doF19llgim+0SNBvQ7M9c=
+github.com/aperturerobotics/protobuf-go-lite v0.5.0 h1:JmTfiOeTQv06EYIFyVkjkmGXxI7JoCRuokVK2SOvo3I=
+github.com/aperturerobotics/protobuf-go-lite v0.5.0/go.mod h1:/EduuzDxtr5s0e9s10XYG35+pPgvrgg3UmBliivOaSs=
 github.com/aperturerobotics/starpc v0.31.2 h1:9zRZbRpZ7TK3O/5ENz0rwShfLS5jkw0SkqIU2pbuvZk=
 github.com/aperturerobotics/starpc v0.31.2/go.mod h1:Q5dAx56ZUhOlytE37LoMA2JhRAPFe68BcMDzHw7kwxs=
-github.com/aperturerobotics/util v1.17.1 h1:7qG1Am+vNAelbXCdYOYfnMaZKM28QBWVCi+zvkjo+d4=
-github.com/aperturerobotics/util v1.17.1/go.mod h1:NdGzI+NyJvqEwt+RkKPxOlKl9zUSWJMgKicNci7ZFMU=
-github.com/aperturerobotics/util v1.18.0 h1:ie2KAuVWGkSICxLrMoI2Dzth0HZSgvmb2CxtxsyGUaY=
-github.com/aperturerobotics/util v1.18.0/go.mod h1:NdGzI+NyJvqEwt+RkKPxOlKl9zUSWJMgKicNci7ZFMU=
+github.com/aperturerobotics/util v1.19.0 h1:eDGMk1rhE3pyKF0GC2XGhPCXTM3saQwKIWNq7PPn6Ng=
+github.com/aperturerobotics/util v1.19.0/go.mod h1:qAQ/fIrnvLUe8RW3tKd96foP66BGbSSA0cBRApTMKXg=
 github.com/blang/semver v3.5.1+incompatible h1:cQNTCjp13qL8KC3Nbxr/y2Bqb63oX6wdnnjpJbkM4JQ=
 github.com/blang/semver v3.5.1+incompatible/go.mod h1:kRBLl5iJ+tD4TcOOxsy/0fnwebNt5EWlYSAyrTnjyyk=
 github.com/cenkalti/backoff v2.2.1+incompatible h1:tNowT99t7UNflLxfYYSlKYsBpXdEet03Pg2g16Swow4=
