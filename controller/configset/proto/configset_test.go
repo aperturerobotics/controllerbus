@@ -9,7 +9,6 @@ import (
 	"github.com/aperturerobotics/controllerbus/core"
 	boilerplate_controller "github.com/aperturerobotics/controllerbus/example/boilerplate/controller"
 	"github.com/sirupsen/logrus"
-	jsonpb "google.golang.org/protobuf/encoding/protojson"
 )
 
 // TestE2E tests configset proto end to end.
@@ -51,7 +50,7 @@ func TestE2E(t *testing.T) {
 // Tests when we have JSON in the Config field.
 func TestJSON(t *testing.T) {
 	mEnc := &ConfigSet{
-		Configurations: map[string]*ControllerConfig{
+		Configs: map[string]*ControllerConfig{
 			"test-config": {
 				Rev:    1,
 				Id:     boilerplate_controller.ConfigID,
@@ -60,14 +59,14 @@ func TestJSON(t *testing.T) {
 		},
 	}
 	t.Logf("%v", mEnc)
-	dat, err := jsonpb.Marshal(mEnc)
+	dat, err := mEnc.MarshalJSON()
 	if err != nil {
 		t.Fatal(err.Error())
 	}
 	t.Logf("%v", string(dat))
 
 	mDec := &ConfigSet{}
-	if err := jsonpb.Unmarshal(dat, mDec); err != nil {
+	if err := mDec.UnmarshalJSON(dat); err != nil {
 		t.Fatal(err.Error())
 	}
 	t.Logf("%v", mDec)

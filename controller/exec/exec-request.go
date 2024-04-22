@@ -65,9 +65,9 @@ func (r *ExecControllerRequest) Execute(
 	if rConfSet == nil && r.GetConfigSetYaml() == "" {
 		return errors.New("at least one config must be specified")
 	}
-	confsList := rConfSet.GetConfigurations()
+	confsList := rConfSet.GetConfigs()
 	prevStates := make(map[string]ControllerStatus, len(confsList))
-	if !allowPartialSuccess && len(rConfSet.GetConfigurations()) != 0 {
+	if !allowPartialSuccess && len(rConfSet.GetConfigs()) != 0 {
 		confSet, err = rConfSet.Resolve(ctx, cbus)
 	}
 	if err != nil {

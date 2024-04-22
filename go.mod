@@ -2,14 +2,10 @@ module github.com/aperturerobotics/controllerbus
 
 go 1.22
 
-replace (
-	github.com/sirupsen/logrus => github.com/aperturerobotics/logrus v1.9.4-0.20240119050608-13332fb58195 // aperture
-	google.golang.org/protobuf => github.com/aperturerobotics/protobuf-go v1.33.1-0.20240411062030-e36f75e0a3b8 // aperture
-)
-
 require (
-	github.com/aperturerobotics/starpc v0.28.1 // latest
-	github.com/aperturerobotics/util v1.16.5 // latest
+	github.com/aperturerobotics/protobuf-go-lite v0.4.5 // latest
+	github.com/aperturerobotics/starpc v0.31.2 // latest
+	github.com/aperturerobotics/util v1.17.1 // latest
 )
 
 require (
@@ -18,15 +14,15 @@ require (
 	github.com/cenkalti/backoff v2.2.1+incompatible
 	github.com/fsnotify/fsnotify v1.7.0
 	github.com/ghodss/yaml v1.0.0
+	github.com/json-iterator/go v1.1.12
 	github.com/mr-tron/base58 v1.2.0
 	github.com/pkg/errors v0.9.1
-	github.com/planetscale/vtprotobuf v0.6.0
 	github.com/sergi/go-diff v1.3.1
 	github.com/sirupsen/logrus v1.9.3
 	github.com/urfave/cli/v2 v2.27.1
 	github.com/valyala/fastjson v1.6.4
 	github.com/zeebo/blake3 v0.2.3
-	golang.org/x/exp v0.0.0-20240409090435-93d18d7e34b8
+	golang.org/x/exp v0.0.0-20240416160154-fe59bbe5cc7f
 	golang.org/x/mod v0.17.0
 	golang.org/x/tools v0.20.0
 	google.golang.org/protobuf v1.33.0
@@ -43,6 +39,8 @@ require (
 	github.com/libp2p/go-libp2p v0.33.2 // indirect
 	github.com/libp2p/go-yamux/v4 v4.0.2-0.20240322071716-53ef5820bd48 // indirect
 	github.com/minio/sha256-simd v1.0.1 // indirect
+	github.com/modern-go/concurrent v0.0.0-20180228061459-e0a39a4cb421 // indirect
+	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/multiformats/go-base32 v0.1.0 // indirect
 	github.com/multiformats/go-base36 v0.2.0 // indirect
 	github.com/multiformats/go-multiaddr v0.12.3 // indirect

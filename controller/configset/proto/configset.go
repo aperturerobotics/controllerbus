@@ -20,7 +20,7 @@ func NewConfigSet(c configset.ConfigSet, useJson bool) (*ConfigSet, error) {
 		return nil, err
 	}
 
-	return &ConfigSet{Configurations: m}, nil
+	return &ConfigSet{Configs: m}, nil
 }
 
 // NewConfigSetMap packs a configset to a proto object.
@@ -41,14 +41,14 @@ func NewConfigSetMap(c configset.ConfigSet, useJson bool) (ConfigSetMap, error) 
 
 // MergeConfigSets merges multiple config sets maps to one ConfigSet.
 func MergeConfigSets(sets ...*ConfigSet) *ConfigSet {
-	out := &ConfigSet{Configurations: make(ConfigSetMap)}
+	out := &ConfigSet{Configs: make(ConfigSetMap)}
 	maps := make([]ConfigSetMap, 0, len(sets))
 	for _, set := range sets {
-		if csm := set.GetConfigurations(); len(csm) != 0 {
+		if csm := set.GetConfigs(); len(csm) != 0 {
 			maps = append(maps, csm)
 		}
 	}
-	MergeConfigSetMaps(out.Configurations, maps...)
+	MergeConfigSetMaps(out.Configs, maps...)
 	return out
 }
 
@@ -74,7 +74,7 @@ func MergeConfigSetMaps(out ConfigSetMap, sets ...ConfigSetMap) {
 
 // Resolve resolves the configset into a configset.ConfigSet
 func (c *ConfigSet) Resolve(ctx context.Context, b bus.Bus) (configset.ConfigSet, error) {
-	return ConfigSetMap(c.GetConfigurations()).Resolve(ctx, b)
+	return ConfigSetMap(c.GetConfigs()).Resolve(ctx, b)
 }
 
 // Resolve resolves the configset into a configset.ConfigSet
@@ -96,7 +96,7 @@ func (c ConfigSetMap) Resolve(ctx context.Context, b bus.Bus) (configset.ConfigS
 
 // Validate validates the ConfigSet.
 func (c *ConfigSet) Validate() error {
-	if err := ConfigSetMap(c.GetConfigurations()).Validate(); err != nil {
+	if err := ConfigSetMap(c.GetConfigs()).Validate(); err != nil {
 		return err
 	}
 	return nil

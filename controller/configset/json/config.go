@@ -8,7 +8,6 @@ import (
 	"github.com/aperturerobotics/controllerbus/config"
 	"github.com/aperturerobotics/controllerbus/controller/resolver"
 	"github.com/pkg/errors"
-	jsonpb "google.golang.org/protobuf/encoding/protojson"
 	// "github.com/aperturerobotics/controllerbus/controller/configset"
 )
 
@@ -46,7 +45,10 @@ func (c *Config) Resolve(ctx context.Context, configID string, b bus.Bus) error 
 		return errors.New("load config constructor directive returned invalid object")
 	}
 	c.underlying = ctor.ConstructConfig()
-	if err := jsonpb.Unmarshal([]byte(c.pendingParseData), c.underlying); err != nil {
+	if c.underlying == nil {
+		return errors.New("load config constructor returned nil object")
+	}
+	if err := c.underlying.UnmarshalJSON([]byte(c.pendingParseData)); err != nil {
 		return err
 	}
 	c.pendingParseData = ""
@@ -68,8 +70,10 @@ func (c *Config) UnmarshalJSON(data []byte) error {
 
 // MarshalJSON marshals a controller config JSON blob.
 func (c *Config) MarshalJSON() ([]byte, error) {
-	m := &jsonpb.MarshalOptions{}
-	return m.Marshal(c.underlying)
+	if c.underlying == nil {
+		return []byte("null"), nil
+	}
+	return c.underlying.MarshalJSON()
 }
 
 // GetConfig returns the underlying config after Resolve.

@@ -1,14 +1,14 @@
 package config
 
 import (
-	"github.com/aperturerobotics/util/vtcompare"
-	"google.golang.org/protobuf/proto"
+	"encoding/json"
+
+	protobuf_go_lite "github.com/aperturerobotics/protobuf-go-lite"
+	vtcompare "github.com/aperturerobotics/protobuf-go-lite"
 )
 
 // Config is an object specifying configuration for a component of the system.
 type Config interface {
-	proto.Message
-
 	// Validate validates the configuration.
 	// This is a cursory validation to see if the values "look correct."
 	Validate() error
@@ -18,10 +18,13 @@ type Config interface {
 	// EqualsConfig checks if the config is equal to another.
 	EqualsConfig(other Config) bool
 
-	// MarshalVT marshals the config object with vtprotobuf.
-	MarshalVT() ([]byte, error)
-	// UnmarshalVT unmarshals the config object with vtprotobuf.
-	UnmarshalVT(data []byte) error
+	// Marshaler is the json marshaler type.
+	json.Marshaler
+	// Unmarshaler is the json unmarshaler type.
+	json.Unmarshaler
+
+	// Message indicates this is a protobuf_go_lite message.
+	protobuf_go_lite.Message
 }
 
 // Constructor constructs configuration objects.

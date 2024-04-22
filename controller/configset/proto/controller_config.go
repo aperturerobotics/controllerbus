@@ -3,17 +3,17 @@ package configset_proto
 import (
 	"context"
 	"encoding/base64"
-	"encoding/json"
 
 	gabs "github.com/Jeffail/gabs/v2"
 	"github.com/aperturerobotics/controllerbus/bus"
 	"github.com/aperturerobotics/controllerbus/config"
 	"github.com/aperturerobotics/controllerbus/controller/configset"
 	"github.com/aperturerobotics/controllerbus/controller/resolver"
+	"github.com/aperturerobotics/protobuf-go-lite/json"
 	"github.com/ghodss/yaml"
+	jsoniter "github.com/json-iterator/go"
 	"github.com/pkg/errors"
 	"github.com/valyala/fastjson"
-	jsonpb "google.golang.org/protobuf/encoding/protojson"
 )
 
 // NewControllerConfig constructs a new controller config.
@@ -24,8 +24,7 @@ func NewControllerConfig(c configset.ControllerConfig, useJson bool) (*Controlle
 	var confData []byte
 	var err error
 	if useJson {
-		m := &jsonpb.MarshalOptions{}
-		confData, err = m.Marshal(conf)
+		confData, err = conf.MarshalJSON()
 	} else {
 		confData, err = conf.MarshalVT()
 	}
@@ -85,7 +84,7 @@ func (c *ControllerConfig) Resolve(ctx context.Context, b bus.Bus) (configset.Co
 	if configData := c.GetConfig(); len(configData) != 0 {
 		// if configData[0] == '{'
 		if configData[0] == 123 {
-			err = jsonpb.Unmarshal(configData, cf)
+			err = cf.UnmarshalJSON(configData)
 		} else {
 			err = cf.UnmarshalVT(configData)
 		}
@@ -97,96 +96,104 @@ func (c *ControllerConfig) Resolve(ctx context.Context, b bus.Bus) (configset.Co
 	return configset.NewControllerConfig(c.GetRev(), cf), nil
 }
 
-// UnmarshalJSON unmarshals json to the controller config.
-// For the config field: supports JSON, YAML, or a string containing either.
-func (c *ControllerConfig) UnmarshalJSON(data []byte) error {
-	jdata, err := yaml.YAMLToJSON(data)
-	if err != nil {
-		return err
+// MarshalProtoJSON marshals the ControllerConfig message to JSON.
+func (c *ControllerConfig) MarshalProtoJSON(s *json.MarshalState) {
+	if c == nil {
+		s.WriteNil()
+		return
 	}
-	var p fastjson.Parser
-	v, err := p.ParseBytes(jdata)
-	if err != nil {
-		return err
+	s.WriteObjectStart()
+	var wroteField bool
+	if c.Id != "" || s.HasField("id") {
+		s.WriteMoreIf(&wroteField)
+		s.WriteObjectField("id")
+		s.WriteString(c.Id)
 	}
-	if v.Exists("id") {
-		c.Id = string(v.GetStringBytes("id"))
+	if c.Rev != 0 || s.HasField("rev") {
+		s.WriteMoreIf(&wroteField)
+		s.WriteObjectField("rev")
+		s.WriteUint64(c.Rev)
 	}
-	// backwards compatible
-	if v.Exists("revision") {
-		c.Rev = v.GetUint64("revision")
-	}
-	if v.Exists("rev") {
-		c.Rev = v.GetUint64("rev")
-	}
-	if v.Exists("config") {
-		var configVal *fastjson.Value
-		configStr := v.GetStringBytes("config")
-		if len(configStr) != 0 {
-			// parse json and/or yaml
-			configJson, err := yaml.YAMLToJSON(configStr)
+	if len(c.Config) > 0 || s.HasField("config") {
+		s.WriteMoreIf(&wroteField)
+		s.WriteObjectField("config")
+		// Detect if config is JSON
+		if c.Config[0] == '{' && c.Config[len(c.Config)-1] == '}' {
+			// Ensure json is parseable
+			_, err := gabs.ParseJSON(c.Config)
 			if err != nil {
-				return err
+				s.SetError(errors.Wrap(err, "unable to parse config json"))
+				return
 			}
-			var cj fastjson.Parser
-			configVal, err = cj.ParseBytes(configJson)
+			_, err = s.Write(c.Config)
 			if err != nil {
-				return err
+				s.SetError(err)
+				return
 			}
 		} else {
-			// expect a object value
-			configVal = v.Get("config")
-			if t := configVal.Type(); t != fastjson.TypeObject {
-				return errors.Errorf("config: expected json object but got %s", t.String())
-			}
+			// Base58 encoded string
+			s.WriteString(base64.RawStdEncoding.EncodeToString(c.Config))
 		}
-		// re-marshal to json
-		c.Config = configVal.MarshalTo(nil)
 	}
-	return nil
+	s.WriteObjectEnd()
 }
 
-// MarshalJSON marshals json from the controller config.
-// For the config field: supports JSON, YAML, or a string containing either.
+// MarshalJSON marshals the ControllerConfig to JSON.
 func (c *ControllerConfig) MarshalJSON() ([]byte, error) {
-	outCtr := gabs.New()
+	return json.DefaultMarshalerConfig.Marshal(c)
+}
 
-	// marshal the regular fields
-	if rev := c.GetRev(); rev != 0 {
-		_, err := outCtr.Set(rev, "rev")
-		if err != nil {
-			return nil, err
+// UnmarshalJSON unmarshals the ControllerConfig from JSON.
+func (c *ControllerConfig) UnmarshalJSON(b []byte) error {
+	return json.DefaultUnmarshalerConfig.Unmarshal(b, c)
+}
+
+func (c *ControllerConfig) UnmarshalProtoJSON(s *json.UnmarshalState) {
+	for key := s.ReadObjectField(); key != ""; key = s.ReadObjectField() {
+		switch key {
+		case "id":
+			c.Id = s.ReadString()
+		case "rev", "revision":
+			c.Rev = s.ReadUint64()
+		case "config":
+			if s.ReadNil() {
+				break
+			}
+			if s.WhatIsNext() == jsoniter.StringValue {
+				// Expect base58 encoded string
+				var err error
+				c.Config, err = base64.RawStdEncoding.DecodeString(s.ReadString())
+				if err != nil {
+					s.SetError(errors.Wrap(err, "unmarshal config value as base58 string"))
+					return
+				}
+			} else {
+				// Expect inline JSON or YAML object
+				rawMsg := s.ReadRawMessage()
+				// Try parsing as JSON first
+				var jsonData interface{}
+				if err := jsoniter.Unmarshal(rawMsg, &jsonData); err != nil {
+					// If JSON parsing fails, try YAML
+					var yamlData interface{}
+					if err := yaml.Unmarshal(rawMsg, &yamlData); err != nil {
+						s.SetErrorf("invalid config format: %v", err)
+						return
+					}
+					// Convert YAML to JSON
+					jsonMsg, err := yaml.YAMLToJSON(rawMsg)
+					if err != nil {
+						s.SetErrorf("failed to convert YAML to JSON: %v", err)
+						return
+					}
+					c.Config = jsonMsg
+				} else {
+					c.Config = rawMsg
+				}
+			}
+		default:
+			s.ReadAny()
 		}
 	}
-	if configID := c.GetId(); configID != "" {
-		_, err := outCtr.Set(configID, "id")
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	if confFieldData := c.GetConfig(); len(confFieldData) != 0 {
-		// detect if the config field is json, if so, set it as inline json.
-		if confFieldData[0] == '{' && confFieldData[len(confFieldData)-1] == '}' {
-			confJSON, err := gabs.ParseJSON(confFieldData)
-			if err != nil {
-				return nil, err
-			}
-			_, err = outCtr.Set(confJSON, "config")
-			if err != nil {
-				return nil, err
-			}
-		} else {
-			// otherwise encode it as base64 (this is what jsonpb does)
-			_, err := outCtr.Set(base64.StdEncoding.EncodeToString(confFieldData), "config")
-			if err != nil {
-				return nil, err
-			}
-		}
-	}
-
-	// finalize the json
-	return outCtr.EncodeJSON(), nil
 }
 
 // _ is a type assertion

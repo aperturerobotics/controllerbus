@@ -3,17 +3,20 @@ package configset.proto;
 
 // ConfigSet contains a configuration set.
 message ConfigSet {
-  // Configurations contains the controller configurations.
-  map<string, ControllerConfig> configurations = 1;
+  // Configs contains the controller configurations.
+  map<string, ControllerConfig> configs = 1;
 }
 
 // ControllerConfig contains a controller configuration.
+//
+//protobuf-go-lite:disable-json
 message ControllerConfig {
   // Id is the config ID.
   string id = 1;
   // Rev is the revision number of the configuration.
   uint64 rev = 2;
   // Config is the configuration object.
-  // Supports: protobuf and json (must start with {).
+  // Proto supports: protobuf (binary) and json (starting with {).
+  // Json supports: protobuf (base64) and json (inline object).
   bytes config = 3;
 }

@@ -31,7 +31,7 @@ func TestMarshalConfigSetYAML(t *testing.T) {
 	}
 	v := string(dat)
 	if v != basicYAMLOutput {
-		t.Fatalf("unexpected output %s", v)
+		t.Fatalf("unexpected output:\n%#v\n%#v", v, basicYAMLOutput)
 	}
 }
 

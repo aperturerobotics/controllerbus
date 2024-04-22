@@ -12,7 +12,6 @@ import (
 	"github.com/aperturerobotics/controllerbus/core"
 	boilerplate "github.com/aperturerobotics/controllerbus/example/boilerplate/controller"
 	"github.com/sirupsen/logrus"
-	"google.golang.org/protobuf/proto"
 )
 
 // TestExecControllerRequest tests the ExecControllerRequest.
@@ -31,7 +30,7 @@ func TestExecControllerRequest(t *testing.T) {
 	req := &ExecControllerRequest{
 		ConfigSet: m,
 	}
-	t.Log(req.String())
+	// t.Log(req.String())
 
 	log := logrus.New()
 	log.SetLevel(logrus.DebugLevel)
@@ -59,7 +58,7 @@ func TestExecControllerRequest(t *testing.T) {
 	errCh := make(chan error, 5)
 	go func() {
 		errCh <- req.Execute(ctx, b, true, func(resp *ExecControllerResponse) error {
-			respCh <- proto.Clone(resp).(*ExecControllerResponse)
+			respCh <- resp.CloneVT()
 			return nil
 		})
 	}()
@@ -68,7 +67,7 @@ func TestExecControllerRequest(t *testing.T) {
 	for {
 		select {
 		case resp := <-respCh:
-			t.Logf("got response: %s", resp.String())
+			// t.Logf("got response: %s", resp.String())
 			if resp.Id == "test-will-succeed" &&
 				resp.Status == ControllerStatus_ControllerStatus_RUNNING {
 				seenSuccess = true

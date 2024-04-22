@@ -9,7 +9,6 @@ import (
 	"github.com/ghodss/yaml"
 	"github.com/pkg/errors"
 	"github.com/urfave/cli/v2"
-	jsonpb "google.golang.org/protobuf/encoding/protojson"
 )
 
 // RunExecController runs the execute configset command.
@@ -48,8 +47,7 @@ func (a *ClientArgs) RunExecController(_ *cli.Context) error {
 			return err
 		}
 
-		msh := &jsonpb.MarshalOptions{}
-		data, err := msh.Marshal(resp)
+		data, err := resp.MarshalJSON()
 		if err != nil {
 			return err
 		}
