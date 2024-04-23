@@ -50,10 +50,12 @@ type Debuggable interface {
 }
 
 // EqualsConfig implements EqualsConfig assuming both Config are the same type and have VTEqual.
-func EqualsConfig[T vtcompare.EqualVT[T]](c1, c2 Config) bool {
-	t1, _ := c1.(T)
-	t2, _ := c2.(T)
-	return vtcompare.IsEqualVT[T](t1, t2)
+func EqualsConfig[T vtcompare.EqualVT[T]](t1 T, c2 Config) bool {
+	t2, ok := c2.(T)
+	if !ok {
+		return false
+	}
+	return vtcompare.IsEqualVT(t1, t2)
 }
 
 // IsEqualVT compares two objects with VTEqual.
