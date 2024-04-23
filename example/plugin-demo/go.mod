@@ -12,7 +12,7 @@ replace (
 )
 
 require (
-	github.com/aperturerobotics/controllerbus v0.42.0
+	github.com/aperturerobotics/controllerbus v0.43.0
 	github.com/aperturerobotics/protobuf-go-lite v0.5.0
 	github.com/blang/semver v3.5.1+incompatible
 	github.com/pkg/errors v0.9.1
@@ -21,8 +21,8 @@ require (
 
 require (
 	github.com/Jeffail/gabs/v2 v2.7.0 // indirect
-	github.com/aperturerobotics/starpc v0.31.2 // indirect
-	github.com/aperturerobotics/util v1.19.0 // indirect
+	github.com/aperturerobotics/starpc v0.31.5 // indirect
+	github.com/aperturerobotics/util v1.20.0 // indirect
 	github.com/cenkalti/backoff v2.2.1+incompatible // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.2 // indirect
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.2.0 // indirect
