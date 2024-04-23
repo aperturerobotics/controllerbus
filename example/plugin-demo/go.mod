@@ -12,7 +12,7 @@ replace (
 )
 
 require (
-	github.com/aperturerobotics/controllerbus v0.30.9
+	github.com/aperturerobotics/controllerbus v0.42.0
 	github.com/aperturerobotics/protobuf-go-lite v0.5.0
 	github.com/blang/semver v3.5.1+incompatible
 	github.com/pkg/errors v0.9.1
