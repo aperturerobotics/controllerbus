@@ -4,13 +4,13 @@ go 1.22
 
 require (
 	github.com/aperturerobotics/protobuf-go-lite v0.5.0 // latest
-	github.com/aperturerobotics/starpc v0.31.4 // latest
-	github.com/aperturerobotics/util v1.19.1 // latest
+	github.com/aperturerobotics/starpc v0.31.5 // latest
+	github.com/aperturerobotics/util v1.20.0 // latest
 )
 
 require (
 	github.com/Jeffail/gabs/v2 v2.7.0
-	github.com/aperturerobotics/common v0.12.0
+	github.com/aperturerobotics/common v0.12.3
 	github.com/blang/semver v3.5.1+incompatible
 	github.com/cenkalti/backoff v2.2.1+incompatible
 	github.com/fsnotify/fsnotify v1.7.0
