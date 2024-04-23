@@ -10,6 +10,7 @@ require (
 
 require (
 	github.com/Jeffail/gabs/v2 v2.7.0
+	github.com/aperturerobotics/common v0.12.0
 	github.com/blang/semver v3.5.1+incompatible
 	github.com/cenkalti/backoff v2.2.1+incompatible
 	github.com/fsnotify/fsnotify v1.7.0
