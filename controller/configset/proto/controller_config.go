@@ -4,16 +4,13 @@ import (
 	"context"
 	"encoding/base64"
 
-	gabs "github.com/Jeffail/gabs/v2"
 	"github.com/aperturerobotics/controllerbus/bus"
 	"github.com/aperturerobotics/controllerbus/config"
 	"github.com/aperturerobotics/controllerbus/controller/configset"
 	"github.com/aperturerobotics/controllerbus/controller/resolver"
+	jsoniter "github.com/aperturerobotics/json-iterator-lite"
 	"github.com/aperturerobotics/protobuf-go-lite/json"
-	"github.com/ghodss/yaml"
-	jsoniter "github.com/json-iterator/go"
 	"github.com/pkg/errors"
-	"github.com/valyala/fastjson"
 )
 
 // NewControllerConfig constructs a new controller config.
@@ -48,9 +45,8 @@ func (c *ControllerConfig) Validate() error {
 		// json if first character is {
 		if conf[0] == 123 {
 			// validate json
-			var p fastjson.Parser
-			_, err := p.ParseBytes(conf)
-			if err != nil {
+			it := jsoniter.ParseBytes(conf)
+			if err := it.Error; err != nil {
 				return err
 			}
 		}
@@ -120,12 +116,12 @@ func (c *ControllerConfig) MarshalProtoJSON(s *json.MarshalState) {
 		// Detect if config is JSON
 		if c.Config[0] == '{' && c.Config[len(c.Config)-1] == '}' {
 			// Ensure json is parseable
-			_, err := gabs.ParseJSON(c.Config)
-			if err != nil {
+			it := jsoniter.ParseBytes(c.Config)
+			if err := it.Error; err != nil {
 				s.SetError(errors.Wrap(err, "unable to parse config json"))
 				return
 			}
-			_, err = s.Write(c.Config)
+			_, err := s.Write(c.Config)
 			if err != nil {
 				s.SetError(err)
 				return
@@ -159,7 +155,8 @@ func (c *ControllerConfig) UnmarshalProtoJSON(s *json.UnmarshalState) {
 			if s.ReadNil() {
 				break
 			}
-			if s.WhatIsNext() == jsoniter.StringValue {
+			nextTok := s.WhatIsNext()
+			if nextTok == jsoniter.StringValue {
 				// Expect base58 encoded string
 				var err error
 				c.Config, err = base64.RawStdEncoding.DecodeString(s.ReadString())
@@ -167,31 +164,14 @@ func (c *ControllerConfig) UnmarshalProtoJSON(s *json.UnmarshalState) {
 					s.SetError(errors.Wrap(err, "unmarshal config value as base58 string"))
 					return
 				}
+			} else if nextTok == jsoniter.ObjectValue {
+				c.Config = s.SkipAndReturnBytes()
 			} else {
-				// Expect inline JSON or YAML object
-				rawMsg := s.ReadRawMessage()
-				// Try parsing as JSON first
-				var jsonData interface{}
-				if err := jsoniter.Unmarshal(rawMsg, &jsonData); err != nil {
-					// If JSON parsing fails, try YAML
-					var yamlData interface{}
-					if err := yaml.Unmarshal(rawMsg, &yamlData); err != nil {
-						s.SetErrorf("invalid config format: %v", err)
-						return
-					}
-					// Convert YAML to JSON
-					jsonMsg, err := yaml.YAMLToJSON(rawMsg)
-					if err != nil {
-						s.SetErrorf("failed to convert YAML to JSON: %v", err)
-						return
-					}
-					c.Config = jsonMsg
-				} else {
-					c.Config = rawMsg
-				}
+				s.SetError(errors.Errorf("invalid json value for config: type %v", nextTok))
+				return
 			}
 		default:
-			s.ReadAny()
+			s.Skip()
 		}
 	}
 }
