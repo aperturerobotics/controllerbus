@@ -7,12 +7,12 @@
   resolved "https://registry.yarnpkg.com/@aashutoshrathi/word-wrap/-/word-wrap-1.2.6.tgz#bd9154aec9983f77b3a034ecaa015c2e4201f6cf"
   integrity sha512-1Yjs2SvM8TflER/OD3cOjhWWOZb58A2t7wpE2S9XfBYTiIl+XFhQG2bjy4Pu1I+EAlCNUzRDYDdFwFYUKvXcIA==
 
-"@aptre/common@^0.14.1":
-  version "0.14.1"
-  resolved "https://registry.yarnpkg.com/@aptre/common/-/common-0.14.1.tgz#b73fbfb58f43478b072bda52ccac0371b17222d8"
-  integrity sha512-xVoNBCIpjbJr+SwfOwYN4B/H3wI+hdrOgPnCfKmiSQg0YO5JOctQMXWvCAwxukDSSiJf8jrhd/3bsWG+fN6KPg==
+"@aptre/common@^0.14.2":
+  version "0.14.2"
+  resolved "https://registry.yarnpkg.com/@aptre/common/-/common-0.14.2.tgz#98413b20d9bc760caab533af4f777978cc5bdcad"
+  integrity sha512-Sb7JHukczhtI9YB4ZNf50tU153mZYbUU38qkk6IOa8cYZXGVZWR1o7tRhKkhP7UwD4DAVNrvBTDFmCxKzezKWA==
   dependencies:
-    "@aptre/protobuf-es-lite" "^0.2.3"
+    "@aptre/protobuf-es-lite" "^0.2.5"
     "@bufbuild/protobuf" "^1.8.0"
     "@typescript-eslint/eslint-plugin" "^7.7.0"
     "@typescript-eslint/parser" "^7.7.0"
@@ -20,7 +20,7 @@
     eslint-config-prettier "^9.0.0"
     eslint-plugin-react-hooks "^4.6.1"
     eslint-plugin-unused-imports "^3.0.0"
-    starpc "^0.31.7"
+    starpc "^0.31.9"
 
 "@aptre/it-ws@^1.0.0":
   version "1.0.0"
@@ -33,18 +33,10 @@
     uint8arrays "^5.0.0"
     ws "^8.4.0"
 
-"@aptre/protobuf-es-lite@^0.2.3":
-  version "0.2.3"
-  resolved "https://registry.yarnpkg.com/@aptre/protobuf-es-lite/-/protobuf-es-lite-0.2.3.tgz#f3347985cad9861819fd3642afa28d408c7bf9b7"
-  integrity sha512-pJnQDAPO2UdQgezm8wukxIMvxq5ZD8hqnZh5sHDKKDfFHgqT8IsNmDaUxprNzuQee7ayPmtPcm1pO99XwJP8hg==
-  dependencies:
-    "@bufbuild/protobuf" "^1.9.0"
-    "@bufbuild/protoplugin" "1.9.0"
-
-"@aptre/protobuf-es-lite@^0.2.4":
-  version "0.2.4"
-  resolved "https://registry.yarnpkg.com/@aptre/protobuf-es-lite/-/protobuf-es-lite-0.2.4.tgz#a790d404f31625a842c4ff1a70a43e98b67ba787"
-  integrity sha512-wZocLQzE6CrlEQH9Gaj3FnrqQ0dW3nLFCnpVdUI0T/G4S0QkbHjteTTgKk/oYyXSiG+JewPjv5G02AYBNtizSw==
+"@aptre/protobuf-es-lite@^0.2.5":
+  version "0.2.5"
+  resolved "https://registry.yarnpkg.com/@aptre/protobuf-es-lite/-/protobuf-es-lite-0.2.5.tgz#3113bab7b9cedeb61876d961aa487d81df1a168c"
+  integrity sha512-7UhvYNJfe5eoOxGvvrg++AWiwMGG4H3B+TX9BlSs/b4TyehbCtqBUdwhbwnhc6cTAvoTJ/dEr45qdbjTYsmq8g==
   dependencies:
     "@bufbuild/protobuf" "^1.9.0"
     "@bufbuild/protoplugin" "1.9.0"
@@ -1873,34 +1865,13 @@ sprintf-js@~1.0.2:
   resolved "https://registry.yarnpkg.com/sprintf-js/-/sprintf-js-1.0.3.tgz#04e6926f662895354f3dd015203633b857297e2c"
   integrity sha512-D9cPgkvLlV3t3IzL0D0YLvGA9Ahk4PcvVwUbN0dSGr1aP0Nrt4AEnTUbuGvquEC0mA64Gqt1fzirlRs5ibXx8g==
 
-starpc@^0.31.7:
-  version "0.31.7"
-  resolved "https://registry.yarnpkg.com/starpc/-/starpc-0.31.7.tgz#fef7b5476e05b8119f751b165b72f49bf57ab97b"
-  integrity sha512-RQMwInbJ/QTj6FGb+70D1lafGTQhKFgDNc4ATwwIwILkHH5o8JESfkZGZ+wUAgIA5pPY1HqVC/zjXyLIcp07Iw==
+starpc@^0.31.9:
+  version "0.31.9"
+  resolved "https://registry.yarnpkg.com/starpc/-/starpc-0.31.9.tgz#3aa3ddb3f9c55e9c43c823cd5cf601ae4e855a20"
+  integrity sha512-oH0R3UPbXNERK9ISqU0L/+AO3owYjqzZa8wGkcjRRopq7dMxKJJ3ZpcuFaJIqiuiUbR0XMjXV+W/5fN9uv+TOA==
   dependencies:
     "@aptre/it-ws" "^1.0.0"
-    "@aptre/protobuf-es-lite" "^0.2.3"
-    "@bufbuild/protoplugin" "^1.9.0"
-    "@chainsafe/libp2p-yamux" "^6.0.2"
-    "@libp2p/interface" "^1.3.0"
-    "@libp2p/logger" "^4.0.11"
-    event-iterator "^2.0.0"
-    isomorphic-ws "^5.0.0"
-    it-first "^3.0.6"
-    it-pipe "^3.0.1"
-    it-pushable "^3.2.3"
-    it-stream-types "^2.0.1"
-    memoize-one "^6.0.0"
-    uint8arraylist "^2.4.7"
-    ws "^8.15.1"
-
-starpc@^0.31.8:
-  version "0.31.8"
-  resolved "https://registry.yarnpkg.com/starpc/-/starpc-0.31.8.tgz#c4f5029561fd673261d65de51556824b94c0289a"
-  integrity sha512-HB+4LxF9j+tULzLztMrPodH7oPIVoHqQ9e9wvGZApbEYMhIp8qQjDzb7A9otccxrXs99xL3aM77+FapLY7+85Q==
-  dependencies:
-    "@aptre/it-ws" "^1.0.0"
-    "@aptre/protobuf-es-lite" "^0.2.4"
+    "@aptre/protobuf-es-lite" "^0.2.5"
     "@bufbuild/protoplugin" "^1.9.0"
     "@chainsafe/libp2p-yamux" "^6.0.2"
     "@libp2p/interface" "^1.3.0"

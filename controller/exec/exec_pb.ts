@@ -3,6 +3,7 @@
 /* eslint-disable */
 
 import {
+  createEnumType,
   createMessageType,
   Message,
   MessageType,
@@ -48,13 +49,16 @@ export enum ControllerStatus {
   ControllerStatus_ERROR = 3,
 }
 
-// ControllerStatus_Name maps the enum names to the values.
-export const ControllerStatus_Name = {
-  ControllerStatus_UNKNOWN: ControllerStatus.ControllerStatus_UNKNOWN,
-  ControllerStatus_CONFIGURING: ControllerStatus.ControllerStatus_CONFIGURING,
-  ControllerStatus_RUNNING: ControllerStatus.ControllerStatus_RUNNING,
-  ControllerStatus_ERROR: ControllerStatus.ControllerStatus_ERROR,
-}
+// ControllerStatus_Enum is the enum type for ControllerStatus.
+export const ControllerStatus_Enum = createEnumType(
+  'controller.exec.ControllerStatus',
+  [
+    { no: 0, name: 'ControllerStatus_UNKNOWN' },
+    { no: 1, name: 'ControllerStatus_CONFIGURING' },
+    { no: 2, name: 'ControllerStatus_RUNNING' },
+    { no: 3, name: 'ControllerStatus_ERROR' },
+  ],
+)
 
 /**
  * ExecControllerRequest is a protobuf request to execute a controller.
@@ -142,7 +146,7 @@ export const ExecControllerResponse: MessageType<ExecControllerResponse> =
     typeName: 'controller.exec.ExecControllerResponse',
     fields: [
       { no: 1, name: 'id', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
-      { no: 2, name: 'status', kind: 'enum', T: ControllerStatus },
+      { no: 2, name: 'status', kind: 'enum', T: ControllerStatus_Enum },
       { no: 3, name: 'controller_info', kind: 'message', T: Info },
       {
         no: 4,
