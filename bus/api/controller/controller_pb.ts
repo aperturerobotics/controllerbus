@@ -41,7 +41,7 @@ export const Config: MessageType<Config> = createMessageType({
       kind: 'scalar',
       T: 9 /* ScalarType.STRING */,
     },
-    { no: 2, name: 'bus_api_config', kind: 'message', T: Config$1 },
+    { no: 2, name: 'bus_api_config', kind: 'message', T: () => Config$1 },
   ] as readonly PartialFieldInfo[],
   packedByDefault: true,
 })

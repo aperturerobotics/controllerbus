@@ -74,7 +74,7 @@ export const DirectiveInfo: MessageType<DirectiveInfo> = createMessageType({
       no: 2,
       name: 'debug_vals',
       kind: 'message',
-      T: ProtoDebugValue,
+      T: () => ProtoDebugValue,
       repeated: true,
     },
   ] as readonly PartialFieldInfo[],
@@ -100,7 +100,7 @@ export interface DirectiveState extends Message<DirectiveState> {
 export const DirectiveState: MessageType<DirectiveState> = createMessageType({
   typeName: 'directive.DirectiveState',
   fields: [
-    { no: 1, name: 'info', kind: 'message', T: DirectiveInfo },
+    { no: 1, name: 'info', kind: 'message', T: () => DirectiveInfo },
   ] as readonly PartialFieldInfo[],
   packedByDefault: true,
 })

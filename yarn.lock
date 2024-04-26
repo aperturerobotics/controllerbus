@@ -41,6 +41,14 @@
     "@bufbuild/protobuf" "^1.9.0"
     "@bufbuild/protoplugin" "1.9.0"
 
+"@aptre/protobuf-es-lite@^0.2.7":
+  version "0.2.7"
+  resolved "https://registry.yarnpkg.com/@aptre/protobuf-es-lite/-/protobuf-es-lite-0.2.7.tgz#f35383eca312ff81c34cf846922e27e34d0ce2de"
+  integrity sha512-zmgKcOD933JcXXYUtkUWokeokrCOIBaA1g+PHmWhcmOLxw/k9f8WENZjxljx6SfRJsWtRZXsEFriGq2QhkW6oA==
+  dependencies:
+    "@bufbuild/protobuf" "^1.9.0"
+    "@bufbuild/protoplugin" "1.9.0"
+
 "@babel/code-frame@^7.0.0", "@babel/code-frame@^7.23.5", "@babel/code-frame@^7.24.1":
   version "7.24.2"
   resolved "https://registry.yarnpkg.com/@babel/code-frame/-/code-frame-7.24.2.tgz#718b4b19841809a58b29b68cde80bc5e1aa6d9ae"
@@ -1872,6 +1880,27 @@ starpc@^0.31.10:
   dependencies:
     "@aptre/it-ws" "^1.0.0"
     "@aptre/protobuf-es-lite" "^0.2.6"
+    "@bufbuild/protoplugin" "^1.9.0"
+    "@chainsafe/libp2p-yamux" "^6.0.2"
+    "@libp2p/interface" "^1.3.0"
+    "@libp2p/logger" "^4.0.11"
+    event-iterator "^2.0.0"
+    isomorphic-ws "^5.0.0"
+    it-first "^3.0.6"
+    it-pipe "^3.0.1"
+    it-pushable "^3.2.3"
+    it-stream-types "^2.0.1"
+    memoize-one "^6.0.0"
+    uint8arraylist "^2.4.7"
+    ws "^8.15.1"
+
+starpc@^0.31.11:
+  version "0.31.11"
+  resolved "https://registry.yarnpkg.com/starpc/-/starpc-0.31.11.tgz#fa1a95420b8f9a4eefcf292cee474e995dc208c3"
+  integrity sha512-AJ7wSS3cZYvCqOf5BHBXT+8xSbkgvOQKChYDSyBdHXR9a+3CEPYPvibwLcDxzQH8bqq2MCHcWCTsC9g3yqdbpQ==
+  dependencies:
+    "@aptre/it-ws" "^1.0.0"
+    "@aptre/protobuf-es-lite" "^0.2.7"
     "@bufbuild/protoplugin" "^1.9.0"
     "@chainsafe/libp2p-yamux" "^6.0.2"
     "@libp2p/interface" "^1.3.0"

@@ -74,7 +74,7 @@ export const ConfigSet: MessageType<ConfigSet> = createMessageType({
       name: 'configs',
       kind: 'map',
       K: 9 /* ScalarType.STRING */,
-      V: { kind: 'message', T: ControllerConfig },
+      V: { kind: 'message', T: () => ControllerConfig },
     },
   ] as readonly PartialFieldInfo[],
   packedByDefault: true,

@@ -6,14 +6,14 @@ toolchain go1.22.2
 
 replace github.com/aperturerobotics/controllerbus => ../..
 
-replace (
-	github.com/sirupsen/logrus => github.com/aperturerobotics/logrus v1.9.4-0.20240119050608-13332fb58195 // aperture
-	google.golang.org/protobuf => github.com/aperturerobotics/protobuf-go v1.33.1-0.20240411062030-e36f75e0a3b8 // aperture
+require (
+	github.com/aperturerobotics/controllerbus v0.44.0 // master
+	github.com/aperturerobotics/protobuf-go-lite v0.6.0 // latest
+	github.com/aperturerobotics/starpc v0.31.11 // indirect; main
+	github.com/aperturerobotics/util v1.21.2 // indirect; latest
 )
 
 require (
-	github.com/aperturerobotics/controllerbus v0.43.1
-	github.com/aperturerobotics/protobuf-go-lite v0.6.0
 	github.com/blang/semver v3.5.1+incompatible
 	github.com/pkg/errors v0.9.1
 	github.com/sirupsen/logrus v1.9.3
@@ -21,8 +21,6 @@ require (
 
 require (
 	github.com/aperturerobotics/json-iterator-lite v1.0.0 // indirect
-	github.com/aperturerobotics/starpc v0.31.6 // indirect
-	github.com/aperturerobotics/util v1.21.2 // indirect
 	github.com/cenkalti/backoff v2.2.1+incompatible // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.2 // indirect
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.2.0 // indirect
@@ -56,6 +54,7 @@ require (
 	golang.org/x/sys v0.19.0 // indirect
 	golang.org/x/tools v0.20.0 // indirect
 	google.golang.org/protobuf v1.33.0 // indirect
+	gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	lukechampine.com/blake3 v1.2.1 // indirect
 	mvdan.cc/gofumpt v0.6.0 // indirect

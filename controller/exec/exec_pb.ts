@@ -91,7 +91,7 @@ export const ExecControllerRequest: MessageType<ExecControllerRequest> =
   createMessageType({
     typeName: 'controller.exec.ExecControllerRequest',
     fields: [
-      { no: 1, name: 'config_set', kind: 'message', T: ConfigSet },
+      { no: 1, name: 'config_set', kind: 'message', T: () => ConfigSet },
       {
         no: 2,
         name: 'config_set_yaml',
@@ -147,7 +147,7 @@ export const ExecControllerResponse: MessageType<ExecControllerResponse> =
     fields: [
       { no: 1, name: 'id', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
       { no: 2, name: 'status', kind: 'enum', T: ControllerStatus_Enum },
-      { no: 3, name: 'controller_info', kind: 'message', T: Info },
+      { no: 3, name: 'controller_info', kind: 'message', T: () => Info },
       {
         no: 4,
         name: 'error_info',
