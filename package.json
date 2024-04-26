@@ -19,9 +19,9 @@
     "url": "git+ssh://git@github.com/aperturerobotics/controllerbus.git"
   },
   "scripts": {
-    "build": "tsc --project tsconfig.json --noEmit false --module ES6 --target es2022 --outDir ./dist/",
+    "build": "tsc --project tsconfig.json --noEmit false --outDir ./dist/",
     "check": "npm run typecheck",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc --project tsconfig.json --noEmit true",
     "deps": "depcheck --ignore-patterns=.eslintrc.js,package.json --ignores depcheck,prettier,typescript,starpc,@aperturerobotics/ts-common,@bufbuild/protoc-gen-es",
     "codegen": "npm run gen",
     "ci": "npm run build && npm run lint:js && npm run lint:go",
@@ -42,15 +42,15 @@
     "singleQuote": true
   },
   "devDependencies": {
-    "@aptre/common": "^0.12.6",
-    "@bufbuild/protoc-gen-es": "^1.9.0",
+    "@aptre/common": "^0.14.1",
     "depcheck": "^1.4.7",
     "prettier": "^3.0.1",
     "rimraf": "^5.0.5",
     "typescript": "^5.4.5"
   },
   "dependencies": {
+    "@aptre/protobuf-es-lite": "^0.2.4",
     "@bufbuild/protobuf": "^1.9.0",
-    "starpc": "^0.31.6"
+    "starpc": "^0.31.8"
   }
 }

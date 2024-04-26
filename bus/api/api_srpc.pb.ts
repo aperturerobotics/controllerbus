@@ -3,12 +3,12 @@
 /* eslint-disable */
 
 import { GetBusInfoRequest, GetBusInfoResponse } from './api_pb.js'
-import type { PartialMessage } from '@bufbuild/protobuf'
 import { MethodKind } from '@bufbuild/protobuf'
 import {
   ExecControllerRequest,
   ExecControllerResponse,
 } from '../../controller/exec/exec_pb.js'
+import { Message } from '@aptre/protobuf-es-lite'
 import { buildDecodeMessageTransform, MessageStream, ProtoRpc } from 'starpc'
 
 /**
@@ -56,9 +56,9 @@ export interface ControllerBusService {
    * @generated from rpc bus.api.ControllerBusService.GetBusInfo
    */
   GetBusInfo(
-    request: PartialMessage<GetBusInfoRequest>,
+    request: Message<GetBusInfoRequest>,
     abortSignal?: AbortSignal,
-  ): Promise<PartialMessage<GetBusInfoResponse>>
+  ): Promise<Message<GetBusInfoResponse>>
 
   /**
    * ExecController executes a controller configuration on the bus.
@@ -66,7 +66,7 @@ export interface ControllerBusService {
    * @generated from rpc bus.api.ControllerBusService.ExecController
    */
   ExecController(
-    request: PartialMessage<ExecControllerRequest>,
+    request: Message<ExecControllerRequest>,
     abortSignal?: AbortSignal,
   ): MessageStream<ExecControllerResponse>
 }
@@ -89,14 +89,14 @@ export class ControllerBusServiceClient implements ControllerBusService {
    * @generated from rpc bus.api.ControllerBusService.GetBusInfo
    */
   async GetBusInfo(
-    request: PartialMessage<GetBusInfoRequest>,
+    request: Message<GetBusInfoRequest>,
     abortSignal?: AbortSignal,
-  ): Promise<PartialMessage<GetBusInfoResponse>> {
-    const requestMsg = new GetBusInfoRequest(request)
+  ): Promise<Message<GetBusInfoResponse>> {
+    const requestMsg = GetBusInfoRequest.create(request)
     const result = await this.rpc.request(
       this.service,
       ControllerBusServiceDefinition.methods.GetBusInfo.name,
-      requestMsg.toBinary(),
+      GetBusInfoRequest.toBinary(requestMsg),
       abortSignal || undefined,
     )
     return GetBusInfoResponse.fromBinary(result)
@@ -108,14 +108,14 @@ export class ControllerBusServiceClient implements ControllerBusService {
    * @generated from rpc bus.api.ControllerBusService.ExecController
    */
   ExecController(
-    request: PartialMessage<ExecControllerRequest>,
+    request: Message<ExecControllerRequest>,
     abortSignal?: AbortSignal,
   ): MessageStream<ExecControllerResponse> {
-    const requestMsg = new ExecControllerRequest(request)
+    const requestMsg = ExecControllerRequest.create(request)
     const result = this.rpc.serverStreamingRequest(
       this.service,
       ControllerBusServiceDefinition.methods.ExecController.name,
-      requestMsg.toBinary(),
+      ExecControllerRequest.toBinary(requestMsg),
       abortSignal || undefined,
     )
     return buildDecodeMessageTransform(ExecControllerResponse)(result)
