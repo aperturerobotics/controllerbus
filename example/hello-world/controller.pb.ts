@@ -2,34 +2,33 @@
 // @generated from file github.com/aperturerobotics/controllerbus/example/hello-world/controller.proto (package main, syntax proto3)
 /* eslint-disable */
 
-import {
-  createMessageType,
-  Message,
-  MessageType,
-  PartialFieldInfo,
-} from '@aptre/protobuf-es-lite'
+import type { MessageType, PartialFieldInfo } from "@aptre/protobuf-es-lite";
+import { createMessageType, Message } from "@aptre/protobuf-es-lite";
 
-export const protobufPackage = 'main'
+export const protobufPackage = "main";
 
 /**
  * ToyControllerConfig contains configuration for the toy controller.
  *
  * @generated from message main.ToyControllerConfig
  */
-export interface ToyControllerConfig extends Message<ToyControllerConfig> {
+export type ToyControllerConfig = Message<{
   /**
    * Name is the name to say hello to.
    *
    * @generated from field: string name = 1;
    */
-  name?: string
-}
+  name?: string;
 
-export const ToyControllerConfig: MessageType<ToyControllerConfig> =
-  createMessageType({
-    typeName: 'main.ToyControllerConfig',
+}>;
+
+export const ToyControllerConfig: MessageType<ToyControllerConfig> = createMessageType(
+  {
+    typeName: "main.ToyControllerConfig",
     fields: [
-      { no: 1, name: 'name', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+        { no: 1, name: "name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     ] as readonly PartialFieldInfo[],
     packedByDefault: true,
-  })
+  },
+);
+

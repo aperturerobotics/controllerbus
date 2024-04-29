@@ -2,13 +2,12 @@
 // @generated from file github.com/aperturerobotics/controllerbus/bus/api/api.proto (package bus.api, syntax proto3)
 /* eslint-disable */
 
-import { GetBusInfoRequest, GetBusInfoResponse } from './api_pb.js'
-import { MethodKind } from '@bufbuild/protobuf'
+import { GetBusInfoRequest, GetBusInfoResponse } from './api.pb.js'
+import { Message, MethodKind } from '@aptre/protobuf-es-lite'
 import {
   ExecControllerRequest,
   ExecControllerResponse,
-} from '../../controller/exec/exec_pb.js'
-import { Message } from '@aptre/protobuf-es-lite'
+} from '../../controller/exec/exec.pb.js'
 import { buildDecodeMessageTransform, MessageStream, ProtoRpc } from 'starpc'
 
 /**
