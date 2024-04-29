@@ -2,10 +2,10 @@
 // @generated from file github.com/aperturerobotics/controllerbus/controller/configset/proto/configset.proto (package configset.proto, syntax proto3)
 /* eslint-disable */
 
-import type { MessageType, PartialFieldInfo } from "@aptre/protobuf-es-lite";
-import { createMessageType, Message } from "@aptre/protobuf-es-lite";
+import type { MessageType, PartialFieldInfo } from '@aptre/protobuf-es-lite'
+import { createMessageType, Message } from '@aptre/protobuf-es-lite'
 
-export const protobufPackage = "configset.proto";
+export const protobufPackage = 'configset.proto'
 
 /**
  * ControllerConfig contains a controller configuration.
@@ -20,13 +20,13 @@ export type ControllerConfig = Message<{
    *
    * @generated from field: string id = 1;
    */
-  id?: string;
+  id?: string
   /**
    * Rev is the revision number of the configuration.
    *
    * @generated from field: uint64 rev = 2;
    */
-  rev?: bigint;
+  rev?: bigint
   /**
    * Config is the configuration object.
    * Proto supports: protobuf (binary) and json (starting with {).
@@ -34,21 +34,19 @@ export type ControllerConfig = Message<{
    *
    * @generated from field: bytes config = 3;
    */
-  config?: Uint8Array;
+  config?: Uint8Array
+}>
 
-}>;
-
-export const ControllerConfig: MessageType<ControllerConfig> = createMessageType(
-  {
-    typeName: "configset.proto.ControllerConfig",
+export const ControllerConfig: MessageType<ControllerConfig> =
+  createMessageType({
+    typeName: 'configset.proto.ControllerConfig',
     fields: [
-        { no: 1, name: "id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-        { no: 2, name: "rev", kind: "scalar", T: 4 /* ScalarType.UINT64 */ },
-        { no: 3, name: "config", kind: "scalar", T: 12 /* ScalarType.BYTES */ },
+      { no: 1, name: 'id', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+      { no: 2, name: 'rev', kind: 'scalar', T: 4 /* ScalarType.UINT64 */ },
+      { no: 3, name: 'config', kind: 'scalar', T: 12 /* ScalarType.BYTES */ },
     ] as readonly PartialFieldInfo[],
     packedByDefault: true,
-  },
-);
+  })
 
 /**
  * ConfigSet contains a configuration set.
@@ -61,17 +59,19 @@ export type ConfigSet = Message<{
    *
    * @generated from field: map<string, configset.proto.ControllerConfig> configs = 1;
    */
-  configs?: { [key: string]: ControllerConfig };
+  configs?: { [key: string]: ControllerConfig }
+}>
 
-}>;
-
-export const ConfigSet: MessageType<ConfigSet> = createMessageType(
-  {
-    typeName: "configset.proto.ConfigSet",
-    fields: [
-        { no: 1, name: "configs", kind: "map", K: 9 /* ScalarType.STRING */, V: {kind: "message", T: () => ControllerConfig} },
-    ] as readonly PartialFieldInfo[],
-    packedByDefault: true,
-  },
-);
-
+export const ConfigSet: MessageType<ConfigSet> = createMessageType({
+  typeName: 'configset.proto.ConfigSet',
+  fields: [
+    {
+      no: 1,
+      name: 'configs',
+      kind: 'map',
+      K: 9 /* ScalarType.STRING */,
+      V: { kind: 'message', T: () => ControllerConfig },
+    },
+  ] as readonly PartialFieldInfo[],
+  packedByDefault: true,
+})

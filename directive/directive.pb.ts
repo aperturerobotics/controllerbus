@@ -2,10 +2,10 @@
 // @generated from file github.com/aperturerobotics/controllerbus/directive/directive.proto (package directive, syntax proto3)
 /* eslint-disable */
 
-import type { MessageType, PartialFieldInfo } from "@aptre/protobuf-es-lite";
-import { createMessageType, Message } from "@aptre/protobuf-es-lite";
+import type { MessageType, PartialFieldInfo } from '@aptre/protobuf-es-lite'
+import { createMessageType, Message } from '@aptre/protobuf-es-lite'
 
-export const protobufPackage = "directive";
+export const protobufPackage = 'directive'
 
 /**
  * ProtoDebugValue is a debug value.
@@ -18,26 +18,29 @@ export type ProtoDebugValue = Message<{
    *
    * @generated from field: string key = 1;
    */
-  key?: string;
+  key?: string
   /**
    * Values are the debug value values.
    *
    * @generated from field: repeated string values = 2;
    */
-  values?: string[];
+  values?: string[]
+}>
 
-}>;
-
-export const ProtoDebugValue: MessageType<ProtoDebugValue> = createMessageType(
-  {
-    typeName: "directive.ProtoDebugValue",
-    fields: [
-        { no: 1, name: "key", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-        { no: 2, name: "values", kind: "scalar", T: 9 /* ScalarType.STRING */, repeated: true },
-    ] as readonly PartialFieldInfo[],
-    packedByDefault: true,
-  },
-);
+export const ProtoDebugValue: MessageType<ProtoDebugValue> = createMessageType({
+  typeName: 'directive.ProtoDebugValue',
+  fields: [
+    { no: 1, name: 'key', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    {
+      no: 2,
+      name: 'values',
+      kind: 'scalar',
+      T: 9 /* ScalarType.STRING */,
+      repeated: true,
+    },
+  ] as readonly PartialFieldInfo[],
+  packedByDefault: true,
+})
 
 /**
  * DirectiveInfo contains directive information in protobuf form.
@@ -50,26 +53,29 @@ export type DirectiveInfo = Message<{
    *
    * @generated from field: string name = 1;
    */
-  name?: string;
+  name?: string
   /**
    * DebugVals contains the directive debug values.
    *
    * @generated from field: repeated directive.ProtoDebugValue debug_vals = 2;
    */
-  debugVals?: ProtoDebugValue[];
+  debugVals?: ProtoDebugValue[]
+}>
 
-}>;
-
-export const DirectiveInfo: MessageType<DirectiveInfo> = createMessageType(
-  {
-    typeName: "directive.DirectiveInfo",
-    fields: [
-        { no: 1, name: "name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-        { no: 2, name: "debug_vals", kind: "message", T: () => ProtoDebugValue, repeated: true },
-    ] as readonly PartialFieldInfo[],
-    packedByDefault: true,
-  },
-);
+export const DirectiveInfo: MessageType<DirectiveInfo> = createMessageType({
+  typeName: 'directive.DirectiveInfo',
+  fields: [
+    { no: 1, name: 'name', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    {
+      no: 2,
+      name: 'debug_vals',
+      kind: 'message',
+      T: () => ProtoDebugValue,
+      repeated: true,
+    },
+  ] as readonly PartialFieldInfo[],
+  packedByDefault: true,
+})
 
 /**
  * DirectiveState contains directive info and state info in protobuf form.
@@ -84,17 +90,13 @@ export type DirectiveState = Message<{
    *
    * @generated from field: directive.DirectiveInfo info = 1;
    */
-  info?: DirectiveInfo;
+  info?: DirectiveInfo
+}>
 
-}>;
-
-export const DirectiveState: MessageType<DirectiveState> = createMessageType(
-  {
-    typeName: "directive.DirectiveState",
-    fields: [
-        { no: 1, name: "info", kind: "message", T: () => DirectiveInfo },
-    ] as readonly PartialFieldInfo[],
-    packedByDefault: true,
-  },
-);
-
+export const DirectiveState: MessageType<DirectiveState> = createMessageType({
+  typeName: 'directive.DirectiveState',
+  fields: [
+    { no: 1, name: 'info', kind: 'message', T: () => DirectiveInfo },
+  ] as readonly PartialFieldInfo[],
+  packedByDefault: true,
+})

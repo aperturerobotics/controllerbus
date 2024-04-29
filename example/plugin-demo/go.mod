@@ -7,10 +7,10 @@ toolchain go1.22.2
 replace github.com/aperturerobotics/controllerbus => ../..
 
 require (
-	github.com/aperturerobotics/controllerbus v0.44.0 // master
+	github.com/aperturerobotics/controllerbus v0.44.1 // master
 	github.com/aperturerobotics/protobuf-go-lite v0.6.0 // latest
 	github.com/aperturerobotics/starpc v0.31.12 // indirect; main
-	github.com/aperturerobotics/util v1.22.1 // indirect; latest
+	github.com/aperturerobotics/util v1.22.2-0.20240429204300-8b2d5826595d // indirect; latest
 )
 
 require (
@@ -22,7 +22,7 @@ require (
 require (
 	github.com/aperturerobotics/json-iterator-lite v1.0.0 // indirect
 	github.com/cenkalti/backoff v2.2.1+incompatible // indirect
-	github.com/cpuguy83/go-md2man/v2 v2.0.2 // indirect
+	github.com/cpuguy83/go-md2man/v2 v2.0.4 // indirect
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.2.0 // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
 	github.com/ghodss/yaml v1.0.0 // indirect
@@ -44,8 +44,8 @@ require (
 	github.com/multiformats/go-varint v0.0.7 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/spaolacci/murmur3 v1.1.1-0.20190317074736-539464a789e9 // indirect
-	github.com/urfave/cli/v2 v2.27.1 // indirect
-	github.com/xrash/smetrics v0.0.0-20201216005158-039620a65673 // indirect
+	github.com/urfave/cli/v2 v2.27.2 // indirect
+	github.com/xrash/smetrics v0.0.0-20240312152122-5f08fbb34913 // indirect
 	github.com/zeebo/blake3 v0.2.3 // indirect
 	golang.org/x/crypto v0.19.0 // indirect
 	golang.org/x/exp v0.0.0-20240416160154-fe59bbe5cc7f // indirect

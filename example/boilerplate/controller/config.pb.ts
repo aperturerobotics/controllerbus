@@ -2,10 +2,10 @@
 // @generated from file github.com/aperturerobotics/controllerbus/example/boilerplate/controller/config.proto (package boilerplate.controller, syntax proto3)
 /* eslint-disable */
 
-import type { MessageType, PartialFieldInfo } from "@aptre/protobuf-es-lite";
-import { createMessageType, Message } from "@aptre/protobuf-es-lite";
+import type { MessageType, PartialFieldInfo } from '@aptre/protobuf-es-lite'
+import { createMessageType, Message } from '@aptre/protobuf-es-lite'
 
-export const protobufPackage = "boilerplate.controller";
+export const protobufPackage = 'boilerplate.controller'
 
 /**
  * Config is the boilerplate configuration.
@@ -18,24 +18,30 @@ export type Config = Message<{
    *
    * @generated from field: string example_field = 1;
    */
-  exampleField?: string;
+  exampleField?: string
   /**
    * FailWithErr indicates the controller should fail with the given error.
    *
    * @generated from field: string fail_with_err = 2;
    */
-  failWithErr?: string;
+  failWithErr?: string
+}>
 
-}>;
-
-export const Config: MessageType<Config> = createMessageType(
-  {
-    typeName: "boilerplate.controller.Config",
-    fields: [
-        { no: 1, name: "example_field", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-        { no: 2, name: "fail_with_err", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    ] as readonly PartialFieldInfo[],
-    packedByDefault: true,
-  },
-);
-
+export const Config: MessageType<Config> = createMessageType({
+  typeName: 'boilerplate.controller.Config',
+  fields: [
+    {
+      no: 1,
+      name: 'example_field',
+      kind: 'scalar',
+      T: 9 /* ScalarType.STRING */,
+    },
+    {
+      no: 2,
+      name: 'fail_with_err',
+      kind: 'scalar',
+      T: 9 /* ScalarType.STRING */,
+    },
+  ] as readonly PartialFieldInfo[],
+  packedByDefault: true,
+})

@@ -2,26 +2,20 @@
 // @generated from file github.com/aperturerobotics/controllerbus/config/config.proto (package config, syntax proto3)
 /* eslint-disable */
 
-import type { MessageType, PartialFieldInfo } from "@aptre/protobuf-es-lite";
-import { createMessageType, Message } from "@aptre/protobuf-es-lite";
+import type { MessageType, PartialFieldInfo } from '@aptre/protobuf-es-lite'
+import { createMessageType, Message } from '@aptre/protobuf-es-lite'
 
-export const protobufPackage = "config";
+export const protobufPackage = 'config'
 
 /**
  * Placeholder is a config used for type assertions.
  *
  * @generated from message config.Placeholder
  */
-export type Placeholder = Message<{
+export type Placeholder = Message<{}>
 
-}>;
-
-export const Placeholder: MessageType<Placeholder> = createMessageType(
-  {
-    typeName: "config.Placeholder",
-    fields: [
-    ] as readonly PartialFieldInfo[],
-    packedByDefault: true,
-  },
-);
-
+export const Placeholder: MessageType<Placeholder> = createMessageType({
+  typeName: 'config.Placeholder',
+  fields: [] as readonly PartialFieldInfo[],
+  packedByDefault: true,
+})

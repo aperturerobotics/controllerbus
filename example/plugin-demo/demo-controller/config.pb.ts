@@ -2,10 +2,10 @@
 // @generated from file github.com/aperturerobotics/controllerbus/example/plugin-demo/demo-controller/config.proto (package hot.compile.demo.controller, syntax proto3)
 /* eslint-disable */
 
-import type { MessageType, PartialFieldInfo } from "@aptre/protobuf-es-lite";
-import { createMessageType, Message } from "@aptre/protobuf-es-lite";
+import type { MessageType, PartialFieldInfo } from '@aptre/protobuf-es-lite'
+import { createMessageType, Message } from '@aptre/protobuf-es-lite'
 
-export const protobufPackage = "hot.compile.demo.controller";
+export const protobufPackage = 'hot.compile.demo.controller'
 
 /**
  * Config is the boilerplate configuration.
@@ -18,17 +18,18 @@ export type Config = Message<{
    *
    * @generated from field: string exit_after_dur = 1;
    */
-  exitAfterDur?: string;
+  exitAfterDur?: string
+}>
 
-}>;
-
-export const Config: MessageType<Config> = createMessageType(
-  {
-    typeName: "hot.compile.demo.controller.Config",
-    fields: [
-        { no: 1, name: "exit_after_dur", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    ] as readonly PartialFieldInfo[],
-    packedByDefault: true,
-  },
-);
-
+export const Config: MessageType<Config> = createMessageType({
+  typeName: 'hot.compile.demo.controller.Config',
+  fields: [
+    {
+      no: 1,
+      name: 'exit_after_dur',
+      kind: 'scalar',
+      T: 9 /* ScalarType.STRING */,
+    },
+  ] as readonly PartialFieldInfo[],
+  packedByDefault: true,
+})

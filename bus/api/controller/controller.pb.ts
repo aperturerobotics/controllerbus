@@ -2,11 +2,11 @@
 // @generated from file github.com/aperturerobotics/controllerbus/bus/api/controller/controller.proto (package bus.api.controller, syntax proto3)
 /* eslint-disable */
 
-import type { MessageType, PartialFieldInfo } from "@aptre/protobuf-es-lite";
-import { createMessageType, Message } from "@aptre/protobuf-es-lite";
-import { Config as Config$1 } from "../api.pb.js";
+import type { MessageType, PartialFieldInfo } from '@aptre/protobuf-es-lite'
+import { createMessageType, Message } from '@aptre/protobuf-es-lite'
+import { Config as Config$1 } from '../api.pb.js'
 
-export const protobufPackage = "bus.api.controller";
+export const protobufPackage = 'bus.api.controller'
 
 /**
  * Config configures the API.
@@ -19,24 +19,25 @@ export type Config = Message<{
    *
    * @generated from field: string listen_addr = 1;
    */
-  listenAddr?: string;
+  listenAddr?: string
   /**
    * BusApiConfig are options for controller bus api.
    *
    * @generated from field: bus.api.Config bus_api_config = 2;
    */
-  busApiConfig?: Config$1;
+  busApiConfig?: Config$1
+}>
 
-}>;
-
-export const Config: MessageType<Config> = createMessageType(
-  {
-    typeName: "bus.api.controller.Config",
-    fields: [
-        { no: 1, name: "listen_addr", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-        { no: 2, name: "bus_api_config", kind: "message", T: () => Config$1 },
-    ] as readonly PartialFieldInfo[],
-    packedByDefault: true,
-  },
-);
-
+export const Config: MessageType<Config> = createMessageType({
+  typeName: 'bus.api.controller.Config',
+  fields: [
+    {
+      no: 1,
+      name: 'listen_addr',
+      kind: 'scalar',
+      T: 9 /* ScalarType.STRING */,
+    },
+    { no: 2, name: 'bus_api_config', kind: 'message', T: () => Config$1 },
+  ] as readonly PartialFieldInfo[],
+  packedByDefault: true,
+})

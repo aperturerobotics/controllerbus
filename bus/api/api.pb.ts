@@ -2,12 +2,12 @@
 // @generated from file github.com/aperturerobotics/controllerbus/bus/api/api.proto (package bus.api, syntax proto3)
 /* eslint-disable */
 
-import type { MessageType, PartialFieldInfo } from "@aptre/protobuf-es-lite";
-import { createMessageType, Message } from "@aptre/protobuf-es-lite";
-import { Info } from "../../controller/controller.pb.js";
-import { DirectiveState } from "../../directive/directive.pb.js";
+import type { MessageType, PartialFieldInfo } from '@aptre/protobuf-es-lite'
+import { createMessageType, Message } from '@aptre/protobuf-es-lite'
+import { Info } from '../../controller/controller.pb.js'
+import { DirectiveState } from '../../directive/directive.pb.js'
 
-export const protobufPackage = "bus.api";
+export const protobufPackage = 'bus.api'
 
 /**
  * Config are configuration arguments.
@@ -20,37 +20,35 @@ export type Config = Message<{
    *
    * @generated from field: bool enable_exec_controller = 1;
    */
-  enableExecController?: boolean;
+  enableExecController?: boolean
+}>
 
-}>;
-
-export const Config: MessageType<Config> = createMessageType(
-  {
-    typeName: "bus.api.Config",
-    fields: [
-        { no: 1, name: "enable_exec_controller", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    ] as readonly PartialFieldInfo[],
-    packedByDefault: true,
-  },
-);
+export const Config: MessageType<Config> = createMessageType({
+  typeName: 'bus.api.Config',
+  fields: [
+    {
+      no: 1,
+      name: 'enable_exec_controller',
+      kind: 'scalar',
+      T: 8 /* ScalarType.BOOL */,
+    },
+  ] as readonly PartialFieldInfo[],
+  packedByDefault: true,
+})
 
 /**
  * GetBusInfoRequest is the request type for GetBusInfo.
  *
  * @generated from message bus.api.GetBusInfoRequest
  */
-export type GetBusInfoRequest = Message<{
+export type GetBusInfoRequest = Message<{}>
 
-}>;
-
-export const GetBusInfoRequest: MessageType<GetBusInfoRequest> = createMessageType(
-  {
-    typeName: "bus.api.GetBusInfoRequest",
-    fields: [
-    ] as readonly PartialFieldInfo[],
+export const GetBusInfoRequest: MessageType<GetBusInfoRequest> =
+  createMessageType({
+    typeName: 'bus.api.GetBusInfoRequest',
+    fields: [] as readonly PartialFieldInfo[],
     packedByDefault: true,
-  },
-);
+  })
 
 /**
  * GetBusInfoResponse is the response type for GetBusInfo.
@@ -63,24 +61,33 @@ export type GetBusInfoResponse = Message<{
    *
    * @generated from field: repeated controller.Info running_controllers = 1;
    */
-  runningControllers?: Info[];
+  runningControllers?: Info[]
   /**
    * RunningDirectives is the list of running directives.
    *
    * @generated from field: repeated directive.DirectiveState running_directives = 2;
    */
-  runningDirectives?: DirectiveState[];
+  runningDirectives?: DirectiveState[]
+}>
 
-}>;
-
-export const GetBusInfoResponse: MessageType<GetBusInfoResponse> = createMessageType(
-  {
-    typeName: "bus.api.GetBusInfoResponse",
+export const GetBusInfoResponse: MessageType<GetBusInfoResponse> =
+  createMessageType({
+    typeName: 'bus.api.GetBusInfoResponse',
     fields: [
-        { no: 1, name: "running_controllers", kind: "message", T: () => Info, repeated: true },
-        { no: 2, name: "running_directives", kind: "message", T: () => DirectiveState, repeated: true },
+      {
+        no: 1,
+        name: 'running_controllers',
+        kind: 'message',
+        T: () => Info,
+        repeated: true,
+      },
+      {
+        no: 2,
+        name: 'running_directives',
+        kind: 'message',
+        T: () => DirectiveState,
+        repeated: true,
+      },
     ] as readonly PartialFieldInfo[],
     packedByDefault: true,
-  },
-);
-
+  })
