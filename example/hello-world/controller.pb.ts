@@ -3,7 +3,7 @@
 /* eslint-disable */
 
 import type { MessageType, PartialFieldInfo } from '@aptre/protobuf-es-lite'
-import { createMessageType, Message } from '@aptre/protobuf-es-lite'
+import { createMessageType, Message, ScalarType } from '@aptre/protobuf-es-lite'
 
 export const protobufPackage = 'main'
 
@@ -21,11 +21,12 @@ export type ToyControllerConfig = Message<{
   name?: string
 }>
 
+// ToyControllerConfig contains the message type declaration for ToyControllerConfig.
 export const ToyControllerConfig: MessageType<ToyControllerConfig> =
   createMessageType({
     typeName: 'main.ToyControllerConfig',
     fields: [
-      { no: 1, name: 'name', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+      { no: 1, name: 'name', kind: 'scalar', T: ScalarType.STRING },
     ] as readonly PartialFieldInfo[],
     packedByDefault: true,
   })

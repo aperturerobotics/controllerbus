@@ -3,7 +3,7 @@
 /* eslint-disable */
 
 import type { MessageType, PartialFieldInfo } from '@aptre/protobuf-es-lite'
-import { createMessageType, Message } from '@aptre/protobuf-es-lite'
+import { createMessageType, Message, ScalarType } from '@aptre/protobuf-es-lite'
 
 export const protobufPackage = 'configset.proto'
 
@@ -37,13 +37,14 @@ export type ControllerConfig = Message<{
   config?: Uint8Array
 }>
 
+// ControllerConfig contains the message type declaration for ControllerConfig.
 export const ControllerConfig: MessageType<ControllerConfig> =
   createMessageType({
     typeName: 'configset.proto.ControllerConfig',
     fields: [
-      { no: 1, name: 'id', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
-      { no: 2, name: 'rev', kind: 'scalar', T: 4 /* ScalarType.UINT64 */ },
-      { no: 3, name: 'config', kind: 'scalar', T: 12 /* ScalarType.BYTES */ },
+      { no: 1, name: 'id', kind: 'scalar', T: ScalarType.STRING },
+      { no: 2, name: 'rev', kind: 'scalar', T: ScalarType.UINT64 },
+      { no: 3, name: 'config', kind: 'scalar', T: ScalarType.BYTES },
     ] as readonly PartialFieldInfo[],
     packedByDefault: true,
   })
@@ -62,6 +63,7 @@ export type ConfigSet = Message<{
   configs?: { [key: string]: ControllerConfig }
 }>
 
+// ConfigSet contains the message type declaration for ConfigSet.
 export const ConfigSet: MessageType<ConfigSet> = createMessageType({
   typeName: 'configset.proto.ConfigSet',
   fields: [
@@ -69,7 +71,7 @@ export const ConfigSet: MessageType<ConfigSet> = createMessageType({
       no: 1,
       name: 'configs',
       kind: 'map',
-      K: 9 /* ScalarType.STRING */,
+      K: ScalarType.STRING,
       V: { kind: 'message', T: () => ControllerConfig },
     },
   ] as readonly PartialFieldInfo[],

@@ -7,10 +7,10 @@ toolchain go1.22.2
 replace github.com/aperturerobotics/controllerbus => ../..
 
 require (
-	github.com/aperturerobotics/controllerbus v0.44.1 // master
-	github.com/aperturerobotics/protobuf-go-lite v0.6.0 // latest
-	github.com/aperturerobotics/starpc v0.31.12 // indirect; main
-	github.com/aperturerobotics/util v1.22.2-0.20240429204300-8b2d5826595d // indirect; latest
+	github.com/aperturerobotics/controllerbus v0.44.3 // master
+	github.com/aperturerobotics/protobuf-go-lite v0.6.1 // latest
+	github.com/aperturerobotics/starpc v0.31.13 // indirect; main
+	github.com/aperturerobotics/util v1.22.1 // indirect; latest
 )
 
 require (
@@ -53,7 +53,7 @@ require (
 	golang.org/x/sync v0.7.0 // indirect
 	golang.org/x/sys v0.19.0 // indirect
 	golang.org/x/tools v0.20.0 // indirect
-	google.golang.org/protobuf v1.33.0 // indirect
+	google.golang.org/protobuf v1.34.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	lukechampine.com/blake3 v1.2.1 // indirect

@@ -3,7 +3,7 @@
 /* eslint-disable */
 
 import type { MessageType, PartialFieldInfo } from '@aptre/protobuf-es-lite'
-import { createMessageType, Message } from '@aptre/protobuf-es-lite'
+import { createMessageType, Message, ScalarType } from '@aptre/protobuf-es-lite'
 
 export const protobufPackage = 'plugin.loader.filesystem'
 
@@ -27,11 +27,12 @@ export type Config = Message<{
   watch?: boolean
 }>
 
+// Config contains the message type declaration for Config.
 export const Config: MessageType<Config> = createMessageType({
   typeName: 'plugin.loader.filesystem.Config',
   fields: [
-    { no: 1, name: 'dir', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: 'watch', kind: 'scalar', T: 8 /* ScalarType.BOOL */ },
+    { no: 1, name: 'dir', kind: 'scalar', T: ScalarType.STRING },
+    { no: 2, name: 'watch', kind: 'scalar', T: ScalarType.BOOL },
   ] as readonly PartialFieldInfo[],
   packedByDefault: true,
 })

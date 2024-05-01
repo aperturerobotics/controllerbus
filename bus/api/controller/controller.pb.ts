@@ -3,7 +3,7 @@
 /* eslint-disable */
 
 import type { MessageType, PartialFieldInfo } from '@aptre/protobuf-es-lite'
-import { createMessageType, Message } from '@aptre/protobuf-es-lite'
+import { createMessageType, Message, ScalarType } from '@aptre/protobuf-es-lite'
 import { Config as Config$1 } from '../api.pb.js'
 
 export const protobufPackage = 'bus.api.controller'
@@ -28,15 +28,11 @@ export type Config = Message<{
   busApiConfig?: Config$1
 }>
 
+// Config contains the message type declaration for Config.
 export const Config: MessageType<Config> = createMessageType({
   typeName: 'bus.api.controller.Config',
   fields: [
-    {
-      no: 1,
-      name: 'listen_addr',
-      kind: 'scalar',
-      T: 9 /* ScalarType.STRING */,
-    },
+    { no: 1, name: 'listen_addr', kind: 'scalar', T: ScalarType.STRING },
     { no: 2, name: 'bus_api_config', kind: 'message', T: () => Config$1 },
   ] as readonly PartialFieldInfo[],
   packedByDefault: true,

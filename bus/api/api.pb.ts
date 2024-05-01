@@ -3,7 +3,7 @@
 /* eslint-disable */
 
 import type { MessageType, PartialFieldInfo } from '@aptre/protobuf-es-lite'
-import { createMessageType, Message } from '@aptre/protobuf-es-lite'
+import { createMessageType, Message, ScalarType } from '@aptre/protobuf-es-lite'
 import { Info } from '../../controller/controller.pb.js'
 import { DirectiveState } from '../../directive/directive.pb.js'
 
@@ -23,6 +23,7 @@ export type Config = Message<{
   enableExecController?: boolean
 }>
 
+// Config contains the message type declaration for Config.
 export const Config: MessageType<Config> = createMessageType({
   typeName: 'bus.api.Config',
   fields: [
@@ -30,7 +31,7 @@ export const Config: MessageType<Config> = createMessageType({
       no: 1,
       name: 'enable_exec_controller',
       kind: 'scalar',
-      T: 8 /* ScalarType.BOOL */,
+      T: ScalarType.BOOL,
     },
   ] as readonly PartialFieldInfo[],
   packedByDefault: true,
@@ -43,6 +44,7 @@ export const Config: MessageType<Config> = createMessageType({
  */
 export type GetBusInfoRequest = Message<{}>
 
+// GetBusInfoRequest contains the message type declaration for GetBusInfoRequest.
 export const GetBusInfoRequest: MessageType<GetBusInfoRequest> =
   createMessageType({
     typeName: 'bus.api.GetBusInfoRequest',
@@ -70,6 +72,7 @@ export type GetBusInfoResponse = Message<{
   runningDirectives?: DirectiveState[]
 }>
 
+// GetBusInfoResponse contains the message type declaration for GetBusInfoResponse.
 export const GetBusInfoResponse: MessageType<GetBusInfoResponse> =
   createMessageType({
     typeName: 'bus.api.GetBusInfoResponse',

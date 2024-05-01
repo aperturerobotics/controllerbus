@@ -3,10 +3,10 @@ module github.com/aperturerobotics/controllerbus
 go 1.22
 
 require (
-	github.com/aperturerobotics/common v0.14.8 // latest
-	github.com/aperturerobotics/protobuf-go-lite v0.6.0 // latest
-	github.com/aperturerobotics/starpc v0.31.12 // main
-	github.com/aperturerobotics/util v1.22.2-0.20240429204300-8b2d5826595d // latest
+	github.com/aperturerobotics/common v0.15.0 // latest
+	github.com/aperturerobotics/protobuf-go-lite v0.6.1 // latest
+	github.com/aperturerobotics/starpc v0.31.13 // main
+	github.com/aperturerobotics/util v1.22.1 // latest
 )
 
 require (
@@ -24,7 +24,7 @@ require (
 	golang.org/x/exp v0.0.0-20240416160154-fe59bbe5cc7f
 	golang.org/x/mod v0.17.0
 	golang.org/x/tools v0.20.0
-	google.golang.org/protobuf v1.33.0
+	google.golang.org/protobuf v1.34.0
 	mvdan.cc/gofumpt v0.6.0
 )
 

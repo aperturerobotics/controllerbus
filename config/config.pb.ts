@@ -14,6 +14,7 @@ export const protobufPackage = 'config'
  */
 export type Placeholder = Message<{}>
 
+// Placeholder contains the message type declaration for Placeholder.
 export const Placeholder: MessageType<Placeholder> = createMessageType({
   typeName: 'config.Placeholder',
   fields: [] as readonly PartialFieldInfo[],

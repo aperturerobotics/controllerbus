@@ -3,7 +3,7 @@
 /* eslint-disable */
 
 import type { MessageType, PartialFieldInfo } from '@aptre/protobuf-es-lite'
-import { createMessageType, Message } from '@aptre/protobuf-es-lite'
+import { createMessageType, Message, ScalarType } from '@aptre/protobuf-es-lite'
 
 export const protobufPackage = 'directive'
 
@@ -27,15 +27,16 @@ export type ProtoDebugValue = Message<{
   values?: string[]
 }>
 
+// ProtoDebugValue contains the message type declaration for ProtoDebugValue.
 export const ProtoDebugValue: MessageType<ProtoDebugValue> = createMessageType({
   typeName: 'directive.ProtoDebugValue',
   fields: [
-    { no: 1, name: 'key', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 1, name: 'key', kind: 'scalar', T: ScalarType.STRING },
     {
       no: 2,
       name: 'values',
       kind: 'scalar',
-      T: 9 /* ScalarType.STRING */,
+      T: ScalarType.STRING,
       repeated: true,
     },
   ] as readonly PartialFieldInfo[],
@@ -62,10 +63,11 @@ export type DirectiveInfo = Message<{
   debugVals?: ProtoDebugValue[]
 }>
 
+// DirectiveInfo contains the message type declaration for DirectiveInfo.
 export const DirectiveInfo: MessageType<DirectiveInfo> = createMessageType({
   typeName: 'directive.DirectiveInfo',
   fields: [
-    { no: 1, name: 'name', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 1, name: 'name', kind: 'scalar', T: ScalarType.STRING },
     {
       no: 2,
       name: 'debug_vals',
@@ -93,6 +95,7 @@ export type DirectiveState = Message<{
   info?: DirectiveInfo
 }>
 
+// DirectiveState contains the message type declaration for DirectiveState.
 export const DirectiveState: MessageType<DirectiveState> = createMessageType({
   typeName: 'directive.DirectiveState',
   fields: [

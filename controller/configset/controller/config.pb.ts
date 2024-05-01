@@ -16,6 +16,7 @@ export const protobufPackage = 'configset.controller'
  */
 export type Config = Message<{}>
 
+// Config contains the message type declaration for Config.
 export const Config: MessageType<Config> = createMessageType({
   typeName: 'configset.controller.Config',
   fields: [] as readonly PartialFieldInfo[],

@@ -7,6 +7,7 @@ import {
   createEnumType,
   createMessageType,
   Message,
+  ScalarType,
 } from '@aptre/protobuf-es-lite'
 import { ConfigSet } from '../configset/proto/configset.pb.js'
 import { Info } from '../controller.pb.js'
@@ -86,22 +87,18 @@ export type ExecControllerRequest = Message<{
   configSetYamlOverwrite?: boolean
 }>
 
+// ExecControllerRequest contains the message type declaration for ExecControllerRequest.
 export const ExecControllerRequest: MessageType<ExecControllerRequest> =
   createMessageType({
     typeName: 'controller.exec.ExecControllerRequest',
     fields: [
       { no: 1, name: 'config_set', kind: 'message', T: () => ConfigSet },
-      {
-        no: 2,
-        name: 'config_set_yaml',
-        kind: 'scalar',
-        T: 9 /* ScalarType.STRING */,
-      },
+      { no: 2, name: 'config_set_yaml', kind: 'scalar', T: ScalarType.STRING },
       {
         no: 3,
         name: 'config_set_yaml_overwrite',
         kind: 'scalar',
-        T: 8 /* ScalarType.BOOL */,
+        T: ScalarType.BOOL,
       },
     ] as readonly PartialFieldInfo[],
     packedByDefault: true,
@@ -139,19 +136,15 @@ export type ExecControllerResponse = Message<{
   errorInfo?: string
 }>
 
+// ExecControllerResponse contains the message type declaration for ExecControllerResponse.
 export const ExecControllerResponse: MessageType<ExecControllerResponse> =
   createMessageType({
     typeName: 'controller.exec.ExecControllerResponse',
     fields: [
-      { no: 1, name: 'id', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+      { no: 1, name: 'id', kind: 'scalar', T: ScalarType.STRING },
       { no: 2, name: 'status', kind: 'enum', T: ControllerStatus_Enum },
       { no: 3, name: 'controller_info', kind: 'message', T: () => Info },
-      {
-        no: 4,
-        name: 'error_info',
-        kind: 'scalar',
-        T: 9 /* ScalarType.STRING */,
-      },
+      { no: 4, name: 'error_info', kind: 'scalar', T: ScalarType.STRING },
     ] as readonly PartialFieldInfo[],
     packedByDefault: true,
   })

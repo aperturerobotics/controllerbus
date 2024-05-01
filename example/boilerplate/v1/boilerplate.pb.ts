@@ -3,7 +3,7 @@
 /* eslint-disable */
 
 import type { MessageType, PartialFieldInfo } from '@aptre/protobuf-es-lite'
-import { createMessageType, Message } from '@aptre/protobuf-es-lite'
+import { createMessageType, Message, ScalarType } from '@aptre/protobuf-es-lite'
 
 export const protobufPackage = 'boilerplate.v1'
 
@@ -23,15 +23,11 @@ export type Boilerplate = Message<{
   messageText?: string
 }>
 
+// Boilerplate contains the message type declaration for Boilerplate.
 export const Boilerplate: MessageType<Boilerplate> = createMessageType({
   typeName: 'boilerplate.v1.Boilerplate',
   fields: [
-    {
-      no: 1,
-      name: 'message_text',
-      kind: 'scalar',
-      T: 9 /* ScalarType.STRING */,
-    },
+    { no: 1, name: 'message_text', kind: 'scalar', T: ScalarType.STRING },
   ] as readonly PartialFieldInfo[],
   packedByDefault: true,
 })
@@ -50,16 +46,12 @@ export type BoilerplateResult = Message<{
   printedLen?: number
 }>
 
+// BoilerplateResult contains the message type declaration for BoilerplateResult.
 export const BoilerplateResult: MessageType<BoilerplateResult> =
   createMessageType({
     typeName: 'boilerplate.v1.BoilerplateResult',
     fields: [
-      {
-        no: 1,
-        name: 'printed_len',
-        kind: 'scalar',
-        T: 13 /* ScalarType.UINT32 */,
-      },
+      { no: 1, name: 'printed_len', kind: 'scalar', T: ScalarType.UINT32 },
     ] as readonly PartialFieldInfo[],
     packedByDefault: true,
   })
