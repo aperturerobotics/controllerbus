@@ -1,11 +1,11 @@
-github.com/aperturerobotics/common v0.15.0 h1:CA+t6vxhcvkCpxqhpUzwZDbz4u5FjmtaayXYeU2VIEE=
-github.com/aperturerobotics/common v0.15.0/go.mod h1:lbKmrcn9sYjn8LsQ+dYOUJ+wjZUCNySsce6+t8r6GFk=
+github.com/aperturerobotics/common v0.15.1 h1:ezvq0sNgGlCElxriqMVuIrBMB/OmIJrBaUiwBoi6xz8=
+github.com/aperturerobotics/common v0.15.1/go.mod h1:lbKmrcn9sYjn8LsQ+dYOUJ+wjZUCNySsce6+t8r6GFk=
 github.com/aperturerobotics/json-iterator-lite v1.0.0 h1:cihbrYWoK/S2RYXhJLpDZd+GUjVvFJN+D3w1VOqqHRI=
 github.com/aperturerobotics/json-iterator-lite v1.0.0/go.mod h1:snaApCEDtrHHP6UWSLKiYNOZU9A5NyzccKenx9oZEzg=
 github.com/aperturerobotics/protobuf-go-lite v0.6.1 h1:dN4baS2e2qHhdpX57RJKUEukseXrXtqtiUJxGFFUbRs=
 github.com/aperturerobotics/protobuf-go-lite v0.6.1/go.mod h1:6Bp+C+fI1uh0NmIKpxlxyHMkKtCP9Kb3PHkhOzxG4B8=
-github.com/aperturerobotics/starpc v0.31.13 h1:NPiSbagU94z1XIC9Eywcllv3ukiGbbH/Dw40DH+k7fc=
-github.com/aperturerobotics/starpc v0.31.13/go.mod h1:O9KeLOIEqrRMxtYioOjKTRvAOGqzqpZ3PbBAswWppJM=
+github.com/aperturerobotics/starpc v0.32.0 h1:DHWzcKH7VTZlAHmFusUAjQF1+On120mSJFcNKpvLUAM=
+github.com/aperturerobotics/starpc v0.32.0/go.mod h1:O9KeLOIEqrRMxtYioOjKTRvAOGqzqpZ3PbBAswWppJM=
 github.com/aperturerobotics/util v1.22.1 h1:ubwNwf5vh/f1dhj5v5OLN7sbfj0iC7NsK8NR+/LJH18=
 github.com/aperturerobotics/util v1.22.1/go.mod h1:b9c3xIwtCfd0DwhfOXB1Tk44uCckcYaB+0z8N17bWIY=
 github.com/blang/semver v3.5.1+incompatible h1:cQNTCjp13qL8KC3Nbxr/y2Bqb63oX6wdnnjpJbkM4JQ=

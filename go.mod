@@ -3,9 +3,9 @@ module github.com/aperturerobotics/controllerbus
 go 1.22
 
 require (
-	github.com/aperturerobotics/common v0.15.0 // latest
+	github.com/aperturerobotics/common v0.15.1 // latest
 	github.com/aperturerobotics/protobuf-go-lite v0.6.1 // latest
-	github.com/aperturerobotics/starpc v0.31.13 // main
+	github.com/aperturerobotics/starpc v0.32.0 // main
 	github.com/aperturerobotics/util v1.22.1 // latest
 )
 
