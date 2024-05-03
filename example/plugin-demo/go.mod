@@ -9,8 +9,8 @@ replace github.com/aperturerobotics/controllerbus => ../..
 require (
 	github.com/aperturerobotics/controllerbus v0.44.4 // master
 	github.com/aperturerobotics/protobuf-go-lite v0.6.1 // latest
-	github.com/aperturerobotics/starpc v0.32.0 // indirect; main
-	github.com/aperturerobotics/util v1.22.1 // indirect; latest
+	github.com/aperturerobotics/starpc v0.32.2 // indirect; main
+	github.com/aperturerobotics/util v1.23.0 // indirect; latest
 )
 
 require (

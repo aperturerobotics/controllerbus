@@ -3,14 +3,14 @@ module github.com/aperturerobotics/controllerbus
 go 1.22
 
 require (
-	github.com/aperturerobotics/common v0.15.1 // latest
+	github.com/aperturerobotics/common v0.15.2 // latest
+	github.com/aperturerobotics/json-iterator-lite v1.0.0 // latest
 	github.com/aperturerobotics/protobuf-go-lite v0.6.1 // latest
-	github.com/aperturerobotics/starpc v0.32.0 // main
-	github.com/aperturerobotics/util v1.22.1 // latest
+	github.com/aperturerobotics/starpc v0.32.2 // main
+	github.com/aperturerobotics/util v1.23.0 // latest
 )
 
 require (
-	github.com/aperturerobotics/json-iterator-lite v1.0.0
 	github.com/blang/semver v3.5.1+incompatible
 	github.com/cenkalti/backoff v2.2.1+incompatible
 	github.com/fsnotify/fsnotify v1.7.0
