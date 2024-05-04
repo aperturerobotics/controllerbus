@@ -59,7 +59,7 @@ added directive                               directive="LoadControllerWithConfi
 added directive                               directive="ExecController<config-id=controllerbus/example/boilerplate>"
 starting controller                           controller=controllerbus/example/boilerplate
 hello from boilerplate controller 1: hello world  controller=controllerbus/example/boilerplate
-controller exited normally                    controller=controllerbus/example/boilerplate exec-time="31.053µs"
+controller exited normally                    controller=controllerbus/example/boilerplate exec-dur="31.053µs"
 ```
 
 ### ConfigSet

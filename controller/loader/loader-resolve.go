@@ -157,7 +157,7 @@ func (c *resolver) Resolve(ctx context.Context, vh directive.ResolverHandler) er
 		le.Debug("starting controller")
 		execErr := bus.ExecuteController(c.ctx, ci)
 
-		le := le.WithField("exec-time", time.Since(t1).String())
+		le := le.WithField("exec-dur", time.Since(t1).String())
 		ctxCanceled := ctx.Err() != nil
 		if execErr != nil && (!ctxCanceled || execErr != context.Canceled) {
 			le.WithError(execErr).Warn("controller exited with error")
