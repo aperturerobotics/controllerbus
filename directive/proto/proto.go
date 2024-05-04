@@ -4,7 +4,7 @@ import (
 	"errors"
 
 	"github.com/aperturerobotics/controllerbus/directive"
-	"google.golang.org/protobuf/proto"
+	protobuf_go_lite "github.com/aperturerobotics/protobuf-go-lite"
 )
 
 // ErrNotProtobuf is returned when using a protobuf codec on a non-protobuf message.
@@ -36,11 +36,11 @@ func (c *protoCodec) Marshal(dir directive.Networked) ([]byte, error) {
 	if vtpbOk {
 		return vtpb.MarshalVT()
 	}
-	pb, pbOk := dir.(proto.Message)
+	pb, pbOk := dir.(protobuf_go_lite.Message)
 	if !pbOk {
 		return nil, ErrNotProtobuf
 	}
-	return proto.Marshal(pb)
+	return pb.MarshalVT()
 }
 
 // vtUnmarshal is the vtProtobuf unmarshal type.
@@ -59,11 +59,11 @@ func (c *protoCodec) Unmarshal(data []byte, dir directive.Networked) error {
 	if vtpbOk {
 		return vtpb.UnmarshalVT(data)
 	}
-	pb, pbOk := dir.(proto.Message)
+	pb, pbOk := dir.(protobuf_go_lite.Message)
 	if !pbOk {
 		return ErrNotProtobuf
 	}
-	return proto.Unmarshal(data, pb)
+	return pb.UnmarshalVT(data)
 }
 
 // _ is a type assertion

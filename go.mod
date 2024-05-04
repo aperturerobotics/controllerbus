@@ -2,11 +2,14 @@ module github.com/aperturerobotics/controllerbus
 
 go 1.22
 
+// While not absolutely necessary, this fork uses go-protobuf-lite.
+replace github.com/libp2p/go-libp2p => github.com/aperturerobotics/go-libp2p v0.33.1-0.20240504075939-591fc65373be // aperture
+
 require (
 	github.com/aperturerobotics/common v0.15.2 // latest
 	github.com/aperturerobotics/json-iterator-lite v1.0.0 // latest
 	github.com/aperturerobotics/protobuf-go-lite v0.6.1 // latest
-	github.com/aperturerobotics/starpc v0.32.2 // main
+	github.com/aperturerobotics/starpc v0.32.3 // main
 	github.com/aperturerobotics/util v1.23.0 // latest
 )
 
@@ -24,7 +27,6 @@ require (
 	golang.org/x/exp v0.0.0-20240416160154-fe59bbe5cc7f
 	golang.org/x/mod v0.17.0
 	golang.org/x/tools v0.20.0
-	google.golang.org/protobuf v1.34.0
 	mvdan.cc/gofumpt v0.6.0
 )
 

@@ -2,14 +2,15 @@ module github.com/aperturerobotics/controllerbus/example/plugin-demo
 
 go 1.22
 
-toolchain go1.22.2
-
 replace github.com/aperturerobotics/controllerbus => ../..
+
+// While not absolutely necessary, this fork uses go-protobuf-lite.
+replace github.com/libp2p/go-libp2p => github.com/aperturerobotics/go-libp2p v0.33.1-0.20240504075939-591fc65373be // aperture
 
 require (
 	github.com/aperturerobotics/controllerbus v0.44.5 // master
 	github.com/aperturerobotics/protobuf-go-lite v0.6.1 // latest
-	github.com/aperturerobotics/starpc v0.32.2 // indirect; main
+	github.com/aperturerobotics/starpc v0.32.3 // indirect; main
 	github.com/aperturerobotics/util v1.23.0 // indirect; latest
 )
 
@@ -53,7 +54,6 @@ require (
 	golang.org/x/sync v0.7.0 // indirect
 	golang.org/x/sys v0.19.0 // indirect
 	golang.org/x/tools v0.20.0 // indirect
-	google.golang.org/protobuf v1.34.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	lukechampine.com/blake3 v1.2.1 // indirect
