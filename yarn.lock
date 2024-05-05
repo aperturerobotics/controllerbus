@@ -3,9 +3,9 @@
 
 
 "@aptre/common@^0.15.4":
-  version "0.15.4"
-  resolved "https://registry.yarnpkg.com/@aptre/common/-/common-0.15.4.tgz#26a70161e13f1aa897e703c72449762d854ce1d9"
-  integrity sha512-UYHYnngO++J20b+4dUgjY2WkPOo3MR/AMz+azE3dUxWQf2S7ghgpMACvwhlg9ijGZ+6kAUpwpjMNY4Kvlhxh6A==
+  version "0.15.5"
+  resolved "https://registry.yarnpkg.com/@aptre/common/-/common-0.15.5.tgz#291816522daf5f84d2064bb4430f9a3525c9c9b6"
+  integrity sha512-zOuHMenwKXkOtntEdTPgUG7IH5XXdQGAdkVh7X0aKeR0SrQEqzi2gSX+s3dw8x503GwR7ryFC3djkDzn7WJvdA==
   dependencies:
     "@aptre/protobuf-es-lite" "^0.4.3"
     "@typescript-eslint/eslint-plugin" "^7.8.0"
@@ -216,9 +216,9 @@
   integrity sha512-93zYdMES/c1D69yZiKDBj0V24vqNzB/koF26KPaagAfd3P/4gUlh3Dys5ogAK+Exi9QyzlD8x/08Zt7wIKcDcA==
 
 "@humanwhocodes/retry@^0.2.3":
-  version "0.2.3"
-  resolved "https://registry.yarnpkg.com/@humanwhocodes/retry/-/retry-0.2.3.tgz#c9aa036d1afa643f1250e83150f39efb3a15a631"
-  integrity sha512-X38nUbachlb01YMlvPFojKoiXq+LzZvuSce70KPMPdeM1Rj03k4dR7lDslhbqXn3Ang4EU3+EAmwEAsbrjHW3g==
+  version "0.2.4"
+  resolved "https://registry.yarnpkg.com/@humanwhocodes/retry/-/retry-0.2.4.tgz#4f3059423823bd8176132ceea9447dee101dfac1"
+  integrity sha512-Ttl/jHpxfS3st5sxwICYfk4pOH0WrLI1SpW283GgQL7sCWU7EHIOhX4b4fkIxr3tkfzwg8+FNojtzsIEE7Ecgg==
 
 "@isaacs/cliui@^8.0.2":
   version "8.0.2"
@@ -1894,9 +1894,9 @@ sprintf-js@~1.0.2:
   integrity sha512-D9cPgkvLlV3t3IzL0D0YLvGA9Ahk4PcvVwUbN0dSGr1aP0Nrt4AEnTUbuGvquEC0mA64Gqt1fzirlRs5ibXx8g==
 
 starpc@^0.32.3:
-  version "0.32.3"
-  resolved "https://registry.yarnpkg.com/starpc/-/starpc-0.32.3.tgz#238ddc76ecbe28242089953101ca8db809db6006"
-  integrity sha512-TDDrk60B2WDikRtKrQ36cqI7v3w5SGIh90uFOsOg2AEk5USgb+p31bDs/IB+SvO5g7DJllA2vFkQv/lwpsTAaw==
+  version "0.32.4"
+  resolved "https://registry.yarnpkg.com/starpc/-/starpc-0.32.4.tgz#5973a277d2505b5aef648280fddc5d3c29166b00"
+  integrity sha512-l9+GiC1W6zegdIJPw2g+pM2dyn99zc5qQxkB+0Ww0K13PbKdeprGUvz3nbutQJE8Mtc42kLRvdnJAOu3ZWl0Wg==
   dependencies:
     "@aptre/it-ws" "^1.0.0"
     "@aptre/protobuf-es-lite" "^0.4.3"
