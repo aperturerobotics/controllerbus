@@ -1,5 +1,6 @@
 github.com/aperturerobotics/common v0.15.5 h1:6imQU3QlLFR2NW4HrJUmc1fqb9kHArtgf0FP9Ag10XI=
 github.com/aperturerobotics/common v0.15.5/go.mod h1:R76WABZ3PDLrAhScLVjnzsI8S0rhIVNowxbzv4f8ZdM=
+github.com/aperturerobotics/common v0.15.6/go.mod h1:R76WABZ3PDLrAhScLVjnzsI8S0rhIVNowxbzv4f8ZdM=
 github.com/aperturerobotics/go-libp2p v0.33.1-0.20240504075939-591fc65373be h1:PZi7dbdjWqHa0TE1lD0f5WxzshL/qPp9fZ1K55fGo1c=
 github.com/aperturerobotics/go-libp2p v0.33.1-0.20240504075939-591fc65373be/go.mod h1:gA6iEEVpQcx0xpygG/U0wkm+DfII4zoPc3EWViXC5b0=
 github.com/aperturerobotics/json-iterator-lite v1.0.0 h1:cihbrYWoK/S2RYXhJLpDZd+GUjVvFJN+D3w1VOqqHRI=

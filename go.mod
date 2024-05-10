@@ -6,7 +6,7 @@ go 1.22
 replace github.com/libp2p/go-libp2p => github.com/aperturerobotics/go-libp2p v0.33.1-0.20240504075939-591fc65373be // aperture
 
 require (
-	github.com/aperturerobotics/common v0.15.5 // latest
+	github.com/aperturerobotics/common v0.15.6 // latest
 	github.com/aperturerobotics/json-iterator-lite v1.0.0 // latest
 	github.com/aperturerobotics/protobuf-go-lite v0.6.1 // latest
 	github.com/aperturerobotics/starpc v0.32.4 // main
