@@ -2,11 +2,14 @@ package static
 
 import (
 	"context"
+	"slices"
+	"strings"
 	"sync"
 
 	"github.com/aperturerobotics/controllerbus/config"
 	"github.com/aperturerobotics/controllerbus/controller"
 	"github.com/blang/semver"
+	"golang.org/x/exp/maps"
 )
 
 // ResolverID is the resolver identifier.
@@ -62,6 +65,15 @@ func (r *Resolver) AddFactory(factory controller.Factory) {
 	}
 
 	r.factories[configID] = factory
+}
+
+// GetFactories returns the factories associated w/ the resolver.
+func (r *Resolver) GetFactories() []controller.Factory {
+	vals := maps.Values(r.factories)
+	slices.SortFunc(vals, func(a, b controller.Factory) int {
+		return strings.Compare(a.GetConfigID(), b.GetConfigID())
+	})
+	return vals
 }
 
 // GetConfigCtorByID returns a config constructor matching the ID.
