@@ -10,8 +10,8 @@ replace github.com/libp2p/go-msgio => github.com/aperturerobotics/go-libp2p-msgi
 require (
 	github.com/aperturerobotics/common v0.15.6 // latest
 	github.com/aperturerobotics/json-iterator-lite v1.0.0 // latest
-	github.com/aperturerobotics/protobuf-go-lite v0.6.3-0.20240511031615-65e4a61b7e69 // latest
-	github.com/aperturerobotics/starpc v0.32.4 // main
+	github.com/aperturerobotics/protobuf-go-lite v0.6.3 // latest
+	github.com/aperturerobotics/starpc v0.32.8 // latest
 	github.com/aperturerobotics/util v1.23.1 // latest
 )
 
