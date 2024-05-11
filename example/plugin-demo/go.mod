@@ -5,13 +5,13 @@ go 1.22
 replace github.com/aperturerobotics/controllerbus => ../..
 
 // While not absolutely necessary, this fork uses go-protobuf-lite.
-replace github.com/libp2p/go-libp2p => github.com/aperturerobotics/go-libp2p v0.33.1-0.20240504075939-591fc65373be // aperture
+replace github.com/libp2p/go-libp2p => github.com/aperturerobotics/go-libp2p v0.33.1-0.20240511072027-002c32698a19 // aperture
 
 require (
 	github.com/aperturerobotics/controllerbus v0.44.5 // master
-	github.com/aperturerobotics/protobuf-go-lite v0.6.1 // latest
+	github.com/aperturerobotics/protobuf-go-lite v0.6.3-0.20240511031615-65e4a61b7e69 // latest
 	github.com/aperturerobotics/starpc v0.32.4 // indirect; main
-	github.com/aperturerobotics/util v1.23.0 // indirect; latest
+	github.com/aperturerobotics/util v1.23.1 // indirect; latest
 )
 
 require (
@@ -23,8 +23,8 @@ require (
 require (
 	github.com/aperturerobotics/json-iterator-lite v1.0.0 // indirect
 	github.com/cenkalti/backoff v2.2.1+incompatible // indirect
+	github.com/cloudflare/circl v1.3.8 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.4 // indirect
-	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.2.0 // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
 	github.com/ghodss/yaml v1.0.0 // indirect
 	github.com/google/go-cmp v0.6.0 // indirect
@@ -39,7 +39,6 @@ require (
 	github.com/multiformats/go-base36 v0.2.0 // indirect
 	github.com/multiformats/go-multiaddr v0.12.3 // indirect
 	github.com/multiformats/go-multibase v0.2.0 // indirect
-	github.com/multiformats/go-multicodec v0.9.0 // indirect
 	github.com/multiformats/go-multihash v0.2.3 // indirect
 	github.com/multiformats/go-multistream v0.5.0 // indirect
 	github.com/multiformats/go-varint v0.0.7 // indirect
