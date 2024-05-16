@@ -11,8 +11,8 @@ require (
 	github.com/aperturerobotics/common v0.16.4 // latest
 	github.com/aperturerobotics/json-iterator-lite v1.0.0 // latest
 	github.com/aperturerobotics/protobuf-go-lite v0.6.5 // latest
-	github.com/aperturerobotics/starpc v0.32.9 // latest
-	github.com/aperturerobotics/util v1.23.2 // latest
+	github.com/aperturerobotics/starpc v0.32.10 // latest
+	github.com/aperturerobotics/util v1.23.3 // latest
 )
 
 require (

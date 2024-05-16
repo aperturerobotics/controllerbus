@@ -10,8 +10,8 @@ replace github.com/libp2p/go-libp2p => github.com/aperturerobotics/go-libp2p v0.
 require (
 	github.com/aperturerobotics/controllerbus v0.45.3 // master
 	github.com/aperturerobotics/protobuf-go-lite v0.6.5 // latest
-	github.com/aperturerobotics/starpc v0.32.9 // indirect; main
-	github.com/aperturerobotics/util v1.23.2 // indirect; latest
+	github.com/aperturerobotics/starpc v0.32.10 // indirect; main
+	github.com/aperturerobotics/util v1.23.3 // indirect; latest
 )
 
 require (
