@@ -8,9 +8,9 @@ replace github.com/libp2p/go-libp2p => github.com/aperturerobotics/go-libp2p v0.
 replace github.com/libp2p/go-msgio => github.com/aperturerobotics/go-libp2p-msgio v0.0.0-20240511033615-1b69178aa5c8 // aperture
 
 require (
-	github.com/aperturerobotics/common v0.15.7 // latest
+	github.com/aperturerobotics/common v0.16.1 // latest
 	github.com/aperturerobotics/json-iterator-lite v1.0.0 // latest
-	github.com/aperturerobotics/protobuf-go-lite v0.6.3 // latest
+	github.com/aperturerobotics/protobuf-go-lite v0.6.4 // latest
 	github.com/aperturerobotics/starpc v0.32.8 // latest
 	github.com/aperturerobotics/util v1.23.1 // latest
 )
