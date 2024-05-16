@@ -43,7 +43,7 @@
     "singleQuote": true
   },
   "devDependencies": {
-    "@aptre/common": "^0.16.3",
+    "@aptre/common": "^0.16.4",
     "depcheck": "^1.4.7",
     "prettier": "^3.0.1",
     "rimraf": "^5.0.5",
