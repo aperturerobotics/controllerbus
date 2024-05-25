@@ -26,7 +26,7 @@ require (
 	github.com/sirupsen/logrus v1.9.3
 	github.com/urfave/cli/v2 v2.27.2
 	github.com/zeebo/blake3 v0.2.3
-	golang.org/x/exp v0.0.0-20240506185415-9bf2ced13842
+	golang.org/x/exp v0.0.0-20240525044651-4c93da0ed11d
 	golang.org/x/mod v0.17.0
 	golang.org/x/tools v0.21.0
 	mvdan.cc/gofumpt v0.6.0
