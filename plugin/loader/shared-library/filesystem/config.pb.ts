@@ -3,7 +3,7 @@
 /* eslint-disable */
 
 import type { MessageType, PartialFieldInfo } from '@aptre/protobuf-es-lite'
-import { createMessageType, Message, ScalarType } from '@aptre/protobuf-es-lite'
+import { createMessageType, ScalarType } from '@aptre/protobuf-es-lite'
 
 export const protobufPackage = 'plugin.loader.filesystem'
 
@@ -12,7 +12,7 @@ export const protobufPackage = 'plugin.loader.filesystem'
  *
  * @generated from message plugin.loader.filesystem.Config
  */
-export type Config = Message<{
+export interface Config {
   /**
    * Dir is the directory to load from.
    *
@@ -25,7 +25,7 @@ export type Config = Message<{
    * @generated from field: bool watch = 2;
    */
   watch?: boolean
-}>
+}
 
 // Config contains the message type declaration for Config.
 export const Config: MessageType<Config> = createMessageType({

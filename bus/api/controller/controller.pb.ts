@@ -2,9 +2,9 @@
 // @generated from file github.com/aperturerobotics/controllerbus/bus/api/controller/controller.proto (package bus.api.controller, syntax proto3)
 /* eslint-disable */
 
-import type { MessageType, PartialFieldInfo } from '@aptre/protobuf-es-lite'
-import { createMessageType, Message, ScalarType } from '@aptre/protobuf-es-lite'
 import { Config as Config$1 } from '../api.pb.js'
+import type { MessageType, PartialFieldInfo } from '@aptre/protobuf-es-lite'
+import { createMessageType, ScalarType } from '@aptre/protobuf-es-lite'
 
 export const protobufPackage = 'bus.api.controller'
 
@@ -13,7 +13,7 @@ export const protobufPackage = 'bus.api.controller'
  *
  * @generated from message bus.api.controller.Config
  */
-export type Config = Message<{
+export interface Config {
   /**
    * ListenAddr is the address to listen on for connections.
    *
@@ -26,7 +26,7 @@ export type Config = Message<{
    * @generated from field: bus.api.Config bus_api_config = 2;
    */
   busApiConfig?: Config$1
-}>
+}
 
 // Config contains the message type declaration for Config.
 export const Config: MessageType<Config> = createMessageType({

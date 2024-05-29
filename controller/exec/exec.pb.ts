@@ -6,7 +6,6 @@ import type { MessageType, PartialFieldInfo } from '@aptre/protobuf-es-lite'
 import {
   createEnumType,
   createMessageType,
-  Message,
   ScalarType,
 } from '@aptre/protobuf-es-lite'
 import { ConfigSet } from '../configset/proto/configset.pb.js'
@@ -65,7 +64,7 @@ export const ControllerStatus_Enum = createEnumType(
  *
  * @generated from message controller.exec.ExecControllerRequest
  */
-export type ExecControllerRequest = Message<{
+export interface ExecControllerRequest {
   /**
    * ConfigSet is the controller config set to execute.
    *
@@ -85,7 +84,7 @@ export type ExecControllerRequest = Message<{
    * @generated from field: bool config_set_yaml_overwrite = 3;
    */
   configSetYamlOverwrite?: boolean
-}>
+}
 
 // ExecControllerRequest contains the message type declaration for ExecControllerRequest.
 export const ExecControllerRequest: MessageType<ExecControllerRequest> =
@@ -109,7 +108,7 @@ export const ExecControllerRequest: MessageType<ExecControllerRequest> =
  *
  * @generated from message controller.exec.ExecControllerResponse
  */
-export type ExecControllerResponse = Message<{
+export interface ExecControllerResponse {
   /**
    * Id is the configset identifier for this status report.
    *
@@ -134,7 +133,7 @@ export type ExecControllerResponse = Message<{
    * @generated from field: string error_info = 4;
    */
   errorInfo?: string
-}>
+}
 
 // ExecControllerResponse contains the message type declaration for ExecControllerResponse.
 export const ExecControllerResponse: MessageType<ExecControllerResponse> =

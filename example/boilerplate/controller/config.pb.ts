@@ -3,7 +3,7 @@
 /* eslint-disable */
 
 import type { MessageType, PartialFieldInfo } from '@aptre/protobuf-es-lite'
-import { createMessageType, Message, ScalarType } from '@aptre/protobuf-es-lite'
+import { createMessageType, ScalarType } from '@aptre/protobuf-es-lite'
 
 export const protobufPackage = 'boilerplate.controller'
 
@@ -12,7 +12,7 @@ export const protobufPackage = 'boilerplate.controller'
  *
  * @generated from message boilerplate.controller.Config
  */
-export type Config = Message<{
+export interface Config {
   /**
    * ExampleField is an example configuration field.
    *
@@ -25,7 +25,7 @@ export type Config = Message<{
    * @generated from field: string fail_with_err = 2;
    */
   failWithErr?: string
-}>
+}
 
 // Config contains the message type declaration for Config.
 export const Config: MessageType<Config> = createMessageType({

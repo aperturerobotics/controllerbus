@@ -3,7 +3,7 @@
 /* eslint-disable */
 
 import { GetBusInfoRequest, GetBusInfoResponse } from './api.pb.js'
-import { Message, MethodKind } from '@aptre/protobuf-es-lite'
+import { MethodKind } from '@aptre/protobuf-es-lite'
 import {
   ExecControllerRequest,
   ExecControllerResponse,
@@ -55,9 +55,9 @@ export interface ControllerBusService {
    * @generated from rpc bus.api.ControllerBusService.GetBusInfo
    */
   GetBusInfo(
-    request: Message<GetBusInfoRequest>,
+    request: GetBusInfoRequest,
     abortSignal?: AbortSignal,
-  ): Promise<Message<GetBusInfoResponse>>
+  ): Promise<GetBusInfoResponse>
 
   /**
    * ExecController executes a controller configuration on the bus.
@@ -65,7 +65,7 @@ export interface ControllerBusService {
    * @generated from rpc bus.api.ControllerBusService.ExecController
    */
   ExecController(
-    request: Message<ExecControllerRequest>,
+    request: ExecControllerRequest,
     abortSignal?: AbortSignal,
   ): MessageStream<ExecControllerResponse>
 }
@@ -88,9 +88,9 @@ export class ControllerBusServiceClient implements ControllerBusService {
    * @generated from rpc bus.api.ControllerBusService.GetBusInfo
    */
   async GetBusInfo(
-    request: Message<GetBusInfoRequest>,
+    request: GetBusInfoRequest,
     abortSignal?: AbortSignal,
-  ): Promise<Message<GetBusInfoResponse>> {
+  ): Promise<GetBusInfoResponse> {
     const requestMsg = GetBusInfoRequest.create(request)
     const result = await this.rpc.request(
       this.service,
@@ -107,7 +107,7 @@ export class ControllerBusServiceClient implements ControllerBusService {
    * @generated from rpc bus.api.ControllerBusService.ExecController
    */
   ExecController(
-    request: Message<ExecControllerRequest>,
+    request: ExecControllerRequest,
     abortSignal?: AbortSignal,
   ): MessageStream<ExecControllerResponse> {
     const requestMsg = ExecControllerRequest.create(request)

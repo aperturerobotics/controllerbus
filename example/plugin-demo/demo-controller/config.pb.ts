@@ -3,7 +3,7 @@
 /* eslint-disable */
 
 import type { MessageType, PartialFieldInfo } from '@aptre/protobuf-es-lite'
-import { createMessageType, Message, ScalarType } from '@aptre/protobuf-es-lite'
+import { createMessageType, ScalarType } from '@aptre/protobuf-es-lite'
 
 export const protobufPackage = 'hot.compile.demo.controller'
 
@@ -12,14 +12,14 @@ export const protobufPackage = 'hot.compile.demo.controller'
  *
  * @generated from message hot.compile.demo.controller.Config
  */
-export type Config = Message<{
+export interface Config {
   /**
    * ExitAfterDur requests an os.Exit(0) after a duration.
    *
    * @generated from field: string exit_after_dur = 1;
    */
   exitAfterDur?: string
-}>
+}
 
 // Config contains the message type declaration for Config.
 export const Config: MessageType<Config> = createMessageType({

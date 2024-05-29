@@ -3,7 +3,7 @@
 /* eslint-disable */
 
 import type { MessageType, PartialFieldInfo } from '@aptre/protobuf-es-lite'
-import { createMessageType, Message } from '@aptre/protobuf-es-lite'
+import { createMessageType } from '@aptre/protobuf-es-lite'
 
 export const protobufPackage = 'config'
 
@@ -12,7 +12,7 @@ export const protobufPackage = 'config'
  *
  * @generated from message config.Placeholder
  */
-export type Placeholder = Message<{}>
+export interface Placeholder {}
 
 // Placeholder contains the message type declaration for Placeholder.
 export const Placeholder: MessageType<Placeholder> = createMessageType({
