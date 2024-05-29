@@ -3,7 +3,7 @@ module github.com/aperturerobotics/controllerbus
 go 1.22
 
 // Optional: this fork uses go-protobuf-lite and adds post-quantum crypto support.
-replace github.com/libp2p/go-libp2p => github.com/aperturerobotics/go-libp2p v0.33.1-0.20240511072027-002c32698a19 // aperture
+replace github.com/libp2p/go-libp2p => github.com/aperturerobotics/go-libp2p v0.33.1-0.20240511223728-e0b67c111765 // aperture
 
 replace github.com/libp2p/go-msgio => github.com/aperturerobotics/go-libp2p-msgio v0.0.0-20240511033615-1b69178aa5c8 // aperture
 

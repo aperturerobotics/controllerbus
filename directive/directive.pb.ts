@@ -3,7 +3,7 @@
 /* eslint-disable */
 
 import type { MessageType, PartialFieldInfo } from '@aptre/protobuf-es-lite'
-import { createMessageType, Message, ScalarType } from '@aptre/protobuf-es-lite'
+import { createMessageType, ScalarType } from '@aptre/protobuf-es-lite'
 
 export const protobufPackage = 'directive'
 
@@ -12,7 +12,7 @@ export const protobufPackage = 'directive'
  *
  * @generated from message directive.ProtoDebugValue
  */
-export type ProtoDebugValue = Message<{
+export interface ProtoDebugValue {
   /**
    * Key is the debug value key.
    *
@@ -25,7 +25,7 @@ export type ProtoDebugValue = Message<{
    * @generated from field: repeated string values = 2;
    */
   values?: string[]
-}>
+}
 
 // ProtoDebugValue contains the message type declaration for ProtoDebugValue.
 export const ProtoDebugValue: MessageType<ProtoDebugValue> = createMessageType({
@@ -48,7 +48,7 @@ export const ProtoDebugValue: MessageType<ProtoDebugValue> = createMessageType({
  *
  * @generated from message directive.DirectiveInfo
  */
-export type DirectiveInfo = Message<{
+export interface DirectiveInfo {
   /**
    * Name is the directive name.
    *
@@ -61,7 +61,7 @@ export type DirectiveInfo = Message<{
    * @generated from field: repeated directive.ProtoDebugValue debug_vals = 2;
    */
   debugVals?: ProtoDebugValue[]
-}>
+}
 
 // DirectiveInfo contains the message type declaration for DirectiveInfo.
 export const DirectiveInfo: MessageType<DirectiveInfo> = createMessageType({
@@ -84,7 +84,7 @@ export const DirectiveInfo: MessageType<DirectiveInfo> = createMessageType({
  *
  * @generated from message directive.DirectiveState
  */
-export type DirectiveState = Message<{
+export interface DirectiveState {
   /**
    * Info is the directive info.
    *
@@ -93,7 +93,7 @@ export type DirectiveState = Message<{
    * @generated from field: directive.DirectiveInfo info = 1;
    */
   info?: DirectiveInfo
-}>
+}
 
 // DirectiveState contains the message type declaration for DirectiveState.
 export const DirectiveState: MessageType<DirectiveState> = createMessageType({

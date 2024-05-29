@@ -3,7 +3,7 @@
 /* eslint-disable */
 
 import type { MessageType, PartialFieldInfo } from '@aptre/protobuf-es-lite'
-import { createMessageType, Message, ScalarType } from '@aptre/protobuf-es-lite'
+import { createMessageType, ScalarType } from '@aptre/protobuf-es-lite'
 
 export const protobufPackage = 'configset.proto'
 
@@ -14,7 +14,7 @@ export const protobufPackage = 'configset.proto'
  *
  * @generated from message configset.proto.ControllerConfig
  */
-export type ControllerConfig = Message<{
+export interface ControllerConfig {
   /**
    * Id is the config ID.
    *
@@ -35,7 +35,7 @@ export type ControllerConfig = Message<{
    * @generated from field: bytes config = 3;
    */
   config?: Uint8Array
-}>
+}
 
 // ControllerConfig contains the message type declaration for ControllerConfig.
 export const ControllerConfig: MessageType<ControllerConfig> =
@@ -54,14 +54,14 @@ export const ControllerConfig: MessageType<ControllerConfig> =
  *
  * @generated from message configset.proto.ConfigSet
  */
-export type ConfigSet = Message<{
+export interface ConfigSet {
   /**
    * Configs contains the controller configurations.
    *
    * @generated from field: map<string, configset.proto.ControllerConfig> configs = 1;
    */
   configs?: { [key: string]: ControllerConfig }
-}>
+}
 
 // ConfigSet contains the message type declaration for ConfigSet.
 export const ConfigSet: MessageType<ConfigSet> = createMessageType({

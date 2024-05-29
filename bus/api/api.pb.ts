@@ -3,7 +3,7 @@
 /* eslint-disable */
 
 import type { MessageType, PartialFieldInfo } from '@aptre/protobuf-es-lite'
-import { createMessageType, Message, ScalarType } from '@aptre/protobuf-es-lite'
+import { createMessageType, ScalarType } from '@aptre/protobuf-es-lite'
 import { Info } from '../../controller/controller.pb.js'
 import { DirectiveState } from '../../directive/directive.pb.js'
 
@@ -14,14 +14,14 @@ export const protobufPackage = 'bus.api'
  *
  * @generated from message bus.api.Config
  */
-export type Config = Message<{
+export interface Config {
   /**
    * EnableExecController enables the exec controller API.
    *
    * @generated from field: bool enable_exec_controller = 1;
    */
   enableExecController?: boolean
-}>
+}
 
 // Config contains the message type declaration for Config.
 export const Config: MessageType<Config> = createMessageType({
@@ -42,7 +42,7 @@ export const Config: MessageType<Config> = createMessageType({
  *
  * @generated from message bus.api.GetBusInfoRequest
  */
-export type GetBusInfoRequest = Message<{}>
+export interface GetBusInfoRequest {}
 
 // GetBusInfoRequest contains the message type declaration for GetBusInfoRequest.
 export const GetBusInfoRequest: MessageType<GetBusInfoRequest> =
@@ -57,7 +57,7 @@ export const GetBusInfoRequest: MessageType<GetBusInfoRequest> =
  *
  * @generated from message bus.api.GetBusInfoResponse
  */
-export type GetBusInfoResponse = Message<{
+export interface GetBusInfoResponse {
   /**
    * RunningControllers is the list of running controllers.
    *
@@ -70,7 +70,7 @@ export type GetBusInfoResponse = Message<{
    * @generated from field: repeated directive.DirectiveState running_directives = 2;
    */
   runningDirectives?: DirectiveState[]
-}>
+}
 
 // GetBusInfoResponse contains the message type declaration for GetBusInfoResponse.
 export const GetBusInfoResponse: MessageType<GetBusInfoResponse> =

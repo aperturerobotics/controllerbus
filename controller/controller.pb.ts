@@ -3,7 +3,7 @@
 /* eslint-disable */
 
 import type { MessageType, PartialFieldInfo } from '@aptre/protobuf-es-lite'
-import { createMessageType, Message, ScalarType } from '@aptre/protobuf-es-lite'
+import { createMessageType, ScalarType } from '@aptre/protobuf-es-lite'
 
 export const protobufPackage = 'controller'
 
@@ -12,7 +12,7 @@ export const protobufPackage = 'controller'
  *
  * @generated from message controller.Info
  */
-export type Info = Message<{
+export interface Info {
   /**
    * Id contains the identifier of the controller.
    *
@@ -31,7 +31,7 @@ export type Info = Message<{
    * @generated from field: string description = 3;
    */
   description?: string
-}>
+}
 
 // Info contains the message type declaration for Info.
 export const Info: MessageType<Info> = createMessageType({
