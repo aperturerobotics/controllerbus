@@ -14,14 +14,14 @@ import (
 type TransformValueFunc[T, R Value] func(ctx context.Context, val T) (rval R, ok bool, err error)
 
 // WatchableTransformResolver wraps a Watchable into a resolver and transforms the values.
-type WatchableTransformResolver[T comparable, R Value] struct {
+type WatchableTransformResolver[T ComparableValue, R Value] struct {
 	// ctr is the watchable
 	ctr  ccontainer.Watchable[T]
 	xfrm TransformValueFunc[T, R]
 }
 
 // NewWatchableTransformResolver constructs a new WatchableTransformResolver.
-func NewWatchableTransformResolver[T comparable, R Value](ctr ccontainer.Watchable[T], xfrm TransformValueFunc[T, R]) *WatchableTransformResolver[T, R] {
+func NewWatchableTransformResolver[T ComparableValue, R Value](ctr ccontainer.Watchable[T], xfrm TransformValueFunc[T, R]) *WatchableTransformResolver[T, R] {
 	return &WatchableTransformResolver[T, R]{ctr: ctr, xfrm: xfrm}
 }
 
