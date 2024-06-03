@@ -21,7 +21,10 @@ type WatchableTransformResolver[T ComparableValue, R Value] struct {
 }
 
 // NewWatchableTransformResolver constructs a new WatchableTransformResolver.
-func NewWatchableTransformResolver[T ComparableValue, R Value](ctr ccontainer.Watchable[T], xfrm TransformValueFunc[T, R]) *WatchableTransformResolver[T, R] {
+func NewWatchableTransformResolver[T ComparableValue, R Value](
+	ctr ccontainer.Watchable[T],
+	xfrm TransformValueFunc[T, R],
+) *WatchableTransformResolver[T, R] {
 	return &WatchableTransformResolver[T, R]{ctr: ctr, xfrm: xfrm}
 }
 
@@ -44,13 +47,12 @@ func (r *WatchableTransformResolver[T, R]) Resolve(ctx context.Context, handler 
 				if err != nil {
 					return err
 				}
-				if !ok {
-					return nil
-				}
-				var accepted bool
-				valID, accepted = handler.AddValue(result)
-				if !accepted {
-					return io.EOF
+				if ok {
+					var accepted bool
+					valID, accepted = handler.AddValue(result)
+					if !accepted {
+						return io.EOF
+					}
 				}
 			}
 			return nil
