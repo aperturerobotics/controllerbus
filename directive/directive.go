@@ -440,7 +440,7 @@ type Resolver interface {
 	Resolve(ctx context.Context, handler ResolverHandler) error
 }
 
-// Handler handles new reference instances.
+// Handler handles directives.
 type Handler interface {
 	// HandleDirective asks if the handler can resolve the directive.
 	// If it can, it returns resolver(s). If not, returns nil.
@@ -449,3 +449,10 @@ type Handler interface {
 	// NOTE: the passed context is not canceled when the handler is removed.
 	HandleDirective(context.Context, Instance) ([]Resolver, error)
 }
+
+// HandlerFunc asks if the handler can resolve the directive.
+// If it can, it returns resolver(s). If not, returns nil.
+// It is safe to add a reference to the directive during this call.
+// The passed context is canceled when the directive instance expires.
+// NOTE: the passed context is not canceled when the handler is removed.
+type HandlerFunc = func(context.Context, Instance) ([]Resolver, error)
