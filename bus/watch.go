@@ -128,6 +128,7 @@ func ExecOneOffWatchRoutine[T directive.ComparableValue](
 // ExecOneOffWatchCh executes a one-off directive and watches for changes.
 // Returns a channel with size 1 which will hold the latest value.
 // Continues to watch for changes until the directive is released.
+// Returns a nil value if the value becomes unset.
 func ExecOneOffWatchCh[T directive.ComparableValue](
 	b Bus,
 	dir directive.Directive,
@@ -150,6 +151,47 @@ func ExecOneOffWatchCh[T directive.ComparableValue](
 		return nil, nil, nil, err
 	}
 	return valCh, di, diRef, nil
+}
+
+// ExecOneOffWatchLatestCb executes a one-off directive and watches for changes.
+// The init callback is called with the directive instance and reference once set.
+// The callback is called with the latest value or nil if the value is removed.
+// The callback will not be called concurrently (only one instance at a time).
+// Values may be dropped if the callback takes longer to execute than a value is available.
+// Continues to watch for changes until the directive is released.
+// Both callbacks are optional.
+// Calls the callback with a nil value if the value becomes unset.
+func ExecOneOffWatchLatestCb[T directive.ComparableValue](
+	ctx context.Context,
+	b Bus,
+	dir directive.Directive,
+	initCb func(di directive.Instance, ref directive.Reference) error,
+	valCb func(val directive.TypedAttachedValue[T]) error,
+) error {
+	valCh, di, ref, err := ExecOneOffWatchCh[T](b, dir)
+	if err != nil {
+		return err
+	}
+	defer ref.Release()
+
+	if initCb != nil {
+		if err := initCb(di, ref); err != nil {
+			return err
+		}
+	}
+
+	for {
+		select {
+		case <-ctx.Done():
+			return context.Canceled
+		case val := <-valCh:
+			if valCb != nil {
+				if err := valCb(val); err != nil {
+					return err
+				}
+			}
+		}
+	}
 }
 
 // ExecWatchEffect calls a callback for each value resolved for a directive.
