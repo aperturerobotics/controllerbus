@@ -33,7 +33,7 @@ func ExecOneOffWatchCb[T directive.ComparableValue](
 					return
 				}
 				vid := av.GetValueID()
-				tav := directive.NewTypedAttachedValue[T](vid, val)
+				tav := directive.NewTypedAttachedValue(vid, val)
 				vals[vid] = tav
 				if currValueID == 0 {
 					currValueID = vid
@@ -93,7 +93,7 @@ func ExecOneOffWatchCtr[T directive.ComparableValue](
 	directive.Reference,
 	error,
 ) {
-	return ExecOneOffWatchCb[T](func(val directive.TypedAttachedValue[T]) bool {
+	return ExecOneOffWatchCb(func(val directive.TypedAttachedValue[T]) bool {
 		if val == nil {
 			var empty T
 			ctr.SetValue(empty)
@@ -114,7 +114,7 @@ func ExecOneOffWatchRoutine[T directive.ComparableValue](
 	b Bus,
 	dir directive.Directive,
 ) (directive.Instance, directive.Reference, error) {
-	return ExecOneOffWatchCb[T](func(val directive.TypedAttachedValue[T]) bool {
+	return ExecOneOffWatchCb(func(val directive.TypedAttachedValue[T]) bool {
 		if val == nil {
 			var empty T
 			routineCtr.SetState(empty)
@@ -133,7 +133,7 @@ func ExecOneOffWatchCh[T directive.ComparableValue](
 	dir directive.Directive,
 ) (<-chan directive.TypedAttachedValue[T], directive.Instance, directive.Reference, error) {
 	valCh := make(chan directive.TypedAttachedValue[T], 1)
-	di, diRef, err := ExecOneOffWatchCb[T](func(val directive.TypedAttachedValue[T]) bool {
+	di, diRef, err := ExecOneOffWatchCb(func(val directive.TypedAttachedValue[T]) bool {
 		for {
 			select {
 			case valCh <- val:
@@ -176,7 +176,7 @@ func ExecWatchEffect[T directive.ComparableValue](
 					return
 				}
 				vid := av.GetValueID()
-				tav := directive.NewTypedAttachedValue[T](vid, val)
+				tav := directive.NewTypedAttachedValue(vid, val)
 				rel := cb(tav)
 				if rel != nil {
 					valRels[vid] = rel
@@ -261,7 +261,7 @@ func ExecWatchTransformEffect[T, E directive.ComparableValue](
 		}
 	}
 
-	transforms := keyed.NewKeyed[uint32, directive.TypedAttachedValue[T]](
+	transforms := keyed.NewKeyed(
 		func(key uint32) (keyed.Routine, directive.TypedAttachedValue[T]) {
 			// NOTE: no mtx.Lock here since we already locked before SetKey below!
 			val, exists := vals[key]
@@ -274,7 +274,7 @@ func ExecWatchTransformEffect[T, E directive.ComparableValue](
 	)
 	transforms.SetContext(ctx, true)
 
-	return ExecWatchEffect[T](func(val directive.TypedAttachedValue[T]) func() {
+	return ExecWatchEffect(func(val directive.TypedAttachedValue[T]) func() {
 		mtx.Lock()
 		vals[val.GetValueID()] = val
 		transforms.SetKey(val.GetValueID(), true)
