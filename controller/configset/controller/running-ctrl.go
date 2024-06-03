@@ -67,26 +67,7 @@ func (c *runningController) Execute(ctx context.Context) (rerr error) {
 		default:
 		}
 
-		ctrlConf := conf.GetConfig()
-
-		// execute the controller with the current config
-		execDir := resolver.NewLoadControllerWithConfig(ctrlConf)
-		c.le.Debug("executing controller")
-		updValCh, updValDir, execRef, err := bus.ExecOneOffWatchCh[resolver.LoadControllerWithConfigValue](c.c.bus, execDir)
-		if err != nil {
-			if err == context.Canceled {
-				return err
-			}
-
-			err = errors.Wrap(err, "exec controller")
-		}
-
-		disposed := make(chan struct{})
-		disposeCb := updValDir.AddDisposeCallback(func() {
-			close(disposed)
-		})
-
-		clearState := func() {
+		clearState := func(err error) {
 			c.mtx.Lock()
 			c.state.ctrl = nil
 			c.state.err = err
@@ -95,7 +76,43 @@ func (c *runningController) Execute(ctx context.Context) (rerr error) {
 			c.pushState(&s)
 			c.mtx.Unlock()
 		}
-		clearState()
+
+		c.le.Debug("executing controller")
+		ctrlConf := conf.GetConfig()
+
+		// execute the controller with the current config
+		execDir := resolver.NewLoadControllerWithConfig(ctrlConf)
+		if err := execDir.Validate(); err != nil {
+			// mark config error and wait for config to change
+			c.le.WithError(err).Warn("controller config is invalid")
+			clearState(err)
+			select {
+			case <-ctx.Done():
+				return ctx.Err()
+			case <-c.confRestartCh:
+				c.le.Info("restarting with new config")
+			}
+			continue
+		}
+
+		// clear old state
+		clearState(nil)
+
+		var disposeCb func()
+		disposed := make(chan struct{})
+		updValCh, updValDir, execRef, err := bus.ExecOneOffWatchCh[resolver.LoadControllerWithConfigValue](c.c.bus, execDir)
+		if err != nil {
+			if err == context.Canceled {
+				return err
+			}
+
+			err = errors.Wrap(err, "exec controller")
+			clearState(err)
+		} else {
+			disposeCb = updValDir.AddDisposeCallback(func() {
+				close(disposed)
+			})
+		}
 
 	RecheckStateLoop:
 		for {
@@ -109,7 +126,7 @@ func (c *runningController) Execute(ctx context.Context) (rerr error) {
 				break RecheckStateLoop
 			case aval := <-updValCh:
 				if aval == nil {
-					clearState()
+					clearState(nil)
 					continue RecheckStateLoop
 				}
 				uval := aval.GetValue()
@@ -126,8 +143,12 @@ func (c *runningController) Execute(ctx context.Context) (rerr error) {
 				c.mtx.Unlock()
 			}
 		}
-		execRef.Release()
-		disposeCb()
+		if execRef != nil {
+			execRef.Release()
+		}
+		if disposeCb != nil {
+			disposeCb()
+		}
 		c.mtx.Lock()
 		conf = c.conf
 		if c.state.ctrl != nil || c.state.conf != conf {
