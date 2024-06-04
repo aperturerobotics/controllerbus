@@ -67,7 +67,7 @@ func (c *Controller) HandleDirective(
 	return nil, nil
 }
 
-// Execute executes the given controller.
+// Execute executes the controller goroutine.
 // Returning nil ends execution.
 // Returning an error triggers a retry with backoff.
 func (c *Controller) Execute(ctx context.Context) error {

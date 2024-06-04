@@ -84,7 +84,7 @@ func (c *BusController[T]) GetControllerInfo() *controller.Info {
 	return controller.NewInfo(c.controllerID, c.controllerVersion, c.controllerDescrip)
 }
 
-// Execute executes the given controller.
+// Execute executes the controller goroutine.
 func (c *BusController[T]) Execute(ctx context.Context) error {
 	return nil
 }

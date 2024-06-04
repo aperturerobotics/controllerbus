@@ -52,7 +52,7 @@ func (b *BusBridge) GetControllerInfo() *controller.Info {
 	return controller.NewInfo(ControllerID, Version, "forwards directives to bus")
 }
 
-// Execute executes the given controller.
+// Execute executes the controller goroutine.
 // Returning nil ends execution.
 // Returning an error triggers a retry with backoff.
 func (b *BusBridge) Execute(ctx context.Context) error {
