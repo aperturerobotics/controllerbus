@@ -18,31 +18,46 @@ func WaitExecControllerRunning(
 	dir directive.Directive,
 	disposeCb func(),
 ) (controller.Controller, directive.Instance, directive.Reference, error) {
-	execValueCh, di, diRef, err := bus.ExecOneOffWatchCh[ExecControllerValue](b, dir)
-	if err != nil {
-		return nil, nil, nil, err
-	}
-
+	subCtx, subCtxCancel := context.WithCancel(ctx)
 	dispose := func() {
-		diRef.Release()
+		subCtxCancel()
 		if disposeCb != nil {
 			disposeCb()
 		}
 	}
-	defer dispose()
+	defer subCtxCancel()
+
+	execValueCh := make(chan ExecControllerValue, 1)
+	di, diRef, err := b.AddDirective(dir, bus.NewCallbackHandler(
+		func(av directive.AttachedValue) {
+			retVal, _ := av.GetValue().(ExecControllerValue)
+			if retVal != nil {
+				select {
+				case <-execValueCh:
+				default:
+				}
+				select {
+				case execValueCh <- retVal:
+				default:
+				}
+			}
+		}, nil, dispose,
+	))
+	if err != nil {
+		return nil, nil, nil, err
+	}
 
 	for {
 		select {
-		case <-ctx.Done():
-			return nil, nil, nil, context.Canceled
+		case <-subCtx.Done():
+			diRef.Release()
+			return nil, nil, nil, subCtx.Err()
 		case val := <-execValueCh:
-			if val == nil {
-				continue
-			}
-			if err := val.GetValue().GetError(); err != nil {
+			if err := val.GetError(); err != nil {
+				diRef.Release()
 				return nil, nil, nil, err
 			}
-			if ctrl := val.GetValue().GetController(); ctrl != nil {
+			if ctrl := val.GetController(); ctrl != nil {
 				return ctrl, di, diRef, nil
 			}
 		}
