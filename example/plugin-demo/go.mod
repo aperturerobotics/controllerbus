@@ -8,7 +8,7 @@ replace github.com/aperturerobotics/controllerbus => ../..
 replace github.com/libp2p/go-libp2p => github.com/aperturerobotics/go-libp2p v0.33.1-0.20240511072027-002c32698a19 // aperture
 
 require (
-	github.com/aperturerobotics/controllerbus v0.46.1 // master
+	github.com/aperturerobotics/controllerbus v0.46.2 // master
 	github.com/aperturerobotics/protobuf-go-lite v0.6.5 // latest
 	github.com/aperturerobotics/starpc v0.32.12 // indirect; main
 	github.com/aperturerobotics/util v1.23.5 // indirect; latest
@@ -48,11 +48,11 @@ require (
 	github.com/xrash/smetrics v0.0.0-20240312152122-5f08fbb34913 // indirect
 	github.com/zeebo/blake3 v0.2.3 // indirect
 	golang.org/x/crypto v0.19.0 // indirect
-	golang.org/x/exp v0.0.0-20240531132922-fd00a4e0eefc // indirect
-	golang.org/x/mod v0.17.0 // indirect
+	golang.org/x/exp v0.0.0-20240604190554-fc45aab8b7f8 // indirect
+	golang.org/x/mod v0.18.0 // indirect
 	golang.org/x/sync v0.7.0 // indirect
-	golang.org/x/sys v0.20.0 // indirect
-	golang.org/x/tools v0.21.0 // indirect
+	golang.org/x/sys v0.21.0 // indirect
+	golang.org/x/tools v0.22.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	lukechampine.com/blake3 v1.2.1 // indirect
