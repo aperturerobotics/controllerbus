@@ -8,11 +8,11 @@ replace github.com/libp2p/go-libp2p => github.com/aperturerobotics/go-libp2p v0.
 replace github.com/libp2p/go-msgio => github.com/aperturerobotics/go-libp2p-msgio v0.0.0-20240511033615-1b69178aa5c8 // aperture
 
 require (
-	github.com/aperturerobotics/common v0.16.8 // latest
+	github.com/aperturerobotics/common v0.16.10 // latest
 	github.com/aperturerobotics/json-iterator-lite v1.0.0 // latest
 	github.com/aperturerobotics/protobuf-go-lite v0.6.5 // latest
-	github.com/aperturerobotics/starpc v0.32.12 // latest
-	github.com/aperturerobotics/util v1.23.6 // latest
+	github.com/aperturerobotics/starpc v0.32.13 // latest
+	github.com/aperturerobotics/util v1.23.7 // latest
 )
 
 require (
@@ -39,7 +39,7 @@ require (
 	github.com/ipfs/go-cid v0.4.1 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.7 // indirect
 	github.com/libp2p/go-buffer-pool v0.1.0 // indirect
-	github.com/libp2p/go-libp2p v0.35.0 // indirect
+	github.com/libp2p/go-libp2p v0.35.1 // indirect
 	github.com/libp2p/go-yamux/v4 v4.0.2-0.20240322071716-53ef5820bd48 // indirect
 	github.com/minio/sha256-simd v1.0.1 // indirect
 	github.com/multiformats/go-base32 v0.1.0 // indirect
