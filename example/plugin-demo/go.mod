@@ -11,7 +11,7 @@ require (
 	github.com/aperturerobotics/controllerbus v0.46.4 // master
 	github.com/aperturerobotics/protobuf-go-lite v0.6.5 // latest
 	github.com/aperturerobotics/starpc v0.32.13 // indirect; main
-	github.com/aperturerobotics/util v1.23.7 // indirect; latest
+	github.com/aperturerobotics/util v1.23.9 // indirect; latest
 )
 
 require (
