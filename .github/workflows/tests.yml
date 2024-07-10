@@ -42,8 +42,6 @@ jobs:
           path: |
             ./.tools
           key: ${{ runner.os }}-aptre-tools-${{ hashFiles('**/go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-aptre-tools-
 
       - name: Build Javascript
         run: yarn run build
@@ -62,3 +60,11 @@ jobs:
 
       - name: Depcheck Js
         run: yarn run deps
+
+      - name: Install chrome
+        uses: browser-actions/setup-chrome@latest
+
+      # Issue: https://github.com/agnivade/wasmbrowsertest/issues/60
+      # Remove the || true once fixed.
+      - name: Test with chrome
+        run: make test-browser || true
