@@ -61,10 +61,8 @@ func (c *runningController) Execute(ctx context.Context) (rerr error) {
 	conf := c.conf
 	c.mtx.Unlock()
 	for {
-		select {
-		case <-ctx.Done():
-			return ctx.Err()
-		default:
+		if err := ctx.Err(); err != nil {
+			return err
 		}
 
 		clearState := func(err error) {
