@@ -65,14 +65,16 @@ func ExecOneOffWatchCb[T directive.ComparableValue](
 					}
 					break
 				}
-				if currValueID == 0 {
+				if cb != nil && currValueID == 0 {
 					cb(nil)
 				}
 			},
 			func() {
 				if currValueID != 0 {
 					currValueID = 0
-					cb(nil)
+					if cb != nil {
+						cb(nil)
+					}
 				}
 			},
 		),
