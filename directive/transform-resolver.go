@@ -94,12 +94,12 @@ func (r *TransformResolver[T]) Resolve(ctx context.Context, handler ResolverHand
 			}
 		},
 			func() {
-				for k, addedValue := range addedVals {
-					delete(addedVals, k)
-					_, _ = handler.RemoveValue(addedValue.id)
-					if addedValue.rel != nil {
-						addedValue.rel()
+				pushErr(ErrDirectiveDisposed)
+				for id, val := range addedVals {
+					if val.rel != nil {
+						val.rel()
 					}
+					delete(addedVals, id)
 				}
 			},
 		),

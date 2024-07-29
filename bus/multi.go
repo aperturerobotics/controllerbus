@@ -98,7 +98,7 @@ func ExecCollectValues[T directive.Value](
 					if returned {
 						cb = valDisposeCallback
 					} else if resErr == nil {
-						resErr = ErrDirectiveDisposed
+						resErr = directive.ErrDirectiveDisposed
 						broadcast()
 					}
 				})

@@ -142,7 +142,7 @@ func ExecOneOffWithFilter(
 			func() {
 				bcast.HoldLock(func(broadcast func(), getWaitCh func() <-chan struct{}) {
 					if resErr == nil {
-						resErr = ErrDirectiveDisposed
+						resErr = directive.ErrDirectiveDisposed
 						broadcast()
 					}
 				})
