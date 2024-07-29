@@ -106,6 +106,85 @@ func ExecOneOffWatchCtr[T directive.ComparableValue](
 	}, b, dir)
 }
 
+// ExecOneOffWatchSelectCb executes a one-off directive and watches for changes.
+//
+// Uses the selectValue callback to select which value to pass to the callback.
+// selectValue can return -1 to select none of the values.
+// if selectValue is nil, the value with the lowest id will be selected.
+//
+// Calls the callback when the selected value changes.
+// Calls with nil when the value becomes unset.
+func ExecOneOffWatchSelectCb[T directive.ComparableValue](
+	b Bus,
+	dir directive.Directive,
+	selectValue func(vals []directive.TypedAttachedValue[T]) int,
+	cb func(val directive.TypedAttachedValue[T]),
+) (directive.Instance, directive.Reference, error) {
+	var sortedVals []directive.TypedAttachedValue[T]
+	var currValueID uint32
+
+	selectNextValue := func() {
+		var selectedVal directive.TypedAttachedValue[T]
+		if len(sortedVals) > 0 {
+			selectedIdx := 0
+			if selectValue != nil {
+				selectedIdx = selectValue(sortedVals)
+			}
+			if selectedIdx >= 0 && selectedIdx < len(sortedVals) {
+				selectedVal = sortedVals[selectedIdx]
+			}
+		}
+
+		if selectedVal == nil {
+			if currValueID != 0 {
+				currValueID = 0
+				if cb != nil {
+					cb(nil)
+				}
+			}
+		} else if selectedValID := selectedVal.GetValueID(); selectedValID != currValueID {
+			currValueID = selectedValID
+			if cb != nil {
+				cb(selectedVal)
+			}
+		}
+	}
+
+	return b.AddDirective(
+		dir,
+		directive.NewTypedCallbackHandler(
+			func(av directive.TypedAttachedValue[T]) {
+				val := av.GetValue()
+				vid := av.GetValueID()
+				tav := directive.NewTypedAttachedValue(vid, val)
+				sortedVals = append(sortedVals, tav)
+				slices.SortFunc(sortedVals, func(a, b directive.TypedAttachedValue[T]) int {
+					return int(a.GetValueID() - b.GetValueID())
+				})
+				selectNextValue()
+			},
+			func(av directive.TypedAttachedValue[T]) {
+				vid := av.GetValueID()
+				sortedVals = slices.DeleteFunc(sortedVals, func(v directive.TypedAttachedValue[T]) bool {
+					return v.GetValueID() == vid
+				})
+				selectNextValue()
+			},
+			func() {
+				// Clear all values
+				sortedVals = nil
+				if currValueID != 0 {
+					currValueID = 0
+					if cb != nil {
+						cb(nil)
+					}
+				}
+			},
+			nil,
+		),
+	)
+}
+
 // ExecOneOffWatchRoutine executes a one-off directive and watches for changes.
 //
 // Calls SetState on the routine container.
