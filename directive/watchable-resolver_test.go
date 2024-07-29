@@ -52,11 +52,13 @@ func TestWatchableResolver(t *testing.T) {
 	}
 
 	cbChan := make(chan cbValues, 1)
-	_, dirRef, err := dc.AddDirective(dir, directive.NewCallbackHandler(func(addedValue directive.AttachedValue) {
+	handler := directive.NewCallbackHandler(func(addedValue directive.AttachedValue) {
 		cbChan <- cbValues{added: addedValue.GetValue().(int)}
 	}, func(removedValue directive.AttachedValue) {
 		cbChan <- cbValues{removed: removedValue.GetValue().(int)}
-	}, nil))
+	}, nil)
+
+	_, dirRef, err := dc.AddDirective(dir, directive.NewLogHandler(le, handler))
 	if err != nil {
 		t.Fatal(err.Error())
 	}
