@@ -76,25 +76,25 @@ func TestWatchableTransformResolver(t *testing.T) {
 	ctr.SetValue(42)
 	values := <-cbChan
 	if values.added != "value is *" {
-		t.Errorf("Expected added value to be 'value is *', got '%s'", values.added)
+		t.Fatalf("Expected added value to be 'value is *', got '%s'", values.added)
 	}
 
 	// Change value and expect old value removed, new value transformed and added
 	ctr.SetValue(99)
 	values = <-cbChan
 	if values.removed != "value is *" {
-		t.Errorf("Expected removed value to be 'value is *', got '%s'", values.removed)
+		t.Fatalf("Expected removed value to be 'value is *', got '%s'", values.removed)
 	}
 	values = <-cbChan
 	if values.added != "value is c" {
-		t.Errorf("Expected added value to be 'value is c', got '%s'", values.added)
+		t.Fatalf("Expected added value to be 'value is c', got '%s'", values.added)
 	}
 
 	// Set value to 0 and expect it to be removed
 	ctr.SetValue(0)
 	values = <-cbChan
 	if values.removed != "value is c" {
-		t.Errorf("Expected removed value to be 'value is c', got '%s'", values.removed)
+		t.Fatalf("Expected removed value to be 'value is c', got '%s'", values.removed)
 	}
 
 	// Set negative value and expect error
@@ -124,6 +124,6 @@ func TestWatchableTransformResolver(t *testing.T) {
 	})
 	err = <-errCh
 	if err == nil || err.Error() != "negative value" {
-		t.Errorf("Expected error 'negative value', got '%v'", err)
+		t.Fatalf("Expected error 'negative value', got '%v'", err)
 	}
 }

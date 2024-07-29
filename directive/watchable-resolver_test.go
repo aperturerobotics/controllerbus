@@ -68,21 +68,21 @@ func TestWatchableResolver(t *testing.T) {
 	ctr.SetValue(42)
 	values := <-cbChan
 	if values.added != 42 {
-		t.Errorf("Expected added value to be 42, got %d", values.added)
+		t.Fatalf("Expected added value to be 42, got %d", values.added)
 	}
 	if values.removed != 0 {
-		t.Errorf("Expected removed value to be 0, got %d", values.removed)
+		t.Fatalf("Expected removed value to be 0, got %d", values.removed)
 	}
 
 	// Change value and expect old value removed, new value added
 	ctr.SetValue(99)
 	values = <-cbChan
 	if values.removed != 42 {
-		t.Errorf("Expected removed value to be 42, got %d", values.removed)
+		t.Fatalf("Expected removed value to be 42, got %d", values.removed)
 	}
 	values = <-cbChan
 	if values.added != 99 {
-		t.Errorf("Expected added value to be 99, got %d", values.added)
+		t.Fatalf("Expected added value to be 99, got %d", values.added)
 	}
 
 	// Clear value and expect it to be removed
@@ -90,6 +90,6 @@ func TestWatchableResolver(t *testing.T) {
 	ctr.SetValue(empty)
 	values = <-cbChan
 	if values.removed != 99 {
-		t.Errorf("Expected removed value to be 99, got %d", values.removed)
+		t.Fatalf("Expected removed value to be 99, got %d", values.removed)
 	}
 }
