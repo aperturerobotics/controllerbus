@@ -31,13 +31,19 @@ func (r *KeyedGetterResolver[K, V]) Resolve(ctx context.Context, handler Resolve
 	for {
 		_ = handler.ClearValues()
 
+		var waitCh <-chan struct{}
+		bcast.HoldLock(func(broadcast func(), getWaitCh func() <-chan struct{}) {
+			waitCh = getWaitCh()
+		})
+
 		var valID atomic.Int32
-		wait := bcast.GetWaitCh()
 		val, relVal, err := r.getter(ctx, r.key, func() {
 			old := valID.Swap(-1)
 			if old > 0 {
 				_, _ = handler.RemoveValue(uint32(old))
-				bcast.Broadcast()
+				bcast.HoldLock(func(broadcast func(), getWaitCh func() <-chan struct{}) {
+					broadcast()
+				})
 			}
 		})
 		if err != nil {
@@ -78,7 +84,7 @@ func (r *KeyedGetterResolver[K, V]) Resolve(ctx context.Context, handler Resolve
 		handler.MarkIdle(true)
 		select {
 		case <-ctx.Done():
-		case <-wait:
+		case <-waitCh:
 		}
 
 		valID.Store(-1)
