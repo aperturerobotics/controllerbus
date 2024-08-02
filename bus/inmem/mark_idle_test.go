@@ -10,7 +10,7 @@ import (
 	"github.com/aperturerobotics/controllerbus/directive/controller"
 	boilerplate_controller "github.com/aperturerobotics/controllerbus/example/boilerplate/controller"
 	boilerplate_v1 "github.com/aperturerobotics/controllerbus/example/boilerplate/v1"
-	"github.com/blang/semver"
+	"github.com/blang/semver/v4"
 	"github.com/sirupsen/logrus"
 )
 

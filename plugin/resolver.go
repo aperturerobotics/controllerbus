@@ -9,7 +9,7 @@ import (
 	"github.com/aperturerobotics/controllerbus/config"
 	"github.com/aperturerobotics/controllerbus/controller"
 	"github.com/aperturerobotics/controllerbus/controller/resolver/static"
-	"github.com/blang/semver"
+	"github.com/blang/semver/v4"
 )
 
 // Version is the resolver version.

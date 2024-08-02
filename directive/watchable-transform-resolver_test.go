@@ -13,7 +13,7 @@ import (
 	cdc "github.com/aperturerobotics/controllerbus/directive/controller"
 	boilerplate_v1 "github.com/aperturerobotics/controllerbus/example/boilerplate/v1"
 	"github.com/aperturerobotics/util/ccontainer"
-	"github.com/blang/semver"
+	"github.com/blang/semver/v4"
 	"github.com/sirupsen/logrus"
 )
 

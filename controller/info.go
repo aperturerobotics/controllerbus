@@ -1,7 +1,7 @@
 package controller
 
 import (
-	"github.com/blang/semver"
+	"github.com/blang/semver/v4"
 )
 
 // NewInfo constructs a new Info object.
