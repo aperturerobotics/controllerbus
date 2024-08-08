@@ -11,7 +11,7 @@ require (
 	github.com/aperturerobotics/common v0.18.3 // latest
 	github.com/aperturerobotics/json-iterator-lite v1.0.0 // latest
 	github.com/aperturerobotics/protobuf-go-lite v0.6.5 // latest
-	github.com/aperturerobotics/starpc v0.33.6 // latest
+	github.com/aperturerobotics/starpc v0.33.8 // latest
 	github.com/aperturerobotics/util v1.25.7 // latest
 )
 
@@ -26,9 +26,9 @@ require (
 	github.com/sirupsen/logrus v1.9.3
 	github.com/urfave/cli/v2 v2.27.3
 	github.com/zeebo/blake3 v0.2.3
-	golang.org/x/exp v0.0.0-20240719175910-8a7402abbf56
-	golang.org/x/mod v0.19.0
-	golang.org/x/tools v0.23.0
+	golang.org/x/exp v0.0.0-20240808152545-0cdaa3abc0fa
+	golang.org/x/mod v0.20.0
+	golang.org/x/tools v0.24.0
 	mvdan.cc/gofumpt v0.6.0
 )
 
@@ -53,8 +53,8 @@ require (
 	github.com/spaolacci/murmur3 v1.1.1-0.20190317074736-539464a789e9 // indirect
 	github.com/xrash/smetrics v0.0.0-20240521201337-686a1a2994c1 // indirect
 	golang.org/x/crypto v0.19.0 // indirect
-	golang.org/x/sync v0.7.0 // indirect
-	golang.org/x/sys v0.22.0 // indirect
+	golang.org/x/sync v0.8.0 // indirect
+	golang.org/x/sys v0.23.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	lukechampine.com/blake3 v1.2.1 // indirect
 	nhooyr.io/websocket v1.8.11 // indirect
