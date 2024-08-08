@@ -8,14 +8,15 @@ replace github.com/aperturerobotics/controllerbus => ../..
 replace github.com/libp2p/go-libp2p => github.com/aperturerobotics/go-libp2p v0.33.1-0.20240511072027-002c32698a19 // aperture
 
 require (
-	github.com/aperturerobotics/controllerbus v0.47.1 // master
+	github.com/aperturerobotics/controllerbus v0.47.3 // master
 	github.com/aperturerobotics/protobuf-go-lite v0.6.5 // latest
 	github.com/aperturerobotics/starpc v0.33.6 // indirect; main
-	github.com/aperturerobotics/util v1.25.4 // indirect; latest
+	github.com/aperturerobotics/util v1.25.7 // indirect; latest
 )
 
 require (
 	github.com/blang/semver v3.5.1+incompatible
+	github.com/blang/semver/v4 v4.0.0
 	github.com/pkg/errors v0.9.1
 	github.com/sirupsen/logrus v1.9.3
 )
