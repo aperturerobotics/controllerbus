@@ -1,6 +1,8 @@
 module github.com/aperturerobotics/controllerbus/example/plugin-demo
 
-go 1.22
+go 1.22.0
+
+toolchain go1.23.1
 
 replace github.com/aperturerobotics/controllerbus => ../..
 
@@ -10,8 +12,8 @@ replace github.com/libp2p/go-libp2p => github.com/aperturerobotics/go-libp2p v0.
 require (
 	github.com/aperturerobotics/controllerbus v0.47.4 // master
 	github.com/aperturerobotics/protobuf-go-lite v0.6.5 // latest
-	github.com/aperturerobotics/starpc v0.33.9 // indirect; main
-	github.com/aperturerobotics/util v1.25.7 // indirect; latest
+	github.com/aperturerobotics/starpc v0.33.11 // indirect; main
+	github.com/aperturerobotics/util v1.25.8 // indirect; latest
 )
 
 require (
@@ -24,6 +26,7 @@ require (
 	github.com/aperturerobotics/json-iterator-lite v1.0.0 // indirect
 	github.com/cenkalti/backoff v2.2.1+incompatible // indirect
 	github.com/cloudflare/circl v1.3.8 // indirect
+	github.com/coder/websocket v1.8.13-0.20240912160150-6c8e3ab3985f // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.4 // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
 	github.com/ghodss/yaml v1.0.0 // indirect
@@ -31,8 +34,8 @@ require (
 	github.com/ipfs/go-cid v0.4.1 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.7 // indirect
 	github.com/libp2p/go-buffer-pool v0.1.0 // indirect
-	github.com/libp2p/go-libp2p v0.36.1 // indirect
-	github.com/libp2p/go-yamux/v4 v4.0.2-0.20240322071716-53ef5820bd48 // indirect
+	github.com/libp2p/go-libp2p v0.36.3 // indirect
+	github.com/libp2p/go-yamux/v4 v4.0.2-0.20240826150533-e92055b23e0e // indirect
 	github.com/minio/sha256-simd v1.0.1 // indirect
 	github.com/mr-tron/base58 v1.2.0 // indirect
 	github.com/multiformats/go-base32 v0.1.0 // indirect
@@ -48,14 +51,13 @@ require (
 	github.com/xrash/smetrics v0.0.0-20240521201337-686a1a2994c1 // indirect
 	github.com/zeebo/blake3 v0.2.4 // indirect
 	golang.org/x/crypto v0.19.0 // indirect
-	golang.org/x/exp v0.0.0-20240808152545-0cdaa3abc0fa // indirect
-	golang.org/x/mod v0.20.0 // indirect
+	golang.org/x/exp v0.0.0-20240909161429-701f63a606c0 // indirect
+	golang.org/x/mod v0.21.0 // indirect
 	golang.org/x/sync v0.8.0 // indirect
-	golang.org/x/sys v0.23.0 // indirect
-	golang.org/x/tools v0.24.0 // indirect
+	golang.org/x/sys v0.25.0 // indirect
+	golang.org/x/tools v0.25.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	lukechampine.com/blake3 v1.2.1 // indirect
 	mvdan.cc/gofumpt v0.7.0 // indirect
-	nhooyr.io/websocket v1.8.17 // indirect
 )
