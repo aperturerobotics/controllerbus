@@ -376,6 +376,7 @@ func (i *directiveInstance) addValueLocked(res *resolver, val directive.Value) (
 
 	i.valCtr++
 	vid := i.valCtr
+
 	v := &value{id: vid, val: val}
 	res.vals = append(res.vals, v)
 

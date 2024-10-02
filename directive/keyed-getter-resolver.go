@@ -36,10 +36,10 @@ func (r *KeyedGetterResolver[K, V]) Resolve(ctx context.Context, handler Resolve
 			waitCh = getWaitCh()
 		})
 
-		var valID atomic.Int32
+		var valID atomic.Uint32
 		val, relVal, err := r.getter(ctx, r.key, func() {
-			old := valID.Swap(-1)
-			if old > 0 {
+			old := valID.Swap(0)
+			if old != 0 {
 				_, _ = handler.RemoveValue(uint32(old))
 				bcast.HoldLock(func(broadcast func(), getWaitCh func() <-chan struct{}) {
 					broadcast()
@@ -62,15 +62,15 @@ func (r *KeyedGetterResolver[K, V]) Resolve(ctx context.Context, handler Resolve
 		addedValID, accepted := handler.AddValue(result)
 		if !accepted {
 			// value not needed
-			valID.Store(-1)
+			valID.Store(0)
 			if relVal != nil {
 				relVal()
 			}
 			return nil
 		}
-		if !valID.CompareAndSwap(0, int32(addedValID)) {
+		if !valID.CompareAndSwap(0, addedValID) {
 			// already released
-			valID.Store(-1)
+			valID.Store(0)
 			if relVal != nil {
 				relVal()
 			}
@@ -87,7 +87,7 @@ func (r *KeyedGetterResolver[K, V]) Resolve(ctx context.Context, handler Resolve
 		case <-waitCh:
 		}
 
-		valID.Store(-1)
+		valID.Store(0)
 		if relVal != nil {
 			relVal()
 		}

@@ -17,8 +17,8 @@ type boilerplateResolver struct {
 
 // resolveBoilerplate resolves the boilerplate directive.
 func (c *Controller) resolveBoilerplate(
-	ctx context.Context,
-	inst directive.Instance,
+	_ context.Context,
+	_ directive.Instance,
 	dir boilerplate.Boilerplate,
 ) ([]directive.Resolver, error) {
 	return directive.Resolvers(&boilerplateResolver{c: c, dir: dir}), nil
@@ -45,7 +45,7 @@ func (b *boilerplateResolver) Resolve(
 	b.c.le.Info(fullMsg)
 
 	valID, _ := handler.AddValue(&boilerplate_v1.BoilerplateResult{
-		PrintedLen: uint32(len(fullMsg)),
+		PrintedLen: uint32(len(fullMsg)), //nolint:gosec
 	})
 
 	// call a callback when the value is removed

@@ -371,6 +371,8 @@ type ValueHandler interface {
 	// accepted. The value may be accepted, immediately before the resolver is
 	// canceled (limit reached). It is always safe to call RemoveValue with the
 	// ID at any time, even if the resolver is cancelled.
+	//
+	// Value IDs start at 1.
 	AddValue(Value) (id uint32, accepted bool)
 	// RemoveValue removes a value from the result, returning found.
 	// It is safe to call this function even if the resolver is canceled.

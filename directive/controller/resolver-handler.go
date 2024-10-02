@@ -20,6 +20,8 @@ type resolverHandler struct {
 // accepted. The value may be accepted, immediately before the resolver is
 // canceled (limit reached). It is always safe to call RemoveValue with the
 // ID at any time, even if the resolver is cancelled.
+//
+// Value IDs start at 1.
 func (r *resolverHandler) AddValue(val directive.Value) (uint32, bool) {
 	r.r.di.c.mtx.Lock()
 	defer r.r.di.c.mtx.Unlock()
