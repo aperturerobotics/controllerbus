@@ -40,7 +40,7 @@ func (r *KeyedGetterResolver[K, V]) Resolve(ctx context.Context, handler Resolve
 		val, relVal, err := r.getter(ctx, r.key, func() {
 			old := valID.Swap(0)
 			if old != 0 {
-				_, _ = handler.RemoveValue(uint32(old))
+				_, _ = handler.RemoveValue(old)
 				bcast.HoldLock(func(broadcast func(), getWaitCh func() <-chan struct{}) {
 					broadcast()
 				})
