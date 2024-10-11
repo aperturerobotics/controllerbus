@@ -1,18 +1,18 @@
 module github.com/aperturerobotics/controllerbus/example/plugin-demo
 
-go 1.22.0
+go 1.23
 
 toolchain go1.23.2
 
 replace github.com/aperturerobotics/controllerbus => ../..
 
 // While not absolutely necessary, this fork uses go-protobuf-lite.
-replace github.com/libp2p/go-libp2p => github.com/aperturerobotics/go-libp2p v0.33.1-0.20240511072027-002c32698a19 // aperture
+replace github.com/libp2p/go-libp2p => github.com/aperturerobotics/go-libp2p v0.36.3-0.20241002070357-a2e1c3498dd3 // aperture
 
 require (
 	github.com/aperturerobotics/controllerbus v0.47.7 // master
 	github.com/aperturerobotics/protobuf-go-lite v0.7.0 // latest
-	github.com/aperturerobotics/starpc v0.33.11 // indirect; main
+	github.com/aperturerobotics/starpc v0.35.0 // indirect; main
 	github.com/aperturerobotics/util v1.25.10 // indirect; latest
 )
 
@@ -32,15 +32,15 @@ require (
 	github.com/ghodss/yaml v1.0.0 // indirect
 	github.com/google/go-cmp v0.6.0 // indirect
 	github.com/ipfs/go-cid v0.4.1 // indirect
-	github.com/klauspost/cpuid/v2 v2.2.7 // indirect
+	github.com/klauspost/cpuid/v2 v2.2.8 // indirect
 	github.com/libp2p/go-buffer-pool v0.1.0 // indirect
-	github.com/libp2p/go-libp2p v0.36.3 // indirect
+	github.com/libp2p/go-libp2p v0.36.5 // indirect
 	github.com/libp2p/go-yamux/v4 v4.0.2-0.20240826150533-e92055b23e0e // indirect
 	github.com/minio/sha256-simd v1.0.1 // indirect
 	github.com/mr-tron/base58 v1.2.0 // indirect
 	github.com/multiformats/go-base32 v0.1.0 // indirect
 	github.com/multiformats/go-base36 v0.2.0 // indirect
-	github.com/multiformats/go-multiaddr v0.12.3 // indirect
+	github.com/multiformats/go-multiaddr v0.13.0 // indirect
 	github.com/multiformats/go-multibase v0.2.0 // indirect
 	github.com/multiformats/go-multihash v0.2.3 // indirect
 	github.com/multiformats/go-multistream v0.5.0 // indirect
@@ -50,14 +50,14 @@ require (
 	github.com/urfave/cli/v2 v2.27.4 // indirect
 	github.com/xrash/smetrics v0.0.0-20240521201337-686a1a2994c1 // indirect
 	github.com/zeebo/blake3 v0.2.4 // indirect
-	golang.org/x/crypto v0.19.0 // indirect
-	golang.org/x/exp v0.0.0-20240909161429-701f63a606c0 // indirect
+	golang.org/x/crypto v0.25.0 // indirect
+	golang.org/x/exp v0.0.0-20241009180824-f66d83c29e7c // indirect
 	golang.org/x/mod v0.21.0 // indirect
 	golang.org/x/sync v0.8.0 // indirect
-	golang.org/x/sys v0.25.0 // indirect
-	golang.org/x/tools v0.25.0 // indirect
+	golang.org/x/sys v0.26.0 // indirect
+	golang.org/x/tools v0.26.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
-	lukechampine.com/blake3 v1.2.1 // indirect
+	lukechampine.com/blake3 v1.3.0 // indirect
 	mvdan.cc/gofumpt v0.7.0 // indirect
 )
