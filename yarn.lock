@@ -618,9 +618,9 @@
   integrity sha512-QvlqvYtGBYIDeO8dFdY4djkRubcrc+yTJtBc7n8VZPlJDUS/00A+PssbvERM8f9bYRmcaSEHPZgZojeQj7kzAA==
 
 "@types/node@*":
-  version "22.5.5"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-22.5.5.tgz#52f939dd0f65fc552a4ad0b392f3c466cc5d7a44"
-  integrity sha512-Xjs4y5UPO/CLdzpgR6GirZJx36yScjh73+2NlLlkFRSoQN8B0DpfXPdZGnvVmLRLOsqDpOfTNv7D9trgGhmOIA==
+  version "22.7.5"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-22.7.5.tgz#cfde981727a7ab3611a481510b473ae54442b92b"
+  integrity sha512-jML7s2NAzMWc//QSJ1a3prpk78cOPchGvXJsC3C6R6PSMoooztvRVQEz89gmBTBY1SPMaqo5teB4uNHPdetShQ==
   dependencies:
     undici-types "~6.19.2"
 
@@ -2321,9 +2321,9 @@ stackback@0.0.2:
   integrity sha512-1XMJE5fQo1jGH6Y/7ebnwPOBEkIEnT4QF32d5R1+VXdXveM0IBMJt8zfaxX1P3QhVwrYe+576+jkANtSS2mBbw==
 
 starpc@^0.35.0:
-  version "0.35.0"
-  resolved "https://registry.yarnpkg.com/starpc/-/starpc-0.35.0.tgz#3ee1eea4c791a5f358183c87212954d5f8e2cc12"
-  integrity sha512-hqnqXpjqTRFvOvF7QR/nFNmHOr66AByg10CKEZEa9zmWIKCxDbwD/wy4vJzgItfZ0MnwXa4D4IfI1IsLeiFaVw==
+  version "0.35.1"
+  resolved "https://registry.yarnpkg.com/starpc/-/starpc-0.35.1.tgz#8a9e60560dc0af8f7a040f6c8eb02196a7c24e8b"
+  integrity sha512-cdIuyVZlj9q4gahJuoB109+1lnx4nzzBeqgVRQ4QO0DG+opdJ1Oopbn44WoWEJZjGmPLUwt7AI6BIhlkhsk9/w==
   dependencies:
     "@aptre/it-ws" "^1.0.1"
     "@aptre/protobuf-es-lite" "^0.4.6"
@@ -2571,9 +2571,9 @@ vitest@^2.0.2:
     why-is-node-running "^2.3.0"
 
 weald@^1.0.2:
-  version "1.0.2"
-  resolved "https://registry.yarnpkg.com/weald/-/weald-1.0.2.tgz#a51fb3a8dbf5fa2b71ef09f9a267c86a46742238"
-  integrity sha512-iG5cIuBwsPe1ZcoGGd4X6QYlepU1vLr4l4oWpzQWqeJPSo9B8bxxyE6xlnj3TCmThtha7gyVL+uuZgUFkPyfDg==
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/weald/-/weald-1.0.4.tgz#8858cf9186869deba58357ae10cf26eaada80bb0"
+  integrity sha512-+kYTuHonJBwmFhP1Z4YQK/dGi3jAnJGCYhyODFpHK73rbxnp9lnZQj7a2m+WVgn8fXr5bJaxUpF6l8qZpPeNWQ==
   dependencies:
     ms "^3.0.0-canary.1"
     supports-color "^9.4.0"
