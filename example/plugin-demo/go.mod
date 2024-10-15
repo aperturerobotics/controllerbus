@@ -10,7 +10,7 @@ replace github.com/aperturerobotics/controllerbus => ../..
 replace github.com/libp2p/go-libp2p => github.com/aperturerobotics/go-libp2p v0.36.3-0.20241002070357-a2e1c3498dd3 // aperture
 
 require (
-	github.com/aperturerobotics/controllerbus v0.47.7 // master
+	github.com/aperturerobotics/controllerbus v0.47.8 // master
 	github.com/aperturerobotics/protobuf-go-lite v0.7.0 // latest
 	github.com/aperturerobotics/starpc v0.35.0 // indirect; main
 	github.com/aperturerobotics/util v1.25.10 // indirect; latest
