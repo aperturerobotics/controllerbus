@@ -8,12 +8,12 @@ github.com/aperturerobotics/protobuf-go-lite v0.8.0 h1:SoiTAVArmOrNTX31e6CC5Bem6
 github.com/aperturerobotics/protobuf-go-lite v0.8.0/go.mod h1:y49wVEezRHg78uQ2OzLLZbtTTWuox+ChmaTuh6FLJW8=
 github.com/aperturerobotics/starpc v0.35.2 h1:ZoA5f4QuXQV2zYlrikE99js14DimZhp1PA7LEGjqQyQ=
 github.com/aperturerobotics/starpc v0.35.2/go.mod h1:+pq40XoDNQWsoi2HECCXSyn9RvM/jdSa4BVbSIG+fYA=
-github.com/aperturerobotics/util v1.26.1 h1:qP3aOgXyrkkgjgJ1CWJx9sx8lPd0f2dqkRelS9h7CLU=
-github.com/aperturerobotics/util v1.26.1/go.mod h1:wjh64quTQw1N5ZJzOwa+TMiIklAaOLvByNT432WSHUs=
+github.com/aperturerobotics/util v1.26.2 h1:PrBgJ3ydAwSD59o7s5zRfL+mbphIC6xo2Inor7/K+ok=
+github.com/aperturerobotics/util v1.26.2/go.mod h1:jp9+cf8cTlX5Jf0F9RlXmKtEw0yXC6gU92V9lXoZ74M=
 github.com/blang/semver/v4 v4.0.0 h1:1PFHFE6yCCTv8C1TeyNNarDzntLi7wMI5i/pzqYIsAM=
 github.com/blang/semver/v4 v4.0.0/go.mod h1:IbckMUScFkM3pff0VJDNKRiT6TG/YpiHIM2yvyW5YoQ=
-github.com/cenkalti/backoff v2.2.1+incompatible h1:tNowT99t7UNflLxfYYSlKYsBpXdEet03Pg2g16Swow4=
-github.com/cenkalti/backoff v2.2.1+incompatible/go.mod h1:90ReRw6GdpyfrHakVjL/QHaoyV4aDUVVkXQJJJ3NXXM=
+github.com/cenkalti/backoff/v4 v4.3.0 h1:MyRJ/UdXutAwSAT+s3wNd7MfTIcy71VQueUuFK343L8=
+github.com/cenkalti/backoff/v4 v4.3.0/go.mod h1:Y3VNntkOUPxTVeUxJ/G5vcM//AlwfmyYozVcomhLiZE=
 github.com/cloudflare/circl v1.3.8 h1:j+V8jJt09PoeMFIu2uh5JUyEaIHTXVOHslFoLNAKqwI=
 github.com/cloudflare/circl v1.3.8/go.mod h1:PDRU+oXvdD7KCtgKxW95M5Z8BpSCJXQORiZFnBQS5QU=
 github.com/coder/websocket v1.8.12 h1:5bUXkEPPIbewrnkU8LTCLVaxi4N4J8ahufH2vlo4NAo=

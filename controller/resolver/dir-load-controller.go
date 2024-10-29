@@ -6,7 +6,7 @@ import (
 	"github.com/aperturerobotics/controllerbus/config"
 	loader "github.com/aperturerobotics/controllerbus/controller/loader"
 	"github.com/aperturerobotics/controllerbus/directive"
-	"github.com/cenkalti/backoff"
+	"github.com/cenkalti/backoff/v4"
 )
 
 // LoadControllerWithConfig is a directive indicating a controller should be

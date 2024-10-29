@@ -14,12 +14,12 @@ require (
 	github.com/aperturerobotics/json-iterator-lite v1.0.0 // latest
 	github.com/aperturerobotics/protobuf-go-lite v0.8.0 // latest
 	github.com/aperturerobotics/starpc v0.35.2 // latest
-	github.com/aperturerobotics/util v1.26.1 // latest
+	github.com/aperturerobotics/util v1.26.2 // latest
 )
 
 require (
 	github.com/blang/semver/v4 v4.0.0
-	github.com/cenkalti/backoff v2.2.1+incompatible
+	github.com/cenkalti/backoff/v4 v4.3.0
 	github.com/fsnotify/fsnotify v1.7.0
 	github.com/ghodss/yaml v1.0.0
 	github.com/mr-tron/base58 v1.2.0
