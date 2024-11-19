@@ -2,7 +2,7 @@ module github.com/aperturerobotics/controllerbus/example/plugin-demo
 
 go 1.23
 
-toolchain go1.23.2
+toolchain go1.23.3
 
 replace github.com/aperturerobotics/controllerbus => ../..
 
@@ -10,9 +10,9 @@ replace github.com/aperturerobotics/controllerbus => ../..
 replace github.com/libp2p/go-libp2p => github.com/aperturerobotics/go-libp2p v0.37.1-0.20241111002741-5cfbb50b74e0 // aperture
 
 require (
-	github.com/aperturerobotics/controllerbus v0.47.8 // master
+	github.com/aperturerobotics/controllerbus v0.48.1 // master
 	github.com/aperturerobotics/protobuf-go-lite v0.8.0 // latest
-	github.com/aperturerobotics/starpc v0.35.2 // indirect; main
+	github.com/aperturerobotics/starpc v0.35.3 // indirect; main
 	github.com/aperturerobotics/util v1.26.2 // indirect; latest
 )
 
@@ -27,7 +27,7 @@ require (
 	github.com/cenkalti/backoff/v4 v4.3.0 // indirect
 	github.com/coder/websocket v1.8.13-0.20240912160150-6c8e3ab3985f // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.5 // indirect
-	github.com/fsnotify/fsnotify v1.7.0 // indirect
+	github.com/fsnotify/fsnotify v1.8.0 // indirect
 	github.com/ghodss/yaml v1.0.0 // indirect
 	github.com/google/go-cmp v0.6.0 // indirect
 	github.com/ipfs/go-cid v0.4.1 // indirect
@@ -50,11 +50,11 @@ require (
 	github.com/xrash/smetrics v0.0.0-20240521201337-686a1a2994c1 // indirect
 	github.com/zeebo/blake3 v0.2.4 // indirect
 	golang.org/x/crypto v0.29.0 // indirect
-	golang.org/x/exp v0.0.0-20241009180824-f66d83c29e7c // indirect
+	golang.org/x/exp v0.0.0-20241108190413-2d47ceb2692f // indirect
 	golang.org/x/mod v0.22.0 // indirect
 	golang.org/x/sync v0.9.0 // indirect
 	golang.org/x/sys v0.27.0 // indirect
-	golang.org/x/tools v0.26.0 // indirect
+	golang.org/x/tools v0.27.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	lukechampine.com/blake3 v1.3.0 // indirect
