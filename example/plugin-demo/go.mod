@@ -12,8 +12,8 @@ replace github.com/libp2p/go-libp2p => github.com/aperturerobotics/go-libp2p v0.
 require (
 	github.com/aperturerobotics/controllerbus v0.48.1 // master
 	github.com/aperturerobotics/protobuf-go-lite v0.8.0 // latest
-	github.com/aperturerobotics/starpc v0.35.3 // indirect; main
-	github.com/aperturerobotics/util v1.26.2 // indirect; latest
+	github.com/aperturerobotics/starpc v0.36.0 // indirect; main
+	github.com/aperturerobotics/util v1.26.3 // indirect; latest
 )
 
 require (
@@ -23,7 +23,7 @@ require (
 )
 
 require (
-	github.com/aperturerobotics/json-iterator-lite v1.0.0 // indirect
+	github.com/aperturerobotics/json-iterator-lite v1.0.1-0.20240713111131-be6bf89c3008 // indirect
 	github.com/cenkalti/backoff/v4 v4.3.0 // indirect
 	github.com/coder/websocket v1.8.13-0.20240912160150-6c8e3ab3985f // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.5 // indirect
@@ -33,7 +33,7 @@ require (
 	github.com/ipfs/go-cid v0.4.1 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.8 // indirect
 	github.com/libp2p/go-buffer-pool v0.1.0 // indirect
-	github.com/libp2p/go-libp2p v0.37.0 // indirect
+	github.com/libp2p/go-libp2p v0.37.2 // indirect
 	github.com/libp2p/go-yamux/v4 v4.0.2-0.20240826150533-e92055b23e0e // indirect
 	github.com/minio/sha256-simd v1.0.1 // indirect
 	github.com/mr-tron/base58 v1.2.0 // indirect
@@ -50,11 +50,11 @@ require (
 	github.com/xrash/smetrics v0.0.0-20240521201337-686a1a2994c1 // indirect
 	github.com/zeebo/blake3 v0.2.4 // indirect
 	golang.org/x/crypto v0.31.0 // indirect
-	golang.org/x/exp v0.0.0-20241108190413-2d47ceb2692f // indirect
+	golang.org/x/exp v0.0.0-20241217172543-b2144cdd0a67 // indirect
 	golang.org/x/mod v0.22.0 // indirect
-	golang.org/x/sync v0.9.0 // indirect
+	golang.org/x/sync v0.10.0 // indirect
 	golang.org/x/sys v0.28.0 // indirect
-	golang.org/x/tools v0.27.0 // indirect
+	golang.org/x/tools v0.28.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	lukechampine.com/blake3 v1.3.0 // indirect
