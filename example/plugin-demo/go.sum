@@ -8,6 +8,8 @@ github.com/aperturerobotics/starpc v0.36.0 h1:HAJe6X6OZ+JPyq9jcSwlVo7utuMbXQD0kx
 github.com/aperturerobotics/starpc v0.36.0/go.mod h1:2wM79xmfJZrrXMgYxcteg7vLxhqSambS79+o159KGRI=
 github.com/aperturerobotics/util v1.26.3 h1:Z7pjEJX27FDUQyP8OHlBcyEc8MGl8z/ZS1vpRBsIU9E=
 github.com/aperturerobotics/util v1.26.3/go.mod h1:D/N1pG02cPukZtwGggCeb8R/wq11Iy76xjSEGFYa06c=
+github.com/aperturerobotics/util v1.27.0 h1:nNFFOQo1NcSfcMPjnzoqxOd7EXdTzLiCNugOm9aarHc=
+github.com/aperturerobotics/util v1.27.0/go.mod h1:8u36NK8OBQM2qxoRU7VVCfiiP5EJ+oV3gHsmnhQoPEY=
 github.com/blang/semver/v4 v4.0.0 h1:1PFHFE6yCCTv8C1TeyNNarDzntLi7wMI5i/pzqYIsAM=
 github.com/blang/semver/v4 v4.0.0/go.mod h1:IbckMUScFkM3pff0VJDNKRiT6TG/YpiHIM2yvyW5YoQ=
 github.com/cenkalti/backoff/v4 v4.3.0 h1:MyRJ/UdXutAwSAT+s3wNd7MfTIcy71VQueUuFK343L8=
