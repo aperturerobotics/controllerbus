@@ -6,7 +6,7 @@ import (
 
 	"github.com/aperturerobotics/controllerbus/controller"
 	"github.com/aperturerobotics/controllerbus/directive"
-	"github.com/aperturerobotics/util/backoff/cbackoff"
+	backoff "github.com/aperturerobotics/util/backoff/cbackoff"
 	"github.com/pkg/errors"
 )
 

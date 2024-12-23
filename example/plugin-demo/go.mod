@@ -10,10 +10,10 @@ replace github.com/aperturerobotics/controllerbus => ../..
 replace github.com/libp2p/go-libp2p => github.com/aperturerobotics/go-libp2p v0.37.1-0.20241111002741-5cfbb50b74e0 // aperture
 
 require (
-	github.com/aperturerobotics/controllerbus v0.48.2 // master
+	github.com/aperturerobotics/controllerbus v0.49.0 // master
 	github.com/aperturerobotics/protobuf-go-lite v0.8.0 // latest
-	github.com/aperturerobotics/starpc v0.36.0 // indirect; main
-	github.com/aperturerobotics/util v1.27.0 // indirect; latest
+	github.com/aperturerobotics/starpc v0.36.2-0.20241223085748-77ec8d462920 // indirect; main
+	github.com/aperturerobotics/util v1.27.1 // indirect; latest
 )
 
 require (
@@ -24,7 +24,6 @@ require (
 
 require (
 	github.com/aperturerobotics/json-iterator-lite v1.0.1-0.20240713111131-be6bf89c3008 // indirect
-	github.com/aperturerobotics/util/backoff/cbackoff v4.3.0 // indirect
 	github.com/coder/websocket v1.8.13-0.20240912160150-6c8e3ab3985f // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.5 // indirect
 	github.com/fsnotify/fsnotify v1.8.0 // indirect
@@ -33,7 +32,7 @@ require (
 	github.com/ipfs/go-cid v0.4.1 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.8 // indirect
 	github.com/libp2p/go-buffer-pool v0.1.0 // indirect
-	github.com/libp2p/go-libp2p v0.37.2 // indirect
+	github.com/libp2p/go-libp2p v0.38.1 // indirect
 	github.com/libp2p/go-yamux/v4 v4.0.2-0.20240826150533-e92055b23e0e // indirect
 	github.com/minio/sha256-simd v1.0.1 // indirect
 	github.com/mr-tron/base58 v1.2.0 // indirect

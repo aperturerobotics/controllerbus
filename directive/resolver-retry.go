@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/aperturerobotics/util/backoff/cbackoff"
+	backoff "github.com/aperturerobotics/util/backoff/cbackoff"
 	"github.com/sirupsen/logrus"
 )
 
