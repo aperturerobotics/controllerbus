@@ -8,8 +8,8 @@ github.com/aperturerobotics/protobuf-go-lite v0.8.0 h1:SoiTAVArmOrNTX31e6CC5Bem6
 github.com/aperturerobotics/protobuf-go-lite v0.8.0/go.mod h1:y49wVEezRHg78uQ2OzLLZbtTTWuox+ChmaTuh6FLJW8=
 github.com/aperturerobotics/starpc v0.36.1 h1:10z0U0gPsXbT6eHGExa/oblWwWSC4yO39T6fdDpsKL4=
 github.com/aperturerobotics/starpc v0.36.1/go.mod h1:VOTQt8NRyo+HbcTpf+YAonYU4gofyPZyYsX/B9NUpj8=
-github.com/aperturerobotics/util v1.27.1-0.20241223092029-6516a0f31e0f h1:4HCrLbBq5U0qeyrwZ8E8jBT4aqgcfF4cOW5ZcVNuK1U=
-github.com/aperturerobotics/util v1.27.1-0.20241223092029-6516a0f31e0f/go.mod h1:LBu2EYRAofsaf9qZuVX7+w4n+TbWO4KC7etGnYCrNRA=
+github.com/aperturerobotics/util v1.27.1 h1:htCjY/HvP8DusRxWiCFEbm8lMz7HzJSovdhSzVcrtuI=
+github.com/aperturerobotics/util v1.27.1/go.mod h1:hurmxv5jC2CqkfhgySRYrXDcvqPk6BHUhHizu6yyXhE=
 github.com/blang/semver/v4 v4.0.0 h1:1PFHFE6yCCTv8C1TeyNNarDzntLi7wMI5i/pzqYIsAM=
 github.com/blang/semver/v4 v4.0.0/go.mod h1:IbckMUScFkM3pff0VJDNKRiT6TG/YpiHIM2yvyW5YoQ=
 github.com/coder/websocket v1.8.12 h1:5bUXkEPPIbewrnkU8LTCLVaxi4N4J8ahufH2vlo4NAo=
