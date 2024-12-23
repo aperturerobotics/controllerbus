@@ -6,7 +6,7 @@ import (
 	"github.com/aperturerobotics/controllerbus/config"
 	"github.com/aperturerobotics/controllerbus/controller"
 	"github.com/aperturerobotics/controllerbus/directive"
-	"github.com/cenkalti/backoff/v4"
+	"github.com/aperturerobotics/util/backoff/cbackoff"
 )
 
 // ExecController is a directive indicating a controller instance should be

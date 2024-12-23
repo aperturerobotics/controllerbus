@@ -12,8 +12,8 @@ github.com/aperturerobotics/util v1.27.0 h1:nNFFOQo1NcSfcMPjnzoqxOd7EXdTzLiCNugO
 github.com/aperturerobotics/util v1.27.0/go.mod h1:8u36NK8OBQM2qxoRU7VVCfiiP5EJ+oV3gHsmnhQoPEY=
 github.com/blang/semver/v4 v4.0.0 h1:1PFHFE6yCCTv8C1TeyNNarDzntLi7wMI5i/pzqYIsAM=
 github.com/blang/semver/v4 v4.0.0/go.mod h1:IbckMUScFkM3pff0VJDNKRiT6TG/YpiHIM2yvyW5YoQ=
-github.com/cenkalti/backoff/v4 v4.3.0 h1:MyRJ/UdXutAwSAT+s3wNd7MfTIcy71VQueUuFK343L8=
-github.com/cenkalti/backoff/v4 v4.3.0/go.mod h1:Y3VNntkOUPxTVeUxJ/G5vcM//AlwfmyYozVcomhLiZE=
+github.com/aperturerobotics/util/backoff/cbackoff v4.3.0 h1:MyRJ/UdXutAwSAT+s3wNd7MfTIcy71VQueUuFK343L8=
+github.com/aperturerobotics/util/backoff/cbackoff v4.3.0/go.mod h1:Y3VNntkOUPxTVeUxJ/G5vcM//AlwfmyYozVcomhLiZE=
 github.com/coder/websocket v1.8.13-0.20240912160150-6c8e3ab3985f h1:izqVn8o6O+hpoOHPHOtegczwcT4wyHk1gsa6hw3vFow=
 github.com/coder/websocket v1.8.13-0.20240912160150-6c8e3ab3985f/go.mod h1:LNVeNrXQZfe5qhS9ALED3uA+l5pPqvwXg3CKoDBB2gs=
 github.com/cpuguy83/go-md2man/v2 v2.0.5 h1:ZtcqGrnekaHpVLArFSe4HK5DoKx1T0rq2DwVB0alcyc=
