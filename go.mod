@@ -2,7 +2,7 @@ module github.com/aperturerobotics/controllerbus
 
 go 1.23
 
-toolchain go1.23.4
+toolchain go1.23.5
 
 // This fork drops ecdsa, drops secp256k1, adds eddilithium2 and eddilithium3
 replace github.com/libp2p/go-libp2p => github.com/aperturerobotics/go-libp2p v0.37.1-0.20241111002741-5cfbb50b74e0 // aperture
@@ -27,9 +27,9 @@ require (
 	github.com/sirupsen/logrus v1.9.3
 	github.com/urfave/cli/v2 v2.27.5
 	github.com/zeebo/blake3 v0.2.4
-	golang.org/x/exp v0.0.0-20241217172543-b2144cdd0a67
+	golang.org/x/exp v0.0.0-20250106191152-7588d65b2ba8
 	golang.org/x/mod v0.22.0
-	golang.org/x/tools v0.28.0
+	golang.org/x/tools v0.29.0
 	mvdan.cc/gofumpt v0.7.0
 )
 
@@ -55,7 +55,7 @@ require (
 	github.com/xrash/smetrics v0.0.0-20240521201337-686a1a2994c1 // indirect
 	golang.org/x/crypto v0.31.0 // indirect
 	golang.org/x/sync v0.10.0 // indirect
-	golang.org/x/sys v0.28.0 // indirect
+	golang.org/x/sys v0.29.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	lukechampine.com/blake3 v1.3.0 // indirect
 )
