@@ -1,6 +1,7 @@
 package plugin_compiler
 
 import (
+	"context"
 	"crypto/sha256"
 	gast "go/ast"
 	"go/build"
@@ -23,6 +24,7 @@ const (
 //
 // {buildHash} will be replaced with the build hash in the output filename.
 func CompilePluginFromFile(
+	ctx context.Context,
 	le *logrus.Entry,
 	gfile *gast.File,
 	intermediateGoFile string,
@@ -56,7 +58,7 @@ func CompilePluginFromFile(
 	// second time with the plugin path including the hash.
 
 	// go 1.16: to generate go.sum files, it's now necessary to run this explicitly
-	ecmd := exec.NewCmd("go", "mod", "tidy")
+	ecmd := exec.NewCmd(ctx, "go", "mod", "tidy")
 	le.
 		WithField("work-dir", ecmd.Dir).
 		Debugf("running go mod tidy: %s", ecmd.String())
@@ -67,6 +69,7 @@ func CompilePluginFromFile(
 	// start the go compiler execution #1
 	intermediateOutFile1 := path.Join(tmpName, "pass-1.cbus.so")
 	ecmd = exec.NewCmd(
+		ctx,
 		"go",
 		"build", "-v",
 		"-buildmode=plugin",
@@ -116,6 +119,7 @@ func CompilePluginFromFile(
 	// start the go compiler execution #2
 	intermediateOutFile2 := path.Join(tmpName, "pass-2.cbus.so")
 	ecmd = exec.NewCmd(
+		ctx,
 		"go",
 		"build", "-v", "-trimpath",
 		"-buildmode=plugin",
