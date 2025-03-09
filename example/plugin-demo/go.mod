@@ -2,7 +2,7 @@ module github.com/aperturerobotics/controllerbus/example/plugin-demo
 
 go 1.24
 
-toolchain go1.24.0
+toolchain go1.24.1
 
 replace github.com/aperturerobotics/controllerbus => ../..
 
@@ -10,7 +10,7 @@ replace github.com/aperturerobotics/controllerbus => ../..
 replace github.com/libp2p/go-libp2p => github.com/aperturerobotics/go-libp2p v0.37.1-0.20241111002741-5cfbb50b74e0 // aperture
 
 require (
-	github.com/aperturerobotics/controllerbus v0.49.0 // master
+	github.com/aperturerobotics/controllerbus v0.49.1 // master
 	github.com/aperturerobotics/protobuf-go-lite v0.8.0 // latest
 	github.com/aperturerobotics/starpc v0.36.2-0.20241223085748-77ec8d462920 // indirect; main
 	github.com/aperturerobotics/util v1.29.0 // indirect; latest
