@@ -9,7 +9,7 @@ import (
 	"github.com/aperturerobotics/controllerbus/config"
 	"github.com/aperturerobotics/controllerbus/controller"
 	"github.com/blang/semver/v4"
-	"golang.org/x/exp/maps"
+	"maps"
 )
 
 // ResolverID is the resolver identifier.
@@ -69,7 +69,7 @@ func (r *Resolver) AddFactory(factory controller.Factory) {
 
 // GetFactories returns the factories associated w/ the resolver.
 func (r *Resolver) GetFactories() []controller.Factory {
-	vals := maps.Values(r.factories)
+	vals := slices.Collect(maps.Values(r.factories))
 	slices.SortFunc(vals, func(a, b controller.Factory) int {
 		return strings.Compare(a.GetConfigID(), b.GetConfigID())
 	})

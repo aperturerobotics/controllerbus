@@ -6,7 +6,7 @@ import (
 
 	"github.com/aperturerobotics/controllerbus/directive"
 	"github.com/sirupsen/logrus"
-	"golang.org/x/exp/slices"
+	"slices"
 )
 
 // Controller manages running directives and handlers.
