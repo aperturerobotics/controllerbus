@@ -4,10 +4,14 @@ github.com/aperturerobotics/json-iterator-lite v1.0.1-0.20241223092408-d525fa878
 github.com/aperturerobotics/json-iterator-lite v1.0.1-0.20241223092408-d525fa878b3e/go.mod h1:SvGGBv3OVxUyqO0ZxA/nvs6z3cg7NIbZ64TnbV2OISo=
 github.com/aperturerobotics/protobuf-go-lite v0.8.0 h1:SoiTAVArmOrNTX31e6CC5Bem6HuOElg3YYNhp4AAPQc=
 github.com/aperturerobotics/protobuf-go-lite v0.8.0/go.mod h1:y49wVEezRHg78uQ2OzLLZbtTTWuox+ChmaTuh6FLJW8=
+github.com/aperturerobotics/protobuf-go-lite v0.8.1 h1:CcBvqWOSep4VF3pPp+ZLcYQwPQu2kGOvL3bbF71bzKE=
+github.com/aperturerobotics/protobuf-go-lite v0.8.1/go.mod h1:6AD6TgBrC+aWprTirXrUASFvTbuIRAsuDLBNUthzcyA=
 github.com/aperturerobotics/starpc v0.36.2-0.20241223085748-77ec8d462920 h1:J2QdJlnvuGzj6lWE6DsIwRonSv+9mPMFWTVjX/VKQUg=
 github.com/aperturerobotics/starpc v0.36.2-0.20241223085748-77ec8d462920/go.mod h1:DBO0ym5Wrt6WiyblRMz6TSvXVEi7N+QCmfqMqenUsdU=
 github.com/aperturerobotics/util v1.29.0 h1:Yu4uP1ZnBMmSLgpKRW9FCu0yJpbKexhFE12jIFXVTIs=
 github.com/aperturerobotics/util v1.29.0/go.mod h1:yG6DwiEHZ79CqoPX9ZEkcSQA6NNMf+vBgf+3b1QOn8A=
+github.com/aperturerobotics/util v1.29.2 h1:4mF7PfltK2g9KuD5gYUx3zvfEQXA/7F/V6EIEwJA35Q=
+github.com/aperturerobotics/util v1.29.2/go.mod h1:wfEm6n6evCQCGu+NjR8qINo0feaPEgeXxDZK6/oSuk8=
 github.com/blang/semver/v4 v4.0.0 h1:1PFHFE6yCCTv8C1TeyNNarDzntLi7wMI5i/pzqYIsAM=
 github.com/blang/semver/v4 v4.0.0/go.mod h1:IbckMUScFkM3pff0VJDNKRiT6TG/YpiHIM2yvyW5YoQ=
 github.com/coder/websocket v1.8.13-0.20240912160150-6c8e3ab3985f h1:izqVn8o6O+hpoOHPHOtegczwcT4wyHk1gsa6hw3vFow=
@@ -25,6 +29,8 @@ github.com/go-quicktest/qt v1.101.0 h1:O1K29Txy5P2OK0dGo59b7b0LR6wKfIhttaAhHUyn7
 github.com/go-quicktest/qt v1.101.0/go.mod h1:14Bz/f7NwaXPtdYEgzsx46kqSxVwTbzVZsDC26tQJow=
 github.com/google/go-cmp v0.6.0 h1:ofyhxvXcZhMsU5ulbFiLKl/XBFqE1GSq7atu8tAmTRI=
 github.com/google/go-cmp v0.6.0/go.mod h1:17dUlkBOakJ0+DkrSSNjCkIjxS6bF9zb3elmeNGIjoY=
+github.com/google/go-cmp v0.7.0 h1:wk8382ETsv4JYUZwIsn6YpYiWiBsYLSJiTsyBybVuN8=
+github.com/google/go-cmp v0.7.0/go.mod h1:pXiqmnSA92OHEEa9HXL2W4E7lf9JzCmGVUdgjX3N/iU=
 github.com/ipfs/go-cid v0.4.1 h1:A/T3qGvxi4kpKWWcPC/PgbvDA2bjVLO7n4UeVwnbs/s=
 github.com/ipfs/go-cid v0.4.1/go.mod h1:uQHwDeX4c6CtyrFwdqyhpNcxVewur1M7l7fNU7LKwZk=
 github.com/klauspost/cpuid/v2 v2.2.8 h1:+StwCXwm9PdpiEkPyzBXIy+M9KUb4ODm0Zarf1kS5BM=
