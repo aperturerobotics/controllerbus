@@ -20,22 +20,25 @@
   },
   "type": "module",
   "scripts": {
-    "build": "tsc --project tsconfig.json --noEmit false --outDir ./dist/",
-    "check": "npm run typecheck",
+    "check": "npm run typecheck && npm run lint",
     "typecheck": "tsc --project tsconfig.json --noEmit true",
     "deps": "depcheck --ignore-patterns=.eslintrc.cjs,package.json --ignores depcheck,@aptre/common,prettier,rimraf,typescript",
+    "clean": "rimraf ./dist/",
+    "build": "tsc --project tsconfig.json --noEmit false --outDir ./dist/",
     "codegen": "npm run gen",
-    "ci": "npm run build && npm run lint:js && npm run lint:go",
-    "format": "npm run format:js && npm run format:go",
-    "format:js": "prettier --write './!(vendor|dist)/**/(*.ts|*.tsx|*.js|*.html|*.css)'",
-    "format:go": "make format",
     "gen": "make genproto",
-    "test": "make test && npm run check && npm run test:js",
-    "test:js": "echo No JS tests.",
+    "format": "npm run format:js && npm run format:go",
+    "format:go": "make format",
+    "format:js": "prettier --write './!(vendor|dist)/**/(*.ts|*.tsx|*.js|*.html|*.css)'",
+    "format:js:all": "prettier --write './!(vendor|dist)/**/(*.ts|*.tsx|*.js|*.html|*.css)'",
+    "test": "npm run test:js && npm run test:go",
+    "test:js": "vitest run && npm run typecheck",
+    "test:go": "make test",
     "lint": "npm run lint:go && npm run lint:js",
     "lint:go": "make lint",
     "lint:js": "ESLINT_USE_FLAT_CONFIG=false eslint -c .eslintrc.cjs ./",
-    "prepare": "go mod vendor && rimraf ./.tools && cd ./example/plugin-demo && go mod tidy && rimraf ./vendor",
+    "ci": "npm run build && npm run lint:js && npm run lint:go",
+    "prepare": "npm run clean && rimraf ./.tools && npm run vendor && npm run setup",
     "precommit": "npm run format"
   },
   "prettier": {
@@ -45,9 +48,11 @@
   "devDependencies": {
     "@aptre/common": "^0.21.1",
     "depcheck": "^1.4.7",
+    "happy-dom": "^17.4.4",
     "prettier": "^3.5.3",
     "rimraf": "^6.0.1",
-    "typescript": "^5.8.2"
+    "typescript": "^5.8.2",
+    "vitest": "^3.0.7"
   },
   "dependencies": {
     "@aptre/protobuf-es-lite": "^0.4.4",
