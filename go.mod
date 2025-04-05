@@ -2,7 +2,7 @@ module github.com/aperturerobotics/controllerbus
 
 go 1.24
 
-toolchain go1.24.1
+toolchain go1.24.2
 
 // This fork drops ecdsa, drops secp256k1, adds eddilithium2 and eddilithium3
 replace github.com/libp2p/go-libp2p => github.com/aperturerobotics/go-libp2p v0.37.1-0.20241111002741-5cfbb50b74e0 // aperture
@@ -12,20 +12,21 @@ replace github.com/libp2p/go-msgio => github.com/aperturerobotics/go-libp2p-msgi
 require (
 	github.com/aperturerobotics/common v0.21.2 // latest
 	github.com/aperturerobotics/json-iterator-lite v1.0.1-0.20241223092408-d525fa878b3e // latest
-	github.com/aperturerobotics/protobuf-go-lite v0.8.1 // latest
+	github.com/aperturerobotics/protobuf-go-lite v0.9.0 // latest
 	github.com/aperturerobotics/starpc v0.37.1 // latest
 	github.com/aperturerobotics/util v1.29.2 // latest
 )
 
 require (
 	github.com/blang/semver/v4 v4.0.0
-	github.com/fsnotify/fsnotify v1.8.0
+	github.com/fsnotify/fsnotify v1.9.0
 	github.com/ghodss/yaml v1.0.0
 	github.com/mr-tron/base58 v1.2.0
 	github.com/pkg/errors v0.9.1
 	github.com/sergi/go-diff v1.3.1
 	github.com/sirupsen/logrus v1.9.3
 	github.com/urfave/cli/v2 v2.27.6
+	github.com/urfave/cli/v3 v3.1.1
 	github.com/zeebo/blake3 v0.2.4
 	golang.org/x/mod v0.24.0
 	golang.org/x/tools v0.31.0
