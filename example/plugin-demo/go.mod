@@ -2,7 +2,7 @@ module github.com/aperturerobotics/controllerbus/example/plugin-demo
 
 go 1.24
 
-toolchain go1.24.1
+toolchain go1.24.2
 
 replace github.com/aperturerobotics/controllerbus => ../..
 
@@ -10,9 +10,9 @@ replace github.com/aperturerobotics/controllerbus => ../..
 replace github.com/libp2p/go-libp2p => github.com/aperturerobotics/go-libp2p v0.37.1-0.20241111002741-5cfbb50b74e0 // aperture
 
 require (
-	github.com/aperturerobotics/controllerbus v0.49.2 // master
-	github.com/aperturerobotics/protobuf-go-lite v0.8.1 // latest
-	github.com/aperturerobotics/starpc v0.36.2-0.20241223085748-77ec8d462920 // indirect; main
+	github.com/aperturerobotics/controllerbus v0.49.3 // master
+	github.com/aperturerobotics/protobuf-go-lite v0.9.0 // latest
+	github.com/aperturerobotics/starpc v0.37.1 // indirect; main
 	github.com/aperturerobotics/util v1.29.2 // indirect; latest
 )
 
@@ -32,7 +32,7 @@ require (
 	github.com/ipfs/go-cid v0.4.1 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.8 // indirect
 	github.com/libp2p/go-buffer-pool v0.1.0 // indirect
-	github.com/libp2p/go-libp2p v0.38.1 // indirect
+	github.com/libp2p/go-libp2p v0.41.0 // indirect
 	github.com/libp2p/go-yamux/v4 v4.0.2-0.20240826150533-e92055b23e0e // indirect
 	github.com/minio/sha256-simd v1.0.1 // indirect
 	github.com/mr-tron/base58 v1.2.0 // indirect
@@ -45,15 +45,15 @@ require (
 	github.com/multiformats/go-varint v0.0.7 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/spaolacci/murmur3 v1.1.1-0.20190317074736-539464a789e9 // indirect
-	github.com/urfave/cli/v2 v2.27.5 // indirect
+	github.com/urfave/cli/v2 v2.27.6 // indirect
 	github.com/xrash/smetrics v0.0.0-20240521201337-686a1a2994c1 // indirect
 	github.com/zeebo/blake3 v0.2.4 // indirect
 	golang.org/x/crypto v0.31.0 // indirect
-	golang.org/x/exp v0.0.0-20250228200357-dead58393ab7 // indirect
-	golang.org/x/mod v0.23.0 // indirect
-	golang.org/x/sync v0.11.0 // indirect
-	golang.org/x/sys v0.30.0 // indirect
-	golang.org/x/tools v0.30.0 // indirect
+	golang.org/x/exp v0.0.0-20250305212735-054e65f0b394 // indirect
+	golang.org/x/mod v0.24.0 // indirect
+	golang.org/x/sync v0.12.0 // indirect
+	golang.org/x/sys v0.31.0 // indirect
+	golang.org/x/tools v0.31.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	lukechampine.com/blake3 v1.3.0 // indirect
