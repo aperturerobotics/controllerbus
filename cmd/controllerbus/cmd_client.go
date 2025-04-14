@@ -1,8 +1,8 @@
 package main
 
 import (
-	ccli "github.com/aperturerobotics/controllerbus/cli"
 	"github.com/aperturerobotics/cli"
+	ccli "github.com/aperturerobotics/controllerbus/cli"
 )
 
 // cliArgs are the client arguments

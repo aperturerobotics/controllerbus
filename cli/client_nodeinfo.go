@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"os"
 
-	bus_api "github.com/aperturerobotics/controllerbus/bus/api"
 	"github.com/aperturerobotics/cli"
+	bus_api "github.com/aperturerobotics/controllerbus/bus/api"
 )
 
 // RunBusInfo runs the bus information command.

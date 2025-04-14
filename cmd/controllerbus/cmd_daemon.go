@@ -4,6 +4,7 @@ import (
 	"context"
 	"os"
 
+	"github.com/aperturerobotics/cli"
 	bus_api "github.com/aperturerobotics/controllerbus/bus/api"
 	api_controller "github.com/aperturerobotics/controllerbus/bus/api/controller"
 	cbcli "github.com/aperturerobotics/controllerbus/cli"
@@ -16,7 +17,6 @@ import (
 	boilerplate_controller "github.com/aperturerobotics/controllerbus/example/boilerplate/controller"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-	"github.com/aperturerobotics/cli"
 )
 
 var daemonFlags cbcli.DaemonArgs

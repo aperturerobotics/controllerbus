@@ -4,8 +4,8 @@ import (
 	"context"
 	"errors"
 
-	"github.com/sirupsen/logrus"
 	"github.com/aperturerobotics/cli"
+	"github.com/sirupsen/logrus"
 )
 
 func (c *CompilerArgs) runCodegenOnce(cctx *cli.Context) error {

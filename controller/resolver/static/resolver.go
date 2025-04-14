@@ -2,6 +2,7 @@ package static
 
 import (
 	"context"
+	"maps"
 	"slices"
 	"strings"
 	"sync"
@@ -9,7 +10,6 @@ import (
 	"github.com/aperturerobotics/controllerbus/config"
 	"github.com/aperturerobotics/controllerbus/controller"
 	"github.com/blang/semver/v4"
-	"maps"
 )
 
 // ResolverID is the resolver identifier.

@@ -5,10 +5,10 @@ import (
 	"io"
 	"os"
 
+	"github.com/aperturerobotics/cli"
 	controller_exec "github.com/aperturerobotics/controllerbus/controller/exec"
 	"github.com/ghodss/yaml"
 	"github.com/pkg/errors"
-	"github.com/aperturerobotics/cli"
 )
 
 // RunExecController runs the execute configset command.

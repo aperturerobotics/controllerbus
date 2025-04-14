@@ -2,11 +2,11 @@ package controller
 
 import (
 	"context"
+	"slices"
 	"sync"
 
 	"github.com/aperturerobotics/controllerbus/directive"
 	"github.com/sirupsen/logrus"
-	"slices"
 )
 
 // Controller manages running directives and handlers.

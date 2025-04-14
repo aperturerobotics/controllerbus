@@ -5,9 +5,9 @@ import (
 	"errors"
 	"net"
 
+	"github.com/aperturerobotics/cli"
 	bus_api "github.com/aperturerobotics/controllerbus/bus/api"
 	"github.com/aperturerobotics/starpc/srpc"
-	"github.com/aperturerobotics/cli"
 )
 
 // ClientArgs contains the client arguments and functions.
