@@ -2,7 +2,7 @@ module github.com/aperturerobotics/controllerbus
 
 go 1.24
 
-toolchain go1.24.1
+toolchain go1.24.2
 
 // This fork drops ecdsa, drops secp256k1, adds eddilithium2 and eddilithium3
 replace github.com/libp2p/go-libp2p => github.com/aperturerobotics/go-libp2p v0.37.1-0.20241111002741-5cfbb50b74e0 // aperture
@@ -13,14 +13,14 @@ require (
 	github.com/aperturerobotics/cli v1.0.0 // latest
 	github.com/aperturerobotics/common v0.21.2 // latest
 	github.com/aperturerobotics/json-iterator-lite v1.0.1-0.20241223092408-d525fa878b3e // latest
-	github.com/aperturerobotics/protobuf-go-lite v0.9.0 // latest
+	github.com/aperturerobotics/protobuf-go-lite v0.9.1 // latest
 	github.com/aperturerobotics/starpc v0.38.0 // latest
 	github.com/aperturerobotics/util v1.29.2 // latest
 )
 
 require (
 	github.com/blang/semver/v4 v4.0.0
-	github.com/fsnotify/fsnotify v1.8.0
+	github.com/fsnotify/fsnotify v1.9.0
 	github.com/ghodss/yaml v1.0.0
 	github.com/mr-tron/base58 v1.2.0
 	github.com/pkg/errors v0.9.1
@@ -28,8 +28,8 @@ require (
 	github.com/sirupsen/logrus v1.9.3
 	github.com/zeebo/blake3 v0.2.4
 	golang.org/x/mod v0.24.0
-	golang.org/x/tools v0.31.0
-	mvdan.cc/gofumpt v0.7.0
+	golang.org/x/tools v0.32.0
+	mvdan.cc/gofumpt v0.8.0
 )
 
 require (
@@ -52,8 +52,8 @@ require (
 	github.com/xrash/smetrics v0.0.0-20240521201337-686a1a2994c1 // indirect
 	golang.org/x/crypto v0.31.0 // indirect
 	golang.org/x/exp v0.0.0-20250305212735-054e65f0b394 // indirect
-	golang.org/x/sync v0.12.0 // indirect
-	golang.org/x/sys v0.31.0 // indirect
+	golang.org/x/sync v0.13.0 // indirect
+	golang.org/x/sys v0.32.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	lukechampine.com/blake3 v1.3.0 // indirect
 )
