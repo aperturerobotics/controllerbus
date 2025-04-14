@@ -20,6 +20,7 @@ module.exports = {
   ignorePatterns: [
     "node_modules",
     "vendor",
+    "dist",
     ".eslintrc.js"
   ]
 }
