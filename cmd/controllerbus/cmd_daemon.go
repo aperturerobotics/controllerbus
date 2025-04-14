@@ -16,7 +16,7 @@ import (
 	boilerplate_controller "github.com/aperturerobotics/controllerbus/example/boilerplate/controller"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-	"github.com/urfave/cli/v2"
+	"github.com/aperturerobotics/cli"
 )
 
 var daemonFlags cbcli.DaemonArgs

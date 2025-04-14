@@ -2,7 +2,7 @@ package main
 
 import (
 	ccli "github.com/aperturerobotics/controllerbus/cli"
-	"github.com/urfave/cli/v2"
+	"github.com/aperturerobotics/cli"
 )
 
 // cliArgs are the client arguments

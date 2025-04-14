@@ -8,7 +8,7 @@ import (
 	controller_exec "github.com/aperturerobotics/controllerbus/controller/exec"
 	"github.com/ghodss/yaml"
 	"github.com/pkg/errors"
-	"github.com/urfave/cli/v2"
+	"github.com/aperturerobotics/cli"
 )
 
 // RunExecController runs the execute configset command.

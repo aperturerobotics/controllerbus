@@ -7,7 +7,7 @@ import (
 
 	bus_api "github.com/aperturerobotics/controllerbus/bus/api"
 	"github.com/aperturerobotics/starpc/srpc"
-	"github.com/urfave/cli/v2"
+	"github.com/aperturerobotics/cli"
 )
 
 // ClientArgs contains the client arguments and functions.

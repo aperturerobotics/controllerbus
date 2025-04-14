@@ -5,7 +5,7 @@ import (
 	"os"
 
 	bus_api "github.com/aperturerobotics/controllerbus/bus/api"
-	"github.com/urfave/cli/v2"
+	"github.com/aperturerobotics/cli"
 )
 
 // RunBusInfo runs the bus information command.

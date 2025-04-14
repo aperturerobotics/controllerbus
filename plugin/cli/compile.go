@@ -11,7 +11,7 @@ import (
 	plugin_compiler "github.com/aperturerobotics/controllerbus/plugin/compiler"
 	b58 "github.com/mr-tron/base58/base58"
 	"github.com/sirupsen/logrus"
-	"github.com/urfave/cli/v2"
+	"github.com/aperturerobotics/cli"
 )
 
 // setupCompiler setups and creates the compiler.

@@ -1,7 +1,7 @@
 package cli
 
 import (
-	"github.com/urfave/cli/v2"
+	"github.com/aperturerobotics/cli"
 )
 
 // DaemonArgs contains common flags for controller-bus daemons.
