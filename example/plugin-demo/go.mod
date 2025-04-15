@@ -10,10 +10,10 @@ replace github.com/aperturerobotics/controllerbus => ../..
 replace github.com/libp2p/go-libp2p => github.com/aperturerobotics/go-libp2p v0.37.1-0.20241111002741-5cfbb50b74e0 // aperture
 
 require (
-	github.com/aperturerobotics/controllerbus v0.49.3 // master
+	github.com/aperturerobotics/controllerbus v0.50.0 // master
 	github.com/aperturerobotics/protobuf-go-lite v0.9.1 // latest
 	github.com/aperturerobotics/starpc v0.38.0 // indirect; main
-	github.com/aperturerobotics/util v1.29.2 // indirect; latest
+	github.com/aperturerobotics/util v1.30.0 // indirect; latest
 )
 
 require (
@@ -24,7 +24,7 @@ require (
 
 require (
 	github.com/aperturerobotics/cli v1.0.0 // indirect
-	github.com/aperturerobotics/common v0.21.2 // indirect
+	github.com/aperturerobotics/common v0.22.1 // indirect
 	github.com/aperturerobotics/json-iterator-lite v1.0.1-0.20241223092408-d525fa878b3e // indirect
 	github.com/coder/websocket v1.8.13 // indirect
 	github.com/fsnotify/fsnotify v1.9.0 // indirect
@@ -48,7 +48,7 @@ require (
 	github.com/xrash/smetrics v0.0.0-20240521201337-686a1a2994c1 // indirect
 	github.com/zeebo/blake3 v0.2.4 // indirect
 	golang.org/x/crypto v0.35.0 // indirect
-	golang.org/x/exp v0.0.0-20250305212735-054e65f0b394 // indirect
+	golang.org/x/exp v0.0.0-20250408133849-7e4ce0ab07d0 // indirect
 	golang.org/x/mod v0.24.0 // indirect
 	golang.org/x/sync v0.13.0 // indirect
 	golang.org/x/sys v0.32.0 // indirect

@@ -100,12 +100,16 @@ func (m *ModuleCompiler) GenerateModules(analysis *Analysis, pluginBinaryVersion
 	outPluginCodeFilePath := path.Join(codegenModulesPluginPathBin, "plugin.go")
 
 	// outPluginGoMod will contain the go.mod for the container plugin.
-	// Add the first line "module plugin"
 	outPluginGoMod := &modfile.File{}
+
+	// Add the first line "module plugin"
 	err = outPluginGoMod.AddModuleStmt(path.Join(buildPrefix, codegenModulesPluginName))
 	if err != nil {
 		return err
 	}
+
+	// Add the go version
+	outPluginGoMod.AddGoStmt("1.24")
 
 	// For each module, create a codegen module directory.
 	// Add a replace statement to outPluginGoMod for each.
@@ -298,7 +302,7 @@ func (m *ModuleCompiler) GenerateModules(analysis *Analysis, pluginBinaryVersion
 	}
 
 	formatCodeFile := func(pkgCodeFile *ast.File) ([]byte, error) {
-		format.File(analysis.fset, pkgCodeFile, format.Options{LangVersion: "1.14"})
+		format.File(analysis.fset, pkgCodeFile, format.Options{LangVersion: "go1.24"})
 		var outBytes bytes.Buffer
 		var printerConf printer.Config
 		printerConf.Mode |= printer.SourcePos
