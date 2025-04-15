@@ -113,7 +113,7 @@ func (b *Bus) RemoveController(c controller.Controller) {
 // addController adds a controller to the bus
 func (b *Bus) addController(c controller.Controller) error {
 	b.mtx.Lock()
-	rel, err := b.Controller.AddHandler(c)
+	rel, err := b.AddHandler(c)
 	if err == nil {
 		b.controllers = append(b.controllers, &attachedCtrl{
 			ctrl: c,

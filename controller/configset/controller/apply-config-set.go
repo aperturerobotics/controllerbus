@@ -94,7 +94,7 @@ func (r *applyConfigSetResolver) Resolve(
 			if v != 0 {
 				handler.RemoveValue(v)
 			}
-			var val configset.ApplyConfigSetValue = st
+			var val configset.ApplyConfigSetValue = st //nolint:staticcheck
 			id, accepted := handler.AddValue(val)
 			if accepted {
 				r.refs[ref] = id

@@ -15,14 +15,14 @@ import (
 )
 
 // setupCompiler setups and creates the compiler.
-func (c *CompilerArgs) setupCompiler(
+func (a *CompilerArgs) setupCompiler(
 	ctx context.Context,
 	le *logrus.Entry,
 	paks []string,
 ) (*plugin_compiler.Analysis, *plugin_compiler.ModuleCompiler, func(), error) {
 	rel := func() {}
 	args := paks
-	err := c.Validate()
+	err := a.Validate()
 	if err != nil {
 		return nil, nil, rel, err
 	}
@@ -46,22 +46,22 @@ func (c *CompilerArgs) setupCompiler(
 		buildUid = b58.Encode(hs.Sum(nil))
 	}
 
-	if c.CodegenDir == "" {
+	if a.CodegenDir == "" {
 		// cannot use /tmp for this, need ~/.cache dir
 		userCacheDir, err := os.UserCacheDir()
 		if err != nil {
 			return nil, nil, rel, err
 		}
-		c.CodegenDir = filepath.Join(userCacheDir, "cbus-codegen-"+buildUid)
-		le.Debugf("created tmpdir for code-gen process: %s", c.CodegenDir)
+		a.CodegenDir = filepath.Join(userCacheDir, "cbus-codegen-"+buildUid)
+		le.Debugf("created tmpdir for code-gen process: %s", a.CodegenDir)
 		f := rel
 		rel = func() {
-			defer os.RemoveAll(c.CodegenDir)
+			defer os.RemoveAll(a.CodegenDir)
 			f()
 		}
 	}
 
-	codegenDirPath, err := filepath.Abs(c.CodegenDir)
+	codegenDirPath, err := filepath.Abs(a.CodegenDir)
 	if err != nil {
 		return nil, nil, rel, err
 	}
@@ -70,12 +70,12 @@ func (c *CompilerArgs) setupCompiler(
 		return nil, nil, rel, err
 	}
 
-	buildPrefix := c.BuildPrefix
+	buildPrefix := a.BuildPrefix
 	if buildPrefix == "" {
 		buildPrefix = "cbus-plugin-" + (buildUid[:8])
 	}
 
-	pluginBinaryID := c.PluginBinaryID
+	pluginBinaryID := a.PluginBinaryID
 	if pluginBinaryID == "" {
 		pluginBinaryID = "cbus-plugin-" + buildUid[:8]
 	}
@@ -84,7 +84,7 @@ func (c *CompilerArgs) setupCompiler(
 		WithField("plugin-binary-id", pluginBinaryID).
 		WithField("build-prefix", buildPrefix).
 		Infof("creating compiler for plugin with packages: %v", args)
-	hc, err := plugin_compiler.NewModuleCompiler(ctx, le, c.BuildPrefix, codegenDirPath, c.PluginBinaryID)
+	hc, err := plugin_compiler.NewModuleCompiler(ctx, le, a.BuildPrefix, codegenDirPath, a.PluginBinaryID)
 	if err != nil {
 		return nil, nil, rel, err
 	}
@@ -98,7 +98,7 @@ func (c *CompilerArgs) setupCompiler(
 	return an, hc, rel, nil
 }
 
-func (c *CompilerArgs) runCompileOnce(cctx *cli.Context) error {
+func (a *CompilerArgs) runCompileOnce(cctx *cli.Context) error {
 	ctx := context.Background()
 	log := logrus.New()
 	log.SetLevel(logrus.DebugLevel)
@@ -109,16 +109,16 @@ func (c *CompilerArgs) runCompileOnce(cctx *cli.Context) error {
 		return errors.New("specify list of packages as arguments")
 	}
 
-	an, modCompiler, cleanup, err := c.setupCompiler(ctx, le, args)
+	an, modCompiler, cleanup, err := a.setupCompiler(ctx, le, args)
 	if err != nil {
 		return err
 	}
-	if !c.NoCleanup {
+	if !a.NoCleanup {
 		defer cleanup()
 		defer modCompiler.Cleanup()
 	}
 
-	pluginBinaryVersion := c.PluginBinaryVersion
+	pluginBinaryVersion := a.PluginBinaryVersion
 	if pluginBinaryVersion == "" {
 		pluginBinaryVersion = "cbus-plugin-{buildHash}"
 	}
@@ -127,7 +127,7 @@ func (c *CompilerArgs) runCompileOnce(cctx *cli.Context) error {
 		return err
 	}
 
-	outputPath, err := filepath.Abs(c.OutputPath)
+	outputPath, err := filepath.Abs(a.OutputPath)
 	if err == nil {
 		err = os.MkdirAll(path.Dir(outputPath), 0o755)
 	}

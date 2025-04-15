@@ -156,7 +156,8 @@ func (c *ControllerConfig) UnmarshalProtoJSON(s *json.UnmarshalState) {
 				break
 			}
 			nextTok := s.WhatIsNext()
-			if nextTok == jsoniter.StringValue {
+			switch nextTok {
+			case jsoniter.StringValue:
 				// Expect base58 encoded string
 				var err error
 				c.Config, err = base64.RawStdEncoding.DecodeString(s.ReadString())
@@ -164,9 +165,9 @@ func (c *ControllerConfig) UnmarshalProtoJSON(s *json.UnmarshalState) {
 					s.SetError(errors.Wrap(err, "unmarshal config value as base58 string"))
 					return
 				}
-			} else if nextTok == jsoniter.ObjectValue {
+			case jsoniter.ObjectValue:
 				c.Config = s.SkipAndReturnBytes()
-			} else {
+			default:
 				s.SetError(errors.Errorf("invalid json value for config: type %v", nextTok))
 				return
 			}

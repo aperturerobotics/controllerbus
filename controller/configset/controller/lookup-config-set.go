@@ -94,7 +94,7 @@ func (r *lookupConfigSetResolver) Resolve(
 			if v != 0 {
 				handler.RemoveValue(v)
 			}
-			var val configset.LookupConfigSetValue = st
+			var val configset.LookupConfigSetValue = st //nolint:staticcheck
 			id, accepted := handler.AddValue(val)
 			if accepted {
 				r.refs[ref] = id

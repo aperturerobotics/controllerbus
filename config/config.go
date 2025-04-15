@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 
 	protobuf_go_lite "github.com/aperturerobotics/protobuf-go-lite"
-	vtcompare "github.com/aperturerobotics/protobuf-go-lite"
 )
 
 // Config is an object specifying configuration for a component of the system.
@@ -50,17 +49,17 @@ type Debuggable interface {
 }
 
 // EqualsConfig implements EqualsConfig assuming both Config are the same type and have VTEqual.
-func EqualsConfig[T vtcompare.EqualVT[T]](t1 T, c2 Config) bool {
+func EqualsConfig[T protobuf_go_lite.EqualVT[T]](t1 T, c2 Config) bool {
 	t2, ok := c2.(T)
 	if !ok {
 		return false
 	}
-	return vtcompare.IsEqualVT(t1, t2)
+	return protobuf_go_lite.IsEqualVT(t1, t2)
 }
 
 // IsEqualVT compares two objects with VTEqual.
-func IsEqualVT[T vtcompare.EqualVT[T]](c1, c2 T) bool {
-	return vtcompare.IsEqualVT[T](c1, c2)
+func IsEqualVT[T protobuf_go_lite.EqualVT[T]](c1, c2 T) bool {
+	return protobuf_go_lite.IsEqualVT[T](c1, c2)
 }
 
 // MergeDebugVals merges multiple DebugValues into the first DebugValues passed.

@@ -58,7 +58,7 @@ func (r *KeyedGetterResolver[K, V]) Resolve(ctx context.Context, handler Resolve
 			return nil
 		}
 
-		var result V = val
+		var result V = val //nolint:staticcheck
 		addedValID, accepted := handler.AddValue(result)
 		if !accepted {
 			// value not needed

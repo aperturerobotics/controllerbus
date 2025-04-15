@@ -8,7 +8,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func (c *CompilerArgs) runCodegenOnce(cctx *cli.Context) error {
+func (a *CompilerArgs) runCodegenOnce(cctx *cli.Context) error {
 	ctx := context.Background()
 	log := logrus.New()
 	log.SetLevel(logrus.DebugLevel)
@@ -19,16 +19,16 @@ func (c *CompilerArgs) runCodegenOnce(cctx *cli.Context) error {
 		return errors.New("specify list of packages as arguments")
 	}
 
-	an, modCompiler, cleanup, err := c.setupCompiler(ctx, le, args.Slice())
+	an, modCompiler, cleanup, err := a.setupCompiler(ctx, le, args.Slice())
 	if err != nil {
 		return err
 	}
-	if !c.NoCleanup {
+	if !a.NoCleanup {
 		defer cleanup()
 		defer modCompiler.Cleanup()
 	}
 
-	pluginBinaryVersion := c.PluginBinaryVersion
+	pluginBinaryVersion := a.PluginBinaryVersion
 	if pluginBinaryVersion == "" {
 		pluginBinaryVersion = "cbus-plugin-{buildHash}"
 	}
