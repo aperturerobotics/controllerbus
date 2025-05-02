@@ -24,7 +24,7 @@ require (
 
 require (
 	github.com/aperturerobotics/cli v1.0.0 // indirect
-	github.com/aperturerobotics/common v0.22.1 // indirect
+	github.com/aperturerobotics/common v0.22.3 // indirect
 	github.com/aperturerobotics/json-iterator-lite v1.0.1-0.20241223092408-d525fa878b3e // indirect
 	github.com/coder/websocket v1.8.13 // indirect
 	github.com/fsnotify/fsnotify v1.9.0 // indirect

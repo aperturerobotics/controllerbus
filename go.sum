@@ -1,7 +1,7 @@
 github.com/aperturerobotics/cli v1.0.0 h1:s3xT2h7eBih4/4yZKTn/HQ6P+qpk6ygWZl2416xAI1M=
 github.com/aperturerobotics/cli v1.0.0/go.mod h1:wtlINjMcKuwyV1x4ftReuA6hHZcPB8kPMXHyQqGFCSc=
-github.com/aperturerobotics/common v0.22.1 h1:wxTV9wSgfAM9jYUuSzNFzUeC28DQMBgDO3iGahlHeaY=
-github.com/aperturerobotics/common v0.22.1/go.mod h1:wsPfDVCTNpGHddg/MSfm84rKoO4GAvb+TQtATXz+pKY=
+github.com/aperturerobotics/common v0.22.3 h1:zPuIaCWqloF/wLAYZhGNuGj8t4ktILYyFfOEsp6cMAw=
+github.com/aperturerobotics/common v0.22.3/go.mod h1:wsPfDVCTNpGHddg/MSfm84rKoO4GAvb+TQtATXz+pKY=
 github.com/aperturerobotics/go-libp2p v0.37.1-0.20241111002741-5cfbb50b74e0 h1:tGwbeDoEeQCrUQL+ClUywldqvz9eRmhcVrGwGxz2xJg=
 github.com/aperturerobotics/go-libp2p v0.37.1-0.20241111002741-5cfbb50b74e0/go.mod h1:FJkAtQcP9XxqG1NNLNHKm+wLVIGSCQX2s6CEoD+w97g=
 github.com/aperturerobotics/json-iterator-lite v1.0.1-0.20241223092408-d525fa878b3e h1:9KDK70CSnHCUGShpq3sEg/t8zEEnKePlhJ4775ekpeI=
