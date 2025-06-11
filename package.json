@@ -49,7 +49,7 @@
   "devDependencies": {
     "@aptre/common": "^0.22.1",
     "depcheck": "^1.4.7",
-    "happy-dom": "^17.4.4",
+    "happy-dom": "^18.0.0",
     "prettier": "^3.5.3",
     "rimraf": "^6.0.1",
     "typescript": "^5.8.3",
@@ -57,9 +57,9 @@
   },
   "dependencies": {
     "@aptre/protobuf-es-lite": "^0.4.4",
-    "starpc": "^0.38.1"
+    "starpc": "^0.39.0"
   },
   "resolutions": {
-    "@aptre/protobuf-es-lite": "0.4.8"
+    "@aptre/protobuf-es-lite": "0.4.9"
   }
 }
