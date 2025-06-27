@@ -80,7 +80,7 @@ func (r *resolverHandler) ClearValues() []uint32 {
 		removed[i] = vals[i].id
 	}
 	r.r.vals = nil
-	r.r.di.onValuesRemovedLocked(r.r, vals...)
+	r.r.di.onValuesRemovedLocked(vals...)
 	return removed
 }
 
@@ -186,8 +186,10 @@ func (r *resolverHandler) executeResolver(ctx context.Context, exitedCh chan<- s
 	if r.r.ctx != r.ctx {
 		return
 	}
+
+	defer r.r.di.deferCheckStateChanged()()
 	r.r.exited = true
-	r.r.err = err
+	r.r.setErrLocked(err)
 	r.r.setIdleLocked(true)
 }
 

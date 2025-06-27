@@ -48,7 +48,7 @@ func NewDirectiveInfo(dir Directive) *DirectiveInfo {
 	}
 }
 
-// NewDirectiveState constructs a new DirectiveState from a running directive.
+// NewDirectiveState constructs a new state snapshot from a running directive.
 func NewDirectiveState(di Instance) *DirectiveState {
 	return &DirectiveState{
 		Info: NewDirectiveInfo(di.GetDirective()),
@@ -207,6 +207,9 @@ type ReferenceHandler interface {
 // Errs is the list of non-nil resolver errors.
 type IdleCallback func(isIdle bool, errs []error)
 
+// StateCallback is called when the directive state changes.
+type StateCallback func(isIdle bool, errs []error, vals []AttachedValue)
+
 // Instance tracks a directive with reference counts and resolution state.
 type Instance interface {
 	// GetContext returns a context that is canceled when Instance is released.
@@ -243,6 +246,12 @@ type Instance interface {
 	// Returns a callback release function.
 	AddIdleCallback(cb IdleCallback) func()
 
+	// AddStateCallback adds a callback that will be called when the directive state changes.
+	// Called when any of the parameters of the callback change.
+	// This is more expensive than AddIdleCallback or AddDisposeCallback.
+	// Returns a callback release function.
+	AddStateCallback(cb StateCallback) func()
+
 	// CloseIfUnreferenced cancels the directive instance if there are no refs.
 	//
 	// This bypasses the unref dispose timer.
@@ -255,7 +264,7 @@ type Instance interface {
 }
 
 // Value satisfies a directive.
-type Value interface{}
+type Value any
 
 // ComparableValue is a type constraint for a comparable Value.
 type ComparableValue interface {

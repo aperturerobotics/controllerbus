@@ -80,11 +80,22 @@ func (r *resolver) updateContextLocked(ctx *context.Context) {
 	}
 }
 
-// updateIdleLocked marks the resolver idle state while di.c.mtx is locked
+// setIdleLocked marks the resolver idle state while di.c.mtx is locked
 func (r *resolver) setIdleLocked(idle bool) {
 	if r.idle == idle {
 		return
 	}
 	r.idle = idle
 	r.di.handleIdleStateLocked()
+}
+
+// setErrLocked marks the resolver error state while di.c.mtx is locked
+func (r *resolver) setErrLocked(err error) {
+	// Only mark state as changed if the error actually changed
+	if r.err == err {
+		return
+	}
+	defer r.di.deferCheckStateChanged()()
+	r.err = err
+	r.di.stateChangedSnapshot = directiveStateSnapshot{} // mark state as changed (error changed)
 }

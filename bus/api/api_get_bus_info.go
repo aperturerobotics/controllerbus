@@ -26,5 +26,6 @@ func (a *API) GetBusInfo(
 	for _, dir := range directives {
 		resp.RunningDirectives = append(resp.RunningDirectives, directive.NewDirectiveState(dir))
 	}
+
 	return &resp, nil
 }

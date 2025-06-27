@@ -84,6 +84,9 @@ func (c *Controller) AddDirective(
 	di.logger().Debug("added directive")
 	c.dir = append(c.dir, di)
 
+	// Defer calling state changed callback.
+	defer di.deferCheckStateChanged()()
+
 	// call all handlers while mtx is unlocked
 	handlers := make([]*handler, len(c.hnd))
 	copy(handlers, c.hnd)
@@ -105,11 +108,17 @@ func (c *Controller) AddDirective(
 	// attach returned resolvers while mtx is locked
 	c.mtx.Lock() // note: unlocked in Defer above
 
-	di.ready = true
 	if !di.released.Load() {
 		for _, res := range resolvers {
 			di.attachStartResolverLocked(res)
 		}
+
+		// mark instance as ready (can be marked idle)
+		di.ready = true
+
+		// Check if idle state changed after setting ready=true
+		// This ensures idle callbacks are called if idle became true when ready became true
+		di.handleIdleStateLocked()
 	}
 
 	return di, diRef, nil

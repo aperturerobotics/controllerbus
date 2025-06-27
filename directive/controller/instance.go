@@ -45,6 +45,14 @@ type directiveInstance struct {
 	rels []*callback[func()]
 	// idles contains all idle callbacks
 	idles []*callback[directive.IdleCallback]
+	// stateChanged contains all state changed callbacks
+	stateChanged []*callback[directive.StateCallback]
+	// stateChangedSnapshot contains the current state snapshot for stateChanged callbacks.
+	// only populated when len(stateChanged) != 0 for performance
+	// when this changes, call the stateChanged callbacks
+	stateChangedSnapshot directiveStateSnapshot
+	// stateChangedSkip indicates we are already checking for state changes in this call stack
+	stateChangedSkip bool
 	// callingRefs indicates we are currently calling a ref callback
 	callingRefCbs bool
 	// refCbs is the callbacks queue
@@ -133,6 +141,90 @@ func (i *directiveInstance) getResolverErrsLocked() []error {
 		}
 	}
 	return errs
+}
+
+// directiveStateSnapshot is a snapshot of the state for a StateCallback
+type directiveStateSnapshot struct {
+	set          bool // set to false if not populated
+	idle         bool
+	errs         []error
+	attachedVals []directive.AttachedValue
+}
+
+// getDirectiveStateSnapshotLocked returns the latest snapshot or populates it if empty.
+func (i *directiveInstance) getDirectiveStateSnapshotLocked() directiveStateSnapshot {
+	if i.stateChangedSnapshot.set {
+		return i.stateChangedSnapshot
+	}
+
+	// populate values
+	i.populateDirectiveStateSnapshotLocked()
+	return i.stateChangedSnapshot
+}
+
+// populateDirectiveStateSnapshotLocked re-populates the entire state snapshot field.
+func (i *directiveInstance) populateDirectiveStateSnapshotLocked() {
+	i.stateChangedSnapshot.idle = i.ready && i.idle
+	i.stateChangedSnapshot.errs = i.getResolverErrsLocked()
+	i.stateChangedSnapshot.attachedVals = i.getResolverAttachedValsLocked()
+	i.stateChangedSnapshot.set = true
+}
+
+// deferCheckStateChanged returns a function to defer state change checking.
+// Usage: defer i.deferCheckStateChanged()()
+func (i *directiveInstance) deferCheckStateChanged() func() {
+	// If already skipping or no state callbacks, return empty function
+	if i.stateChangedSkip || len(i.stateChanged) == 0 {
+		return func() {}
+	}
+
+	// Set skip flag and return function to check state changes
+	i.stateChangedSkip = true
+	return func() {
+		i.maybeCallStateChanged()
+		i.stateChangedSkip = false
+	}
+}
+
+// maybeCallStateChanged checks if state changed and calls callbacks if so.
+func (i *directiveInstance) maybeCallStateChanged() {
+	if len(i.stateChanged) == 0 || i.stateChangedSnapshot.set {
+		return
+	}
+
+	// Populate current state snapshot
+	i.populateDirectiveStateSnapshotLocked()
+
+	// Call callbacks
+	var cbs []func()
+	for _, stateCb := range i.stateChanged {
+		if !stateCb.released.Load() && stateCb.cb != nil {
+			stateCbFn := stateCb.cb
+			snapshot := i.stateChangedSnapshot
+			cbs = append(cbs, func() {
+				stateCbFn(snapshot.idle, snapshot.errs, snapshot.attachedVals)
+			})
+		}
+	}
+	i.callCallbacksLocked(cbs...)
+}
+
+// getResolverAttachedValsLocked returns the list of values while c.mtx is locked.
+func (i *directiveInstance) getResolverAttachedValsLocked() []directive.AttachedValue {
+	// count size for slice
+	var numVals int
+	for _, resolver := range i.res {
+		numVals += len(resolver.vals)
+	}
+
+	vals := make([]directive.AttachedValue, 0, numVals)
+	for _, resolver := range i.res {
+		for _, val := range resolver.vals {
+			vals = append(vals, val)
+		}
+	}
+
+	return vals
 }
 
 // AddReference adds a reference to the directive.
@@ -327,18 +419,17 @@ func (i *directiveInstance) checkFullLocked() {
 	}
 }
 
-// checkIdleLocked checks if there are any running resolvers
-func (i *directiveInstance) checkIdleLocked() bool {
-	return i.countRunningResolversLocked() == 0
-}
-
 // handleIdleStateLocked checks if the idle state of the instance changes & handles that if so.
 func (i *directiveInstance) handleIdleStateLocked() {
-	idle := i.checkIdleLocked()
+	// true if there are no running resolvers and the instance is ready.
+	idle := i.countRunningResolversLocked() == 0 && i.ready
 	if i.idle == idle {
 		return
 	}
+
+	defer i.deferCheckStateChanged()()
 	i.idle = idle
+	i.stateChangedSnapshot = directiveStateSnapshot{} // mark state as changed
 
 	if len(i.idles) == 0 {
 		return
@@ -359,16 +450,23 @@ func (i *directiveInstance) handleIdleStateLocked() {
 
 // removeReleaseCallbackLocked removes a release callback while i.c.mtx is locked.
 func (i *directiveInstance) removeReleaseCallbackLocked(cb *callback[func()]) {
-	removeFromCallbacks(i.rels, cb)
+	i.rels = removeFromCallbacks(i.rels, cb)
 }
 
 // removeIdleCallbackLocked removes a idle callback while i.c.mtx is locked.
 func (i *directiveInstance) removeIdleCallbackLocked(cb *callback[directive.IdleCallback]) {
-	removeFromCallbacks(i.idles, cb)
+	i.idles = removeFromCallbacks(i.idles, cb)
+}
+
+// removeStateCallbackLocked removes a state callback while i.c.mtx is locked.
+func (i *directiveInstance) removeStateCallbackLocked(cb *callback[directive.StateCallback]) {
+	i.stateChanged = removeFromCallbacks(i.stateChanged, cb)
 }
 
 // addValueLocked adds a value to the instance while i.c.mtx is locked
 func (i *directiveInstance) addValueLocked(res *resolver, val directive.Value) (uint32, bool) {
+	defer i.deferCheckStateChanged()()
+
 	maxVals := i.valueOpts.MaxValueCount
 	if maxVals != 0 && i.countValuesLocked() >= maxVals && i.valueOpts.MaxValueHardCap {
 		return 0, false
@@ -379,6 +477,7 @@ func (i *directiveInstance) addValueLocked(res *resolver, val directive.Value) (
 
 	v := &value{id: vid, val: val}
 	res.vals = append(res.vals, v)
+	i.stateChangedSnapshot = directiveStateSnapshot{} // mark state as changed
 
 	var cbs []func()
 	for _, ref := range i.refs {
@@ -401,7 +500,7 @@ func (i *directiveInstance) removeValueLocked(res *resolver, valID uint32) (dire
 		val := res.vals[idx]
 		if val.id == valID {
 			res.vals = append(res.vals[:idx], res.vals[idx+1:]...)
-			i.onValuesRemovedLocked(res, val)
+			i.onValuesRemovedLocked(val)
 			return val.val, true
 		}
 	}
@@ -487,7 +586,14 @@ func (i *directiveInstance) attachStartSubResolverLocked(res *resolver, subRes d
 }
 
 // onValuesRemovedLocked is called after removing values from a resolver.
-func (i *directiveInstance) onValuesRemovedLocked(res *resolver, vals ...*value) {
+func (i *directiveInstance) onValuesRemovedLocked(vals ...*value) {
+	if len(vals) == 0 {
+		return
+	}
+
+	defer i.deferCheckStateChanged()()
+	i.stateChangedSnapshot = directiveStateSnapshot{} // mark state as changed
+
 	var cbs []func()
 	for _, val := range vals {
 		for _, removedCallback := range val.removeCallbacks {
@@ -498,7 +604,6 @@ func (i *directiveInstance) onValuesRemovedLocked(res *resolver, vals ...*value)
 		val.removeCallbacks = nil
 
 		for _, ref := range i.refs {
-			ref := ref
 			if !ref.released.Load() && ref.h != nil {
 				cbs = append(cbs, func() {
 					ref.h.HandleValueRemoved(i, val)
@@ -541,18 +646,43 @@ func (i *directiveInstance) AddIdleCallback(cb directive.IdleCallback) func() {
 	i.c.mtx.Lock()
 	defer i.c.mtx.Unlock()
 
-	rel := newCallback(cb)
-	i.idles = append(i.idles, rel)
-	isIdle := i.ready && i.checkIdleLocked()
+	cbCtr := newCallback(cb)
+	i.idles = append(i.idles, cbCtr)
+	isIdle := i.ready && i.idle
 	errs := i.getResolverErrsLocked()
 	i.callCallbacksLocked(func() {
 		cb(isIdle, errs)
 	})
 
 	return func() {
-		if !rel.released.Swap(true) {
+		if !cbCtr.released.Swap(true) {
 			i.c.mtx.Lock()
-			i.removeIdleCallbackLocked(rel)
+			i.removeIdleCallbackLocked(cbCtr)
+			i.c.mtx.Unlock()
+		}
+	}
+}
+
+// AddStateCallback adds a callback that will be called when the directive state changes.
+// Called when any of the parameters of the callback change.
+// This is more expensive than AddIdleCallback or AddDisposeCallback.
+// Returns a callback release function.
+func (i *directiveInstance) AddStateCallback(cb directive.StateCallback) func() {
+	i.c.mtx.Lock()
+	defer i.c.mtx.Unlock()
+
+	cbCtr := newCallback(cb)
+	i.stateChanged = append(i.stateChanged, cbCtr)
+	stateSnapshot := i.getDirectiveStateSnapshotLocked()
+
+	i.callCallbacksLocked(func() {
+		cb(stateSnapshot.idle, stateSnapshot.errs, stateSnapshot.attachedVals)
+	})
+
+	return func() {
+		if !cbCtr.released.Swap(true) {
+			i.c.mtx.Lock()
+			i.removeStateCallbackLocked(cbCtr)
 			i.c.mtx.Unlock()
 		}
 	}
@@ -618,9 +748,11 @@ func (i *directiveInstance) callHandlerUnlocked(handler *handler) (res []*resolv
 func (i *directiveInstance) attachStartResolverLocked(res *resolver) {
 	i.res = append(i.res, res)
 	if i.full {
+		// already full => already idle => don't call handleIdleStateLocked.
 		res.idle = true
 		res.updateContextLocked(nil)
 	} else {
+		// we possibly just transitioned from idle => not idle.
 		res.updateContextLocked(&i.ctx)
 		i.handleIdleStateLocked()
 	}
@@ -721,7 +853,7 @@ func (i *directiveInstance) removeResolverLocked(resIdx int, rres *resolver) {
 	// remove values associated with the resolver
 	vals := rres.vals
 	rres.vals = nil
-	i.onValuesRemovedLocked(rres, vals...)
+	i.onValuesRemovedLocked(vals...)
 	// call the resolver removed callbacks
 	var cbs []func()
 	for _, cb := range rres.rels {
@@ -750,15 +882,14 @@ func (i *directiveInstance) callCallbacksLocked(cbs ...func()) {
 	for len(cbs) != 0 {
 		i.c.mtx.Unlock()
 		for _, cb := range cbs {
-			cb := cb
-			func() {
+			func(cb func()) {
 				defer func() {
 					if rerr := recover(); rerr != nil {
 						_ = handlePanic(i.logger(), rerr)
 					}
 				}()
 				cb()
-			}()
+			}(cb)
 		}
 		i.c.mtx.Lock()
 		cbs = i.refCbs
@@ -768,7 +899,7 @@ func (i *directiveInstance) callCallbacksLocked(cbs ...func()) {
 }
 
 // handlePanic converts a panic error into a regular error
-func handlePanic(le *logrus.Entry, panicErr interface{}) error {
+func handlePanic(le *logrus.Entry, panicErr any) error {
 	debug.PrintStack()
 	e, eOk := panicErr.(error)
 	if !eOk {

@@ -25,7 +25,7 @@ func NewUniqueListResolver[K, V comparable](
 ) *UniqueListResolver[K, V] {
 	valueIds := make(map[K]uint32)
 	return &UniqueListResolver[K, V]{
-		KeyedList: unique.NewKeyedList[K, V](
+		KeyedList: unique.NewKeyedList(
 			getKey,
 			cmp,
 			func(k K, v V, added bool, removed bool) {
@@ -85,7 +85,7 @@ func NewUniqueListXfrmResolver[K, V comparable, O any](
 ) *UniqueListXfrmResolver[K, V, O] {
 	valueIds := make(map[K]uint32)
 	return &UniqueListXfrmResolver[K, V, O]{
-		KeyedList: unique.NewKeyedList[K, V](
+		KeyedList: unique.NewKeyedList(
 			getKey,
 			cmp,
 			func(k K, v V, added bool, removed bool) {
