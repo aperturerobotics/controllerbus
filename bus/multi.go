@@ -208,7 +208,7 @@ func ExecCollectValues[T directive.Value](
 //
 // errorCb can be nil.
 //
-// Returns the directive instance and reference for cleanup. If err != nil, ref == nil.
+// Returns the directive instance and function for cleanup. If err != nil, ref == nil.
 func ExecCollectValuesWatch[T directive.Value](
 	ctx context.Context,
 	bus Bus,
@@ -216,7 +216,7 @@ func ExecCollectValuesWatch[T directive.Value](
 	waitIdle bool,
 	callback func(resErr []error, vals []T) error,
 	errorCb func(err error),
-) (directive.Instance, directive.Reference, error) {
+) (directive.Instance, func(), error) {
 	// bcast guards these variables
 	var bcast broadcast.Broadcast
 
@@ -291,7 +291,7 @@ func ExecCollectValuesWatch[T directive.Value](
 		return nil, nil, err
 	}
 
-	defer di.AddIdleCallback(func(isIdle bool, errs []error) {
+	relIdleCallback := di.AddIdleCallback(func(isIdle bool, errs []error) {
 		bcast.HoldLock(func(broadcast func(), getWaitCh func() <-chan struct{}) {
 			wasIdle := idle
 			idle = isIdle
@@ -311,10 +311,12 @@ func ExecCollectValuesWatch[T directive.Value](
 				broadcast()
 			}
 		})
-	})()
+	})
 
 	// Goroutine to handle callbacks
 	go func() {
+		defer relIdleCallback()
+
 		for {
 			var currVals []T
 			var currErr []error
@@ -355,5 +357,8 @@ func ExecCollectValuesWatch[T directive.Value](
 		}
 	}()
 
-	return di, ref, nil
+	return di, func() {
+		relIdleCallback()
+		ref.Release()
+	}, nil
 }
