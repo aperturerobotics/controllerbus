@@ -2,36 +2,35 @@
 # yarn lockfile v1
 
 
-"@aptre/common@^0.22.1":
-  version "0.22.5"
-  resolved "https://registry.yarnpkg.com/@aptre/common/-/common-0.22.5.tgz#8eb164bf0f5d8dd780b4f5487857fa3fee470562"
-  integrity sha512-FAkgQerVWcVQt6SzTOlLkYma2X/pnLu1uYwqM4zOUesd+eMUoSc/Qgdz+RmC9IuqAcGxtm6MHslHTrSBgAn0dw==
+"@aptre/common@^0.22.7":
+  version "0.22.7"
+  resolved "https://registry.yarnpkg.com/@aptre/common/-/common-0.22.7.tgz#8c98d48f6e556328b37031d37b531d5062e364cc"
+  integrity sha512-SlmI5zEm1yCIVG/P+7rBdu6DzD9ESbFkdn/WhNfRSU2nQRyRftO0ItxQsI9+7H6yWZhSjAWAkSgtfNk4E1pUpw==
   dependencies:
-    "@aptre/protobuf-es-lite" "^0.4.7"
+    "@aptre/protobuf-es-lite" "^0.5.2"
     "@typescript-eslint/eslint-plugin" "^8.18.0"
     "@typescript-eslint/parser" "^8.18.0"
     eslint "^9.26.0"
     eslint-config-prettier "^10.0.0"
     eslint-plugin-react-hooks "^5.1.0"
     eslint-plugin-unused-imports "^4.0.0"
-    starpc "^0.39.0"
+    starpc "^0.39.5"
     vitest "^3.0.0"
 
-"@aptre/it-ws@^1.0.1":
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/@aptre/it-ws/-/it-ws-1.0.1.tgz#fd3e45d517849b7a76a37f19d5c25f5dbc3ba991"
-  integrity sha512-8gbaW9utMyVtAi317JX+CYm4uM2XUy+a4y62pok++sSkvlHjG4tjPYOkzVxeTer10BjgTHLek2K/1naWgYicgQ==
+"@aptre/it-ws@^1.1.2":
+  version "1.1.2"
+  resolved "https://registry.yarnpkg.com/@aptre/it-ws/-/it-ws-1.1.2.tgz#c158e7ee534e2ecd7e3b0f23c8ac7bb39a2e12bb"
+  integrity sha512-llC/rTR1YXs3sNven2QRyHp3PoUwxpe0/iohiFNIfUTjbThlv1vGuq6GZysOGwCqEgbYRJGMhu4A4pTjwqztJQ==
   dependencies:
     "@types/ws" "^8.2.2"
     event-iterator "^2.0.0"
     it-stream-types "^2.0.1"
-    uint8arrays "^5.1.0"
     ws "^8.17.1"
 
-"@aptre/protobuf-es-lite@0.4.9", "@aptre/protobuf-es-lite@^0.4.4", "@aptre/protobuf-es-lite@^0.4.6", "@aptre/protobuf-es-lite@^0.4.7":
-  version "0.4.9"
-  resolved "https://registry.yarnpkg.com/@aptre/protobuf-es-lite/-/protobuf-es-lite-0.4.9.tgz#4d57ccb84a9fc445a5fb0ade524154e9896ccc66"
-  integrity sha512-iNe/R3TvmNWRv/e7dP5TR023v4GkSB0Fk9d4Mjby7WjIbJB/VhAuL39k9OkUWC8fnNFFAwCiUPhq4/tpzRmdnw==
+"@aptre/protobuf-es-lite@0.5.2", "@aptre/protobuf-es-lite@^0.5.2":
+  version "0.5.2"
+  resolved "https://registry.yarnpkg.com/@aptre/protobuf-es-lite/-/protobuf-es-lite-0.5.2.tgz#5e962eaea3e9153be445f72c3534c733ade842db"
+  integrity sha512-AUUiBZP/2C2W3ig50loSWKfhOvr8Gb7uL9vl49kFRsXQJOcNbcDMRSKOS7HNYcDIM6ZhASGL9EasghmNesNa7Q==
   dependencies:
     "@typescript/vfs" "^1.5.0"
     lz-string "^1.5.0"
@@ -433,7 +432,7 @@
     progress-events "^1.0.1"
     uint8arraylist "^2.4.8"
 
-"@libp2p/logger@^5.1.11", "@libp2p/logger@^5.1.13":
+"@libp2p/logger@^5.1.13":
   version "5.1.13"
   resolved "https://registry.yarnpkg.com/@libp2p/logger/-/logger-5.1.13.tgz#f0ecfe4ead772f8210337f09f727870e08860341"
   integrity sha512-JKyMlySG8T+LpItsj9Vma57yap/A0HqJ8ZdaHvgdoThhSOfqcRs8oRWO/2EG0Q5hUXugw//EAT+Ptj8MyNdbjQ==
@@ -2317,16 +2316,15 @@ stackback@0.0.2:
   resolved "https://registry.yarnpkg.com/stackback/-/stackback-0.0.2.tgz#1ac8a0d9483848d1695e418b6d031a3c3ce68e3b"
   integrity sha512-1XMJE5fQo1jGH6Y/7ebnwPOBEkIEnT4QF32d5R1+VXdXveM0IBMJt8zfaxX1P3QhVwrYe+576+jkANtSS2mBbw==
 
-starpc@^0.39.0:
-  version "0.39.1"
-  resolved "https://registry.yarnpkg.com/starpc/-/starpc-0.39.1.tgz#3565fc54b610b066be0a1f5690149417a902a40b"
-  integrity sha512-h+nBbw30e4ti28pYCwhuAWPKbTUUrb6tCb8sKqoE5+/vBBwQPyXEeNnwzt1iAWuYFAJiSFm7eHIyLVtidBX+gQ==
+starpc@^0.39.5:
+  version "0.39.5"
+  resolved "https://registry.yarnpkg.com/starpc/-/starpc-0.39.5.tgz#4e5da18e52c7679fedf097491606e1eb806e2ff5"
+  integrity sha512-ilMs3Ek5V5u4txKzhGD1SZEozT86wDHylz8xgOM/h0gv+XgY64B3PsSVn041zi4DYutcIOmnLDene+enzKz9Vg==
   dependencies:
-    "@aptre/it-ws" "^1.0.1"
-    "@aptre/protobuf-es-lite" "^0.4.6"
+    "@aptre/it-ws" "^1.1.2"
+    "@aptre/protobuf-es-lite" "^0.5.2"
     "@chainsafe/libp2p-yamux" "^7.0.1"
     "@libp2p/interface" "^2.6.1"
-    "@libp2p/logger" "^5.1.11"
     event-iterator "^2.0.0"
     isomorphic-ws "^5.0.0"
     it-first "^3.0.6"
