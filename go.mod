@@ -11,11 +11,11 @@ replace github.com/libp2p/go-msgio => github.com/aperturerobotics/go-libp2p-msgi
 
 require (
 	github.com/aperturerobotics/cli v1.0.0 // latest
-	github.com/aperturerobotics/common v0.22.5 // latest
-	github.com/aperturerobotics/json-iterator-lite v1.0.1-0.20241223092408-d525fa878b3e // latest
+	github.com/aperturerobotics/common v0.22.7 // latest
+	github.com/aperturerobotics/json-iterator-lite v1.0.1-0.20250712004945-4e5f8882b0b8 // latest
 	github.com/aperturerobotics/protobuf-go-lite v0.9.1 // latest
-	github.com/aperturerobotics/starpc v0.39.1 // latest
-	github.com/aperturerobotics/util v1.30.0 // latest
+	github.com/aperturerobotics/starpc v0.39.6 // latest
+	github.com/aperturerobotics/util v1.31.0 // latest
 )
 
 require (
@@ -27,8 +27,8 @@ require (
 	github.com/sergi/go-diff v1.4.0
 	github.com/sirupsen/logrus v1.9.3
 	github.com/zeebo/blake3 v0.2.4
-	golang.org/x/mod v0.25.0
-	golang.org/x/tools v0.34.0
+	golang.org/x/mod v0.26.0
+	golang.org/x/tools v0.35.0
 	mvdan.cc/gofumpt v0.8.0
 )
 
@@ -38,7 +38,7 @@ require (
 	github.com/ipfs/go-cid v0.4.1 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.8 // indirect
 	github.com/libp2p/go-buffer-pool v0.1.0 // indirect
-	github.com/libp2p/go-libp2p v0.41.1 // indirect
+	github.com/libp2p/go-libp2p v0.42.0 // indirect
 	github.com/libp2p/go-yamux/v4 v4.0.2-0.20240826150533-e92055b23e0e // indirect
 	github.com/minio/sha256-simd v1.0.1 // indirect
 	github.com/multiformats/go-base32 v0.1.0 // indirect
@@ -52,8 +52,8 @@ require (
 	github.com/xrash/smetrics v0.0.0-20240521201337-686a1a2994c1 // indirect
 	golang.org/x/crypto v0.37.0 // indirect
 	golang.org/x/exp v0.0.0-20250408133849-7e4ce0ab07d0 // indirect
-	golang.org/x/sync v0.15.0 // indirect
-	golang.org/x/sys v0.33.0 // indirect
+	golang.org/x/sync v0.16.0 // indirect
+	golang.org/x/sys v0.34.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	lukechampine.com/blake3 v1.3.0 // indirect
 )
