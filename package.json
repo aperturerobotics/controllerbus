@@ -27,6 +27,7 @@
     "build": "tsc --project tsconfig.json --noEmit false --outDir ./dist/",
     "codegen": "npm run gen",
     "gen": "make genproto",
+    "gen:goscript": "npm run vendor && rimraf ./goscript/@go && bash ./goscript/compile.bash",
     "format": "npm run format:js && npm run format:go",
     "format:go": "make format",
     "format:js": "prettier --write './!(vendor|dist)/**/(*.ts|*.tsx|*.js|*.html|*.css)'",

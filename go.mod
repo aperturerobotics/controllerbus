@@ -1,6 +1,6 @@
 module github.com/aperturerobotics/controllerbus
 
-go 1.24
+go 1.24.4
 
 toolchain go1.24.5
 
@@ -19,6 +19,7 @@ require (
 )
 
 require (
+	github.com/aperturerobotics/goscript v0.0.58
 	github.com/blang/semver/v4 v4.0.0
 	github.com/fsnotify/fsnotify v1.9.0
 	github.com/ghodss/yaml v1.0.0

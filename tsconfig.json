@@ -6,7 +6,8 @@
     "jsx": "react",
     "baseUrl": "./",
     "paths": {
-      "@go/*": ["vendor/*"]
+      "@go/*": ["./vendor/*"]
+      "@goscript/*": ["./goscript/@goscript/*"]
     },
     "allowSyntheticDefaultImports": true,
     "declaration": true,
