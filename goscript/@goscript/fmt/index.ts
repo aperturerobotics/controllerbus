@@ -1,0 +1,35 @@
+export {
+  Errorf,
+  Print,
+  Printf,
+  Println,
+  Sprint,
+  Sprintf,
+  Sprintln,
+  Fprint,
+  Fprintf,
+  Fprintln,
+  Append,
+  Appendf,
+  Appendln,
+  FormatString,
+  Scan,
+  Scanf,
+  Scanln,
+  Sscan,
+  Sscanf,
+  Sscanln,
+  Fscan,
+  Fscanf,
+  Fscanln,
+} from './fmt.js'
+
+// Re-export types for TypeScript compilation
+export type {
+  Formatter,
+  GoStringer,
+  Stringer,
+  State,
+  Scanner,
+  ScanState,
+} from './fmt.js'

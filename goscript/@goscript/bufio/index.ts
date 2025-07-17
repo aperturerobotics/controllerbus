@@ -1,0 +1,5 @@
+export { ErrBufferFull, ErrInvalidUnreadByte, ErrInvalidUnreadRune, ErrNegativeCount, NewReadWriter, NewReader, NewReaderSize, NewWriter, NewWriterSize } from "./bufio.gs.js"
+export { ReadWriter, Reader, Writer } from "./bufio.gs.js"
+export { ErrAdvanceTooFar, ErrBadReadCount, ErrFinalToken, ErrNegativeAdvance, ErrTooLong, MaxScanTokenSize, NewScanner, ScanBytes, ScanLines, ScanRunes, ScanWords } from "./scan.gs.js"
+export { Scanner } from "./scan.gs.js"
+export type { SplitFunc } from "./scan.gs.js"

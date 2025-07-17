@@ -2,6 +2,8 @@ package main
 
 import (
 	"context"
+
+	"github.com/sirupsen/logrus"
 )
 
 func main() {
@@ -19,6 +21,13 @@ func run(ctx context.Context) error {
 	}()
 	<-subCtx.Done()
 	println("context test worked")
+
+	// build a logger
+	log := logrus.New()
+	log.SetLevel(logrus.DebugLevel)
+	le := logrus.NewEntry(log)
+
+	le.Debug("hello world from logrus")
 
 	return nil
 }
