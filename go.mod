@@ -2,7 +2,7 @@ module github.com/aperturerobotics/controllerbus
 
 go 1.24
 
-toolchain go1.24.4
+toolchain go1.24.5
 
 // This fork drops ecdsa, drops secp256k1, adds eddilithium2 and eddilithium3
 replace github.com/libp2p/go-libp2p => github.com/aperturerobotics/go-libp2p v0.37.1-0.20241111002741-5cfbb50b74e0 // aperture
