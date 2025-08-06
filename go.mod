@@ -2,7 +2,7 @@ module github.com/aperturerobotics/controllerbus
 
 go 1.24
 
-toolchain go1.24.5
+toolchain go1.24.6
 
 // This fork drops ecdsa, drops secp256k1, adds eddilithium2 and eddilithium3
 replace github.com/libp2p/go-libp2p => github.com/aperturerobotics/go-libp2p v0.37.1-0.20241111002741-5cfbb50b74e0 // aperture
@@ -11,10 +11,10 @@ replace github.com/libp2p/go-msgio => github.com/aperturerobotics/go-libp2p-msgi
 
 require (
 	github.com/aperturerobotics/cli v1.0.0 // latest
-	github.com/aperturerobotics/common v0.22.7 // latest
+	github.com/aperturerobotics/common v0.22.9 // latest
 	github.com/aperturerobotics/json-iterator-lite v1.0.1-0.20250712004945-4e5f8882b0b8 // latest
-	github.com/aperturerobotics/protobuf-go-lite v0.9.1 // latest
-	github.com/aperturerobotics/starpc v0.39.6 // latest
+	github.com/aperturerobotics/protobuf-go-lite v0.10.1 // latest
+	github.com/aperturerobotics/starpc v0.39.7 // latest
 	github.com/aperturerobotics/util v1.31.0 // latest
 )
 
@@ -38,7 +38,7 @@ require (
 	github.com/ipfs/go-cid v0.4.1 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.8 // indirect
 	github.com/libp2p/go-buffer-pool v0.1.0 // indirect
-	github.com/libp2p/go-libp2p v0.42.0 // indirect
+	github.com/libp2p/go-libp2p v0.42.1 // indirect
 	github.com/libp2p/go-yamux/v4 v4.0.2-0.20240826150533-e92055b23e0e // indirect
 	github.com/minio/sha256-simd v1.0.1 // indirect
 	github.com/multiformats/go-base32 v0.1.0 // indirect

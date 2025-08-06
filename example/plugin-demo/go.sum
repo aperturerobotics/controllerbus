@@ -8,6 +8,8 @@ github.com/aperturerobotics/json-iterator-lite v1.0.1-0.20250712004945-4e5f8882b
 github.com/aperturerobotics/json-iterator-lite v1.0.1-0.20250712004945-4e5f8882b0b8/go.mod h1:SvGGBv3OVxUyqO0ZxA/nvs6z3cg7NIbZ64TnbV2OISo=
 github.com/aperturerobotics/protobuf-go-lite v0.9.1 h1:P1knXKnwLJpVE8fmeXYGckKu79IhqUvKRdCfJNR0MwQ=
 github.com/aperturerobotics/protobuf-go-lite v0.9.1/go.mod h1:fULrxQxEBWKQm7vvju9AfjTp9yfHoLgwMQWTiZQ2tg0=
+github.com/aperturerobotics/protobuf-go-lite v0.10.1 h1:I2OebcI0BKaQLQSEPnwKmMCz3sAl/aT0C2hZl9lHwEQ=
+github.com/aperturerobotics/protobuf-go-lite v0.10.1/go.mod h1:c4kGy7Dkfz6B1m0t4QBIMQoNeQ7m+nYj3Qxxnlwhygo=
 github.com/aperturerobotics/starpc v0.39.6 h1:z86Q5F1+5TiQcpn9uxrbBRRSo8VRChaiO9yzpvrP+Ec=
 github.com/aperturerobotics/starpc v0.39.6/go.mod h1:q8PqoL5FUP1LR2OfJTdVpX+XOxqiHoEVqrH/H0YmKu0=
 github.com/aperturerobotics/util v1.31.0 h1:094JjGljJCyd6uq5HfbFR//GGsMgN362TOhvEh78JyI=
