@@ -50,6 +50,15 @@ func (r *AccessResolver[T]) Resolve(ctx context.Context, handler ResolverHandler
 			return err
 		}
 
+		// ignore empty values
+		var empty T
+		if val == empty {
+			if rel != nil {
+				rel()
+			}
+			return nil
+		}
+
 		valID, valAccepted := handler.AddValue(val)
 		if !valAccepted {
 			if rel != nil {
