@@ -42,6 +42,30 @@ func ExecCollectValues[T directive.Value](
 	waitOne bool,
 	valDisposeCb func(),
 ) ([]T, directive.Instance, directive.Reference, error) {
+	return ExecCollectValuesWithFilter[T](ctx, bus, dir, waitOne, valDisposeCb, nil)
+}
+
+// ExecCollectValuesWithFilter collects one or more values while ctx is active and
+// directive is not idle, with an optional filter callback.
+//
+// filterCb is called for each value to determine if it should be included.
+// If filterCb is nil, all values of type T are included.
+// If filterCb returns false or an error, the value is not included.
+//
+// Returns vals, ref, nil if the directive is idle.
+// Returns err if any resolver returns an error or if filterCb returns an error.
+// valDisposeCb is called if any of the values are no longer valid.
+// valDisposeCb might be called multiple times.
+// If err != nil, ref == nil.
+// If waitOne=true, waits for at least one value before returning.
+func ExecCollectValuesWithFilter[T directive.Value](
+	ctx context.Context,
+	bus Bus,
+	dir directive.Directive,
+	waitOne bool,
+	valDisposeCb func(),
+	filterCb func(val T) (bool, error),
+) ([]T, directive.Instance, directive.Reference, error) {
 	var disposed atomic.Bool
 	valDisposeCallback := func() {
 		if !disposed.Swap(true) {
@@ -68,6 +92,24 @@ func ExecCollectValues[T directive.Value](
 				if !valOk {
 					return
 				}
+
+				// Apply filter if provided
+				if filterCb != nil {
+					ok, err := filterCb(val)
+					if err != nil {
+						bcast.HoldLock(func(broadcast func(), getWaitCh func() <-chan struct{}) {
+							if !returned && resErr == nil {
+								resErr = err
+								broadcast()
+							}
+						})
+						return
+					}
+					if !ok {
+						return
+					}
+				}
+
 				bcast.HoldLock(func(broadcast func(), getWaitCh func() <-chan struct{}) {
 					if !returned {
 						// we can append without re-allocating.
@@ -217,6 +259,49 @@ func ExecCollectValuesWatch[T directive.Value](
 	callback func(resErr []error, vals []T) error,
 	errorCb func(err error),
 ) (directive.Instance, func(), error) {
+	return ExecCollectValuesWatchWithFilter(ctx, bus, dir, waitIdle, callback, errorCb, nil)
+}
+
+// ExecCollectValuesWatchWithFilter collects values and calls a callback whenever the slice changes,
+// with an optional filter callback.
+//
+// filterCb is called for each value to determine if it should be included.
+// If filterCb is nil, all values of type T are included.
+// If filterCb returns false or an error, the value is not included.
+//
+// The callback is called with a snapshot of the current values and resolver errors.
+// Its behavior is determined by the waitIdle flag and the directive's state.
+//
+// Rules for Emitting:
+//  1. If waitIdle is false: Any change (add, remove, error) triggers an immediate emit.
+//  2. If waitIdle is true: Changes are buffered until the directive becomes idle.
+//     The first emit occurs only when the directive becomes idle, even if the
+//     collected value set is empty.
+//  3. After the First Emit: Once the initial collection has been emitted, any
+//     subsequent change (add, remove, error) will trigger an immediate emit,
+//     regardless of the waitIdle flag.
+//  4. Error Changes: Any change in the resolver error state (errors appearing,
+//     disappearing, or changing) will trigger an immediate emit.
+//
+// The callback receives a slice of resolver errors. If any resolvers fail, their
+// errors will be included in the slice. If all resolvers succeed, the slice will
+// be empty. The callback can continue to be called as resolver errors come and go.
+//
+// The callback runs in a separate goroutine. If the callback returns an error,
+// it will not be called again, and the error will be passed to errorCb.
+//
+// errorCb can be nil.
+//
+// Returns the directive instance and function for cleanup. If err != nil, ref == nil.
+func ExecCollectValuesWatchWithFilter[T directive.Value](
+	ctx context.Context,
+	bus Bus,
+	dir directive.Directive,
+	waitIdle bool,
+	callback func(resErr []error, vals []T) error,
+	errorCb func(err error),
+	filterCb func(val T) (bool, error),
+) (directive.Instance, func(), error) {
 	// bcast guards these variables
 	var bcast broadcast.Broadcast
 
@@ -245,6 +330,25 @@ func ExecCollectValuesWatch[T directive.Value](
 				if !valOk {
 					return
 				}
+
+				// Apply filter if provided
+				if filterCb != nil {
+					ok, err := filterCb(val)
+					if err != nil {
+						bcast.HoldLock(func(broadcast func(), getWaitCh func() <-chan struct{}) {
+							if len(resErr) == 0 {
+								resErr = []error{err}
+								pendingEmit = true
+								broadcast()
+							}
+						})
+						return
+					}
+					if !ok {
+						return
+					}
+				}
+
 				bcast.HoldLock(func(broadcast func(), getWaitCh func() <-chan struct{}) {
 					vals = append(vals, val)
 					valIDs = append(valIDs, v.GetValueID())
