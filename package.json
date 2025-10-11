@@ -49,7 +49,7 @@
   "devDependencies": {
     "@aptre/common": "^0.22.10",
     "depcheck": "^1.4.7",
-    "happy-dom": "^18.0.0",
+    "happy-dom": "^20.0.0",
     "prettier": "^3.5.3",
     "rimraf": "^6.0.1",
     "typescript": "^5.8.3",
