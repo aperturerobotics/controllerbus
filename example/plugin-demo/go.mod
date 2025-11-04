@@ -2,7 +2,7 @@ module github.com/aperturerobotics/controllerbus/example/plugin-demo
 
 go 1.24.0
 
-toolchain go1.25.1
+toolchain go1.25.3
 
 replace github.com/aperturerobotics/controllerbus => ../..
 
