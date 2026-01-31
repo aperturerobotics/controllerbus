@@ -1,0 +1,219 @@
+{
+  "version": 2,
+  "protocFlagsHash": "9150639224e955224e0912be804715cb2f32dc473052ed201e72834537809575",
+  "toolVersions": "protoc=embedded,protobuf-go-lite=v0.12.0,starpc=v0.42.0,protobuf-es-lite=^0.5.2",
+  "packages": {
+    "github.com/aperturerobotics/controllerbus/bus/api": {
+      "hash": "cb54c58f93c550b41349c1e5cfa10e2107543a0570a1596065598d61676f80d2",
+      "generatedFiles": [
+        "vendor/github.com/aperturerobotics/controllerbus/bus/api/api.pb.cc",
+        "vendor/github.com/aperturerobotics/controllerbus/bus/api/api.pb.go",
+        "vendor/github.com/aperturerobotics/controllerbus/bus/api/api.pb.h",
+        "vendor/github.com/aperturerobotics/controllerbus/bus/api/api.pb.ts",
+        "vendor/github.com/aperturerobotics/controllerbus/bus/api/api_srpc.pb.go",
+        "vendor/github.com/aperturerobotics/controllerbus/bus/api/api_srpc.pb.ts",
+        "bus/api/api.pb.cc",
+        "bus/api/api.pb.go",
+        "bus/api/api.pb.h",
+        "bus/api/api.pb.ts",
+        "bus/api/api_srpc.pb.go",
+        "bus/api/api_srpc.pb.ts"
+      ],
+      "protoFiles": [
+        "bus/api/api.proto"
+      ]
+    },
+    "github.com/aperturerobotics/controllerbus/bus/api/controller": {
+      "hash": "ade0e0a0d6fcf19ce8dd0e221ad2c1ce2cb0259f5a316ce6477d910d2750e883",
+      "generatedFiles": [
+        "vendor/github.com/aperturerobotics/controllerbus/bus/api/controller/controller.pb.cc",
+        "vendor/github.com/aperturerobotics/controllerbus/bus/api/controller/controller.pb.go",
+        "vendor/github.com/aperturerobotics/controllerbus/bus/api/controller/controller.pb.h",
+        "vendor/github.com/aperturerobotics/controllerbus/bus/api/controller/controller.pb.ts",
+        "bus/api/controller/controller.pb.cc",
+        "bus/api/controller/controller.pb.go",
+        "bus/api/controller/controller.pb.h",
+        "bus/api/controller/controller.pb.ts"
+      ],
+      "protoFiles": [
+        "bus/api/controller/controller.proto"
+      ]
+    },
+    "github.com/aperturerobotics/controllerbus/config": {
+      "hash": "bed2db0d7ebc3f8345a7d1c815ff14a0d40876c06673f5c8463141218458d1d2",
+      "generatedFiles": [
+        "vendor/github.com/aperturerobotics/controllerbus/config/config.pb.cc",
+        "vendor/github.com/aperturerobotics/controllerbus/config/config.pb.go",
+        "vendor/github.com/aperturerobotics/controllerbus/config/config.pb.h",
+        "vendor/github.com/aperturerobotics/controllerbus/config/config.pb.ts",
+        "config/config.pb.cc",
+        "config/config.pb.go",
+        "config/config.pb.h",
+        "config/config.pb.ts"
+      ],
+      "protoFiles": [
+        "config/config.proto"
+      ]
+    },
+    "github.com/aperturerobotics/controllerbus/controller": {
+      "hash": "4f09d458cfb022b74d8688b8468110963874dcbeba798b6d27a9bb008b0bb2ac",
+      "generatedFiles": [
+        "vendor/github.com/aperturerobotics/controllerbus/controller/controller.pb.cc",
+        "vendor/github.com/aperturerobotics/controllerbus/controller/controller.pb.go",
+        "vendor/github.com/aperturerobotics/controllerbus/controller/controller.pb.h",
+        "vendor/github.com/aperturerobotics/controllerbus/controller/controller.pb.ts",
+        "controller/controller.pb.cc",
+        "controller/controller.pb.go",
+        "controller/controller.pb.h",
+        "controller/controller.pb.ts"
+      ],
+      "protoFiles": [
+        "controller/controller.proto"
+      ]
+    },
+    "github.com/aperturerobotics/controllerbus/controller/configset/controller": {
+      "hash": "f9b0e9e1447650a7353f8334647aba0212a5379e5c23b5cfe9d519b38e92083f",
+      "generatedFiles": [
+        "vendor/github.com/aperturerobotics/controllerbus/controller/configset/controller/config.pb.cc",
+        "vendor/github.com/aperturerobotics/controllerbus/controller/configset/controller/config.pb.go",
+        "vendor/github.com/aperturerobotics/controllerbus/controller/configset/controller/config.pb.h",
+        "vendor/github.com/aperturerobotics/controllerbus/controller/configset/controller/config.pb.ts",
+        "controller/configset/controller/config.pb.cc",
+        "controller/configset/controller/config.pb.go",
+        "controller/configset/controller/config.pb.h",
+        "controller/configset/controller/config.pb.ts"
+      ],
+      "protoFiles": [
+        "controller/configset/controller/config.proto"
+      ]
+    },
+    "github.com/aperturerobotics/controllerbus/controller/configset/proto": {
+      "hash": "7be02933fcccc971388a65c0b568c6163934a91338adb23f17ba81508ab724b4",
+      "generatedFiles": [
+        "vendor/github.com/aperturerobotics/controllerbus/controller/configset/proto/configset.pb.cc",
+        "vendor/github.com/aperturerobotics/controllerbus/controller/configset/proto/configset.pb.go",
+        "vendor/github.com/aperturerobotics/controllerbus/controller/configset/proto/configset.pb.h",
+        "vendor/github.com/aperturerobotics/controllerbus/controller/configset/proto/configset.pb.ts",
+        "controller/configset/proto/configset.pb.cc",
+        "controller/configset/proto/configset.pb.go",
+        "controller/configset/proto/configset.pb.h",
+        "controller/configset/proto/configset.pb.ts"
+      ],
+      "protoFiles": [
+        "controller/configset/proto/configset.proto"
+      ]
+    },
+    "github.com/aperturerobotics/controllerbus/controller/exec": {
+      "hash": "f733a11301cc88e06c2db5cf489efc8f387b4120383fe9ce93eca237f95b18b0",
+      "generatedFiles": [
+        "vendor/github.com/aperturerobotics/controllerbus/controller/exec/exec.pb.cc",
+        "vendor/github.com/aperturerobotics/controllerbus/controller/exec/exec.pb.go",
+        "vendor/github.com/aperturerobotics/controllerbus/controller/exec/exec.pb.h",
+        "vendor/github.com/aperturerobotics/controllerbus/controller/exec/exec.pb.ts",
+        "controller/exec/exec.pb.cc",
+        "controller/exec/exec.pb.go",
+        "controller/exec/exec.pb.h",
+        "controller/exec/exec.pb.ts"
+      ],
+      "protoFiles": [
+        "controller/exec/exec.proto"
+      ]
+    },
+    "github.com/aperturerobotics/controllerbus/directive": {
+      "hash": "754c58f6c623426a5a78e2990958e55d356d18de33d12f52a419c6a47d7cfd7a",
+      "generatedFiles": [
+        "vendor/github.com/aperturerobotics/controllerbus/directive/directive.pb.cc",
+        "vendor/github.com/aperturerobotics/controllerbus/directive/directive.pb.go",
+        "vendor/github.com/aperturerobotics/controllerbus/directive/directive.pb.h",
+        "vendor/github.com/aperturerobotics/controllerbus/directive/directive.pb.ts",
+        "directive/directive.pb.cc",
+        "directive/directive.pb.go",
+        "directive/directive.pb.h",
+        "directive/directive.pb.ts"
+      ],
+      "protoFiles": [
+        "directive/directive.proto"
+      ]
+    },
+    "github.com/aperturerobotics/controllerbus/example/boilerplate/controller": {
+      "hash": "0352de0c5b58042a8d252488da20b8087bd3373513e2ee39862022a2d89e7fc4",
+      "generatedFiles": [
+        "vendor/github.com/aperturerobotics/controllerbus/example/boilerplate/controller/config.pb.cc",
+        "vendor/github.com/aperturerobotics/controllerbus/example/boilerplate/controller/config.pb.go",
+        "vendor/github.com/aperturerobotics/controllerbus/example/boilerplate/controller/config.pb.h",
+        "vendor/github.com/aperturerobotics/controllerbus/example/boilerplate/controller/config.pb.ts",
+        "example/boilerplate/controller/config.pb.cc",
+        "example/boilerplate/controller/config.pb.go",
+        "example/boilerplate/controller/config.pb.h",
+        "example/boilerplate/controller/config.pb.ts"
+      ],
+      "protoFiles": [
+        "example/boilerplate/controller/config.proto"
+      ]
+    },
+    "github.com/aperturerobotics/controllerbus/example/boilerplate/v1": {
+      "hash": "d76c33056eb64e0d878b9266b0d2ae079a48ea9698f30f438a7a8c052d8333be",
+      "generatedFiles": [
+        "vendor/github.com/aperturerobotics/controllerbus/example/boilerplate/v1/boilerplate.pb.cc",
+        "vendor/github.com/aperturerobotics/controllerbus/example/boilerplate/v1/boilerplate.pb.go",
+        "vendor/github.com/aperturerobotics/controllerbus/example/boilerplate/v1/boilerplate.pb.h",
+        "vendor/github.com/aperturerobotics/controllerbus/example/boilerplate/v1/boilerplate.pb.ts",
+        "example/boilerplate/v1/boilerplate.pb.cc",
+        "example/boilerplate/v1/boilerplate.pb.go",
+        "example/boilerplate/v1/boilerplate.pb.h",
+        "example/boilerplate/v1/boilerplate.pb.ts"
+      ],
+      "protoFiles": [
+        "example/boilerplate/v1/boilerplate.proto"
+      ]
+    },
+    "github.com/aperturerobotics/controllerbus/example/hello-world": {
+      "hash": "046b4fd8b685040bedee8cd5239cf8b3bfdcd6e092e7471d1eb606b851452697",
+      "generatedFiles": [
+        "vendor/github.com/aperturerobotics/controllerbus/example/hello-world/controller.pb.cc",
+        "vendor/github.com/aperturerobotics/controllerbus/example/hello-world/controller.pb.go",
+        "vendor/github.com/aperturerobotics/controllerbus/example/hello-world/controller.pb.h",
+        "vendor/github.com/aperturerobotics/controllerbus/example/hello-world/controller.pb.ts",
+        "example/hello-world/controller.pb.cc",
+        "example/hello-world/controller.pb.go",
+        "example/hello-world/controller.pb.h",
+        "example/hello-world/controller.pb.ts"
+      ],
+      "protoFiles": [
+        "example/hello-world/controller.proto"
+      ]
+    },
+    "github.com/aperturerobotics/controllerbus/example/plugin-demo/demo-controller": {
+      "hash": "4b57d06a504d0b1dfaadb431cfaeb828da3f9622147fd78941664f981da9b384",
+      "generatedFiles": [
+        "vendor/github.com/aperturerobotics/controllerbus/example/plugin-demo/demo-controller/config.pb.cc",
+        "vendor/github.com/aperturerobotics/controllerbus/example/plugin-demo/demo-controller/config.pb.go",
+        "vendor/github.com/aperturerobotics/controllerbus/example/plugin-demo/demo-controller/config.pb.h",
+        "vendor/github.com/aperturerobotics/controllerbus/example/plugin-demo/demo-controller/config.pb.ts",
+        "example/plugin-demo/demo-controller/config.pb.cc",
+        "example/plugin-demo/demo-controller/config.pb.go",
+        "example/plugin-demo/demo-controller/config.pb.h",
+        "example/plugin-demo/demo-controller/config.pb.ts"
+      ],
+      "protoFiles": [
+        "example/plugin-demo/demo-controller/config.proto"
+      ]
+    },
+    "github.com/aperturerobotics/controllerbus/plugin/loader/shared-library/filesystem": {
+      "hash": "e2620e2547efe2629dc0aceb6c03394f38eadde5330535051d059a7ea50cd5b5",
+      "generatedFiles": [
+        "vendor/github.com/aperturerobotics/controllerbus/plugin/loader/shared-library/filesystem/config.pb.cc",
+        "vendor/github.com/aperturerobotics/controllerbus/plugin/loader/shared-library/filesystem/config.pb.go",
+        "vendor/github.com/aperturerobotics/controllerbus/plugin/loader/shared-library/filesystem/config.pb.h",
+        "vendor/github.com/aperturerobotics/controllerbus/plugin/loader/shared-library/filesystem/config.pb.ts",
+        "plugin/loader/shared-library/filesystem/config.pb.cc",
+        "plugin/loader/shared-library/filesystem/config.pb.go",
+        "plugin/loader/shared-library/filesystem/config.pb.h",
+        "plugin/loader/shared-library/filesystem/config.pb.ts"
+      ],
+      "protoFiles": [
+        "plugin/loader/shared-library/filesystem/config.proto"
+      ]
+    }
+  }
+}

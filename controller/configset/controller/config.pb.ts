@@ -2,10 +2,10 @@
 // @generated from file github.com/aperturerobotics/controllerbus/controller/configset/controller/config.proto (package configset.controller, syntax proto3)
 /* eslint-disable */
 
-import type { MessageType, PartialFieldInfo } from '@aptre/protobuf-es-lite'
-import { createMessageType } from '@aptre/protobuf-es-lite'
+import type { MessageType, PartialFieldInfo } from "@aptre/protobuf-es-lite";
+import { createMessageType } from "@aptre/protobuf-es-lite";
 
-export const protobufPackage = 'configset.controller'
+export const protobufPackage = "configset.controller";
 
 /**
  * Config is the configset controller configuration.
@@ -14,11 +14,15 @@ export const protobufPackage = 'configset.controller'
  *
  * @generated from message configset.controller.Config
  */
-export interface Config {}
+export interface Config {
+
+};
 
 // Config contains the message type declaration for Config.
 export const Config: MessageType<Config> = createMessageType({
-  typeName: 'configset.controller.Config',
-  fields: [] as readonly PartialFieldInfo[],
-  packedByDefault: true,
-})
+    typeName: "configset.controller.Config",
+    fields: [
+    ] as readonly PartialFieldInfo[],
+    packedByDefault: true,
+});
+

@@ -2,13 +2,10 @@
 // @generated from file github.com/aperturerobotics/controllerbus/bus/api/api.proto (package bus.api, syntax proto3)
 /* eslint-disable */
 
-import { GetBusInfoRequest, GetBusInfoResponse } from './api.pb.js'
-import { MethodKind } from '@aptre/protobuf-es-lite'
-import {
-  ExecControllerRequest,
-  ExecControllerResponse,
-} from '../../controller/exec/exec.pb.js'
-import { buildDecodeMessageTransform, MessageStream, ProtoRpc } from 'starpc'
+import { GetBusInfoRequest, GetBusInfoResponse } from "./api.pb.js";
+import { MethodKind } from "@aptre/protobuf-es-lite";
+import { ExecControllerRequest, ExecControllerResponse } from "../../controller/exec/exec.pb.js";
+import { buildDecodeMessageTransform, MessageStream, ProtoRpc } from "starpc";
 
 /**
  * ControllerBusService is a generic controller bus lookup api.
@@ -16,7 +13,7 @@ import { buildDecodeMessageTransform, MessageStream, ProtoRpc } from 'starpc'
  * @generated from service bus.api.ControllerBusService
  */
 export const ControllerBusServiceDefinition = {
-  typeName: 'bus.api.ControllerBusService',
+  typeName: "bus.api.ControllerBusService",
   methods: {
     /**
      * GetBusInfo requests information about the controller bus.
@@ -24,7 +21,7 @@ export const ControllerBusServiceDefinition = {
      * @generated from rpc bus.api.ControllerBusService.GetBusInfo
      */
     GetBusInfo: {
-      name: 'GetBusInfo',
+      name: "GetBusInfo",
       I: GetBusInfoRequest,
       O: GetBusInfoResponse,
       kind: MethodKind.Unary,
@@ -35,13 +32,13 @@ export const ControllerBusServiceDefinition = {
      * @generated from rpc bus.api.ControllerBusService.ExecController
      */
     ExecController: {
-      name: 'ExecController',
+      name: "ExecController",
       I: ExecControllerRequest,
       O: ExecControllerResponse,
       kind: MethodKind.ServerStreaming,
     },
-  },
-} as const
+  }
+} as const;
 
 /**
  * ControllerBusService is a generic controller bus lookup api.
@@ -54,24 +51,17 @@ export interface ControllerBusService {
    *
    * @generated from rpc bus.api.ControllerBusService.GetBusInfo
    */
-  GetBusInfo(
-    request: GetBusInfoRequest,
-    abortSignal?: AbortSignal,
-  ): Promise<GetBusInfoResponse>
+  GetBusInfo(request: GetBusInfoRequest, abortSignal?: AbortSignal): Promise<GetBusInfoResponse>;
 
   /**
    * ExecController executes a controller configuration on the bus.
    *
    * @generated from rpc bus.api.ControllerBusService.ExecController
    */
-  ExecController(
-    request: ExecControllerRequest,
-    abortSignal?: AbortSignal,
-  ): MessageStream<ExecControllerResponse>
+  ExecController(request: ExecControllerRequest, abortSignal?: AbortSignal): MessageStream<ExecControllerResponse>;
 }
 
-export const ControllerBusServiceServiceName =
-  ControllerBusServiceDefinition.typeName
+export const ControllerBusServiceServiceName = ControllerBusServiceDefinition.typeName
 
 export class ControllerBusServiceClient implements ControllerBusService {
   private readonly rpc: ProtoRpc
@@ -87,10 +77,7 @@ export class ControllerBusServiceClient implements ControllerBusService {
    *
    * @generated from rpc bus.api.ControllerBusService.GetBusInfo
    */
-  async GetBusInfo(
-    request: GetBusInfoRequest,
-    abortSignal?: AbortSignal,
-  ): Promise<GetBusInfoResponse> {
+  async GetBusInfo(request: GetBusInfoRequest, abortSignal?: AbortSignal): Promise<GetBusInfoResponse> {
     const requestMsg = GetBusInfoRequest.create(request)
     const result = await this.rpc.request(
       this.service,
@@ -106,10 +93,7 @@ export class ControllerBusServiceClient implements ControllerBusService {
    *
    * @generated from rpc bus.api.ControllerBusService.ExecController
    */
-  ExecController(
-    request: ExecControllerRequest,
-    abortSignal?: AbortSignal,
-  ): MessageStream<ExecControllerResponse> {
+  ExecController(request: ExecControllerRequest, abortSignal?: AbortSignal): MessageStream<ExecControllerResponse> {
     const requestMsg = ExecControllerRequest.create(request)
     const result = this.rpc.serverStreamingRequest(
       this.service,

@@ -2,10 +2,10 @@ name: Tests
 
 on:
   push:
-    branches: [ "master" ]
+    branches: ['master']
   pull_request:
     # The branches below must be a subset of the branches above
-    branches: [ "master" ]
+    branches: ['master']
 
 # Builds images for target boards.
 permissions:
@@ -47,7 +47,7 @@ jobs:
         run: yarn run build
 
       - name: Test Go
-        run: make test
+        run: yarn run go:aptre -- test
 
       - name: Test Js
         run: yarn test:js
@@ -67,4 +67,4 @@ jobs:
       # Issue: https://github.com/agnivade/wasmbrowsertest/issues/60
       # Remove the || true once fixed.
       - name: Test with chrome
-        run: make test-browser || true
+        run: yarn run go:aptre -- test --browser || true

@@ -2,16 +2,12 @@
 // @generated from file github.com/aperturerobotics/controllerbus/controller/exec/exec.proto (package controller.exec, syntax proto3)
 /* eslint-disable */
 
-import type { MessageType, PartialFieldInfo } from '@aptre/protobuf-es-lite'
-import {
-  createEnumType,
-  createMessageType,
-  ScalarType,
-} from '@aptre/protobuf-es-lite'
-import { ConfigSet } from '../configset/proto/configset.pb.js'
-import { Info } from '../controller.pb.js'
+import type { MessageType, PartialFieldInfo } from "@aptre/protobuf-es-lite";
+import { createEnumType, createMessageType, ScalarType } from "@aptre/protobuf-es-lite";
+import { ConfigSet } from "../configset/proto/configset.pb.js";
+import { Info } from "../controller.pb.js";
 
-export const protobufPackage = 'controller.exec'
+export const protobufPackage = "controller.exec";
 
 /**
  * ControllerStatus holds basic status for a controller.
@@ -49,15 +45,12 @@ export enum ControllerStatus {
 }
 
 // ControllerStatus_Enum is the enum type for ControllerStatus.
-export const ControllerStatus_Enum = createEnumType(
-  'controller.exec.ControllerStatus',
-  [
-    { no: 0, name: 'ControllerStatus_UNKNOWN' },
-    { no: 1, name: 'ControllerStatus_CONFIGURING' },
-    { no: 2, name: 'ControllerStatus_RUNNING' },
-    { no: 3, name: 'ControllerStatus_ERROR' },
-  ],
-)
+export const ControllerStatus_Enum = createEnumType("controller.exec.ControllerStatus", [
+  { no: 0, name: "ControllerStatus_UNKNOWN" },
+  { no: 1, name: "ControllerStatus_CONFIGURING" },
+  { no: 2, name: "ControllerStatus_RUNNING" },
+  { no: 3, name: "ControllerStatus_ERROR" },
+]);
 
 /**
  * ExecControllerRequest is a protobuf request to execute a controller.
@@ -70,38 +63,33 @@ export interface ExecControllerRequest {
    *
    * @generated from field: configset.proto.ConfigSet config_set = 1;
    */
-  configSet?: ConfigSet
+  configSet?: ConfigSet;
   /**
    * ConfigSetYaml is optionally the YAML form of config_set to parse.
    * Merged with config_set.
    *
    * @generated from field: string config_set_yaml = 2;
    */
-  configSetYaml?: string
+  configSetYaml?: string;
   /**
    * ConfigSetYamlOverwrite sets if the yaml portion overwrites the proto portion.
    *
    * @generated from field: bool config_set_yaml_overwrite = 3;
    */
-  configSetYamlOverwrite?: boolean
-}
+  configSetYamlOverwrite?: boolean;
+
+};
 
 // ExecControllerRequest contains the message type declaration for ExecControllerRequest.
-export const ExecControllerRequest: MessageType<ExecControllerRequest> =
-  createMessageType({
-    typeName: 'controller.exec.ExecControllerRequest',
+export const ExecControllerRequest: MessageType<ExecControllerRequest> = createMessageType({
+    typeName: "controller.exec.ExecControllerRequest",
     fields: [
-      { no: 1, name: 'config_set', kind: 'message', T: () => ConfigSet },
-      { no: 2, name: 'config_set_yaml', kind: 'scalar', T: ScalarType.STRING },
-      {
-        no: 3,
-        name: 'config_set_yaml_overwrite',
-        kind: 'scalar',
-        T: ScalarType.BOOL,
-      },
+        { no: 1, name: "config_set", kind: "message", T: () => ConfigSet },
+        { no: 2, name: "config_set_yaml", kind: "scalar", T: ScalarType.STRING },
+        { no: 3, name: "config_set_yaml_overwrite", kind: "scalar", T: ScalarType.BOOL },
     ] as readonly PartialFieldInfo[],
     packedByDefault: true,
-  })
+});
 
 /**
  * ExecControllerResponse is a protobuf response stream.
@@ -114,36 +102,37 @@ export interface ExecControllerResponse {
    *
    * @generated from field: string id = 1;
    */
-  id?: string
+  id?: string;
   /**
    * Status is the controller execution status.
    *
    * @generated from field: controller.exec.ControllerStatus status = 2;
    */
-  status?: ControllerStatus
+  status?: ControllerStatus;
   /**
    * ControllerInfo may contain the running controller info.
    *
    * @generated from field: controller.Info controller_info = 3;
    */
-  controllerInfo?: Info
+  controllerInfo?: Info;
   /**
    * ErrorInfo may contain the error information.
    *
    * @generated from field: string error_info = 4;
    */
-  errorInfo?: string
-}
+  errorInfo?: string;
+
+};
 
 // ExecControllerResponse contains the message type declaration for ExecControllerResponse.
-export const ExecControllerResponse: MessageType<ExecControllerResponse> =
-  createMessageType({
-    typeName: 'controller.exec.ExecControllerResponse',
+export const ExecControllerResponse: MessageType<ExecControllerResponse> = createMessageType({
+    typeName: "controller.exec.ExecControllerResponse",
     fields: [
-      { no: 1, name: 'id', kind: 'scalar', T: ScalarType.STRING },
-      { no: 2, name: 'status', kind: 'enum', T: ControllerStatus_Enum },
-      { no: 3, name: 'controller_info', kind: 'message', T: () => Info },
-      { no: 4, name: 'error_info', kind: 'scalar', T: ScalarType.STRING },
+        { no: 1, name: "id", kind: "scalar", T: ScalarType.STRING },
+        { no: 2, name: "status", kind: "enum", T: ControllerStatus_Enum },
+        { no: 3, name: "controller_info", kind: "message", T: () => Info },
+        { no: 4, name: "error_info", kind: "scalar", T: ScalarType.STRING },
     ] as readonly PartialFieldInfo[],
     packedByDefault: true,
-  })
+});
+

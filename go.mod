@@ -8,12 +8,12 @@ replace github.com/libp2p/go-libp2p => github.com/aperturerobotics/go-libp2p v0.
 replace github.com/libp2p/go-msgio => github.com/aperturerobotics/go-libp2p-msgio v0.0.0-20240511033615-1b69178aa5c8 // aperture
 
 require (
-	github.com/aperturerobotics/cli v1.0.1 // latest
-	github.com/aperturerobotics/common v0.24.0 // latest
+	github.com/aperturerobotics/cli v1.1.0 // latest
+	github.com/aperturerobotics/common v0.26.6 // latest
 	github.com/aperturerobotics/json-iterator-lite v1.0.1-0.20251104042408-0c9eb8a3f726 // latest
-	github.com/aperturerobotics/protobuf-go-lite v0.11.0 // latest
-	github.com/aperturerobotics/starpc v0.42.0 // latest
-	github.com/aperturerobotics/util v1.32.0 // latest
+	github.com/aperturerobotics/protobuf-go-lite v0.12.0 // latest
+	github.com/aperturerobotics/starpc v0.39.10 // latest
+	github.com/aperturerobotics/util v1.32.3 // latest
 )
 
 require (
@@ -31,6 +31,8 @@ require (
 )
 
 require (
+	github.com/aperturerobotics/abseil-cpp v0.0.0-20260130220554-305ed0ea7006 // indirect
+	github.com/aperturerobotics/protobuf v0.0.0-20260131033322-bd4a2148b9c4 // indirect
 	github.com/coder/websocket v1.8.14 // indirect
 	github.com/google/go-cmp v0.7.0 // indirect
 	github.com/ipfs/go-cid v0.4.1 // indirect

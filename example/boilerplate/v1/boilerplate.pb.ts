@@ -2,10 +2,10 @@
 // @generated from file github.com/aperturerobotics/controllerbus/example/boilerplate/v1/boilerplate.proto (package boilerplate.v1, syntax proto3)
 /* eslint-disable */
 
-import type { MessageType, PartialFieldInfo } from '@aptre/protobuf-es-lite'
-import { createMessageType, ScalarType } from '@aptre/protobuf-es-lite'
+import type { MessageType, PartialFieldInfo } from "@aptre/protobuf-es-lite";
+import { createMessageType, ScalarType } from "@aptre/protobuf-es-lite";
 
-export const protobufPackage = 'boilerplate.v1'
+export const protobufPackage = "boilerplate.v1";
 
 /**
  * Boilerplate implements the boilerplate directive.
@@ -20,17 +20,18 @@ export interface Boilerplate {
    *
    * @generated from field: string message_text = 1;
    */
-  messageText?: string
-}
+  messageText?: string;
+
+};
 
 // Boilerplate contains the message type declaration for Boilerplate.
 export const Boilerplate: MessageType<Boilerplate> = createMessageType({
-  typeName: 'boilerplate.v1.Boilerplate',
-  fields: [
-    { no: 1, name: 'message_text', kind: 'scalar', T: ScalarType.STRING },
-  ] as readonly PartialFieldInfo[],
-  packedByDefault: true,
-})
+    typeName: "boilerplate.v1.Boilerplate",
+    fields: [
+        { no: 1, name: "message_text", kind: "scalar", T: ScalarType.STRING },
+    ] as readonly PartialFieldInfo[],
+    packedByDefault: true,
+});
 
 /**
  * BoilerplateResult implements the boilerplate directive result.
@@ -43,15 +44,16 @@ export interface BoilerplateResult {
    *
    * @generated from field: uint32 printed_len = 1;
    */
-  printedLen?: number
-}
+  printedLen?: number;
+
+};
 
 // BoilerplateResult contains the message type declaration for BoilerplateResult.
-export const BoilerplateResult: MessageType<BoilerplateResult> =
-  createMessageType({
-    typeName: 'boilerplate.v1.BoilerplateResult',
+export const BoilerplateResult: MessageType<BoilerplateResult> = createMessageType({
+    typeName: "boilerplate.v1.BoilerplateResult",
     fields: [
-      { no: 1, name: 'printed_len', kind: 'scalar', T: ScalarType.UINT32 },
+        { no: 1, name: "printed_len", kind: "scalar", T: ScalarType.UINT32 },
     ] as readonly PartialFieldInfo[],
     packedByDefault: true,
-  })
+});
+
