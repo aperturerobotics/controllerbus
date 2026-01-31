@@ -2,10 +2,10 @@
 # yarn lockfile v1
 
 
-"@aptre/common@^0.24.0":
-  version "0.24.0"
-  resolved "https://registry.yarnpkg.com/@aptre/common/-/common-0.24.0.tgz#ecdbf5dca9bb4704443adf425dc3a618fb2c652d"
-  integrity sha512-35b73cshWpSObQVSxPjH2ot8SzC3GQywOiDR38G/Zi7ft3YUVHgBbeGnw1B1LfzvrNUNaxcJ7tgFET06eAkSZw==
+"@aptre/common@^0.26.5":
+  version "0.26.6"
+  resolved "https://registry.yarnpkg.com/@aptre/common/-/common-0.26.6.tgz#bdedea169c4542153407e84b5d3c14712f3ba8f6"
+  integrity sha512-HvpG9R95ZoT5kLYxgzy/EAvsjB/+u82ACePKzwiu32B8nFHkXoVMRSdqS2JkQ/duILAyZH6pQY9rg/zAENYW3Q==
   dependencies:
     "@aptre/protobuf-es-lite" "^0.5.2"
     "@typescript-eslint/eslint-plugin" "^8.39.1"
@@ -14,7 +14,7 @@
     eslint-config-prettier "^10.0.0"
     eslint-plugin-react-hooks "^7.0.0"
     eslint-plugin-unused-imports "^4.0.0"
-    starpc "^0.41.0"
+    starpc "^0.42.0"
     vitest "^4.0.0"
 
 "@aptre/it-ws@^1.1.2":
@@ -1674,10 +1674,10 @@ graphemer@^1.4.0:
   resolved "https://registry.yarnpkg.com/graphemer/-/graphemer-1.4.0.tgz#fb2f1d55e0e3a1849aeffc90c4fa0dd53a0e66c6"
   integrity sha512-EtKwoO6kxCL9WO5xipiHTZlSzBm7WLT627TqC/uVRd0HKmq8NXyebnNYxDoBi7wt8eTWrUrKXCOVaFq9x1kgag==
 
-happy-dom@^20.0.0:
-  version "20.3.7"
-  resolved "https://registry.yarnpkg.com/happy-dom/-/happy-dom-20.3.7.tgz#0e210b88c12f71e786f3b21baccb5f62fc181120"
-  integrity sha512-sb5IzoRl1WJKsUSRe+IloJf3z1iDq5PQ7Yk/ULMsZ5IAQEs9ZL7RsFfiKBXU7nK9QmO+iz0e59EH8r8jexTZ/g==
+happy-dom@^20.4.0:
+  version "20.4.0"
+  resolved "https://registry.yarnpkg.com/happy-dom/-/happy-dom-20.4.0.tgz#83d1aa589cf4b4908a2f14e9596196afeb30e9e6"
+  integrity sha512-RDeQm3dT9n0A5f/TszjUmNCLEuPnMGv3Tv4BmNINebz/h17PA6LMBcxJ5FrcqltNBMh9jA/8ufgDdBYUdBt+eg==
   dependencies:
     "@types/node" ">=20.0.0"
     "@types/whatwg-mimetype" "^3.0.2"
@@ -1887,9 +1887,9 @@ js-tokens@^4.0.0:
   integrity sha512-RdJUflcE3cUzKiMqQgsCu06FPu9UdIJO0beYbPhHN4k6apgJtifcoCtT9bcxOpYBtpD2kCM6Sbzg4CausW/PKQ==
 
 js-yaml@^3.14.1:
-  version "3.14.1"
-  resolved "https://registry.yarnpkg.com/js-yaml/-/js-yaml-3.14.1.tgz#dae812fdb3825fa306609a8717383c50c36a0537"
-  integrity sha512-okMH7OXXJ7YrN9Ok3/SXrnu4iX9yOk+25nqX4imS2npuvTYDmo/QEZoqwZkYaIDk3jVvBOTOIEgEhaLOynBS9g==
+  version "3.14.2"
+  resolved "https://registry.yarnpkg.com/js-yaml/-/js-yaml-3.14.2.tgz#77485ce1dd7f33c061fd1b16ecea23b55fcb04b0"
+  integrity sha512-PMSmkqxr106Xa156c2M265Z+FTrPl+oxd/rgOQy2tijQeK5TxQ43psO1ZCwhVOSdnn+RzkzlRz/eY4BgJBYVpg==
   dependencies:
     argparse "^1.0.7"
     esprima "^4.0.0"
@@ -2234,7 +2234,7 @@ prelude-ls@^1.2.1:
   resolved "https://registry.yarnpkg.com/prelude-ls/-/prelude-ls-1.2.1.tgz#debc6489d7a6e6b0e7611888cec880337d316396"
   integrity sha512-vkcDPrRZo1QZLbn5RLGPpg/WmIQ65qoWWhcGKf/b5eplkkarX0m9z8ppCat4mlOqUsWpyNuYgO3VRyrYHSzX5g==
 
-prettier@^3.5.3:
+prettier@^3.8.1:
   version "3.8.1"
   resolved "https://registry.yarnpkg.com/prettier/-/prettier-3.8.1.tgz#edf48977cf991558f4fcbd8a3ba6015ba2a3a173"
   integrity sha512-UOnG6LftzbdaHZcKoPFtOcCKztrQ57WkHDeRD9t/PTQtmT0NHSeWWepj6pS0z/N7+08BHFDQVUrfmfMRcZwbMg==
@@ -2324,7 +2324,7 @@ reusify@^1.0.4:
   resolved "https://registry.yarnpkg.com/reusify/-/reusify-1.1.0.tgz#0fe13b9522e1473f51b558ee796e08f11f9b489f"
   integrity sha512-g6QUff04oZpHs0eG5p83rFLhHeV00ug/Yf9nZM6fLeUrPguBTkTQOdpAWWspMh55TZfVQDPaN3NQJfbVRAxdIw==
 
-rimraf@^6.0.1:
+rimraf@^6.1.2:
   version "6.1.2"
   resolved "https://registry.yarnpkg.com/rimraf/-/rimraf-6.1.2.tgz#9a0f3cea2ab853e81291127422116ecf2a86ae89"
   integrity sha512-cFCkPslJv7BAXJsYlK1dZsbP8/ZNLkCAQ0bi1hf5EKX2QHegmDFEFA6QhuYJlk7UDdc+02JjO80YSOrWPpw06g==
@@ -2419,24 +2419,6 @@ stackback@0.0.2:
   version "0.0.2"
   resolved "https://registry.yarnpkg.com/stackback/-/stackback-0.0.2.tgz#1ac8a0d9483848d1695e418b6d031a3c3ce68e3b"
   integrity sha512-1XMJE5fQo1jGH6Y/7ebnwPOBEkIEnT4QF32d5R1+VXdXveM0IBMJt8zfaxX1P3QhVwrYe+576+jkANtSS2mBbw==
-
-starpc@^0.41.0:
-  version "0.41.2"
-  resolved "https://registry.yarnpkg.com/starpc/-/starpc-0.41.2.tgz#c2d56752ad5db6b3a7163dbf2d74f55b2f1e998f"
-  integrity sha512-yqtP92y4t+TKszJh5nh2iQOVXTmK7j5wDIzKMtGfMpq/zUmYVaUt/v2vogKx68YH2MXoSUH0aEo35awz6FzzcA==
-  dependencies:
-    "@aptre/it-ws" "^1.1.2"
-    "@aptre/protobuf-es-lite" "^0.5.2"
-    "@chainsafe/libp2p-yamux" "^7.0.1"
-    "@libp2p/interface" "^2.6.1"
-    event-iterator "^2.0.0"
-    isomorphic-ws "^5.0.0"
-    it-first "^3.0.6"
-    it-pipe "^3.0.1"
-    it-pushable "^3.2.3"
-    it-stream-types "^2.0.2"
-    uint8arraylist "^2.4.7"
-    ws "^8.18.1"
 
 starpc@^0.42.0:
   version "0.42.0"
@@ -2602,7 +2584,7 @@ uri-js@^4.2.2:
   optionalDependencies:
     fsevents "~2.3.3"
 
-vitest@^4.0.0:
+vitest@^4.0.0, vitest@^4.0.18:
   version "4.0.18"
   resolved "https://registry.yarnpkg.com/vitest/-/vitest-4.0.18.tgz#56f966353eca0b50f4df7540cd4350ca6d454a05"
   integrity sha512-hOQuK7h0FGKgBAas7v0mSAsnvrIgAvWmRFjmzpJ7SwFHH3g1k2u37JtYwOwmEKhK6ZO3v9ggDBBm0La1LCK4uQ==
