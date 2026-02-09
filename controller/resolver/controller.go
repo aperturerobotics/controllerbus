@@ -67,6 +67,11 @@ func (c *Controller) HandleDirective(ctx context.Context, di directive.Instance)
 	return nil, nil
 }
 
+// GetFactoryResolver returns the underlying factory resolver.
+func (c *Controller) GetFactoryResolver() controller.FactoryResolver {
+	return c.resolver
+}
+
 // Execute executes the controller goroutine.
 // Returning nil ends execution.
 // Returning an error triggers a retry with backoff.
