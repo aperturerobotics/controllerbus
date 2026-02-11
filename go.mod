@@ -9,10 +9,10 @@ replace github.com/libp2p/go-msgio => github.com/aperturerobotics/go-libp2p-msgi
 
 require (
 	github.com/aperturerobotics/cli v1.1.0 // latest
-	github.com/aperturerobotics/common v0.30.1 // latest
+	github.com/aperturerobotics/common v0.30.3 // latest
 	github.com/aperturerobotics/json-iterator-lite v1.0.1-0.20251104042408-0c9eb8a3f726 // latest
 	github.com/aperturerobotics/protobuf-go-lite v0.12.1 // latest
-	github.com/aperturerobotics/starpc v0.46.1 // latest
+	github.com/aperturerobotics/starpc v0.46.2 // latest
 	github.com/aperturerobotics/util v1.32.3 // latest
 )
 
@@ -25,13 +25,15 @@ require (
 	github.com/sergi/go-diff v1.4.0
 	github.com/sirupsen/logrus v1.9.4
 	github.com/zeebo/blake3 v0.2.4
-	golang.org/x/mod v0.32.0
+	golang.org/x/mod v0.33.0
 	golang.org/x/tools v0.41.0
 	mvdan.cc/gofumpt v0.9.2
 )
 
 require (
 	github.com/aperturerobotics/abseil-cpp v0.0.0-20260131110040-4bb56e2f9017 // indirect
+	github.com/aperturerobotics/go-protoc-gen-prost v0.0.0-20260204215916-dc1f0fed8cfc // indirect
+	github.com/aperturerobotics/go-protoc-wasi v0.0.0-20260131050911-b5f94b044584 // indirect
 	github.com/aperturerobotics/protobuf v0.0.0-20260203024654-8201686529c4 // indirect
 	github.com/coder/websocket v1.8.14 // indirect
 	github.com/google/go-cmp v0.7.0 // indirect
@@ -49,6 +51,7 @@ require (
 	github.com/multiformats/go-multistream v0.5.0 // indirect
 	github.com/multiformats/go-varint v0.0.7 // indirect
 	github.com/spaolacci/murmur3 v1.1.1-0.20190317074736-539464a789e9 // indirect
+	github.com/tetratelabs/wazero v1.11.0 // indirect
 	github.com/xrash/smetrics v0.0.0-20250705151800-55b8f293f342 // indirect
 	golang.org/x/crypto v0.45.0 // indirect
 	golang.org/x/exp v0.0.0-20250408133849-7e4ce0ab07d0 // indirect
