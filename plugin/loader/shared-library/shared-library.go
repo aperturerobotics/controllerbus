@@ -55,7 +55,7 @@ func LoadPluginSharedLibrary(
 		// It's possible the interface type is different:
 		// Dereference first with introspection.
 		symVal := reflect.ValueOf(sym)
-		if symVal.Kind() != reflect.Ptr {
+		if symVal.Kind() != reflect.Pointer {
 			return nil, errInvalidPluginType(sym)
 		}
 

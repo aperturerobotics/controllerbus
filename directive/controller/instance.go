@@ -262,7 +262,6 @@ func (i *directiveInstance) addReferenceLocked(cb directive.ReferenceHandler, we
 	if cb != nil {
 		for _, res := range i.res {
 			for _, val := range res.vals {
-				val := val
 				cbs = append(cbs, func() {
 					cb.HandleValueAdded(i, val)
 				})
@@ -481,7 +480,6 @@ func (i *directiveInstance) addValueLocked(res *resolver, val directive.Value) (
 
 	var cbs []func()
 	for _, ref := range i.refs {
-		ref := ref
 		if !ref.released.Load() && ref.h != nil {
 			cbs = append(cbs, func() {
 				ref.h.HandleValueAdded(i, v)
@@ -810,7 +808,6 @@ func (i *directiveInstance) removeLocked(diIdx int) {
 		}
 	}
 	for _, ref := range i.refs {
-		ref := ref
 		if !ref.released.Swap(true) && ref.h != nil {
 			cbs = append(cbs, func() {
 				ref.h.HandleInstanceDisposed(i)

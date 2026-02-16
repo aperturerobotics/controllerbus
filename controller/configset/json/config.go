@@ -59,7 +59,7 @@ func (c *Config) Resolve(ctx context.Context, configID string, b bus.Bus) error 
 // the pending parse buffer.
 func (c *Config) UnmarshalJSON(data []byte) error {
 	// assert that the object is a map
-	var m map[string]interface{}
+	var m map[string]any
 	if err := json.Unmarshal(data, &m); err != nil {
 		return err
 	}

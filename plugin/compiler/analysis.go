@@ -3,6 +3,7 @@ package plugin_compiler
 import (
 	"context"
 	"go/build"
+	"slices"
 
 	// "go/parser"
 	"go/token"
@@ -83,7 +84,7 @@ func AnalyzePackages(
 		packages.NeedModule
 
 	conf.Dir = workDir
-	conf.Logf = func(format string, args ...interface{}) {
+	conf.Logf = func(format string, args ...any) {
 		le.Debugf(format, args...)
 	}
 
@@ -171,11 +172,8 @@ func (a *Analysis) GetProgramCodeFiles(
 			}
 			if len(exactMatchFilter) != 0 {
 				var found bool
-				for _, ex := range exactMatchFilter {
-					if ex == pakImportPath {
-						found = true
-						break
-					}
+				if slices.Contains(exactMatchFilter, pakImportPath) {
+					found = true
 				}
 				if !found {
 					continue
