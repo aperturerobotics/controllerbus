@@ -9,11 +9,11 @@ replace github.com/libp2p/go-msgio => github.com/aperturerobotics/go-libp2p-msgi
 
 require (
 	github.com/aperturerobotics/cli v1.1.0 // latest
-	github.com/aperturerobotics/common v0.30.3 // latest
-	github.com/aperturerobotics/json-iterator-lite v1.0.1-0.20251104042408-0c9eb8a3f726 // latest
-	github.com/aperturerobotics/protobuf-go-lite v0.12.1 // latest
+	github.com/aperturerobotics/common v0.30.6 // latest
+	github.com/aperturerobotics/json-iterator-lite v1.0.1-0.20260219012250-5319a9708f4a // latest
+	github.com/aperturerobotics/protobuf-go-lite v0.12.2 // latest
 	github.com/aperturerobotics/starpc v0.46.2 // latest
-	github.com/aperturerobotics/util v1.32.3 // latest
+	github.com/aperturerobotics/util v1.32.4 // latest
 )
 
 require (
@@ -26,7 +26,7 @@ require (
 	github.com/sirupsen/logrus v1.9.4
 	github.com/zeebo/blake3 v0.2.4
 	golang.org/x/mod v0.33.0
-	golang.org/x/tools v0.41.0
+	golang.org/x/tools v0.42.0
 	mvdan.cc/gofumpt v0.9.2
 )
 
@@ -56,7 +56,7 @@ require (
 	golang.org/x/crypto v0.45.0 // indirect
 	golang.org/x/exp v0.0.0-20250408133849-7e4ce0ab07d0 // indirect
 	golang.org/x/sync v0.19.0 // indirect
-	golang.org/x/sys v0.40.0 // indirect
+	golang.org/x/sys v0.41.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	lukechampine.com/blake3 v1.3.0 // indirect
 )
