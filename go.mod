@@ -18,7 +18,7 @@ require (
 	github.com/mr-tron/base58 v1.2.0
 	github.com/pkg/errors v0.9.1
 	github.com/sergi/go-diff v1.4.0
-	github.com/sirupsen/logrus v1.9.4
+	github.com/sirupsen/logrus v1.9.5-0.20260226151524-34027eac4204
 	github.com/zeebo/blake3 v0.2.4
 	golang.org/x/mod v0.33.0
 	golang.org/x/tools v0.42.0
