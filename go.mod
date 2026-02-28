@@ -7,7 +7,7 @@ require (
 	github.com/aperturerobotics/common v0.31.0 // latest
 	github.com/aperturerobotics/json-iterator-lite v1.0.1-0.20260223122953-12a7c334f634 // master
 	github.com/aperturerobotics/protobuf-go-lite v0.12.2 // latest
-	github.com/aperturerobotics/starpc v0.47.0 // latest
+	github.com/aperturerobotics/starpc v0.47.2-0.20260228105112-f1337c4314e9 // latest
 	github.com/aperturerobotics/util v1.32.4 // latest
 )
 
@@ -27,8 +27,8 @@ require (
 
 require (
 	github.com/aperturerobotics/abseil-cpp v0.0.0-20260131110040-4bb56e2f9017 // indirect
+	github.com/aperturerobotics/go-websocket v1.8.15-0.20260228104546-35e37959349c // indirect
 	github.com/aperturerobotics/protobuf v0.0.0-20260203024654-8201686529c4 // indirect
-	github.com/coder/websocket v1.8.14 // indirect
 	github.com/google/go-cmp v0.7.0 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.10 // indirect
 	github.com/libp2p/go-buffer-pool v0.1.0 // indirect
