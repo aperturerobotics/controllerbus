@@ -7,20 +7,21 @@ toolchain go1.26.0
 replace github.com/aperturerobotics/controllerbus => ../..
 
 require (
-	github.com/aperturerobotics/controllerbus v0.52.3 // master
+	github.com/aperturerobotics/controllerbus v0.52.5 // master
 	github.com/aperturerobotics/protobuf-go-lite v0.12.2 // latest
-	github.com/aperturerobotics/starpc v0.47.0 // indirect; main
-	github.com/aperturerobotics/util v1.32.4 // indirect; latest
+	github.com/aperturerobotics/starpc v0.48.0 // indirect; main
+	github.com/aperturerobotics/util v1.32.5 // indirect; latest
 )
 
 require (
 	github.com/blang/semver/v4 v4.0.0
 	github.com/pkg/errors v0.9.1
-	github.com/sirupsen/logrus v1.9.5-0.20260226151524-34027eac4204
+	github.com/sirupsen/logrus v1.9.5-0.20260227125846-00992ca6ba06
 )
 
 require (
 	github.com/aperturerobotics/cli v1.1.0 // indirect
+	github.com/aperturerobotics/go-websocket v1.8.15-0.20260228104546-35e37959349c // indirect
 	github.com/aperturerobotics/json-iterator-lite v1.0.1-0.20260223122953-12a7c334f634 // indirect
 	github.com/coder/websocket v1.8.14 // indirect
 	github.com/fsnotify/fsnotify v1.9.0 // indirect
