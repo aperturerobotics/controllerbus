@@ -4,11 +4,11 @@ go 1.25
 
 require (
 	github.com/aperturerobotics/cli v1.1.0 // latest
-	github.com/aperturerobotics/common v0.31.0 // latest
+	github.com/aperturerobotics/common v0.32.0 // latest
 	github.com/aperturerobotics/json-iterator-lite v1.0.1-0.20260223122953-12a7c334f634 // master
 	github.com/aperturerobotics/protobuf-go-lite v0.12.2 // latest
-	github.com/aperturerobotics/starpc v0.47.2-0.20260228105112-f1337c4314e9 // latest
-	github.com/aperturerobotics/util v1.32.4 // latest
+	github.com/aperturerobotics/starpc v0.48.0 // latest
+	github.com/aperturerobotics/util v1.32.5 // latest
 )
 
 require (
@@ -18,7 +18,7 @@ require (
 	github.com/mr-tron/base58 v1.2.0
 	github.com/pkg/errors v0.9.1
 	github.com/sergi/go-diff v1.4.0
-	github.com/sirupsen/logrus v1.9.5-0.20260226151524-34027eac4204
+	github.com/sirupsen/logrus v1.9.5-0.20260227125846-00992ca6ba06
 	github.com/zeebo/blake3 v0.2.4
 	golang.org/x/mod v0.33.0
 	golang.org/x/tools v0.42.0
