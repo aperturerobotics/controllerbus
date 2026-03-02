@@ -171,11 +171,7 @@ func (a *Analysis) GetProgramCodeFiles(
 				continue
 			}
 			if len(exactMatchFilter) != 0 {
-				var found bool
-				if slices.Contains(exactMatchFilter, pakImportPath) {
-					found = true
-				}
-				if !found {
+				if !slices.Contains(exactMatchFilter, pakImportPath) {
 					continue
 				}
 			}
