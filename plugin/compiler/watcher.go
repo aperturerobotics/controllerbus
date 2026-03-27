@@ -13,7 +13,7 @@ import (
 	"time"
 
 	debounce_fswatcher "github.com/aperturerobotics/util/debounce-fswatcher"
-	"github.com/fsnotify/fsnotify"
+	"github.com/aperturerobotics/fsnotify"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 )
@@ -202,7 +202,7 @@ func (w *Watcher) WatchCompilePlugin(
 		//   original file is now lost, as that no longer exists.
 		//
 		// It's necessary to create one watcher per directory:
-		//   https://github.com/fsnotify/fsnotify/issues/18
+		//   https://github.com/aperturerobotics/fsnotify/issues/18
 		watcher, err := fsnotify.NewWatcher()
 		if err != nil {
 			return err

@@ -13,7 +13,7 @@ import (
 	"github.com/aperturerobotics/controllerbus/bus"
 	shared "github.com/aperturerobotics/controllerbus/plugin/loader/shared-library"
 	debounce_fswatcher "github.com/aperturerobotics/util/debounce-fswatcher"
-	"github.com/fsnotify/fsnotify"
+	"github.com/aperturerobotics/fsnotify"
 	"github.com/sirupsen/logrus"
 )
 
