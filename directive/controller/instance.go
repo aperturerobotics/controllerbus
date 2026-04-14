@@ -781,6 +781,11 @@ func (i *directiveInstance) removeLocked(diIdx int) {
 	i.logger().Debug("removed directive")
 	i.c.dir = append(i.c.dir[:diIdx], i.c.dir[diIdx+1:]...)
 
+	// signal directive list changed
+	i.c.bcast.HoldLock(func(broadcast func(), getWaitCh func() <-chan struct{}) {
+		broadcast()
+	})
+
 	// Clear all idle callbacks
 	for _, idle := range i.idles {
 		idle.released.Store(true)

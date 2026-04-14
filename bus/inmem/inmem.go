@@ -8,6 +8,7 @@ import (
 	"github.com/aperturerobotics/controllerbus/bus"
 	"github.com/aperturerobotics/controllerbus/controller"
 	"github.com/aperturerobotics/controllerbus/directive"
+	"github.com/aperturerobotics/util/broadcast"
 	"github.com/pkg/errors"
 )
 
@@ -16,6 +17,8 @@ type Bus struct {
 	// Controller is the directive controller.
 	directive.Controller
 
+	// bcast is signaled when controllers are added or removed.
+	bcast broadcast.Broadcast
 	// mtx guards below fields
 	mtx sync.Mutex
 	// controllers is the set of attached controllers
@@ -36,6 +39,12 @@ func (b *Bus) GetControllers() []controller.Controller {
 	}
 	b.mtx.Unlock()
 	return c
+}
+
+// GetControllersBroadcast returns the broadcast that is signaled when
+// controllers are added or removed from the bus.
+func (b *Bus) GetControllersBroadcast() *broadcast.Broadcast {
+	return &b.bcast
 }
 
 // AddController adds a controller to the bus and calls Execute().
@@ -121,11 +130,17 @@ func (b *Bus) addController(c controller.Controller) error {
 		})
 	}
 	b.mtx.Unlock()
+	if err == nil {
+		b.bcast.HoldLock(func(broadcast func(), getWaitCh func() <-chan struct{}) {
+			broadcast()
+		})
+	}
 	return err
 }
 
 // removeController removes a controller from the bus
 func (b *Bus) removeController(c controller.Controller) {
+	var removed bool
 	b.mtx.Lock()
 	for i, ci := range b.controllers {
 		if ci.ctrl == c {
@@ -133,10 +148,16 @@ func (b *Bus) removeController(c controller.Controller) {
 			b.controllers[len(b.controllers)-1] = nil
 			b.controllers = b.controllers[:len(b.controllers)-1]
 			ci.rel()
+			removed = true
 			break
 		}
 	}
 	b.mtx.Unlock()
+	if removed {
+		b.bcast.HoldLock(func(broadcast func(), getWaitCh func() <-chan struct{}) {
+			broadcast()
+		})
+	}
 }
 
 // _ is a type assertion

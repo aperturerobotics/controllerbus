@@ -6,6 +6,7 @@ import (
 	"sync"
 
 	"github.com/aperturerobotics/controllerbus/directive"
+	"github.com/aperturerobotics/util/broadcast"
 	"github.com/sirupsen/logrus"
 )
 
@@ -15,6 +16,8 @@ type Controller struct {
 	ctx context.Context
 	// le is the logger for logging events related to the controller
 	le *logrus.Entry
+	// bcast is signaled when directives are added or removed.
+	bcast broadcast.Broadcast
 
 	// mtx guards below fields
 	mtx sync.Mutex
@@ -44,6 +47,12 @@ func (c *Controller) GetDirectives() []directive.Instance {
 	}
 	c.mtx.Unlock()
 	return dirs
+}
+
+// GetDirectivesBroadcast returns the broadcast that is signaled when
+// directives are added or removed.
+func (c *Controller) GetDirectivesBroadcast() *broadcast.Broadcast {
+	return &c.bcast
 }
 
 // AddDirective adds a directive to the controller.
@@ -83,6 +92,11 @@ func (c *Controller) AddDirective(
 	c.dirID++
 	di.logger().Debug("added directive")
 	c.dir = append(c.dir, di)
+
+	// signal directive list changed
+	c.bcast.HoldLock(func(broadcast func(), getWaitCh func() <-chan struct{}) {
+		broadcast()
+	})
 
 	// Defer calling state changed callback.
 	defer di.deferCheckStateChanged()()

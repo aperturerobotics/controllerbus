@@ -5,6 +5,7 @@ import (
 
 	"github.com/aperturerobotics/controllerbus/controller"
 	"github.com/aperturerobotics/controllerbus/directive"
+	"github.com/aperturerobotics/util/broadcast"
 )
 
 // Bus manages running controllers. It has an attached directive controller,
@@ -15,6 +16,9 @@ type Bus interface {
 
 	// GetControllers returns a list of all currently active controllers.
 	GetControllers() []controller.Controller
+	// GetControllersBroadcast returns the broadcast that is signaled when
+	// controllers are added or removed from the bus.
+	GetControllersBroadcast() *broadcast.Broadcast
 
 	// AddController adds a controller to the bus and calls Execute().
 	// The controller will exit if ctx is canceled.

@@ -8,6 +8,8 @@ import (
 	"context"
 	"sort"
 	"time"
+
+	"github.com/aperturerobotics/util/broadcast"
 )
 
 // DebugValues maps string key to a list of values.
@@ -172,6 +174,10 @@ type DirectiveLister interface {
 type Controller interface {
 	// DirectiveLister has GetDirectives.
 	DirectiveLister
+
+	// GetDirectivesBroadcast returns the broadcast that is signaled when
+	// directives are added or removed.
+	GetDirectivesBroadcast() *broadcast.Broadcast
 
 	// DirectiveAdder has AddDirective.
 	DirectiveAdder
