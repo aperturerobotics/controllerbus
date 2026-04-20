@@ -2,12 +2,12 @@ module github.com/aperturerobotics/controllerbus/example/plugin-demo
 
 go 1.25.0
 
-toolchain go1.26.1
+toolchain go1.26.2
 
 replace github.com/aperturerobotics/controllerbus => ../..
 
 require (
-	github.com/aperturerobotics/controllerbus v0.52.5 // master
+	github.com/aperturerobotics/controllerbus v0.53.1 // master
 	github.com/aperturerobotics/protobuf-go-lite v0.12.2 // latest
 	github.com/aperturerobotics/starpc v0.49.1 // indirect; main
 	github.com/aperturerobotics/util v1.33.0 // indirect; latest
