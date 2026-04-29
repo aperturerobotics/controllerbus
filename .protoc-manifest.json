@@ -1,7 +1,7 @@
 {
   "version": 2,
   "protocFlagsHash": "b26750f795ea135ef84b9b001ea36a0394a279957f2bdde4b46837f6b4e41e3d",
-  "toolVersions": "protoc=embedded,protobuf-go-lite=v0.12.2,starpc=v0.47.1,protobuf-es-lite=^1.0.0",
+  "toolVersions": "protoc=embedded,protobuf-go-lite=v0.13.0,starpc=v0.49.7,protobuf-es-lite=^1.0.0",
   "packages": {
     "github.com/aperturerobotics/controllerbus/bus/api": {
       "hash": "cb54c58f93c550b41349c1e5cfa10e2107543a0570a1596065598d61676f80d2",
