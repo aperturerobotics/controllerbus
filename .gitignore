@@ -1,5 +1,6 @@
 /node_modules
 /coverage
+/.tmp
 /build
 /.log
 /.snowpack

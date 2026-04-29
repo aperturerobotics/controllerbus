@@ -5,10 +5,10 @@ import (
 	"maps"
 	"slices"
 	"strings"
-	"sync"
 
 	"github.com/aperturerobotics/controllerbus/config"
 	"github.com/aperturerobotics/controllerbus/controller"
+	"github.com/aperturerobotics/util/broadcast"
 	"github.com/blang/semver/v4"
 )
 
@@ -21,8 +21,9 @@ var Version = semver.MustParse("0.0.1")
 // Resolver implements the controller resolver using a list of built-in
 // controller implementations.
 type Resolver struct {
-	factoryMtx sync.Mutex
-	factories  map[string]controller.Factory
+	// bcast guards factories and broadcasts when factories are added.
+	bcast     broadcast.Broadcast
+	factories map[string]controller.Factory
 }
 
 // NewResolver constructs a new resolver.
@@ -53,23 +54,26 @@ func (r *Resolver) AddFactory(factory controller.Factory) {
 	configID := factory.GetConfigID()
 	version := factory.GetVersion()
 
-	r.factoryMtx.Lock()
-	defer r.factoryMtx.Unlock()
-
-	existing, ok := r.factories[configID]
-	if ok {
-		existingVer := existing.GetVersion()
-		if existingVer.GTE(version) {
-			return
+	r.bcast.HoldLock(func(broadcast func(), getWaitCh func() <-chan struct{}) {
+		existing, ok := r.factories[configID]
+		if ok {
+			existingVer := existing.GetVersion()
+			if existingVer.GTE(version) {
+				return
+			}
 		}
-	}
 
-	r.factories[configID] = factory
+		r.factories[configID] = factory
+		broadcast()
+	})
 }
 
 // GetFactories returns the factories associated w/ the resolver.
 func (r *Resolver) GetFactories() []controller.Factory {
-	vals := slices.Collect(maps.Values(r.factories))
+	var vals []controller.Factory
+	r.bcast.HoldLock(func(broadcast func(), getWaitCh func() <-chan struct{}) {
+		vals = slices.Collect(maps.Values(r.factories))
+	})
 	slices.SortFunc(vals, func(a, b controller.Factory) int {
 		return strings.Compare(a.GetConfigID(), b.GetConfigID())
 	})
@@ -81,17 +85,17 @@ func (r *Resolver) GetFactories() []controller.Factory {
 func (r *Resolver) GetConfigCtorByID(
 	ctx context.Context, id string,
 ) (config.Constructor, error) {
-	r.factoryMtx.Lock()
-	defer r.factoryMtx.Unlock()
-
-	for _, f := range r.factories {
-		cid := f.GetConfigID()
-		if cid == id {
-			return NewConfigCtor(cid, f), nil
+	var ctor config.Constructor
+	r.bcast.HoldLock(func(broadcast func(), getWaitCh func() <-chan struct{}) {
+		for _, f := range r.factories {
+			cid := f.GetConfigID()
+			if cid == id {
+				ctor = NewConfigCtor(cid, f)
+				return
+			}
 		}
-	}
-
-	return nil, nil
+	})
+	return ctor, nil
 }
 
 // GetFactoryMatchingConfig returns the factory that matches the config.
@@ -100,15 +104,31 @@ func (r *Resolver) GetConfigCtorByID(
 func (r *Resolver) GetFactoryMatchingConfig(
 	ctx context.Context, c config.Config,
 ) (controller.Factory, error) {
-	r.factoryMtx.Lock()
-	defer r.factoryMtx.Unlock()
+	var f controller.Factory
+	r.bcast.HoldLock(func(broadcast func(), getWaitCh func() <-chan struct{}) {
+		f = r.factories[c.GetConfigID()]
+	})
+	return f, nil
+}
 
-	f, ok := r.factories[c.GetConfigID()]
-	if ok {
-		return f, nil
-	}
-
-	return nil, nil
+// GetFactoryMatchingConfigWatch returns the factory matching the config and a
+// wait channel that will be closed when the resolver's factory set changes.
+// Use this to wake idle resolvers when new factories are registered. Returns
+// (nil, waitCh, nil) when no factory currently matches.
+func (r *Resolver) GetFactoryMatchingConfigWatch(
+	ctx context.Context, c config.Config,
+) (controller.Factory, <-chan struct{}, error) {
+	var (
+		f      controller.Factory
+		waitCh <-chan struct{}
+	)
+	r.bcast.HoldLock(func(broadcast func(), getWaitCh func() <-chan struct{}) {
+		f = r.factories[c.GetConfigID()]
+		if f == nil {
+			waitCh = getWaitCh()
+		}
+	})
+	return f, waitCh, nil
 }
 
 // _ is a type assertion
