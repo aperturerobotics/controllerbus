@@ -55,7 +55,7 @@
     "singleQuote": true
   },
   "devDependencies": {
-    "@aptre/common": "^0.32.0",
+    "@aptre/common": "^0.33.0",
     "depcheck": "^1.4.7",
     "happy-dom": "^20.7.0",
     "prettier": "^3.8.1",

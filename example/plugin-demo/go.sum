@@ -8,6 +8,8 @@ github.com/aperturerobotics/json-iterator-lite v1.0.1-0.20260223122953-12a7c334f
 github.com/aperturerobotics/json-iterator-lite v1.0.1-0.20260223122953-12a7c334f634/go.mod h1:SvGGBv3OVxUyqO0ZxA/nvs6z3cg7NIbZ64TnbV2OISo=
 github.com/aperturerobotics/protobuf-go-lite v0.12.2 h1:ujwTKgpIYAVsv8VljB6PPMY5SI8i8m/NlIHAkkuxQcU=
 github.com/aperturerobotics/protobuf-go-lite v0.12.2/go.mod h1:lGH3s5ArCTXKI4wJdlNpaybUtwSjfAG0vdWjxOfMcF8=
+github.com/aperturerobotics/protobuf-go-lite v0.13.0 h1:jEvCJhHaJEikDY/va2AUnS0DOb/0n82aISLAqxSh4Sk=
+github.com/aperturerobotics/protobuf-go-lite v0.13.0/go.mod h1:lGH3s5ArCTXKI4wJdlNpaybUtwSjfAG0vdWjxOfMcF8=
 github.com/aperturerobotics/starpc v0.49.1 h1:Vjjb7z0B4Fq/WKOIloRv4frMcgtVK3DDrjFFk8A8W6E=
 github.com/aperturerobotics/starpc v0.49.1/go.mod h1:HjqsB5RcFiB2GDTvZ6KuDCbrICVoGD+1jJiKiOdWxyY=
 github.com/aperturerobotics/util v1.33.0 h1:l7Aql7rlFZaGPRS+lzFC7h0zuLE0WyR3nPVXgCYMW88=
@@ -44,6 +46,8 @@ github.com/sergi/go-diff v1.4.0 h1:n/SP9D5ad1fORl+llWyN+D6qoUETXNZARKjyY2/KVCw=
 github.com/sergi/go-diff v1.4.0/go.mod h1:A0bzQcvG0E7Rwjx0REVgAGH58e96+X0MeOfepqsbeW4=
 github.com/sirupsen/logrus v1.9.5-0.20260309202648-9f0600962f75 h1:JeSpp4dH/b6DwynjIVL8YDlOSNrEtfhhPajrT3CUUTI=
 github.com/sirupsen/logrus v1.9.5-0.20260309202648-9f0600962f75/go.mod h1:FXZFonkDAnFozmO+5hGAFvB0Yg9/j2SIhA/QuIkP180=
+github.com/sirupsen/logrus v1.9.5-0.20260426203557-6878cb36b029 h1:24s81vaIm1uch3GUIIZxneOyFRfBbHRdymMRBdoDuk0=
+github.com/sirupsen/logrus v1.9.5-0.20260426203557-6878cb36b029/go.mod h1:FXZFonkDAnFozmO+5hGAFvB0Yg9/j2SIhA/QuIkP180=
 github.com/stretchr/testify v1.11.1 h1:7s2iGBzp5EwR7/aIZr8ao5+dra3wiQyKjjFuvgVKu7U=
 github.com/stretchr/testify v1.11.1/go.mod h1:wZwfW3scLgRK+23gO65QZefKpKQRnfz6sD981Nm4B6U=
 github.com/xrash/smetrics v0.0.0-20250705151800-55b8f293f342 h1:FnBeRrxr7OU4VvAzt5X7s6266i6cSVkkFPS0TuXWbIg=
