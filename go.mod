@@ -7,7 +7,7 @@ require (
 	github.com/aperturerobotics/cli v1.1.0 // latest
 	github.com/aperturerobotics/common v0.33.0 // latest
 	github.com/aperturerobotics/go-websocket v1.8.15-0.20260329113544-74dbfb8f11c6 // indirect
-	github.com/aperturerobotics/json-iterator-lite v1.0.1-0.20260329113556-783bbb0820d5 // master
+	github.com/aperturerobotics/json-iterator-lite v1.1.0 // master
 	github.com/aperturerobotics/protobuf v0.0.0-20260203024654-8201686529c4 // indirect
 	github.com/aperturerobotics/protobuf-go-lite v0.13.0 // latest
 	github.com/aperturerobotics/starpc v0.49.7 // latest
