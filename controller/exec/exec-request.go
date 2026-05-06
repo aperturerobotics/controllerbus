@@ -3,26 +3,12 @@ package controller_exec
 import (
 	"context"
 	"errors"
-	"sort"
 
 	"github.com/aperturerobotics/controllerbus/bus"
 	"github.com/aperturerobotics/controllerbus/controller/configset"
-	configset_json "github.com/aperturerobotics/controllerbus/controller/configset/json"
 	configset_proto "github.com/aperturerobotics/controllerbus/controller/configset/proto"
 	"github.com/aperturerobotics/controllerbus/directive"
 )
-
-// ExecControllerYAMLFromConfigSet converts a config set to a ExecControllerRequest w/ YAML.
-func ExecControllerYAMLFromConfigSet(cs configset.ConfigSet) (*ExecControllerRequest, error) {
-	// encode to yaml
-	dat, err := configset_json.MarshalYAML(cs)
-	if err != nil {
-		return nil, err
-	}
-	return &ExecControllerRequest{
-		ConfigSetYaml: string(dat),
-	}, nil
-}
 
 // ExecControllerProtoFromConfigSet converts a config set to a ExecControllerRequest w/ proto.
 func ExecControllerProtoFromConfigSet(cs configset.ConfigSet) (*ExecControllerRequest, error) {
@@ -82,17 +68,10 @@ func (r *ExecControllerRequest) Execute(
 
 	confsYAML := r.GetConfigSetYaml()
 	if confsYAML != "" {
-		addedConfs, err := configset_json.UnmarshalYAML(
-			ctx,
-			cbus,
-			[]byte(confsYAML),
-			confSet,
-			r.GetConfigSetYamlOverwrite(),
-		)
+		err := resolveYAMLConfigSet(ctx, cbus, []byte(confsYAML), confSet, r.GetConfigSetYamlOverwrite())
 		if err != nil {
 			return err
 		}
-		sort.Strings(addedConfs)
 	}
 
 	niniterr := 0
