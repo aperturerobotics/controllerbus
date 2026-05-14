@@ -6,7 +6,6 @@ import (
 	"github.com/aperturerobotics/controllerbus/bus"
 	"github.com/aperturerobotics/controllerbus/controller"
 	"github.com/aperturerobotics/controllerbus/directive"
-	"github.com/blang/semver/v4"
 	"github.com/sirupsen/logrus"
 )
 
@@ -14,7 +13,7 @@ import (
 const ControllerID = "controllerbus/loader"
 
 // Version is the controller version
-var Version = semver.MustParse("0.0.1")
+var Version = controller.MustParseVersion("0.0.1")
 
 // Controller implements the loader controller.
 // It responds to ExecController directives and attaches to a bus.

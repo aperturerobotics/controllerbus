@@ -5,7 +5,6 @@ import (
 
 	"github.com/aperturerobotics/controllerbus/config"
 	"github.com/aperturerobotics/controllerbus/controller"
-	"github.com/blang/semver/v4"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 )
@@ -14,7 +13,7 @@ import (
 type BusFactory[T config.Config, C controller.Controller] struct {
 	b             Bus
 	configID      string
-	version       semver.Version
+	version       controller.Version
 	newConfig     func() T
 	newController func(le *logrus.Entry, b Bus, conf T) (C, error)
 }
@@ -23,7 +22,7 @@ type BusFactory[T config.Config, C controller.Controller] struct {
 func NewBusFactory[T config.Config, C controller.Controller](
 	b Bus,
 	configID string,
-	version semver.Version,
+	version controller.Version,
 	newConfig func() T,
 	newController func(le *logrus.Entry, b Bus, conf T) (C, error),
 ) *BusFactory[T, C] {
@@ -66,6 +65,6 @@ func (f *BusFactory[T, C]) Construct(
 }
 
 // GetVersion returns the version of this controller.
-func (f *BusFactory[T, C]) GetVersion() semver.Version {
+func (f *BusFactory[T, C]) GetVersion() controller.Version {
 	return f.version
 }

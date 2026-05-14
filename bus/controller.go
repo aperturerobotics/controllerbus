@@ -6,7 +6,6 @@ import (
 	"github.com/aperturerobotics/controllerbus/config"
 	"github.com/aperturerobotics/controllerbus/controller"
 	"github.com/aperturerobotics/controllerbus/directive"
-	"github.com/blang/semver/v4"
 	"github.com/sirupsen/logrus"
 )
 
@@ -18,7 +17,7 @@ type BusController[T config.Config] struct {
 	bus               Bus
 	conf              T
 	controllerID      string
-	controllerVersion semver.Version
+	controllerVersion controller.Version
 	controllerDescrip string
 }
 
@@ -28,7 +27,7 @@ func NewBusController[T config.Config](
 	b Bus,
 	conf T,
 	controllerID string,
-	controllerVersion semver.Version,
+	controllerVersion controller.Version,
 	controllerDescrip string,
 ) *BusController[T] {
 	return &BusController[T]{
@@ -46,7 +45,7 @@ func NewBusControllerFactory[T config.Config, C controller.Controller](
 	b Bus,
 	configID string,
 	controllerID string,
-	version semver.Version,
+	version controller.Version,
 	controllerDescription string,
 	newConfig func() T,
 	newController func(base *BusController[T]) (C, error),

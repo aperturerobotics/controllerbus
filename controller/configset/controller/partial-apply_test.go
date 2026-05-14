@@ -15,7 +15,6 @@ import (
 	"github.com/aperturerobotics/controllerbus/core"
 	"github.com/aperturerobotics/controllerbus/directive"
 	boilerplate "github.com/aperturerobotics/controllerbus/example/boilerplate/controller"
-	"github.com/blang/semver/v4"
 	"github.com/sirupsen/logrus"
 )
 
@@ -29,7 +28,7 @@ type partialApplyController struct {
 func (c *partialApplyController) GetControllerInfo() *controller.Info {
 	return controller.NewInfo(
 		(&config.Placeholder{}).GetConfigID(),
-		semver.MustParse("0.0.1"),
+		controller.MustParseVersion("0.0.1"),
 		"partial-apply test controller",
 	)
 }
@@ -64,7 +63,9 @@ func (f *partialApplyFactory) GetConfigID() string {
 func (f *partialApplyFactory) ConstructConfig() config.Config { return &config.Placeholder{} }
 
 // GetVersion returns the factory version.
-func (f *partialApplyFactory) GetVersion() semver.Version { return semver.MustParse("0.0.1") }
+func (f *partialApplyFactory) GetVersion() controller.Version {
+	return controller.MustParseVersion("0.0.1")
+}
 
 // Construct returns a controller for the given config.
 func (f *partialApplyFactory) Construct(

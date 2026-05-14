@@ -1,11 +1,7 @@
 package controller
 
-import (
-	"github.com/blang/semver/v4"
-)
-
 // NewInfo constructs a new Info object.
-func NewInfo(id string, version semver.Version, descrip string) *Info {
+func NewInfo(id string, version Version, descrip string) *Info {
 	return &Info{
 		Id:          id,
 		Version:     version.String(),

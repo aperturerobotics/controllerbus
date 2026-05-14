@@ -1,10 +1,6 @@
 package config
 
-import (
-	"encoding/json"
-
-	protobuf_go_lite "github.com/aperturerobotics/protobuf-go-lite"
-)
+import protobuf_go_lite "github.com/aperturerobotics/protobuf-go-lite"
 
 // Config is an object specifying configuration for a component of the system.
 type Config interface {
@@ -17,10 +13,10 @@ type Config interface {
 	// EqualsConfig checks if the config is equal to another.
 	EqualsConfig(other Config) bool
 
-	// Marshaler is the json marshaler type.
-	json.Marshaler
-	// Unmarshaler is the json unmarshaler type.
-	json.Unmarshaler
+	// MarshalJSON marshals the config to JSON.
+	MarshalJSON() ([]byte, error)
+	// UnmarshalJSON unmarshals the config from JSON.
+	UnmarshalJSON([]byte) error
 
 	// Message indicates this is a protobuf_go_lite message.
 	protobuf_go_lite.Message

@@ -6,11 +6,10 @@ import (
 
 	"github.com/aperturerobotics/controllerbus/config"
 	"github.com/aperturerobotics/controllerbus/controller"
-	"github.com/blang/semver/v4"
 )
 
 // toyFactoryVersion is the compiled-in version
-var toyFactoryVersion = semver.MustParse("0.1.0")
+var toyFactoryVersion = controller.MustParseVersion("0.1.0")
 
 // toyControllerID is the controller id
 const toyControllerID = "hello-world"
@@ -53,7 +52,7 @@ func (f *ToyFactory) Construct(
 }
 
 // GetVersion returns the version of this controller.
-func (f *ToyFactory) GetVersion() semver.Version {
+func (f *ToyFactory) GetVersion() controller.Version {
 	return toyFactoryVersion
 }
 

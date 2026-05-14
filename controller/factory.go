@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/aperturerobotics/controllerbus/config"
-	"github.com/blang/semver/v4"
 	"github.com/sirupsen/logrus"
 )
 
@@ -35,7 +34,7 @@ type Factory interface {
 	// Construct constructs the associated controller given configuration.
 	Construct(context.Context, config.Config, ConstructOpts) (Controller, error)
 	// GetVersion returns the version of this controller.
-	GetVersion() semver.Version
+	GetVersion() Version
 }
 
 // FactoryWithContext is a factory with a cancelation context.
@@ -51,7 +50,7 @@ type FactoryResolver interface {
 	// Ex: static, go-plugin
 	GetResolverID() string
 	// GetResolverVersion returns the resolver version.
-	GetResolverVersion() semver.Version
+	GetResolverVersion() Version
 	// GetConfigCtorByID returns a config constructor by ID.
 	// If none found, return nil, nil
 	GetConfigCtorByID(ctx context.Context, id string) (config.Constructor, error)

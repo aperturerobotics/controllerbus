@@ -6,11 +6,11 @@ import (
 	"testing"
 
 	"github.com/aperturerobotics/controllerbus/bus"
+	cb_controller "github.com/aperturerobotics/controllerbus/controller"
 	"github.com/aperturerobotics/controllerbus/directive"
 	"github.com/aperturerobotics/controllerbus/directive/controller"
 	boilerplate_controller "github.com/aperturerobotics/controllerbus/example/boilerplate/controller"
 	boilerplate_v1 "github.com/aperturerobotics/controllerbus/example/boilerplate/v1"
-	"github.com/blang/semver/v4"
 	"github.com/sirupsen/logrus"
 )
 
@@ -54,7 +54,7 @@ func TestMarkIdle(t *testing.T) {
 
 	// add test controller
 	boilerplateConf := &boilerplate_controller.Config{}
-	testMarkIdle := bus.NewBusController(le, b, boilerplateConf, "test-mark-idle", semver.MustParse("0.0.1"), "")
+	testMarkIdle := bus.NewBusController(le, b, boilerplateConf, "test-mark-idle", cb_controller.MustParseVersion("0.0.1"), "")
 	markIdleCtrl := &markIdleCtrl{BusController: testMarkIdle}
 	rel, err := b.AddController(ctx, markIdleCtrl, nil)
 	if err != nil {

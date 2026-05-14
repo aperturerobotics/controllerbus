@@ -13,7 +13,6 @@ import (
 	cdc "github.com/aperturerobotics/controllerbus/directive/controller"
 	boilerplate_v1 "github.com/aperturerobotics/controllerbus/example/boilerplate/v1"
 	"github.com/aperturerobotics/util/ccontainer"
-	"github.com/blang/semver/v4"
 	"github.com/sirupsen/logrus"
 )
 
@@ -28,7 +27,7 @@ func TestWatchableTransformResolver(t *testing.T) {
 
 	ctr := ccontainer.NewCContainer(0)
 	testCtrl := callback.NewCallbackController(
-		controller.NewInfo("test", semver.MustParse("0.0.0"), "test controller"),
+		controller.NewInfo("test", controller.MustParseVersion("0.0.0"), "test controller"),
 		nil,
 		func(ctx context.Context, di directive.Instance) ([]directive.Resolver, error) {
 			switch di.GetDirective().(type) {

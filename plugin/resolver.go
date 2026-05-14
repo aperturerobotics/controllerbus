@@ -9,11 +9,10 @@ import (
 	"github.com/aperturerobotics/controllerbus/config"
 	"github.com/aperturerobotics/controllerbus/controller"
 	"github.com/aperturerobotics/controllerbus/controller/resolver/static"
-	"github.com/blang/semver/v4"
 )
 
 // Version is the resolver version.
-var Version = semver.MustParse("0.0.1")
+var Version = controller.MustParseVersion("0.0.1")
 
 // Resolver implements the controller resolver using a list of built-in
 // controller implementations.
@@ -64,7 +63,7 @@ func (r *Resolver) GetResolverID() string {
 }
 
 // GetResolverVersion returns the resolver version.
-func (r *Resolver) GetResolverVersion() semver.Version {
+func (r *Resolver) GetResolverVersion() controller.Version {
 	return Version
 }
 

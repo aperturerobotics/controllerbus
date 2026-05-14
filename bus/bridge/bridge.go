@@ -7,14 +7,13 @@ import (
 	"github.com/aperturerobotics/controllerbus/bus"
 	"github.com/aperturerobotics/controllerbus/controller"
 	"github.com/aperturerobotics/controllerbus/directive"
-	"github.com/blang/semver/v4"
 )
 
 // ControllerID is the controller identifier.
 const ControllerID = "controllerbus/bus/bridge"
 
 // Version is the API version.
-var Version = semver.MustParse("0.0.1")
+var Version = controller.MustParseVersion("0.0.1")
 
 // BusBridge forwards directives to a bus.
 type BusBridge struct {
