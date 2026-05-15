@@ -57,7 +57,7 @@ type directiveInstance struct {
 	callingRefCbs bool
 	// refCbs is the callbacks queue
 	// called when callingRefCbs=true and unlocked
-	refCbs []func()
+	refCbs []callbackEvent
 	// refs contains all directive instance references
 	// all weak references are at the beginning of the list
 	refs []*dirRef
@@ -149,6 +149,28 @@ type directiveStateSnapshot struct {
 	idle         bool
 	errs         []error
 	attachedVals []directive.AttachedValue
+}
+
+// callbackEvent is a queued callback to call while c.mtx is unlocked.
+type callbackEvent struct {
+	fn         func()
+	removedRef *dirRef
+	removedVal *value
+}
+
+// call calls the callback event.
+func (e callbackEvent) call(i *directiveInstance) {
+	if e.fn != nil {
+		e.fn()
+		return
+	}
+	if e.removedRef == nil || e.removedVal == nil {
+		return
+	}
+	if e.removedRef.released.Load() || e.removedRef.h == nil {
+		return
+	}
+	e.removedRef.h.HandleValueRemoved(i, e.removedVal)
 }
 
 // getDirectiveStateSnapshotLocked returns the latest snapshot or populates it if empty.
@@ -592,24 +614,22 @@ func (i *directiveInstance) onValuesRemovedLocked(vals ...*value) {
 	defer i.deferCheckStateChanged()()
 	i.stateChangedSnapshot = directiveStateSnapshot{} // mark state as changed
 
-	var cbs []func()
+	var cbs []callbackEvent
 	for _, val := range vals {
 		for _, removedCallback := range val.removeCallbacks {
-			if !removedCallback.released.Swap(true) {
-				cbs = append(cbs, removedCallback.cb)
+			if !removedCallback.released.Swap(true) && removedCallback.cb != nil {
+				cbs = append(cbs, callbackEvent{fn: removedCallback.cb})
 			}
 		}
 		val.removeCallbacks = nil
 
 		for _, ref := range i.refs {
 			if !ref.released.Load() && ref.h != nil {
-				cbs = append(cbs, func() {
-					ref.h.HandleValueRemoved(i, val)
-				})
+				cbs = append(cbs, callbackEvent{removedRef: ref, removedVal: val})
 			}
 		}
 	}
-	i.callCallbacksLocked(cbs...)
+	i.callCallbackEventsLocked(cbs...)
 	i.checkFullLocked()
 }
 
@@ -871,6 +891,17 @@ func (i *directiveInstance) removeResolverLocked(resIdx int, rres *resolver) {
 
 // callCallbacksLocked calls the refsCbs list or adds to queue
 func (i *directiveInstance) callCallbacksLocked(cbs ...func()) {
+	events := make([]callbackEvent, 0, len(cbs))
+	for _, cb := range cbs {
+		if cb != nil {
+			events = append(events, callbackEvent{fn: cb})
+		}
+	}
+	i.callCallbackEventsLocked(events...)
+}
+
+// callCallbackEventsLocked calls the refsCbs list or adds to queue.
+func (i *directiveInstance) callCallbackEventsLocked(cbs ...callbackEvent) {
 	if len(cbs)+len(i.refCbs) == 0 {
 		return
 	}
@@ -884,13 +915,13 @@ func (i *directiveInstance) callCallbacksLocked(cbs ...func()) {
 	for len(cbs) != 0 {
 		i.c.mtx.Unlock()
 		for _, cb := range cbs {
-			func(cb func()) {
+			func(cb callbackEvent) {
 				defer func() {
 					if rerr := recover(); rerr != nil {
 						_ = handlePanic(i.logger(), rerr)
 					}
 				}()
-				cb()
+				cb.call(i)
 			}(cb)
 		}
 		i.c.mtx.Lock()
