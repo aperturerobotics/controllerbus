@@ -28,7 +28,8 @@ jobs:
 
       - uses: oven-sh/setup-bun@v2
 
-      - run: bun install
+      - name: Install Bun dependencies
+        run: bun install --frozen-lockfile --ignore-scripts
 
       - name: Cache tools
         uses: actions/cache@v5

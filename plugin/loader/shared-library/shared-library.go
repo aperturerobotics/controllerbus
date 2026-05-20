@@ -74,6 +74,7 @@ func LoadPluginSharedLibrary(
 	if err != nil {
 		return nil, err
 	}
+	// #nosec G118 -- cancel func is stored on LoadedPlugin and called by Close.
 	subCtx, subCtxCancel := context.WithCancel(ctx)
 	go func() {
 		resolverController := resolver.NewController(le, bus, pluginResolver)

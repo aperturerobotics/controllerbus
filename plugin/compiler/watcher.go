@@ -12,8 +12,8 @@ import (
 	"strings"
 	"time"
 
-	debounce_fswatcher "github.com/aperturerobotics/util/debounce-fswatcher"
 	"github.com/aperturerobotics/fsnotify"
+	debounce_fswatcher "github.com/aperturerobotics/util/debounce-fswatcher"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 )

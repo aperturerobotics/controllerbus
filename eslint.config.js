@@ -1,9 +1,9 @@
 import eslint from '@eslint/js'
-import tseslint from '@typescript-eslint/eslint-plugin'
 import prettier from 'eslint-config-prettier'
 import reactHooks from 'eslint-plugin-react-hooks'
 import unusedImports from 'eslint-plugin-unused-imports'
 import globals from 'globals'
+import tseslint from 'typescript-eslint'
 
 export default [
   {
@@ -19,7 +19,7 @@ export default [
     ],
   },
   eslint.configs.recommended,
-  ...tseslint.configs['flat/recommended'],
+  ...tseslint.configs.recommended,
   reactHooks.configs.flat.recommended,
   {
     languageOptions: {

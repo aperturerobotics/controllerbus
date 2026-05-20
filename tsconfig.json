@@ -3,20 +3,18 @@
     "target": "ES2022",
     "module": "ESNext",
     "moduleResolution": "bundler",
-    "jsx": "react",
-    "baseUrl": "./",
+    "jsx": "react-jsx",
     "paths": {
-      "@go/*": ["vendor/*"]
+      "@go/*": ["./vendor/*"]
     },
     "allowSyntheticDefaultImports": true,
     "declaration": true,
     "forceConsistentCasingInFileNames": true,
-    "importsNotUsedAsValues": "remove",
     "noEmit": true,
     "resolveJsonModule": true,
     "skipLibCheck": true,
     "strict": true,
-    "lib": ["webworker", "dom"]
+    "lib": ["ES2024", "webworker", "dom"]
   },
-  "exclude": ["node_modules", "vendor"]
+  "exclude": ["node_modules", "vendor", "dist"]
 }

@@ -86,6 +86,7 @@ func newDirectiveInstance(
 		dir:       dir,
 		valueOpts: dir.GetValueOptions(),
 	}
+	// #nosec G118 -- cancel func is stored on directiveInstance and called when the instance is released.
 	i.ctx, i.ctxCancel = context.WithCancel(c.ctx)
 	return i, i.addReferenceLocked(h, false)
 }

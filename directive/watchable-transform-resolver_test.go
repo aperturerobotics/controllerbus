@@ -39,7 +39,7 @@ func TestWatchableTransformResolver(t *testing.T) {
 					if val < 0 {
 						return "", false, errors.New("negative value")
 					}
-					return "value is " + string(rune(val)), true, nil
+					return "value is " + string(rune(val)), true, nil //nolint:gosec // test values are small Unicode code points.
 				}), nil)
 			}
 			return nil, nil
