@@ -61,9 +61,8 @@ func (r *resolverHandler) CountValues(allResolvers bool) int {
 	defer r.r.di.c.mtx.Unlock()
 	if allResolvers {
 		return r.r.di.countValuesLocked()
-	} else {
-		return len(r.r.vals)
 	}
+	return len(r.r.vals)
 }
 
 // ClearValues removes any values that were set by this ResolverHandler.

@@ -5,8 +5,9 @@
 package directive
 
 import (
+	"cmp"
 	"context"
-	"sort"
+	"slices"
 	"time"
 
 	"github.com/aperturerobotics/util/broadcast"
@@ -30,8 +31,8 @@ func NewProtoDebugValues(dv DebugValues) []*ProtoDebugValue {
 			Values: v,
 		})
 	}
-	sort.Slice(res, func(i int, j int) bool {
-		return res[i].GetKey() < res[j].GetKey()
+	slices.SortFunc(res, func(a, b *ProtoDebugValue) int {
+		return cmp.Compare(a.GetKey(), b.GetKey())
 	})
 	return res
 }

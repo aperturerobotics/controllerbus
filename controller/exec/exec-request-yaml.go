@@ -4,7 +4,7 @@ package controller_exec
 
 import (
 	"context"
-	"sort"
+	"slices"
 
 	"github.com/aperturerobotics/controllerbus/bus"
 	"github.com/aperturerobotics/controllerbus/controller/configset"
@@ -34,6 +34,6 @@ func resolveYAMLConfigSet(
 	if err != nil {
 		return err
 	}
-	sort.Strings(addedConfs)
+	slices.Sort(addedConfs)
 	return nil
 }

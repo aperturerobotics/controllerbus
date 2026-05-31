@@ -3,11 +3,9 @@ package plugin_compiler
 import (
 	"context"
 	"go/build"
-	"slices"
-
-	// "go/parser"
 	"go/token"
 	"go/types"
+	"slices"
 	"strings"
 
 	"github.com/pkg/errors"
