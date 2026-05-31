@@ -5,13 +5,13 @@ go 1.25.0
 require (
 	github.com/aperturerobotics/abseil-cpp v0.0.0-20260131110040-4bb56e2f9017 // indirect
 	github.com/aperturerobotics/cli v1.1.0 // latest
-	github.com/aperturerobotics/common v0.33.1-0.20260516193515-675cfc5a0c12 // latest
+	github.com/aperturerobotics/common v0.33.1-0.20260531062830-4591052ba51d // latest
 	github.com/aperturerobotics/go-websocket v1.8.15-0.20260329113544-74dbfb8f11c6 // indirect
 	github.com/aperturerobotics/json-iterator-lite v1.1.0 // master
 	github.com/aperturerobotics/protobuf v0.0.0-20260203024654-8201686529c4 // indirect
-	github.com/aperturerobotics/protobuf-go-lite v0.13.0 // latest
-	github.com/aperturerobotics/starpc v0.49.11 // latest
-	github.com/aperturerobotics/util v1.34.5 // latest
+	github.com/aperturerobotics/protobuf-go-lite v0.14.0 // latest
+	github.com/aperturerobotics/starpc v0.49.16 // latest
+	github.com/aperturerobotics/util v1.34.6 // latest
 )
 
 require (
@@ -33,6 +33,6 @@ require (
 	github.com/libp2p/go-yamux/v4 v4.0.2 // indirect
 	github.com/xrash/smetrics v0.0.0-20250705151800-55b8f293f342 // indirect
 	golang.org/x/sync v0.20.0 // indirect
-	golang.org/x/sys v0.44.0 // indirect
+	golang.org/x/sys v0.45.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
