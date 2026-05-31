@@ -4,6 +4,7 @@ github.com/aperturerobotics/cli v1.1.0 h1:7a+YRC+EY3npAnTzhHV5gLCiw91KS0Ts3XwLIL
 github.com/aperturerobotics/cli v1.1.0/go.mod h1:M7BFP9wow5ytTzMyJQOOO991fGfsUqdTI7gGEsHfTQ8=
 github.com/aperturerobotics/common v0.33.1-0.20260531062830-4591052ba51d h1:PpIlWNYVwVcj8b+Iq1uXgnLhH2qXVxB0hjMn2Jn52Aw=
 github.com/aperturerobotics/common v0.33.1-0.20260531062830-4591052ba51d/go.mod h1:SYAlWG4Y8siytCM4tSs6NUiK7T1qut2Dn//Hu2zIm2M=
+github.com/aperturerobotics/common v0.33.1/go.mod h1:SYAlWG4Y8siytCM4tSs6NUiK7T1qut2Dn//Hu2zIm2M=
 github.com/aperturerobotics/fsnotify v1.9.1-0.20260506231828-931cb4bf1761 h1:PEEf9o0+orSLs9Z4M/PixY6ZWvGDla+a9mKq0z/TGAE=
 github.com/aperturerobotics/fsnotify v1.9.1-0.20260506231828-931cb4bf1761/go.mod h1:exy/yzvowYqAyWyO3wBTDGumPaU6ZY6GbhzwJWL7G/o=
 github.com/aperturerobotics/go-websocket v1.8.15-0.20260329113544-74dbfb8f11c6 h1:Utc1F7jdCc6/HrwwIikJFXt/hXxkWIWETLp/CsG6Gl0=
