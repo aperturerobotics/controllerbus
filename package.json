@@ -72,10 +72,13 @@
     "vitest": "^4.1.5"
   },
   "dependencies": {
-    "@aptre/protobuf-es-lite": "^1.0.0",
+    "@aptre/protobuf-es-lite": "1.1.0",
     "starpc": "^0.49.0"
   },
   "resolutions": {
-    "@aptre/protobuf-es-lite": "^1.0.0"
+    "@aptre/protobuf-es-lite": "1.1.0"
+  },
+  "overrides": {
+    "@aptre/protobuf-es-lite": "1.1.0"
   }
 }
