@@ -2,11 +2,12 @@ package configset_json
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 
 	"github.com/aperturerobotics/controllerbus/bus"
 	"github.com/aperturerobotics/controllerbus/controller/configset"
-	"github.com/ghodss/yaml"
+	cbyaml "github.com/aperturerobotics/controllerbus/yaml"
 )
 
 // ControllerConfig implements the JSON unmarshaling logic.
@@ -33,7 +34,11 @@ func NewControllerConfig(c configset.ControllerConfig) *ControllerConfig {
 // UnmarshalControllerConfigYAML unmarshals a yaml to a ControllerConfig.
 func UnmarshalControllerConfigYAML(data []byte) (*ControllerConfig, error) {
 	conf := &ControllerConfig{}
-	if err := yaml.Unmarshal(data, &conf); err != nil {
+	jdat, err := cbyaml.YAMLToJSON(data)
+	if err != nil {
+		return nil, err
+	}
+	if err := json.Unmarshal(jdat, &conf); err != nil {
 		return nil, err
 	}
 	return conf, nil

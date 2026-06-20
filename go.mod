@@ -16,7 +16,6 @@ require (
 
 require (
 	github.com/aperturerobotics/fsnotify v1.9.1-0.20260506231828-931cb4bf1761
-	github.com/ghodss/yaml v1.0.0
 	github.com/mr-tron/base58 v1.3.0
 	github.com/pkg/errors v0.9.1
 	github.com/sergi/go-diff v1.4.0
@@ -34,7 +33,6 @@ require (
 	github.com/xrash/smetrics v0.0.0-20250705151800-55b8f293f342 // indirect
 	golang.org/x/sync v0.20.0 // indirect
 	golang.org/x/sys v0.45.0 // indirect
-	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
 
 replace github.com/sirupsen/logrus => github.com/aperturerobotics/logrus v1.9.5-0.20260430110313-9c892333814d

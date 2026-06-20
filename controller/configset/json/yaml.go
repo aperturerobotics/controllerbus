@@ -6,7 +6,7 @@ import (
 
 	"github.com/aperturerobotics/controllerbus/bus"
 	"github.com/aperturerobotics/controllerbus/controller/configset"
-	"github.com/ghodss/yaml"
+	cbyaml "github.com/aperturerobotics/controllerbus/yaml"
 	"github.com/pkg/errors"
 )
 
@@ -17,7 +17,7 @@ func MarshalYAML(cs configset.ConfigSet) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return yaml.JSONToYAML(jdat)
+	return cbyaml.JSONToYAML(jdat)
 }
 
 // UnmarshalYAML unmarshals a yaml to a config set, optionally overwriting existing.
@@ -31,7 +31,11 @@ func UnmarshalYAML(
 	overwriteExisting bool,
 ) ([]string, error) {
 	cs := make(ConfigSet)
-	if err := yaml.Unmarshal(data, &cs); err != nil {
+	jdat, err := cbyaml.YAMLToJSON(data)
+	if err != nil {
+		return nil, err
+	}
+	if err := json.Unmarshal(jdat, &cs); err != nil {
 		return nil, err
 	}
 

@@ -7,7 +7,7 @@ import (
 
 	"github.com/aperturerobotics/cli"
 	controller_exec "github.com/aperturerobotics/controllerbus/controller/exec"
-	"github.com/ghodss/yaml"
+	cbyaml "github.com/aperturerobotics/controllerbus/yaml"
 	"github.com/pkg/errors"
 )
 
@@ -21,7 +21,7 @@ func (a *ClientArgs) RunExecController(_ *cli.Context) error {
 		if err != nil {
 			return err
 		}
-		jdat, err := yaml.YAMLToJSON(data)
+		jdat, err := cbyaml.YAMLToJSON(data)
 		if err != nil {
 			return errors.Wrap(err, "parse configset file")
 		}
