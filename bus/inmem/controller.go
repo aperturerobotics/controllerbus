@@ -19,7 +19,6 @@ type attachedCtrl struct {
 	executeErr  error
 	callback    func(error)
 
-	detachOnce   sync.Once
 	finalizeOnce sync.Once
 	finalErr     error
 }
@@ -50,9 +49,7 @@ func (c *attachedCtrl) finishExecution(err error) {
 func (c *attachedCtrl) finalize(b *Bus) error {
 	c.finalizeOnce.Do(func() {
 		c.cancel()
-		c.detachOnce.Do(func() {
-			b.detachController(c)
-		})
+		b.detachController(c)
 		<-c.executeDone
 
 		c.finalErr = joinControllerErrors(c.executeErr, c.ctrl.Close())
