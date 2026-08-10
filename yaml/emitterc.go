@@ -162,10 +162,9 @@ func yaml_emitter_emit(emitter *yaml_emitter_t, event *yaml_event_t) bool {
 // Check if we need to accumulate more events before emitting.
 //
 // We accumulate extra
-//  - 1 event for DOCUMENT-START
-//  - 2 events for SEQUENCE-START
-//  - 3 events for MAPPING-START
-//
+//   - 1 event for DOCUMENT-START
+//   - 2 events for SEQUENCE-START
+//   - 3 events for MAPPING-START
 func yaml_emitter_need_more_events(emitter *yaml_emitter_t) bool {
 	if emitter.events_head == len(emitter.events) {
 		return true
@@ -174,13 +173,10 @@ func yaml_emitter_need_more_events(emitter *yaml_emitter_t) bool {
 	switch emitter.events[emitter.events_head].typ {
 	case yaml_DOCUMENT_START_EVENT:
 		accumulate = 1
-		break
 	case yaml_SEQUENCE_START_EVENT:
 		accumulate = 2
-		break
 	case yaml_MAPPING_START_EVENT:
 		accumulate = 3
-		break
 	default:
 		return false
 	}
@@ -241,7 +237,7 @@ func yaml_emitter_increase_indent(emitter *yaml_emitter_t, flow, indentless bool
 			emitter.indent += 2
 		} else {
 			// Everything else aligns to the chosen indentation.
-			emitter.indent = emitter.best_indent*((emitter.indent+emitter.best_indent)/emitter.best_indent)
+			emitter.indent = emitter.best_indent * ((emitter.indent + emitter.best_indent) / emitter.best_indent)
 		}
 	}
 	return true
@@ -847,10 +843,6 @@ func yaml_emitter_emit_block_mapping_value(emitter *yaml_emitter_t, event *yaml_
 	return true
 }
 
-func yaml_emitter_silent_nil_event(emitter *yaml_emitter_t, event *yaml_event_t) bool {
-	return event.typ == yaml_SCALAR_EVENT && event.implicit && !emitter.canonical && len(emitter.scalar_data.value) == 0
-}
-
 // Expect a node.
 func yaml_emitter_emit_node(emitter *yaml_emitter_t, event *yaml_event_t,
 	root bool, sequence bool, mapping bool, simple_key bool) bool {
@@ -1267,8 +1259,8 @@ func yaml_emitter_analyze_scalar(emitter *yaml_emitter_t, value []byte) bool {
 		break_space    = false
 		space_break    = false
 
-		preceded_by_whitespace = false
-		followed_by_whitespace = false
+		preceded_by_whitespace bool
+		followed_by_whitespace bool
 		previous_space         = false
 		previous_break         = false
 	)
@@ -1847,6 +1839,9 @@ func yaml_emitter_write_double_quoted_scalar(emitter *yaml_emitter_t, value []by
 
 func yaml_emitter_write_block_scalar_hints(emitter *yaml_emitter_t, value []byte) bool {
 	if is_space(value, 0) || is_break(value, 0) {
+		if emitter.best_indent < 2 || emitter.best_indent > 9 {
+			return yaml_emitter_set_emitter_error(emitter, "indent must be between 2 and 9")
+		}
 		indent_hint := []byte{'0' + byte(emitter.best_indent)}
 		if !yaml_emitter_write_indicator(emitter, indent_hint, false, false, false) {
 			return false

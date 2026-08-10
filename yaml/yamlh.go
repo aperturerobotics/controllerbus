@@ -22,10 +22,7 @@
 
 package yaml
 
-import (
-	"fmt"
-	"io"
-)
+import "fmt"
 
 // The version directive data.
 type yaml_version_directive_t struct {
@@ -108,22 +105,16 @@ type yaml_sequence_style_t yaml_style_t
 
 // Sequence styles.
 const (
-	// Let the emitter choose the style.
-	yaml_ANY_SEQUENCE_STYLE yaml_sequence_style_t = iota
-
-	yaml_BLOCK_SEQUENCE_STYLE // The block sequence style.
-	yaml_FLOW_SEQUENCE_STYLE  // The flow sequence style.
+	yaml_BLOCK_SEQUENCE_STYLE yaml_sequence_style_t = 1 + iota // The block sequence style.
+	yaml_FLOW_SEQUENCE_STYLE                                   // The flow sequence style.
 )
 
 type yaml_mapping_style_t yaml_style_t
 
 // Mapping styles.
 const (
-	// Let the emitter choose the style.
-	yaml_ANY_MAPPING_STYLE yaml_mapping_style_t = iota
-
-	yaml_BLOCK_MAPPING_STYLE // The block mapping style.
-	yaml_FLOW_MAPPING_STYLE  // The flow mapping style.
+	yaml_BLOCK_MAPPING_STYLE yaml_mapping_style_t = 1 + iota // The block mapping style.
+	yaml_FLOW_MAPPING_STYLE                                  // The flow mapping style.
 )
 
 // Tokens
@@ -333,104 +324,6 @@ func (e *yaml_event_t) scalar_style() yaml_scalar_style_t     { return yaml_scal
 func (e *yaml_event_t) sequence_style() yaml_sequence_style_t { return yaml_sequence_style_t(e.style) }
 func (e *yaml_event_t) mapping_style() yaml_mapping_style_t   { return yaml_mapping_style_t(e.style) }
 
-// Nodes
-
-const (
-	yaml_NULL_TAG      = "tag:yaml.org,2002:null"      // The tag !!null with the only possible value: null.
-	yaml_BOOL_TAG      = "tag:yaml.org,2002:bool"      // The tag !!bool with the values: true and false.
-	yaml_STR_TAG       = "tag:yaml.org,2002:str"       // The tag !!str for string values.
-	yaml_INT_TAG       = "tag:yaml.org,2002:int"       // The tag !!int for integer values.
-	yaml_FLOAT_TAG     = "tag:yaml.org,2002:float"     // The tag !!float for float values.
-	yaml_TIMESTAMP_TAG = "tag:yaml.org,2002:timestamp" // The tag !!timestamp for date and time values.
-
-	yaml_SEQ_TAG = "tag:yaml.org,2002:seq" // The tag !!seq is used to denote sequences.
-	yaml_MAP_TAG = "tag:yaml.org,2002:map" // The tag !!map is used to denote mapping.
-
-	// Not in original libyaml.
-	yaml_BINARY_TAG = "tag:yaml.org,2002:binary"
-	yaml_MERGE_TAG  = "tag:yaml.org,2002:merge"
-
-	yaml_DEFAULT_SCALAR_TAG   = yaml_STR_TAG // The default scalar tag is !!str.
-	yaml_DEFAULT_SEQUENCE_TAG = yaml_SEQ_TAG // The default sequence tag is !!seq.
-	yaml_DEFAULT_MAPPING_TAG  = yaml_MAP_TAG // The default mapping tag is !!map.
-)
-
-type yaml_node_type_t int
-
-// Node types.
-const (
-	// An empty node.
-	yaml_NO_NODE yaml_node_type_t = iota
-
-	yaml_SCALAR_NODE   // A scalar node.
-	yaml_SEQUENCE_NODE // A sequence node.
-	yaml_MAPPING_NODE  // A mapping node.
-)
-
-// An element of a sequence node.
-type yaml_node_item_t int
-
-// An element of a mapping node.
-type yaml_node_pair_t struct {
-	key   int // The key of the element.
-	value int // The value of the element.
-}
-
-// The node structure.
-type yaml_node_t struct {
-	typ yaml_node_type_t // The node type.
-	tag []byte           // The node tag.
-
-	// The node data.
-
-	// The scalar parameters (for yaml_SCALAR_NODE).
-	scalar struct {
-		value  []byte              // The scalar value.
-		length int                 // The length of the scalar value.
-		style  yaml_scalar_style_t // The scalar style.
-	}
-
-	// The sequence parameters (for YAML_SEQUENCE_NODE).
-	sequence struct {
-		items_data []yaml_node_item_t    // The stack of sequence items.
-		style      yaml_sequence_style_t // The sequence style.
-	}
-
-	// The mapping parameters (for yaml_MAPPING_NODE).
-	mapping struct {
-		pairs_data  []yaml_node_pair_t   // The stack of mapping pairs (key, value).
-		pairs_start *yaml_node_pair_t    // The beginning of the stack.
-		pairs_end   *yaml_node_pair_t    // The end of the stack.
-		pairs_top   *yaml_node_pair_t    // The top of the stack.
-		style       yaml_mapping_style_t // The mapping style.
-	}
-
-	start_mark yaml_mark_t // The beginning of the node.
-	end_mark   yaml_mark_t // The end of the node.
-
-}
-
-// The document structure.
-type yaml_document_t struct {
-
-	// The document nodes.
-	nodes []yaml_node_t
-
-	// The version directive.
-	version_directive *yaml_version_directive_t
-
-	// The list of tag directives.
-	tag_directives_data  []yaml_tag_directive_t
-	tag_directives_start int // The beginning of the tag directives list.
-	tag_directives_end   int // The end of the tag directives list.
-
-	start_implicit int // Is the document start indicator implicit?
-	end_implicit   int // Is the document end indicator implicit?
-
-	// The start/end of the document.
-	start_mark, end_mark yaml_mark_t
-}
-
 // The prototype of a read handler.
 //
 // The read handler is called when the parser needs to read more bytes from the
@@ -438,7 +331,9 @@ type yaml_document_t struct {
 // The number of written bytes should be set to the size_read variable.
 //
 // [in,out]   data        A pointer to an application data specified by
-//                        yaml_parser_set_input().
+//
+//	yaml_parser_set_input().
+//
 // [out]      buffer      The buffer to write the data from the source.
 // [in]       size        The size of the buffer.
 // [out]      size_read   The actual number of bytes read from the source.
@@ -541,13 +436,6 @@ func (ps yaml_parser_state_t) String() string {
 	return "<unknown parser state>"
 }
 
-// This structure holds aliases data.
-type yaml_alias_data_t struct {
-	anchor []byte      // The anchor.
-	index  int         // The node id.
-	mark   yaml_mark_t // The anchor mark.
-}
-
 // The parser structure.
 //
 // All members are internal. Manage the structure using the
@@ -573,9 +461,8 @@ type yaml_parser_t struct {
 
 	read_handler yaml_read_handler_t // Read handler.
 
-	input_reader io.Reader // File input data.
-	input        []byte    // String input data.
-	input_pos    int
+	input     []byte // String input data.
+	input_pos int
 
 	eof bool // EOF flag
 
@@ -631,15 +518,9 @@ type yaml_parser_t struct {
 	marks          []yaml_mark_t          // The stack of marks.
 	tag_directives []yaml_tag_directive_t // The list of TAG directives.
 
-	// Dumper stuff
-
-	aliases []yaml_alias_data_t // The alias data.
-
-	document *yaml_document_t // The currently parsed document.
 }
 
 type yaml_comment_t struct {
-
 	scan_mark  yaml_mark_t // Position where scanning for comments started
 	token_mark yaml_mark_t // Position after which tokens will be associated with this comment
 	start_mark yaml_mark_t // Position of '#' comment mark
@@ -659,13 +540,14 @@ type yaml_comment_t struct {
 // @a buffer to the output.
 //
 // @param[in,out]   data        A pointer to an application data specified by
-//                              yaml_emitter_set_output().
+//
+//	yaml_emitter_set_output().
+//
 // @param[in]       buffer      The buffer with bytes to be written.
 // @param[in]       size        The size of the buffer.
 //
 // @returns On success, the handler should return @c 1.  If the handler failed,
 // the returned value should be @c 0.
-//
 type yaml_write_handler_t func(emitter *yaml_emitter_t, buffer []byte) error
 
 type yaml_emitter_state_t int
@@ -711,14 +593,12 @@ type yaml_emitter_t struct {
 
 	write_handler yaml_write_handler_t // Write handler.
 
-	output_buffer *[]byte   // String output data.
-	output_writer io.Writer // File output data.
+	output_buffer *[]byte // String output data.
 
 	buffer     []byte // The working buffer.
 	buffer_pos int    // The current position of the buffer.
 
-	raw_buffer     []byte // The raw buffer.
-	raw_buffer_pos int    // The current position of the buffer.
+	raw_buffer []byte // The raw buffer.
 
 	encoding yaml_encoding_t // The stream encoding.
 
@@ -788,20 +668,4 @@ type yaml_emitter_t struct {
 	tail_comment []byte
 
 	key_line_comment []byte
-
-	// Dumper stuff
-
-	opened bool // If the stream was already opened?
-	closed bool // If the stream was already closed?
-
-	// The information associated with the document nodes.
-	anchors *struct {
-		references int  // The number of references.
-		anchor     int  // The anchor id.
-		serialized bool // If the node has been emitted?
-	}
-
-	last_anchor_id int // The last assigned anchor id.
-
-	document *yaml_document_t // The currently emitted document.
 }

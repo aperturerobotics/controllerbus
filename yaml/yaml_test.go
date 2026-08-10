@@ -2,6 +2,7 @@ package yaml
 
 import (
 	"encoding/json"
+	"strings"
 	"testing"
 )
 
@@ -27,6 +28,51 @@ func TestYAMLToJSONScalars(t *testing.T) {
 				t.Fatal(err.Error())
 			}
 			assertJSONEqual(t, got, []byte(test.json))
+		})
+	}
+}
+
+func TestYAMLToJSONDirectives(t *testing.T) {
+	tests := []struct {
+		name       string
+		yaml       string
+		wantJSON   string
+		wantErrSub string
+	}{
+		{
+			name:     "version",
+			yaml:     "%YAML 1.1\n---\nvalue\n",
+			wantJSON: `"value"`,
+		},
+		{
+			name:       "version overflow",
+			yaml:       "%YAML 123.1\n---\nvalue\n",
+			wantErrSub: "found extremely long version number",
+		},
+		{
+			name:     "escaped tag URI",
+			yaml:     "%TAG !e! tag:example.com,2000:app/%66oo\n---\n!e!bar value\n",
+			wantJSON: `"value"`,
+		},
+		{
+			name:       "invalid escaped tag URI",
+			yaml:       "%TAG !e! tag:example.com,2000:app/%GG\n---\n!e!bar value\n",
+			wantErrSub: "did not find URI escaped octet",
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			got, err := YAMLToJSON([]byte(test.yaml))
+			if test.wantErrSub != "" {
+				if err == nil || !strings.Contains(err.Error(), test.wantErrSub) {
+					t.Fatalf("expected error containing %q, got %v", test.wantErrSub, err)
+				}
+				return
+			}
+			if err != nil {
+				t.Fatal(err.Error())
+			}
+			assertJSONEqual(t, got, []byte(test.wantJSON))
 		})
 	}
 }
