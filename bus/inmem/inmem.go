@@ -29,10 +29,15 @@ type Bus struct {
 }
 
 // NewBus constructs a new in-memory Bus with a directive controller.
-func NewBus(dc directive.Controller, logger ...*logrus.Entry) *Bus {
-	le := logrus.NewEntry(logrus.New())
-	if len(logger) != 0 && logger[0] != nil {
-		le = logger[0]
+func NewBus(dc directive.Controller) *Bus {
+	return NewBusWithLogger(dc, nil)
+}
+
+// NewBusWithLogger constructs a new in-memory Bus with a directive controller
+// and lifecycle logger.
+func NewBusWithLogger(dc directive.Controller, le *logrus.Entry) *Bus {
+	if le == nil {
+		le = logrus.NewEntry(logrus.New())
 	}
 	return &Bus{Controller: dc, le: le}
 }

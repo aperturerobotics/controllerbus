@@ -331,7 +331,7 @@ func TestAddControllerReleaseWarnsWhileExecuteIsStuck(t *testing.T) {
 			Controller: dc,
 			detached:   make(chan struct{}),
 		}
-		b := NewBus(tracking, logrus.NewEntry(logger))
+		b := NewBusWithLogger(tracking, logrus.NewEntry(logger))
 		executionStarted := make(chan struct{})
 		allowExecuteReturn := make(chan struct{})
 		releaseReturned := make(chan struct{})
