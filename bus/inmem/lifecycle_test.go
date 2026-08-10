@@ -15,6 +15,7 @@ import (
 	"github.com/aperturerobotics/controllerbus/directive"
 	directivecontroller "github.com/aperturerobotics/controllerbus/directive/controller"
 	"github.com/sirupsen/logrus"
+	logrustest "github.com/sirupsen/logrus/hooks/test"
 )
 
 type lifecycleController struct {
@@ -320,6 +321,73 @@ func TestAddControllerReleaseWaitsForContextIgnoringExecute(t *testing.T) {
 	if got := ctrl.closeCalls.Load(); got != 1 {
 		t.Fatalf("Close calls = %d, want 1", got)
 	}
+}
+
+func TestAddControllerReleaseWarnsWhileExecuteIsStuck(t *testing.T) {
+	synctest.Test(t, func(t *testing.T) {
+		logger, hook := logrustest.NewNullLogger()
+		dc := directivecontroller.NewController(t.Context(), logrus.NewEntry(logger))
+		tracking := &trackingDirectiveController{
+			Controller: dc,
+			detached:   make(chan struct{}),
+		}
+		b := NewBus(tracking, logrus.NewEntry(logger))
+		executionStarted := make(chan struct{})
+		allowExecuteReturn := make(chan struct{})
+		releaseReturned := make(chan struct{})
+		ctrl := &lifecycleController{executeFn: func(context.Context) error {
+			close(executionStarted)
+			<-allowExecuteReturn
+			return nil
+		}}
+
+		release, err := b.AddController(t.Context(), ctrl, nil)
+		if err != nil {
+			t.Fatalf("AddController failed: %v", err)
+		}
+		<-executionStarted
+		go func() {
+			release()
+			close(releaseReturned)
+		}()
+		<-tracking.detached
+
+		time.Sleep(releaseWarningInterval)
+		synctest.Wait()
+		if got := len(hook.AllEntries()); got != 1 {
+			t.Fatalf("warning count after first interval = %d, want 1", got)
+		}
+		time.Sleep(releaseWarningInterval)
+		synctest.Wait()
+		entries := hook.AllEntries()
+		if got := len(entries); got != 2 {
+			t.Fatalf("warning count after second interval = %d, want 2", got)
+		}
+		for i, entry := range entries {
+			if entry.Level != logrus.WarnLevel {
+				t.Fatalf("entry %d level = %s, want warning", i, entry.Level)
+			}
+			if entry.Message != "waiting for controller Execute to return" {
+				t.Fatalf("entry %d message = %q", i, entry.Message)
+			}
+			if entry.Data["controller"] != ctrl {
+				t.Fatalf("entry %d controller = %v, want attached controller", i, entry.Data["controller"])
+			}
+		}
+		select {
+		case <-releaseReturned:
+			t.Fatal("release returned while Execute was stuck")
+		default:
+		}
+
+		close(allowExecuteReturn)
+		synctest.Wait()
+		select {
+		case <-releaseReturned:
+		default:
+			t.Fatal("release did not return after Execute returned")
+		}
+	})
 }
 
 func TestAddControllerLifecycleOutcomes(t *testing.T) {

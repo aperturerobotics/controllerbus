@@ -10,6 +10,7 @@ import (
 	"github.com/aperturerobotics/controllerbus/directive"
 	"github.com/aperturerobotics/util/broadcast"
 	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 )
 
 // Bus is an in-memory controller bus.
@@ -17,6 +18,8 @@ type Bus struct {
 	// Controller is the directive controller.
 	directive.Controller
 
+	// le reports controller lifecycle diagnostics.
+	le *logrus.Entry
 	// bcast is signaled when controllers are added or removed.
 	bcast broadcast.Broadcast
 	// mtx guards below fields
@@ -26,8 +29,12 @@ type Bus struct {
 }
 
 // NewBus constructs a new in-memory Bus with a directive controller.
-func NewBus(dc directive.Controller) *Bus {
-	return &Bus{Controller: dc}
+func NewBus(dc directive.Controller, logger ...*logrus.Entry) *Bus {
+	le := logrus.NewEntry(logrus.New())
+	if len(logger) != 0 && logger[0] != nil {
+		le = logger[0]
+	}
+	return &Bus{Controller: dc, le: le}
 }
 
 // GetControllers returns a list of all currently active controllers.

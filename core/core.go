@@ -51,7 +51,7 @@ func NewCoreBus(
 	opts ...Option,
 ) (bus.Bus, *static.Resolver, error) {
 	dc := cdc.NewController(ctx, le)
-	b := inmem.NewBus(dc)
+	b := inmem.NewBus(dc, le)
 
 	// Process options
 	conf := &CoreBusConfig{}
