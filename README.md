@@ -252,9 +252,9 @@ factories into a single Plugin, and compile that package to a .so library.
 
 List of projects known to use Controller Bus:
 
- - [Bifrost]: networking and p2p library + daemon
+ - [Spacewave]: local-first peer-to-peer collaborative application framework
 
-[Bifrost]: https://github.com/aperturerobotics/bifrost
+[Spacewave]: https://github.com/s4wave/spacewave
 
 Open a PR to add your project to this list!
 
