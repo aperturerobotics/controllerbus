@@ -13,7 +13,7 @@ type WatchableResolver[T comparable] struct {
 	ctr ccontainer.Watchable[T]
 }
 
-// NewWatchableResolver constructs a new retry resolver.
+// NewWatchableResolver constructs a watchable resolver.
 func NewWatchableResolver[T comparable](ctr ccontainer.Watchable[T]) *WatchableResolver[T] {
 	return &WatchableResolver[T]{ctr: ctr}
 }

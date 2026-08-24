@@ -32,6 +32,9 @@ type Controller struct {
 
 // NewController builds a new directive controller.
 func NewController(ctx context.Context, le *logrus.Entry) *Controller {
+	if le == nil {
+		le = logrus.New().WithField("component", "directive-controller")
+	}
 	return &Controller{
 		ctx: ctx,
 		le:  le,

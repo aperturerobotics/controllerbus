@@ -22,7 +22,8 @@ type LoadedPlugin struct {
 	cbus_plugin.PluginResolver
 	PluginStat
 
-	closeOnce sync.Once
+	mtx       sync.Mutex
+	closed    bool
 	ctx       context.Context
 	ctxCancel context.CancelFunc
 }
@@ -104,14 +105,20 @@ func LoadPluginSharedLibrary(
 
 // Close closes the loaded plugin.
 func (l *LoadedPlugin) Close() {
-	l.closeOnce.Do(func() {
-		l.ctxCancel()
-		if l.PluginResolver != nil {
-			l.PluginResolver.PrePluginUnload()
-		}
-		if l.Plugin != nil {
-			l.Plugin.PrePluginUnload()
-		}
-		// TODO unload shared go plugin (not possible)
-	})
+	l.mtx.Lock()
+	if l.closed {
+		l.mtx.Unlock()
+		return
+	}
+	l.closed = true
+	l.mtx.Unlock()
+
+	l.ctxCancel()
+	if l.PluginResolver != nil {
+		l.PluginResolver.PrePluginUnload()
+	}
+	if l.Plugin != nil {
+		l.Plugin.PrePluginUnload()
+	}
+	// TODO unload shared go plugin (not possible)
 }

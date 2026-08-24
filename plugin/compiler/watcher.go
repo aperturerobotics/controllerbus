@@ -91,14 +91,13 @@ func (w *Watcher) WatchCompilePlugin(
 	}
 
 	compilePlugin := func() (*Analysis, error) {
-		rctx := ctx
-		ctx, compileCtxCancel := context.WithCancel(rctx)
+		compileCtx, compileCtxCancel := context.WithCancel(ctx)
 		defer compileCtxCancel()
 
 		le.
 			WithField("plugin-output-filename", path.Base(pluginOutputPath)).
 			Debugf("analyzing packages: %v", w.packagePaths)
-		an, err := AnalyzePackages(ctx, w.le, w.packageLookupPath, w.packagePaths)
+		an, err := AnalyzePackages(compileCtx, w.le, w.packageLookupPath, w.packagePaths)
 		if err != nil {
 			return nil, err
 		}
@@ -110,7 +109,7 @@ func (w *Watcher) WatchCompilePlugin(
 		}
 
 		pass1OutputPath := filepath.Join(passBinDir, "pass1.cbus.so")
-		if err := compilePluginOnce(ctx, an, "pass1", pass1OutputPath, pluginBinaryVersion); err != nil {
+		if err := compilePluginOnce(compileCtx, an, "pass1", pass1OutputPath, pluginBinaryVersion); err != nil {
 			return nil, err
 		}
 
@@ -136,14 +135,16 @@ func (w *Watcher) WatchCompilePlugin(
 		// pass 2: codegen + build with the build hash
 		pass2OutputPath := filepath.Join(passBinDir, "pass2.cbus.so")
 		buildPrefix := "cbus-plugin-" + buildHashShort
-		if err := compilePluginOnce(ctx, an, buildPrefix, pass2OutputPath, passBuildPluginVersion); err != nil {
+		if err := compilePluginOnce(compileCtx, an, buildPrefix, pass2OutputPath, passBuildPluginVersion); err != nil {
 			return an, err
 		}
 		if err := copyFileFromTo(pass2OutputPath, targetOutputPath); err != nil {
 			return an, err
 		}
-		if err == nil && compiledCb != nil {
-			err = compiledCb(w.packagePaths, targetOutputPath)
+		if compiledCb != nil {
+			if err := compiledCb(w.packagePaths, targetOutputPath); err != nil {
+				return an, err
+			}
 		}
 
 		return an, err

@@ -5,6 +5,7 @@ import (
 	"time"
 
 	backoff "github.com/aperturerobotics/util/backoff/cbackoff"
+	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 )
 
@@ -20,6 +21,9 @@ type RetryResolver struct {
 
 // NewRetryResolver constructs a new retry resolver.
 func NewRetryResolver(le *logrus.Entry, res Resolver, bo backoff.BackOff) *RetryResolver {
+	if le == nil {
+		le = logrus.New().WithField("component", "retry-resolver")
+	}
 	return &RetryResolver{le: le, res: res, bo: bo}
 }
 
@@ -39,6 +43,9 @@ func (r *RetryResolver) Resolve(ctx context.Context, handler ResolverHandler) er
 		}
 
 		nextBackOff := r.bo.NextBackOff()
+		if nextBackOff == backoff.Stop {
+			return errors.Wrap(err, "retry backoff exhausted")
+		}
 		r.le.
 			WithError(err).
 			Warnf("resolver returned error: backing off %s", nextBackOff.String())

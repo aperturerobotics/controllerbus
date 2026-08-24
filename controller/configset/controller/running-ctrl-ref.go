@@ -15,7 +15,7 @@ type runningControllerRef struct {
 	cbs []func(configset.State)
 	rc  *runningController // may be nil
 
-	relOnce sync.Once
+	released bool
 }
 
 func newRunningControllerRef(id string, rc *runningController) *runningControllerRef {
@@ -90,14 +90,22 @@ func (r *runningControllerRef) pushState(st configset.State) {
 
 // Release releases the reference.
 func (r *runningControllerRef) Release() {
-	r.relOnce.Do(func() {
-		if r.rc != nil {
-			r.rc.DelReference(r)
-		}
-		if cb := r.relInternalCallback; cb != nil {
-			go r.relInternalCallback()
-		}
-	})
+	r.mtx.Lock()
+	if r.released {
+		r.mtx.Unlock()
+		return
+	}
+	r.released = true
+	rc := r.rc
+	cb := r.relInternalCallback
+	r.mtx.Unlock()
+
+	if rc != nil {
+		rc.DelReference(r)
+	}
+	if cb != nil {
+		cb()
+	}
 }
 
 // _ is a type assertion

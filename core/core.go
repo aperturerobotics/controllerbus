@@ -50,6 +50,9 @@ func NewCoreBus(
 	le *logrus.Entry,
 	opts ...Option,
 ) (bus.Bus, *static.Resolver, error) {
+	if le == nil {
+		le = logrus.New().WithField("component", "core-bus")
+	}
 	dc := cdc.NewController(ctx, le)
 	b := inmem.NewBusWithLogger(dc, le)
 

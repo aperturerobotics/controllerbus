@@ -11,11 +11,6 @@ func (a *API) GetBusInfo(
 	ctx context.Context,
 	req *GetBusInfoRequest,
 ) (*GetBusInfoResponse, error) {
-	/*
-		if err := req.Validate(); err != nil {
-			return nil, err
-		}
-	*/
 	controllers := a.bus.GetControllers()
 	directives := a.bus.GetDirectives()
 	var resp GetBusInfoResponse

@@ -88,9 +88,8 @@ func (b *BusBridge) HandleDirective(ctx context.Context, di directive.Instance) 
 		return nil, nil
 	}
 
-	// add callback to remove when necessary
-	// use separate goroutine to avoid mutex contention
-	go di.AddDisposeCallback(func() {
+	// Add a callback to remove the directive when it is disposed.
+	di.AddDisposeCallback(func() {
 		b.mtx.Lock()
 		delete(b.seenDi, dir)
 		b.mtx.Unlock()

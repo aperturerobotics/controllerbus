@@ -1,6 +1,7 @@
 package bus
 
 import (
+	"cmp"
 	"context"
 	"slices"
 	"sync"
@@ -159,7 +160,7 @@ func ExecOneOffWatchSelectCb[T directive.ComparableValue](
 				tav := directive.NewTypedAttachedValue(vid, val)
 				sortedVals = append(sortedVals, tav)
 				slices.SortFunc(sortedVals, func(a, b directive.TypedAttachedValue[T]) int {
-					return int(a.GetValueID() - b.GetValueID())
+					return cmp.Compare(a.GetValueID(), b.GetValueID())
 				})
 				selectNextValue()
 			},
@@ -468,7 +469,7 @@ func ExecOneOffWatchTransformEffect[T, E directive.ComparableValue](
 	var xfrmVals []directive.TransformedAttachedValue[T, E]
 	sortXfrmVals := func() {
 		slices.SortFunc(xfrmVals, func(a, b directive.TransformedAttachedValue[T, E]) int {
-			return int(a.GetValueID() - b.GetValueID())
+			return cmp.Compare(a.GetValueID(), b.GetValueID())
 		})
 	}
 

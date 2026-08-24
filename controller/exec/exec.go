@@ -77,6 +77,9 @@ func ExecuteController(
 		case <-ctx.Done():
 			return nil
 		case <-subCtx.Done():
+			if err := ctx.Err(); err != nil {
+				return err
+			}
 			return subCtx.Err()
 		case csv := <-addedCh:
 			ctrl := csv.GetController()

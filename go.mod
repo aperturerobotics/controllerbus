@@ -15,11 +15,13 @@ require (
 )
 
 require (
+	github.com/aperturerobotics/fastjson v0.1.1
 	github.com/aperturerobotics/fsnotify v1.9.1-0.20260506231828-931cb4bf1761
 	github.com/mr-tron/base58 v1.3.0
 	github.com/pkg/errors v0.9.1
 	github.com/sergi/go-diff v1.4.0
 	github.com/sirupsen/logrus v1.9.5-0.20260508084601-d4a50659cfd6
+	github.com/stretchr/testify v1.11.1
 	github.com/zeebo/blake3 v0.2.4
 	golang.org/x/mod v0.36.0
 	golang.org/x/tools v0.45.0
@@ -27,12 +29,15 @@ require (
 )
 
 require (
+	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.10 // indirect
 	github.com/libp2p/go-buffer-pool v0.1.0 // indirect
 	github.com/libp2p/go-yamux/v4 v4.0.2 // indirect
+	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/xrash/smetrics v0.0.0-20250705151800-55b8f293f342 // indirect
 	golang.org/x/sync v0.20.0 // indirect
 	golang.org/x/sys v0.45.0 // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
 replace github.com/sirupsen/logrus => github.com/aperturerobotics/logrus v1.9.5-0.20260430110313-9c892333814d

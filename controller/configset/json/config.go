@@ -7,8 +7,8 @@ import (
 	"github.com/aperturerobotics/controllerbus/bus"
 	"github.com/aperturerobotics/controllerbus/config"
 	"github.com/aperturerobotics/controllerbus/controller/resolver"
+	"github.com/aperturerobotics/fastjson"
 	"github.com/pkg/errors"
-	// "github.com/aperturerobotics/controllerbus/controller/configset"
 )
 
 // Config implements JSON unmarshaling and marshaling logic.
@@ -58,12 +58,13 @@ func (c *Config) Resolve(ctx context.Context, configID string, b bus.Bus) error 
 // UnmarshalJSON unmarshals a controller config JSON blob pushing the data into
 // the pending parse buffer.
 func (c *Config) UnmarshalJSON(data []byte) error {
-	// assert that the object is a map
-	var m map[string]any
-	if err := json.Unmarshal(data, &m); err != nil {
+	parsed, err := fastjson.ParseBytes(data)
+	if err != nil {
 		return err
 	}
-
+	if parsed.GetObject() == nil {
+		return errors.New("config must be a JSON object")
+	}
 	c.pendingParseData = string(data)
 	return nil
 }

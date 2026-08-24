@@ -818,13 +818,6 @@ func (i *directiveInstance) removeLocked(diIdx int) {
 		resIdx := len(i.res) - 1
 		i.removeResolverLocked(resIdx, i.res[resIdx])
 	}
-	for _, res := range i.res {
-		if res.ctxCancel != nil {
-			res.ctxCancel()
-		}
-		res.ctx, res.ctxCancel = nil, nil
-	}
-	i.res = nil
 
 	// Call directive release callbacks and ref release callbacks
 	var cbs []func()
