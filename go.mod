@@ -23,7 +23,7 @@ require (
 	github.com/sirupsen/logrus v1.9.5-0.20260508084601-d4a50659cfd6
 	github.com/stretchr/testify v1.11.1
 	github.com/zeebo/blake3 v0.2.4
-	golang.org/x/mod v0.36.0
+	golang.org/x/mod v0.40.0
 	golang.org/x/tools v0.45.0
 	mvdan.cc/gofumpt v0.10.0
 )
