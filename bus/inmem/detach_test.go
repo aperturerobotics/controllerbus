@@ -2,6 +2,7 @@ package inmem
 
 import "testing"
 
+// TestDetachControllerIsIdempotent checks public removal and one release notification.
 func TestDetachControllerIsIdempotent(t *testing.T) {
 	releaseCalls := 0
 	target := &attachedCtrl{
@@ -20,10 +21,10 @@ func TestDetachControllerIsIdempotent(t *testing.T) {
 	if got := releaseCalls; got != 1 {
 		t.Fatalf("release calls after first detach = %d, want 1", got)
 	}
-	if got := len(b.controllers); got != 1 {
+	if got := len(b.GetControllers()); got != 1 {
 		t.Fatalf("controller count after first detach = %d, want 1", got)
 	}
-	if b.controllers[0] != retained {
+	if !target.detached || retained.detached {
 		t.Fatal("retained controller changed after first detach")
 	}
 
@@ -44,10 +45,10 @@ func TestDetachControllerIsIdempotent(t *testing.T) {
 	if got := releaseCalls; got != 1 {
 		t.Fatalf("release calls after second detach = %d, want 1", got)
 	}
-	if got := len(b.controllers); got != 1 {
+	if got := len(b.GetControllers()); got != 1 {
 		t.Fatalf("controller count after second detach = %d, want 1", got)
 	}
-	if b.controllers[0] != retained {
+	if !target.detached || retained.detached {
 		t.Fatal("retained controller changed after second detach")
 	}
 	select {

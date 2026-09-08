@@ -3,27 +3,40 @@ package inmem
 import (
 	"context"
 	"errors"
-	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/aperturerobotics/controllerbus/bus"
 	"github.com/aperturerobotics/controllerbus/controller"
 )
 
+// releaseWarningInterval bounds the interval between cleanup diagnostics.
 const releaseWarningInterval = 30 * time.Second
 
 // attachedCtrl contains the lifecycle of one attached controller instance.
 type attachedCtrl struct {
+	// ctrl owns execution and resource cleanup.
 	ctrl controller.Controller
-	rel  func()
+	// rel detaches directive handling.
+	rel func()
+	// detached excludes a closing controller from active lookup; guarded by Bus.mtx.
+	detached bool
 
-	cancel      context.CancelFunc
+	// cancel stops execution.
+	cancel context.CancelFunc
+	// executeDone publishes executeErr after Execute returns.
 	executeDone chan struct{}
-	executeErr  error
-	callback    func(error)
+	// executeErr is read only after executeDone closes.
+	executeErr error
+	// callback receives the completed lifecycle result.
+	callback func(error)
 
-	finalizeOnce sync.Once
-	finalErr     error
+	// finalizing selects the single finalizer.
+	finalizing atomic.Bool
+	// finalized publishes finalErr after all cleanup completes.
+	finalized chan struct{}
+	// finalErr is read only by the finalizer or after finalized closes.
+	finalErr error
 }
 
 // newAttachedCtrl constructs an attached controller lifecycle.
@@ -38,6 +51,7 @@ func newAttachedCtrl(
 		rel:         rel,
 		cancel:      cancel,
 		executeDone: make(chan struct{}),
+		finalized:   make(chan struct{}),
 		callback:    callback,
 	}
 }
@@ -50,27 +64,31 @@ func (c *attachedCtrl) finishExecution(err error) {
 
 // finalize cancels, detaches, waits, closes, and reports exactly once.
 func (c *attachedCtrl) finalize(b *Bus) error {
-	c.finalizeOnce.Do(func() {
-		c.cancel()
-		b.detachController(c)
+	if !c.finalizing.CompareAndSwap(false, true) {
+		<-c.finalized
+		return c.finalErr
+	}
+	defer close(c.finalized)
+	defer b.forgetController(c)
+	c.cancel()
+	b.detachController(c)
 
-		ticker := time.NewTicker(releaseWarningInterval)
-		defer ticker.Stop()
-	waitForExecute:
-		for {
-			select {
-			case <-c.executeDone:
-				break waitForExecute
-			case <-ticker.C:
-				b.le.WithField("controller", c.ctrl).Warn("waiting for controller Execute to return")
-			}
+	ticker := time.NewTicker(releaseWarningInterval)
+	defer ticker.Stop()
+waitForExecute:
+	for {
+		select {
+		case <-c.executeDone:
+			break waitForExecute
+		case <-ticker.C:
+			b.le.WithField("controller", c.ctrl).Warn("waiting for controller Execute to return")
 		}
+	}
 
-		c.finalErr = joinControllerErrors(c.executeErr, c.ctrl.Close())
-		if c.callback != nil {
-			c.callback(c.finalErr)
-		}
-	})
+	c.finalErr = joinControllerErrors(c.executeErr, c.ctrl.Close())
+	if c.callback != nil {
+		c.callback(c.finalErr)
+	}
 	return c.finalErr
 }
 

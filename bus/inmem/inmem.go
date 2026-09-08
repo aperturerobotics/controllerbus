@@ -2,7 +2,9 @@ package inmem
 
 import (
 	"context"
+	stderrors "errors"
 	"runtime/debug"
+	"slices"
 	"sync"
 
 	"github.com/aperturerobotics/controllerbus/bus"
@@ -22,10 +24,18 @@ type Bus struct {
 	le *logrus.Entry
 	// bcast is signaled when controllers are added or removed.
 	bcast broadcast.Broadcast
-	// mtx guards below fields
+	// mtx guards admission and the retained controller lifetimes.
 	mtx sync.Mutex
-	// controllers is the set of attached controllers
+	// controllers retains admitted controllers until finalization completes.
 	controllers []*attachedCtrl
+	// closed rejects admission after the owner begins shutdown.
+	closed bool
+	// admitting joins handler registration before shutdown snapshots lifetimes.
+	admitting sync.WaitGroup
+	// closeOnce joins concurrent shutdown callers.
+	closeOnce sync.Once
+	// closeErr retains cleanup errors from the completed shutdown.
+	closeErr error
 }
 
 // NewBus constructs a new in-memory Bus with a directive controller.
@@ -45,9 +55,11 @@ func NewBusWithLogger(dc directive.Controller, le *logrus.Entry) *Bus {
 // GetControllers returns a list of all currently active controllers.
 func (b *Bus) GetControllers() []controller.Controller {
 	b.mtx.Lock()
-	c := make([]controller.Controller, len(b.controllers))
-	for i := range b.controllers {
-		c[i] = b.controllers[i].ctrl
+	c := make([]controller.Controller, 0, len(b.controllers))
+	for _, attached := range b.controllers {
+		if !attached.detached {
+			c = append(c, attached.ctrl)
+		}
 	}
 	b.mtx.Unlock()
 	return c
@@ -67,7 +79,7 @@ func (b *Bus) AddController(ctx context.Context, ctrl controller.Controller, cb 
 	attached, err := b.attachController(ctrl, subCtxCancel, cb)
 	if err != nil {
 		subCtxCancel()
-		return nil, joinControllerErrors(err, ctrl.Close())
+		return nil, err
 	}
 
 	go b.executeAttached(subCtx, attached)
@@ -114,7 +126,7 @@ func (b *Bus) ExecuteController(ctx context.Context, c controller.Controller) er
 	attached, err := b.attachController(c, subCtxCancel, nil)
 	if err != nil {
 		subCtxCancel()
-		return joinControllerErrors(err, c.Close())
+		return err
 	}
 
 	err = b.executeController(subCtx, c)
@@ -133,16 +145,52 @@ func (b *Bus) RemoveController(c controller.Controller) {
 	}
 }
 
+// Close rejects admission and joins every retained controller lifetime.
+func (b *Bus) Close() error {
+	b.closeOnce.Do(func() {
+		// Close admission before waiting for handler registration already in progress.
+		b.mtx.Lock()
+		b.closed = true
+		b.mtx.Unlock()
+		b.admitting.Wait()
+		b.mtx.Lock()
+		controllers := slices.Clone(b.controllers)
+		b.mtx.Unlock()
+
+		// Cancel all dependencies before joining any one controller's cleanup.
+		for _, attached := range controllers {
+			attached.cancel()
+		}
+		for _, attached := range controllers {
+			var closeErr *bus.ControllerCloseError
+			if stderrors.As(attached.finalize(b), &closeErr) {
+				b.closeErr = stderrors.Join(b.closeErr, closeErr)
+			}
+		}
+	})
+	return b.closeErr
+}
+
 // attachController registers and records one attached controller instance.
 func (b *Bus) attachController(
 	c controller.Controller,
 	cancel context.CancelFunc,
 	cb func(error),
 ) (*attachedCtrl, error) {
+	// Serialize admission with shutdown without holding the mutex across callbacks.
+	b.mtx.Lock()
+	if b.closed {
+		b.mtx.Unlock()
+		return nil, joinControllerErrors(bus.ErrClosed, c.Close())
+	}
+	b.admitting.Add(1)
+	b.mtx.Unlock()
+	defer b.admitting.Done()
+
 	// AddHandler may call HandleDirective, so it must run outside b.mtx.
 	rel, err := b.AddHandler(c)
 	if err != nil {
-		return nil, err
+		return nil, joinControllerErrors(err, c.Close())
 	}
 	attached := newAttachedCtrl(c, rel, cancel, cb)
 
@@ -160,37 +208,41 @@ func (b *Bus) findController(c controller.Controller) *attachedCtrl {
 	b.mtx.Lock()
 	defer b.mtx.Unlock()
 	for _, attached := range b.controllers {
-		if attached.ctrl == c {
+		if attached.ctrl == c && !attached.detached {
 			return attached
 		}
 	}
 	return nil
 }
 
-// detachController removes an exact attached instance and then releases its
-// directive handler without holding b.mtx.
+// detachController removes directive handling while retaining the closing lifetime.
 func (b *Bus) detachController(attached *attachedCtrl) {
-	var removed bool
 	b.mtx.Lock()
-	for i, candidate := range b.controllers {
-		if candidate == attached {
-			b.controllers[i] = b.controllers[len(b.controllers)-1]
-			b.controllers[len(b.controllers)-1] = nil
-			b.controllers = b.controllers[:len(b.controllers)-1]
-			removed = true
-			break
-		}
-	}
-	b.mtx.Unlock()
-
-	if !removed {
+	if attached.detached {
+		b.mtx.Unlock()
 		return
 	}
+	attached.detached = true
+	b.mtx.Unlock()
 	attached.rel()
 	b.bcast.HoldLock(func(broadcast func(), getWaitCh func() <-chan struct{}) {
 		broadcast()
 	})
 }
 
-// _ is a type assertion
-var _ bus.Bus = ((*Bus)(nil))
+// forgetController drops a lifetime only after its cleanup and callback complete.
+func (b *Bus) forgetController(attached *attachedCtrl) {
+	b.mtx.Lock()
+	for i, candidate := range b.controllers {
+		if candidate == attached {
+			b.controllers[i] = b.controllers[len(b.controllers)-1]
+			b.controllers[len(b.controllers)-1] = nil
+			b.controllers = b.controllers[:len(b.controllers)-1]
+			break
+		}
+	}
+	b.mtx.Unlock()
+}
+
+// _ is a type assertion.
+var _ bus.Bus = (*Bus)(nil)
