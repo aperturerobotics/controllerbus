@@ -6,7 +6,11 @@ import (
 	"github.com/aperturerobotics/controllerbus/controller"
 	"github.com/aperturerobotics/controllerbus/directive"
 	"github.com/aperturerobotics/util/broadcast"
+	"github.com/pkg/errors"
 )
+
+// ErrClosed rejects controller admission after bus shutdown begins.
+var ErrClosed = errors.New("controller bus is closed")
 
 // ControllerCloseError reports a Controller.Close failure.
 //
@@ -15,6 +19,7 @@ import (
 // Callers can distinguish close failures from execution failures with
 // errors.As.
 type ControllerCloseError struct {
+	// Err is the controller's cleanup failure.
 	Err error
 }
 
@@ -66,4 +71,11 @@ type Bus interface {
 	// controller. It cancels that instance's Execute context, detaches
 	// directive handling, waits for Execute to return, and calls Close once.
 	RemoveController(controller.Controller)
+
+	// Close rejects new controllers, cancels admitted controllers, and waits
+	// for their Execute, Close, and completion callbacks, including releases
+	// already in progress. It returns joined ControllerCloseError values.
+	// Repeated calls wait for the same shutdown and return the same result.
+	// Call Close from the owning host, never from an owned controller lifecycle.
+	Close() error
 }
