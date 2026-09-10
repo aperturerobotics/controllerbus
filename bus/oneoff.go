@@ -95,7 +95,7 @@ func ExecOneOffWithFilter(
 	valDisposeCallback func(),
 	filterCb func(val directive.AttachedValue) (bool, error),
 ) (directive.AttachedValue, directive.Instance, directive.Reference, error) {
-	// mtx, bcast guard these variables
+	// bcast guards the result and idle state.
 	var bcast broadcast.Broadcast
 
 	var val directive.AttachedValue
@@ -289,7 +289,6 @@ func ExecOneOffWithXfrm(
 		idleCb,
 		valDisposeCallback,
 		func(val directive.AttachedValue) (bool, error) {
-			var ok bool
 			xval, ok, err := xfrmCb(val)
 			if !ok || err != nil {
 				return false, err
@@ -298,6 +297,10 @@ func ExecOneOffWithXfrm(
 			return true, nil
 		},
 	)
+	if err != nil || av == nil {
+		// Cancellation can return before the transform callback finishes.
+		return nil, av, di, ref, err
+	}
 	return xfrm, av, di, ref, err
 }
 
@@ -329,7 +332,6 @@ func ExecOneOffWithXfrmTyped[T, R directive.ComparableValue](
 		idleCb,
 		valDisposeCallback,
 		func(val directive.TypedAttachedValue[T]) (bool, error) {
-			var ok bool
 			xval, ok, err := xfrmCb(val)
 			if !ok || err != nil {
 				return false, err
@@ -339,9 +341,9 @@ func ExecOneOffWithXfrmTyped[T, R directive.ComparableValue](
 		},
 	)
 	if err != nil || av == nil {
-		// ensure xfrm is empty too
+		// Cancellation can return before the transform callback finishes.
 		var empty R
-		xfrm = empty
+		return empty, av, di, ref, err
 	}
 	return xfrm, av, di, ref, err
 }
