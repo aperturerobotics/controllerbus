@@ -22,6 +22,8 @@ github.com/aperturerobotics/starpc v0.52.1 h1:oz8EpHO3SIPLLL6lx6di2IBlQNyhsumcEB
 github.com/aperturerobotics/starpc v0.52.1/go.mod h1:04caiWwOtqsuwiIc5aLoNtp6ega99V7AhFinALdfFXc=
 github.com/aperturerobotics/util v1.34.10-0.20260802062101-496aab6cefd2 h1:fIAb1MvcrFtw/6Bqg+mjOqiHjHPPcljvM53Sm8g/e5s=
 github.com/aperturerobotics/util v1.34.10-0.20260802062101-496aab6cefd2/go.mod h1:2uIQA8dHn5EQgEtRqcTS4zxJ51dEVehY9O++bJfU2hs=
+github.com/aperturerobotics/util v1.34.10-0.20260908052533-9b98f88c3976 h1:oqZexz7ocadkSwiYr0//PYzcoFxqagk5NyO8p5oJOzY=
+github.com/aperturerobotics/util v1.34.10-0.20260908052533-9b98f88c3976/go.mod h1:2uIQA8dHn5EQgEtRqcTS4zxJ51dEVehY9O++bJfU2hs=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/go-quicktest/qt v1.102.0 h1:HSQxCeh5YZH3EL3W39ixjtyaEhcWSXQHtHnMBzSs474=
