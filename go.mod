@@ -8,9 +8,9 @@ require (
 	github.com/aperturerobotics/fastjson v0.1.1
 	github.com/aperturerobotics/fsnotify v1.9.1-0.20260506231828-931cb4bf1761
 	github.com/aperturerobotics/json-iterator-lite v1.1.0 // master
-	github.com/aperturerobotics/protobuf-go-lite v0.18.0 // latest
+	github.com/aperturerobotics/protobuf-go-lite v0.19.0 // latest
 	github.com/aperturerobotics/starpc v0.52.1 // latest
-	github.com/aperturerobotics/util v1.34.10-0.20260802062101-496aab6cefd2 // latest
+	github.com/aperturerobotics/util v1.34.10-0.20260924000454-918a9e70b357 // latest
 	github.com/mr-tron/base58 v1.3.0
 	github.com/pkg/errors v0.9.1
 	github.com/sergi/go-diff v1.4.0
