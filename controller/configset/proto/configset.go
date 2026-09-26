@@ -2,6 +2,8 @@ package configset_proto
 
 import (
 	"context"
+	"maps"
+	"slices"
 
 	"github.com/aperturerobotics/controllerbus/bus"
 	"github.com/aperturerobotics/controllerbus/config"
@@ -70,6 +72,23 @@ func MergeConfigSetMaps(out ConfigSetMap, sets ...ConfigSetMap) {
 			out[k] = v
 		}
 	}
+}
+
+// MarshalDeterministicVT encodes the set with its configs in ID order, so
+// equal sets encode to equal bytes. MarshalVT follows Go map iteration order.
+// Protobuf merges repeated map entries on decode, so the concatenated
+// single-entry encodings decode to the full set.
+func (c *ConfigSet) MarshalDeterministicVT() ([]byte, error) {
+	configs := c.GetConfigs()
+	var out []byte
+	for _, id := range slices.Sorted(maps.Keys(configs)) {
+		entry, err := (&ConfigSet{Configs: ConfigSetMap{id: configs[id]}}).MarshalVT()
+		if err != nil {
+			return nil, err
+		}
+		out = append(out, entry...)
+	}
+	return out, nil
 }
 
 // Resolve resolves the configset into a configset.ConfigSet

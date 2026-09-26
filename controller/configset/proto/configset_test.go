@@ -1,7 +1,9 @@
 package configset_proto
 
 import (
+	"bytes"
 	"context"
+	"strconv"
 	"testing"
 
 	"github.com/aperturerobotics/controllerbus/controller/configset"
@@ -73,5 +75,36 @@ func TestJSON(t *testing.T) {
 
 	if !mEnc.EqualVT(mDec) {
 		t.Fatal("values not identical after decoding")
+	}
+}
+
+// TestMarshalDeterministicVT checks that the encoding is stable across map
+// iteration orders and decodes to the same set.
+func TestMarshalDeterministicVT(t *testing.T) {
+	m := &ConfigSet{Configs: make(ConfigSetMap)}
+	for i := range 32 {
+		id := "config-" + strconv.Itoa(i)
+		m.Configs[id] = &ControllerConfig{Id: id, Rev: uint64(i), Config: []byte(id)}
+	}
+	want, err := m.MarshalDeterministicVT()
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+	for range 8 {
+		got, err := m.CloneVT().MarshalDeterministicVT()
+		if err != nil {
+			t.Fatal(err.Error())
+		}
+		if !bytes.Equal(got, want) {
+			t.Fatal("encoding changed between marshals")
+		}
+	}
+
+	dec := &ConfigSet{}
+	if err := dec.UnmarshalVT(want); err != nil {
+		t.Fatal(err.Error())
+	}
+	if !dec.EqualVT(m) {
+		t.Fatal("decoded set differs from the original")
 	}
 }
