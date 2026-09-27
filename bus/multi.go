@@ -437,9 +437,7 @@ func ExecCollectValuesWatchWithFilter[T directive.Value](
 					// Mark that the emit has happened.
 					// This is the one and only place this flag is set.
 					emittedOnce = true
-					if len(currErr) == 0 {
-						currVals = slices.Clone(vals)
-					}
+					currVals = slices.Clone(vals)
 				}
 			})
 
