@@ -248,7 +248,7 @@ type Instance interface {
 	// Returns a callback release function.
 	AddDisposeCallback(cb func()) func()
 
-	// AddIdleCallback adds a callback that will be called when the idle state changes.
+	// AddIdleCallback observes idle state and removal of resolver errors.
 	// Called immediately with the initial state.
 	// Returns a callback release function.
 	AddIdleCallback(cb IdleCallback) func()

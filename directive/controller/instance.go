@@ -453,10 +453,17 @@ func (i *directiveInstance) handleIdleStateLocked() {
 	i.idle = idle
 	i.stateChangedSnapshot = directiveStateSnapshot{} // mark state as changed
 
+	i.notifyIdleCallbacksLocked()
+}
+
+// notifyIdleCallbacksLocked publishes current idle state and resolver errors.
+// The controller mutex is held by the caller.
+func (i *directiveInstance) notifyIdleCallbacksLocked() {
 	if len(i.idles) == 0 {
 		return
 	}
 
+	idle := i.ready && i.idle
 	errs := i.getResolverErrsLocked()
 	var cbs []func()
 	for _, idleCb := range i.idles {
@@ -658,7 +665,7 @@ func (i *directiveInstance) AddDisposeCallback(cb func()) func() {
 	}
 }
 
-// AddIdleCallback adds a callback that will be called when the idle state changes.
+// AddIdleCallback observes idle state and removal of resolver errors.
 // Called immediately with the initial state.
 // Returns a callback release function.
 func (i *directiveInstance) AddIdleCallback(cb directive.IdleCallback) func() {
@@ -862,6 +869,10 @@ func (i *directiveInstance) removeResolverLocked(resIdx int, rres *resolver) {
 		}
 	}
 
+	defer i.deferCheckStateChanged()()
+	i.stateChangedSnapshot = directiveStateSnapshot{}
+	previousIdle := i.idle
+
 	// remove the resolver from the list
 	i.res = append(i.res[:resIdx], i.res[resIdx+1:]...)
 	// cancel the resolver
@@ -879,8 +890,11 @@ func (i *directiveInstance) removeResolverLocked(resIdx int, rres *resolver) {
 	}
 	rres.rels = nil
 	i.callCallbacksLocked(cbs...)
-	// check if the idle state changed
+	// Removing an already-idle failed resolver still changes its error list.
 	i.handleIdleStateLocked()
+	if rres.err != nil && previousIdle == i.idle {
+		i.notifyIdleCallbacksLocked()
+	}
 }
 
 // callCallbacksLocked calls the refsCbs list or adds to queue
