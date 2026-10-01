@@ -3,6 +3,7 @@ package loader
 import (
 	"context"
 	"errors"
+	"sync"
 
 	"github.com/aperturerobotics/controllerbus/bus"
 	"github.com/aperturerobotics/controllerbus/controller"
@@ -11,7 +12,8 @@ import (
 
 // WaitExecControllerRunning executes any directive which yields
 // ExecControllerValue and waits for either a error or success state before
-// returning. Disposed is called if the state leaves RUNNING.
+// returning. Disposed is called once if the directive is disposed or the
+// returned controller leaves RUNNING, such as when it exits with an error.
 func WaitExecControllerRunning(
 	ctx context.Context,
 	b bus.Bus,
@@ -19,29 +21,53 @@ func WaitExecControllerRunning(
 	disposeCb func(),
 ) (controller.Controller, directive.Instance, directive.Reference, error) {
 	subCtx, subCtxCancel := context.WithCancel(ctx)
+	defer subCtxCancel()
+	var disposeOnce sync.Once
 	dispose := func() {
 		subCtxCancel()
 		if disposeCb != nil {
-			disposeCb()
+			disposeOnce.Do(disposeCb)
 		}
 	}
-	defer subCtxCancel()
 
-	execValueCh := make(chan ExecControllerValue, 1)
+	// runningID identifies the current running value; returned marks it handed to the caller.
+	var mtx sync.Mutex
+	var runningID uint32
+	var returned bool
+	execValueCh := make(chan directive.AttachedValue, 1)
 	di, diRef, err := b.AddDirective(dir, bus.NewCallbackHandler(
 		func(av directive.AttachedValue) {
 			retVal, _ := av.GetValue().(ExecControllerValue)
-			if retVal != nil {
-				select {
-				case <-execValueCh:
-				default:
-				}
-				select {
-				case execValueCh <- retVal:
-				default:
-				}
+			if retVal == nil {
+				return
 			}
-		}, nil, dispose,
+			if retVal.GetController() != nil {
+				mtx.Lock()
+				runningID = av.GetValueID()
+				mtx.Unlock()
+			}
+			select {
+			case <-execValueCh:
+			default:
+			}
+			select {
+			case execValueCh <- av:
+			default:
+			}
+		},
+		func(av directive.AttachedValue) {
+			mtx.Lock()
+			left := runningID != 0 && av.GetValueID() == runningID
+			if left {
+				runningID = 0
+			}
+			left = left && returned
+			mtx.Unlock()
+			if left {
+				dispose()
+			}
+		},
+		dispose,
 	))
 	if err != nil {
 		return nil, nil, nil, err
@@ -52,12 +78,23 @@ func WaitExecControllerRunning(
 		case <-subCtx.Done():
 			diRef.Release()
 			return nil, nil, nil, subCtx.Err()
-		case val := <-execValueCh:
+		case av := <-execValueCh:
+			val := av.GetValue().(ExecControllerValue)
 			if err := val.GetError(); err != nil {
 				diRef.Release()
 				return nil, nil, nil, err
 			}
-			if ctrl := val.GetController(); ctrl != nil {
+			ctrl := val.GetController()
+			if ctrl == nil {
+				continue
+			}
+
+			// A value removed before it is returned is skipped for the next one.
+			mtx.Lock()
+			current := av.GetValueID() == runningID
+			returned = current
+			mtx.Unlock()
+			if current {
 				return ctrl, di, diRef, nil
 			}
 		}
