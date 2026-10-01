@@ -20,6 +20,31 @@ func WaitExecControllerRunning(
 	dir directive.Directive,
 	disposeCb func(),
 ) (controller.Controller, directive.Instance, directive.Reference, error) {
+	return waitExecControllerRunning(ctx, b, dir, disposeCb, false)
+}
+
+// WaitExecControllerRunningRetry is WaitExecControllerRunning for callers that
+// need the controller rather than its first outcome. A failed execution is
+// retried by the loader after backoff, so the wait continues until the
+// controller runs or ctx ends. Disposed is called as in WaitExecControllerRunning.
+func WaitExecControllerRunningRetry(
+	ctx context.Context,
+	b bus.Bus,
+	dir directive.Directive,
+	disposeCb func(),
+) (controller.Controller, directive.Instance, directive.Reference, error) {
+	return waitExecControllerRunning(ctx, b, dir, disposeCb, true)
+}
+
+// waitExecControllerRunning waits for the directive's controller to run. An
+// execution error ends the wait unless retry is set.
+func waitExecControllerRunning(
+	ctx context.Context,
+	b bus.Bus,
+	dir directive.Directive,
+	disposeCb func(),
+	retry bool,
+) (controller.Controller, directive.Instance, directive.Reference, error) {
 	subCtx, subCtxCancel := context.WithCancel(ctx)
 	defer subCtxCancel()
 	var disposeOnce sync.Once
@@ -80,7 +105,7 @@ func WaitExecControllerRunning(
 			return nil, nil, nil, subCtx.Err()
 		case av := <-execValueCh:
 			val := av.GetValue().(ExecControllerValue)
-			if err := val.GetError(); err != nil {
+			if err := val.GetError(); err != nil && !retry {
 				diRef.Release()
 				return nil, nil, nil, err
 			}
@@ -113,8 +138,29 @@ func WaitExecControllerRunningTyped[T controller.Controller](
 	dir directive.Directive,
 	disposeCb func(),
 ) (T, directive.Instance, directive.Reference, error) {
+	return typedExecController[T](WaitExecControllerRunning(ctx, b, dir, disposeCb))
+}
+
+// WaitExecControllerRunningRetryTyped is WaitExecControllerRunningRetry with
+// the controller type check of WaitExecControllerRunningTyped.
+func WaitExecControllerRunningRetryTyped[T controller.Controller](
+	ctx context.Context,
+	b bus.Bus,
+	dir directive.Directive,
+	disposeCb func(),
+) (T, directive.Instance, directive.Reference, error) {
+	return typedExecController[T](WaitExecControllerRunningRetry(ctx, b, dir, disposeCb))
+}
+
+// typedExecController asserts the controller type of a wait result, releasing
+// the reference on a mismatch.
+func typedExecController[T controller.Controller](
+	ctrl controller.Controller,
+	di directive.Instance,
+	diRef directive.Reference,
+	err error,
+) (T, directive.Instance, directive.Reference, error) {
 	var empty T
-	ctrl, di, diRef, err := WaitExecControllerRunning(ctx, b, dir, disposeCb)
 	if err != nil {
 		return empty, di, diRef, err
 	}
