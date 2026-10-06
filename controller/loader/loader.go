@@ -9,23 +9,22 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-// ControllerID is the controller identifier
+// ControllerID is the controller identifier.
 const ControllerID = "controllerbus/loader"
 
-// Version is the controller version
+// Version is the controller version.
 var Version = controller.MustParseVersion("0.0.1")
 
 // Controller implements the loader controller.
 // It responds to ExecController directives and attaches to a bus.
 type Controller struct {
-	// le is the logger
+	// le is the logger.
 	le *logrus.Entry
-	// bus is the controller bus
+	// bus runs the loaded controllers.
 	bus bus.Bus
 }
 
 // NewController builds a new loader controller given a bus.
-// If the given backoff is nil, uses the defaults.
 func NewController(le *logrus.Entry, bus bus.Bus) (*Controller, error) {
 	return &Controller{bus: bus, le: le}, nil
 }
@@ -39,33 +38,22 @@ func (c *Controller) GetControllerInfo() *controller.Info {
 	)
 }
 
-// Execute executes the loader controller.
+// Execute returns immediately; the loader works through HandleDirective.
 func (c *Controller) Execute(ctx context.Context) error {
-	// No-op
 	return nil
 }
 
-// HandleDirective asks if the handler can resolve the directive.
-// If it can, it returns a resolver. If not, returns nil.
-// Any unexpected errors are returned for logging.
-// It is safe to add a reference to the directive during this call.
-// The context passed is canceled when the directive instance expires.
-func (c *Controller) HandleDirective(
-	ctx context.Context,
-	di directive.Instance,
-) ([]directive.Resolver, error) {
-	dir := di.GetDirective()
-	switch d := dir.(type) {
-	case ExecController:
-		return c.resolveExecController(ctx, di, d)
+// HandleDirective resolves ExecController directives. The context is
+// canceled when the directive instance expires.
+func (c *Controller) HandleDirective(ctx context.Context, di directive.Instance) ([]directive.Resolver, error) {
+	if d, ok := di.GetDirective().(ExecController); ok {
+		return c.resolveExecController(ctx, d)
 	}
-
 	return nil, nil
 }
 
-// Close closes the controller.
+// Close releases nothing; each loaded controller is released with its directive.
 func (c *Controller) Close() error {
-	// TODO
 	return nil
 }
 

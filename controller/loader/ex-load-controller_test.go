@@ -3,10 +3,12 @@ package loader_test
 import (
 	"context"
 	"errors"
+	"slices"
 	"sync/atomic"
 	"testing"
 	"time"
 
+	"github.com/aperturerobotics/controllerbus/bus"
 	"github.com/aperturerobotics/controllerbus/config"
 	"github.com/aperturerobotics/controllerbus/controller"
 	"github.com/aperturerobotics/controllerbus/controller/loader"
@@ -126,5 +128,44 @@ func TestWaitExecControllerRunningRetry(t *testing.T) {
 	}
 	if constructs := factory.constructs.Load(); constructs != 2 {
 		t.Fatalf("expected a retried construction, got %d", constructs)
+	}
+}
+
+// TestExecControllerAttachedBeforeValue checks that a controller is attached to
+// the bus when the loader publishes it, so a directive added next reaches it.
+func TestExecControllerAttachedBeforeValue(t *testing.T) {
+	// Start a bus with the loader.
+	ctx, cancel := context.WithTimeout(t.Context(), 10*time.Second)
+	defer cancel()
+	b, _, err := core.NewCoreBus(ctx, logrus.NewEntry(logrus.New()))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Check the bus from the value callback, which runs as the value is published.
+	attached := make(chan bool, 1)
+	factory := &failingFactory{ctrl: &failingController{}}
+	_, ref, err := b.AddDirective(
+		loader.NewExecController(factory, &boilerplate_controller.Config{}),
+		bus.NewCallbackHandler(func(av directive.AttachedValue) {
+			ctrl := av.GetValue().(loader.ExecControllerValue).GetController()
+			if ctrl != nil {
+				attached <- slices.Contains(b.GetControllers(), ctrl)
+			}
+		}, nil, nil),
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer ref.Release()
+
+	// The published controller must already be attached.
+	select {
+	case ok := <-attached:
+		if !ok {
+			t.Fatal("the loader published the controller before attaching it")
+		}
+	case <-ctx.Done():
+		t.Fatal("the loader did not publish the controller")
 	}
 }

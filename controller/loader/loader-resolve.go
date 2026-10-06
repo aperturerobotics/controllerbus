@@ -10,19 +10,20 @@ import (
 	"github.com/pkg/errors"
 )
 
-// resolver tracks a ExecController request
+// resolver runs the controller an ExecController directive requests.
 type resolver struct {
-	ctx        context.Context
-	di         directive.Instance
-	dir        ExecController
+	// ctx is the lifetime of the attached controller.
+	ctx context.Context
+	// dir is the directive being resolved.
+	dir ExecController
+	// controller is the loader that owns the resolver.
 	controller *Controller
 }
 
 // newResolver builds a new ExecController resolver.
-func newResolver(ctx context.Context, di directive.Instance, dir ExecController, controller *Controller) *resolver {
+func newResolver(ctx context.Context, dir ExecController, controller *Controller) *resolver {
 	return &resolver{
 		ctx:        ctx,
-		di:         di,
 		dir:        dir,
 		controller: controller,
 	}
@@ -30,33 +31,32 @@ func newResolver(ctx context.Context, di directive.Instance, dir ExecController,
 
 // newExecBackoff constructs the default exec backoff.
 func newExecBackoff() backoff.BackOff {
+	// Retry quickly at first, then at most every two seconds.
 	ebo := backoff.NewExponentialBackOff()
 	ebo.InitialInterval = time.Millisecond * 100
 	ebo.Multiplier = 1.8
 	ebo.MaxInterval = time.Second * 2
-	// ebo.MaxElapsedTime = time.Minute
 	return ebo
 }
 
-// resolveExecController handles a ExecController directive.
-func (c *Controller) resolveExecController(
-	ctx context.Context,
-	di directive.Instance,
-	dir ExecController,
-) ([]directive.Resolver, error) {
-	// Check if the ExecController is meant for / compatible with us.
-	// In this case, we handle all ExecController requests.
-	return directive.R(newResolver(ctx, di, dir, c), nil)
+// resolveExecController handles every ExecController directive.
+func (c *Controller) resolveExecController(ctx context.Context, dir ExecController) ([]directive.Resolver, error) {
+	return directive.R(newResolver(ctx, dir, c), nil)
 }
 
-// Resolve resolves the values.
-// Any fatal error resolving the value is returned.
-// When the context is canceled valCh will not be drained anymore.
+// Resolve constructs the controller and runs it on the bus, retrying with
+// backoff after a failure. The value carrying the controller is emitted only
+// after the bus attaches it, so a directive added after the value is observed
+// is offered to the controller. The controller stays attached until ctx is
+// canceled or the controller is removed from the bus.
 func (c *resolver) Resolve(ctx context.Context, vh directive.ResolverHandler) error {
-	// Construct and attach the new controller to the bus.
+	// Read the factory and config to construct.
 	config := c.dir.GetExecControllerConfig()
 	factory := c.dir.GetExecControllerFactory()
+	le := c.controller.le.WithField("config", factory.GetConfigID())
+	bus := c.controller.bus
 
+	// Use the directive's retry backoff, or the default.
 	var execBackoff backoff.BackOff
 	if buildBackoff := c.dir.GetExecControllerRetryBackoff(); buildBackoff != nil {
 		execBackoff = buildBackoff()
@@ -65,135 +65,79 @@ func (c *resolver) Resolve(ctx context.Context, vh directive.ResolverHandler) er
 		execBackoff = newExecBackoff()
 	}
 
-	configID := factory.GetConfigID()
-	le := c.controller.le.WithField("config", configID)
-	bus := c.controller.bus
-
-	// execute the controller w/ retry backoff.
+	// Run the controller until ctx is canceled, constructing a new instance
+	// after each failure because the bus closes a controller that fails.
 	var lastErr error
-	var execNextBo time.Duration
-	var ci controller.Controller
-	closeCi := func() {
-		if ci == nil {
-			return
-		}
-		err := ci.Close()
-		if err != nil && err != context.Canceled {
-			le.WithError(err).Warn("controller close returned an error")
-		}
-	}
-
 	for {
-		// Clear any old values
 		_ = vh.ClearValues()
 
-		// if lastErr == nil: first run
+		// Back off after a failure, publishing the error and the retry time.
 		if lastErr != nil {
-			execNextBo = execBackoff.NextBackOff()
-			if execNextBo == backoff.Stop {
-				closeCi()
+			delay := execBackoff.NextBackOff()
+			if delay == backoff.Stop {
 				return errors.Wrap(lastErr, "backoff timeout exceeded")
 			}
-		} else {
-			execNextBo = 0
-		}
-
-		// if we need to wait for a backoff
-		if execNextBo != 0 {
 			le.
-				WithField("backoff-duration", execNextBo.String()).
+				WithField("backoff-duration", delay.String()).
 				Debug("backing off before controller re-start")
-			boTimer := time.NewTimer(execNextBo)
-			defer boTimer.Stop()
-
-			// emit the value
 			now := time.Now()
-			vid, vidOk := vh.AddValue(NewExecControllerValue(
-				now,
-				now.Add(execNextBo),
-				nil,
-				lastErr,
-			))
-
+			vid, vidOk := vh.AddValue(NewExecControllerValue(now, now.Add(delay), nil, lastErr))
+			timer := time.NewTimer(delay)
 			select {
 			case <-ctx.Done():
-				closeCi()
+				timer.Stop()
 				return ctx.Err()
-			case <-boTimer.C:
-				if vidOk {
-					vh.RemoveValue(vid)
-				}
+			case <-timer.C:
+			}
+			if vidOk {
+				vh.RemoveValue(vid)
 			}
 		}
 
-		// construct controller (once)
+		// Construct the controller.
 		t1 := time.Now()
-		if ci == nil {
-			ci, lastErr = factory.Construct(
-				ctx,
-				config,
-				controller.ConstructOpts{Logger: le},
-			)
-			if lastErr != nil {
-				ci = nil
-				continue
-			}
-			if ci == nil {
-				err := errors.New("controller construct returned nil")
-				le.Warn(err.Error())
-				return err
-			}
-		}
-
-		// emit the value
-		vid, vidOk := vh.AddValue(NewExecControllerValue(
-			t1,
-			time.Time{},
-			ci,
-			nil,
-		))
-
-		// run execute
-		le.Debug("starting controller")
-		execErr := bus.ExecuteController(c.ctx, ci)
-
-		le := le.WithField("exec-dur", time.Since(t1).String())
-		ctxCanceled := ctx.Err() != nil
-		if execErr != nil && (!ctxCanceled || execErr != context.Canceled) {
-			le.WithError(execErr).Warn("controller exited with error")
-			lastErr = execErr
-		} else {
-			// controller was canceled or returned nil error
-			le.Debug("controller exited normally")
-		}
-
-		// context was canceled, return now.
-		if ctxCanceled {
-			_ = vh.ClearValues()
-			bus.RemoveController(ci)
-			closeCi()
-			return context.Canceled
-		}
-
-		// an error occurred, try again.
-		if execErr != nil {
+		ci, err := factory.Construct(ctx, config, controller.ConstructOpts{Logger: le})
+		if err != nil {
+			lastErr = err
 			continue
 		}
-
-		// controller Execute() is complete.
-		// note: we need to take care to RemoveController later
-		if vidOk {
-			vh.AddValueRemovedCallback(vid, func() {
-				bus.RemoveController(ci)
-				closeCi()
-			})
-		} else {
-			vh.AddResolverRemovedCallback(func() {
-				bus.RemoveController(ci)
-				closeCi()
-			})
+		if ci == nil {
+			err := errors.New("controller construct returned nil")
+			le.Warn(err.Error())
+			return err
 		}
-		return nil
+
+		// Attach the controller, then publish it. The bus closes the
+		// controller when attaching fails or Execute returns an error.
+		le.Debug("starting controller")
+		exited := make(chan error, 1)
+		release, err := bus.AddController(c.ctx, ci, func(err error) {
+			exited <- err
+		})
+		if err != nil {
+			lastErr = err
+			continue
+		}
+		_, _ = vh.AddValue(NewExecControllerValue(t1, time.Time{}, ci, nil))
+
+		// Hold the controller until ctx is canceled or Execute fails.
+		select {
+		case <-ctx.Done():
+			_ = vh.ClearValues()
+			release()
+			return context.Canceled
+		case err := <-exited:
+			// A nil result means the controller was removed from the bus.
+			if err == nil {
+				_ = vh.ClearValues()
+				return nil
+			}
+			le.
+				WithField("exec-dur", time.Since(t1).String()).
+				WithError(err).
+				Warn("controller exited with error")
+			lastErr = err
+		}
 	}
 }
 
