@@ -15,9 +15,8 @@ import (
 
 // NewControllerConfig constructs a new controller config.
 func NewControllerConfig(c configset.ControllerConfig, useJson bool) (*ControllerConfig, error) {
+	// Encode the config as JSON or protobuf.
 	conf := c.GetConfig()
-	cID := conf.GetConfigID()
-
 	var confData []byte
 	var err error
 	if useJson {
@@ -29,8 +28,9 @@ func NewControllerConfig(c configset.ControllerConfig, useJson bool) (*Controlle
 		return nil, err
 	}
 
+	// Wrap it with its ID and revision.
 	return &ControllerConfig{
-		Id:     cID,
+		Id:     conf.GetConfigID(),
 		Config: confData,
 		Rev:    c.GetRev(),
 	}, nil
@@ -54,32 +54,38 @@ func (c *ControllerConfig) Validate() error {
 	return nil
 }
 
-// Resolve resolves the config into a configset.ControllerConfig
+// Resolve resolves the config into a configset.ControllerConfig. It returns
+// ErrUnknownConfigID when the bus settles with no constructor for the ID.
 func (c *ControllerConfig) Resolve(ctx context.Context, b bus.Bus) (configset.ControllerConfig, error) {
+	// Require a config ID.
 	if len(c.GetId()) == 0 {
 		return nil, ErrControllerConfigIdEmpty
 	}
 
+	// Look up the config constructor, returning once the resolvers settle.
 	configCtorDir := resolver.NewLoadConfigConstructorByID(c.GetId())
-	configCtorVal, _, configCtorRef, err := bus.ExecOneOff(ctx, b, configCtorDir, nil, nil)
+	configCtorVal, _, configCtorRef, err := bus.ExecOneOff(ctx, b, configCtorDir, bus.ReturnWhenIdle(), nil)
+	if err == context.Canceled {
+		return nil, err
+	}
 	if err != nil {
-		if err == context.Canceled {
-			return nil, err
-		}
 		return nil, errors.WithMessage(err, "resolve config object")
+	}
+	if configCtorVal == nil {
+		return nil, errors.WithMessage(ErrUnknownConfigID, c.GetId())
 	}
 	defer configCtorRef.Release()
 
+	// Construct an empty config.
 	ctor, ctorOk := configCtorVal.GetValue().(config.Constructor)
 	if !ctorOk {
 		return nil, errors.New("load config constructor directive returned invalid object")
 	}
 	cf := ctor.ConstructConfig()
 
-	// detect json or protobuf & parse
+	// Parse the data as JSON when it opens an object, else as protobuf.
 	if configData := c.GetConfig(); len(configData) != 0 {
-		// if configData[0] == '{'
-		if configData[0] == 123 {
+		if configData[0] == '{' {
 			err = cf.UnmarshalJSON(configData)
 		} else {
 			err = cf.UnmarshalVT(configData)
@@ -94,10 +100,13 @@ func (c *ControllerConfig) Resolve(ctx context.Context, b bus.Bus) (configset.Co
 
 // MarshalProtoJSON marshals the ControllerConfig message to JSON.
 func (c *ControllerConfig) MarshalProtoJSON(s *json.MarshalState) {
+	// Write a nil message as null.
 	if c == nil {
 		s.WriteNil()
 		return
 	}
+
+	// Write each set field.
 	s.WriteObjectStart()
 	var wroteField bool
 	if c.Id != "" || s.HasField("id") {
@@ -144,6 +153,7 @@ func (c *ControllerConfig) UnmarshalJSON(b []byte) error {
 	return json.DefaultUnmarshalerConfig.Unmarshal(b, c)
 }
 
+// UnmarshalProtoJSON unmarshals the ControllerConfig message from JSON.
 func (c *ControllerConfig) UnmarshalProtoJSON(s *json.UnmarshalState) {
 	for key := s.ReadObjectField(); key != ""; key = s.ReadObjectField() {
 		switch key {

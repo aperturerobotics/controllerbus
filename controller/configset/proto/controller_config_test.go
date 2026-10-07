@@ -2,9 +2,12 @@ package configset_proto
 
 import (
 	"encoding/json"
+	"errors"
 	"testing"
 
+	"github.com/aperturerobotics/controllerbus/core"
 	cbyaml "github.com/aperturerobotics/controllerbus/yaml"
+	"github.com/sirupsen/logrus"
 )
 
 var mockControllerConfig = `
@@ -23,5 +26,18 @@ func TestParseControllerConfig(t *testing.T) {
 	}
 	if err := json.Unmarshal(jdat, conf); err != nil {
 		t.Fatal(err.Error())
+	}
+}
+
+// TestResolveUnknownConfigID tests that resolving a config id no factory
+// registers fails instead of waiting.
+func TestResolveUnknownConfigID(t *testing.T) {
+	b, _, err := core.NewCoreBus(t.Context(), logrus.NewEntry(logrus.New()))
+	if err != nil {
+		t.Fatal(err)
+	}
+	conf := &ControllerConfig{Id: "test/unregistered"}
+	if _, err := conf.Resolve(t.Context(), b); !errors.Is(err, ErrUnknownConfigID) {
+		t.Fatalf("Resolve = %v, want ErrUnknownConfigID", err)
 	}
 }
