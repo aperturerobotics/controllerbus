@@ -2,10 +2,8 @@
 // @generated from file github.com/aperturerobotics/controllerbus/controller/controller.proto (package controller, syntax proto3)
 /* eslint-disable */
 
-import type { MessageType, PartialFieldInfo } from '@aptre/protobuf-es-lite'
-import { createMessageType, ScalarType } from '@aptre/protobuf-es-lite'
-
-export const protobufPackage = 'controller'
+import type { MessageType } from '@aptre/protobuf-es-lite/message'
+import { createMessageType } from '@aptre/protobuf-es-lite/message'
 
 /**
  * Info contains information about a controller.
@@ -15,31 +13,23 @@ export const protobufPackage = 'controller'
 export interface Info {
   /**
    * Id contains the identifier of the controller.
-   *
-   * @generated from field: string id = 1;
    */
   id?: string
   /**
    * Version contains the version string for the controller.
-   *
-   * @generated from field: string version = 2;
    */
   version?: string
   /**
    * Description contains a descriptive string about the controller.
-   *
-   * @generated from field: string description = 3;
    */
   description?: string
 }
 
-// Info contains the message type declaration for Info.
-export const Info: MessageType<Info> = createMessageType({
-  typeName: 'controller.Info',
-  fields: [
-    { no: 1, name: 'id', kind: 'scalar', T: ScalarType.STRING },
-    { no: 2, name: 'version', kind: 'scalar', T: ScalarType.STRING },
-    { no: 3, name: 'description', kind: 'scalar', T: ScalarType.STRING },
-  ] as readonly PartialFieldInfo[],
-  packedByDefault: true,
-})
+export const Info: MessageType<Info> = /* @__PURE__ */ createMessageType<Info>(
+  'controller.Info',
+  () => [
+    [1, 'id', 9],
+    [2, 'version', 9],
+    [3, 'description', 9],
+  ],
+)

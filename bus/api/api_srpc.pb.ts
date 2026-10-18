@@ -8,7 +8,12 @@ import {
   ExecControllerRequest,
   ExecControllerResponse,
 } from '../../controller/exec/exec.pb.js'
-import { buildDecodeMessageTransform, MessageStream, ProtoRpc } from 'starpc'
+import {
+  buildDecodeMessageTransform,
+  MessageStream,
+  ProtoRpc,
+  ServerContext,
+} from 'starpc'
 
 /**
  * ControllerBusService is a generic controller bus lookup api.
@@ -67,6 +72,35 @@ export interface ControllerBusService {
   ExecController(
     request: ExecControllerRequest,
     abortSignal?: AbortSignal,
+  ): MessageStream<ExecControllerResponse>
+}
+
+/**
+ * ControllerBusService is a generic controller bus lookup api.
+ *
+ * @generated from service bus.api.ControllerBusService
+ */
+export interface ControllerBusServiceHandler {
+  /**
+   * GetBusInfo requests information about the controller bus.
+   *
+   * @generated from rpc bus.api.ControllerBusService.GetBusInfo
+   */
+  GetBusInfo(
+    request: GetBusInfoRequest,
+    abortSignal: AbortSignal,
+    context: ServerContext,
+  ): Promise<GetBusInfoResponse>
+
+  /**
+   * ExecController executes a controller configuration on the bus.
+   *
+   * @generated from rpc bus.api.ControllerBusService.ExecController
+   */
+  ExecController(
+    request: ExecControllerRequest,
+    abortSignal: AbortSignal,
+    context: ServerContext,
   ): MessageStream<ExecControllerResponse>
 }
 

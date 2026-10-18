@@ -2,10 +2,8 @@
 // @generated from file github.com/aperturerobotics/controllerbus/plugin/loader/shared-library/filesystem/config.proto (package plugin.loader.filesystem, syntax proto3)
 /* eslint-disable */
 
-import type { MessageType, PartialFieldInfo } from '@aptre/protobuf-es-lite'
-import { createMessageType, ScalarType } from '@aptre/protobuf-es-lite'
-
-export const protobufPackage = 'plugin.loader.filesystem'
+import type { MessageType } from '@aptre/protobuf-es-lite/message'
+import { createMessageType } from '@aptre/protobuf-es-lite/message'
 
 /**
  * Config is configuration for the filesystem hot-plugin loader.
@@ -15,24 +13,19 @@ export const protobufPackage = 'plugin.loader.filesystem'
 export interface Config {
   /**
    * Dir is the directory to load from.
-   *
-   * @generated from field: string dir = 1;
    */
   dir?: string
   /**
    * Watch will watch the directory and hot-reload plugins.
-   *
-   * @generated from field: bool watch = 2;
    */
   watch?: boolean
 }
 
-// Config contains the message type declaration for Config.
-export const Config: MessageType<Config> = createMessageType({
-  typeName: 'plugin.loader.filesystem.Config',
-  fields: [
-    { no: 1, name: 'dir', kind: 'scalar', T: ScalarType.STRING },
-    { no: 2, name: 'watch', kind: 'scalar', T: ScalarType.BOOL },
-  ] as readonly PartialFieldInfo[],
-  packedByDefault: true,
-})
+export const Config: MessageType<Config> =
+  /* @__PURE__ */ createMessageType<Config>(
+    'plugin.loader.filesystem.Config',
+    () => [
+      [1, 'dir', 9],
+      [2, 'watch', 8],
+    ],
+  )

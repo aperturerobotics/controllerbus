@@ -2,10 +2,8 @@
 // @generated from file github.com/aperturerobotics/controllerbus/example/boilerplate/v1/boilerplate.proto (package boilerplate.v1, syntax proto3)
 /* eslint-disable */
 
-import type { MessageType, PartialFieldInfo } from '@aptre/protobuf-es-lite'
-import { createMessageType, ScalarType } from '@aptre/protobuf-es-lite'
-
-export const protobufPackage = 'boilerplate.v1'
+import type { MessageType } from '@aptre/protobuf-es-lite/message'
+import { createMessageType } from '@aptre/protobuf-es-lite/message'
 
 /**
  * Boilerplate implements the boilerplate directive.
@@ -17,20 +15,15 @@ export interface Boilerplate {
    * MessageText is the message to print with the boilerplate.
    * This is an example field.
    * The keyword "message" prevents us from using that as the field name.
-   *
-   * @generated from field: string message_text = 1;
    */
   messageText?: string
 }
 
-// Boilerplate contains the message type declaration for Boilerplate.
-export const Boilerplate: MessageType<Boilerplate> = createMessageType({
-  typeName: 'boilerplate.v1.Boilerplate',
-  fields: [
-    { no: 1, name: 'message_text', kind: 'scalar', T: ScalarType.STRING },
-  ] as readonly PartialFieldInfo[],
-  packedByDefault: true,
-})
+export const Boilerplate: MessageType<Boilerplate> =
+  /* @__PURE__ */ createMessageType<Boilerplate>(
+    'boilerplate.v1.Boilerplate',
+    () => [[1, 'message_text', 9]],
+  )
 
 /**
  * BoilerplateResult implements the boilerplate directive result.
@@ -40,18 +33,12 @@ export const Boilerplate: MessageType<Boilerplate> = createMessageType({
 export interface BoilerplateResult {
   /**
    * PrintedLen is the final length of the printed message.
-   *
-   * @generated from field: uint32 printed_len = 1;
    */
   printedLen?: number
 }
 
-// BoilerplateResult contains the message type declaration for BoilerplateResult.
 export const BoilerplateResult: MessageType<BoilerplateResult> =
-  createMessageType({
-    typeName: 'boilerplate.v1.BoilerplateResult',
-    fields: [
-      { no: 1, name: 'printed_len', kind: 'scalar', T: ScalarType.UINT32 },
-    ] as readonly PartialFieldInfo[],
-    packedByDefault: true,
-  })
+  /* @__PURE__ */ createMessageType<BoilerplateResult>(
+    'boilerplate.v1.BoilerplateResult',
+    () => [[1, 'printed_len', 13]],
+  )

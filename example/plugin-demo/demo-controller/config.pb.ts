@@ -2,10 +2,8 @@
 // @generated from file github.com/aperturerobotics/controllerbus/example/plugin-demo/demo-controller/config.proto (package hot.compile.demo.controller, syntax proto3)
 /* eslint-disable */
 
-import type { MessageType, PartialFieldInfo } from '@aptre/protobuf-es-lite'
-import { createMessageType, ScalarType } from '@aptre/protobuf-es-lite'
-
-export const protobufPackage = 'hot.compile.demo.controller'
+import type { MessageType } from '@aptre/protobuf-es-lite/message'
+import { createMessageType } from '@aptre/protobuf-es-lite/message'
 
 /**
  * Config is the boilerplate configuration.
@@ -15,17 +13,12 @@ export const protobufPackage = 'hot.compile.demo.controller'
 export interface Config {
   /**
    * ExitAfterDur requests an os.Exit(0) after a duration.
-   *
-   * @generated from field: string exit_after_dur = 1;
    */
   exitAfterDur?: string
 }
 
-// Config contains the message type declaration for Config.
-export const Config: MessageType<Config> = createMessageType({
-  typeName: 'hot.compile.demo.controller.Config',
-  fields: [
-    { no: 1, name: 'exit_after_dur', kind: 'scalar', T: ScalarType.STRING },
-  ] as readonly PartialFieldInfo[],
-  packedByDefault: true,
-})
+export const Config: MessageType<Config> =
+  /* @__PURE__ */ createMessageType<Config>(
+    'hot.compile.demo.controller.Config',
+    () => [[1, 'exit_after_dur', 9]],
+  )

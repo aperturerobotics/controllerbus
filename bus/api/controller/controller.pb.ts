@@ -3,10 +3,8 @@
 /* eslint-disable */
 
 import { Config as Config$1 } from '../api.pb.js'
-import type { MessageType, PartialFieldInfo } from '@aptre/protobuf-es-lite'
-import { createMessageType, ScalarType } from '@aptre/protobuf-es-lite'
-
-export const protobufPackage = 'bus.api.controller'
+import type { MessageType } from '@aptre/protobuf-es-lite/message'
+import { createMessageType } from '@aptre/protobuf-es-lite/message'
 
 /**
  * Config configures the API.
@@ -16,24 +14,16 @@ export const protobufPackage = 'bus.api.controller'
 export interface Config {
   /**
    * ListenAddr is the address to listen on for connections.
-   *
-   * @generated from field: string listen_addr = 1;
    */
   listenAddr?: string
   /**
    * BusApiConfig are options for controller bus api.
-   *
-   * @generated from field: bus.api.Config bus_api_config = 2;
    */
   busApiConfig?: Config$1
 }
 
-// Config contains the message type declaration for Config.
-export const Config: MessageType<Config> = createMessageType({
-  typeName: 'bus.api.controller.Config',
-  fields: [
-    { no: 1, name: 'listen_addr', kind: 'scalar', T: ScalarType.STRING },
-    { no: 2, name: 'bus_api_config', kind: 'message', T: () => Config$1 },
-  ] as readonly PartialFieldInfo[],
-  packedByDefault: true,
-})
+export const Config: MessageType<Config> =
+  /* @__PURE__ */ createMessageType<Config>('bus.api.controller.Config', () => [
+    [1, 'listen_addr', 9],
+    [2, 'bus_api_config', 11, 0, Config$1.codec],
+  ])

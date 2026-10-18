@@ -2,12 +2,10 @@
 // @generated from file github.com/aperturerobotics/controllerbus/bus/api/api.proto (package bus.api, syntax proto3)
 /* eslint-disable */
 
-import type { MessageType, PartialFieldInfo } from '@aptre/protobuf-es-lite'
-import { createMessageType, ScalarType } from '@aptre/protobuf-es-lite'
+import type { MessageType } from '@aptre/protobuf-es-lite/message'
+import { createMessageType } from '@aptre/protobuf-es-lite/message'
 import { Info } from '../../controller/controller.pb.js'
 import { DirectiveState } from '../../directive/directive.pb.js'
-
-export const protobufPackage = 'bus.api'
 
 /**
  * Config are configuration arguments.
@@ -17,25 +15,14 @@ export const protobufPackage = 'bus.api'
 export interface Config {
   /**
    * EnableExecController enables the exec controller API.
-   *
-   * @generated from field: bool enable_exec_controller = 1;
    */
   enableExecController?: boolean
 }
 
-// Config contains the message type declaration for Config.
-export const Config: MessageType<Config> = createMessageType({
-  typeName: 'bus.api.Config',
-  fields: [
-    {
-      no: 1,
-      name: 'enable_exec_controller',
-      kind: 'scalar',
-      T: ScalarType.BOOL,
-    },
-  ] as readonly PartialFieldInfo[],
-  packedByDefault: true,
-})
+export const Config: MessageType<Config> =
+  /* @__PURE__ */ createMessageType<Config>('bus.api.Config', () => [
+    [1, 'enable_exec_controller', 8],
+  ])
 
 /**
  * GetBusInfoRequest is the request type for GetBusInfo.
@@ -44,13 +31,11 @@ export const Config: MessageType<Config> = createMessageType({
  */
 export interface GetBusInfoRequest {}
 
-// GetBusInfoRequest contains the message type declaration for GetBusInfoRequest.
 export const GetBusInfoRequest: MessageType<GetBusInfoRequest> =
-  createMessageType({
-    typeName: 'bus.api.GetBusInfoRequest',
-    fields: [] as readonly PartialFieldInfo[],
-    packedByDefault: true,
-  })
+  /* @__PURE__ */ createMessageType<GetBusInfoRequest>(
+    'bus.api.GetBusInfoRequest',
+    () => [],
+  )
 
 /**
  * GetBusInfoResponse is the response type for GetBusInfo.
@@ -60,37 +45,19 @@ export const GetBusInfoRequest: MessageType<GetBusInfoRequest> =
 export interface GetBusInfoResponse {
   /**
    * RunningControllers is the list of running controllers.
-   *
-   * @generated from field: repeated controller.Info running_controllers = 1;
    */
   runningControllers?: Info[]
   /**
    * RunningDirectives is the list of running directives.
-   *
-   * @generated from field: repeated directive.DirectiveState running_directives = 2;
    */
   runningDirectives?: DirectiveState[]
 }
 
-// GetBusInfoResponse contains the message type declaration for GetBusInfoResponse.
 export const GetBusInfoResponse: MessageType<GetBusInfoResponse> =
-  createMessageType({
-    typeName: 'bus.api.GetBusInfoResponse',
-    fields: [
-      {
-        no: 1,
-        name: 'running_controllers',
-        kind: 'message',
-        T: () => Info,
-        repeated: true,
-      },
-      {
-        no: 2,
-        name: 'running_directives',
-        kind: 'message',
-        T: () => DirectiveState,
-        repeated: true,
-      },
-    ] as readonly PartialFieldInfo[],
-    packedByDefault: true,
-  })
+  /* @__PURE__ */ createMessageType<GetBusInfoResponse>(
+    'bus.api.GetBusInfoResponse',
+    () => [
+      [1, 'running_controllers', 11, 1, Info.codec],
+      [2, 'running_directives', 11, 1, DirectiveState.codec],
+    ],
+  )
