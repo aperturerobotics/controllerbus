@@ -310,6 +310,7 @@ func (i *directiveInstance) addReferenceLocked(origin directive.Origin, cb direc
 	if !weakRef && (firstRef || firstNonWeakRef) {
 		i.handleReferencedLocked()
 	}
+	i.c.broadcastLocked()
 	i.callCallbacksLocked(cbs...)
 	return ref
 }
@@ -320,6 +321,7 @@ func (i *directiveInstance) removeReferenceLocked(ref *dirRef) {
 		if iref == ref {
 			i.refs = append(i.refs[:idx], i.refs[idx+1:]...)
 			ref.released.Store(true)
+			i.c.broadcastLocked()
 			anyNonWeakRefs := len(i.refs) != 0 && !i.refs[len(i.refs)-1].weak
 			if !anyNonWeakRefs {
 				i.handleUnreferencedLocked()
@@ -826,9 +828,7 @@ func (i *directiveInstance) removeLocked(diIdx int) {
 	i.c.dir = append(i.c.dir[:diIdx], i.c.dir[diIdx+1:]...)
 
 	// signal directive list changed
-	i.c.bcast.HoldLock(func(broadcast func(), getWaitCh func() <-chan struct{}) {
-		broadcast()
-	})
+	i.c.broadcastLocked()
 
 	// Clear all idle callbacks
 	for _, idle := range i.idles {

@@ -179,8 +179,9 @@ type Controller interface {
 	// DirectiveLister has GetDirectives.
 	DirectiveLister
 
-	// GetDirectivesBroadcast returns the broadcast that is signaled when
-	// directives are added or removed.
+	// GetDirectivesBroadcast returns the directives broadcast.
+	// It is signaled when a directive is added or removed.
+	// It is signaled when a reference to a directive is added or released.
 	GetDirectivesBroadcast() *broadcast.Broadcast
 
 	// DirectiveAdder has AddDirective.

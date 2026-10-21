@@ -52,10 +52,18 @@ func (c *Controller) GetDirectives() []directive.Instance {
 	return dirs
 }
 
-// GetDirectivesBroadcast returns the broadcast that is signaled when
-// directives are added or removed.
+// GetDirectivesBroadcast returns the directives broadcast.
+// It is signaled when a directive is added or removed.
+// It is signaled when a reference to a directive is added or released.
 func (c *Controller) GetDirectivesBroadcast() *broadcast.Broadcast {
 	return &c.bcast
+}
+
+// broadcastLocked signals the directives broadcast while c.mtx is locked.
+func (c *Controller) broadcastLocked() {
+	c.bcast.HoldLock(func(broadcast func(), _ func() <-chan struct{}) {
+		broadcast()
+	})
 }
 
 // AddDirective adds a directive to the controller.
@@ -99,9 +107,7 @@ func (c *Controller) AddDirective(
 	c.dir = append(c.dir, di)
 
 	// signal directive list changed
-	c.bcast.HoldLock(func(broadcast func(), getWaitCh func() <-chan struct{}) {
-		broadcast()
-	})
+	c.broadcastLocked()
 
 	// Defer calling state changed callback.
 	defer di.deferCheckStateChanged()()

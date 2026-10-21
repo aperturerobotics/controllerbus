@@ -188,3 +188,45 @@ func TestOriginCycle(t *testing.T) {
 	ref.Release()
 	di.Close()
 }
+
+// TestOriginBroadcast checks that adding and releasing a reference to an
+// existing directive signals the directives broadcast.
+func TestOriginBroadcast(t *testing.T) {
+	ctx := t.Context()
+	le := logrus.NewEntry(logrus.New())
+	b := NewBusWithLogger(directivecontroller.NewController(ctx, le), le)
+
+	d := &originTestDirective{name: "shared"}
+	_, first, err := b.AddDirective(ctx, d, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer first.Release()
+
+	waitCh := func() <-chan struct{} {
+		var ch <-chan struct{}
+		b.GetDirectivesBroadcast().HoldLock(func(_ func(), getWaitCh func() <-chan struct{}) {
+			ch = getWaitCh()
+		})
+		return ch
+	}
+	expectSignal := func(what string, ch <-chan struct{}) {
+		t.Helper()
+		select {
+		case <-ch:
+		case <-time.After(5 * time.Second):
+			t.Fatalf("no broadcast after %s", what)
+		}
+	}
+
+	ch := waitCh()
+	_, second, err := b.AddDirective(ctx, d, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	expectSignal("adding a deduplicated reference", ch)
+
+	ch = waitCh()
+	second.Release()
+	expectSignal("releasing a reference", ch)
+}
