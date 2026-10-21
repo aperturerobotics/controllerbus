@@ -61,7 +61,7 @@ func TestWatchableTransformResolver(t *testing.T) {
 	}
 
 	cbChan := make(chan cbValues, 1)
-	di, dirRef, err := dc.AddDirective(dir, directive.NewCallbackHandler(func(addedValue directive.AttachedValue) {
+	di, dirRef, err := dc.AddDirective(ctx, dir, directive.NewCallbackHandler(func(addedValue directive.AttachedValue) {
 		cbChan <- cbValues{added: addedValue.GetValue().(string)}
 	}, func(removedValue directive.AttachedValue) {
 		cbChan <- cbValues{removed: removedValue.GetValue().(string)}

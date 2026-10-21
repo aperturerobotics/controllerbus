@@ -60,7 +60,7 @@ func runDaemon(c *cli.Context) error {
 
 	// Construct hot loader
 	if pluginDir != "" {
-		hlRef, err := addHotLoader(b, sr)
+		hlRef, err := addHotLoader(ctx, b, sr)
 		if err != nil {
 			return err
 		}
@@ -71,6 +71,7 @@ func runDaemon(c *cli.Context) error {
 
 	// ConfigSet controller
 	_, csRef, err := b.AddDirective(
+		ctx,
 		resolver.NewLoadControllerWithConfig(&configset_controller.Config{}),
 		nil,
 	)
@@ -120,6 +121,7 @@ func runDaemon(c *cli.Context) error {
 	}
 
 	_, configSetRef, err := b.AddDirective(
+		ctx,
 		configset.NewApplyConfigSet(confSet),
 		nil,
 	)

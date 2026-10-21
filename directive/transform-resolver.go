@@ -46,6 +46,7 @@ func (r *TransformResolver[T]) Resolve(ctx context.Context, handler ResolverHand
 		}
 	}
 	di, ref, err := r.adder.AddDirective(
+		ctx,
 		r.dir,
 		NewCallbackHandler(func(av AttachedValue) {
 			var val T

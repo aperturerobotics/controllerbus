@@ -16,6 +16,8 @@ type dirRef struct {
 	weak bool
 	// h is the reference handler
 	h directive.ReferenceHandler
+	// origin is where the reference came from.
+	origin directive.Origin
 }
 
 // Release releases the reference.

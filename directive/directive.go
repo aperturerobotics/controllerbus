@@ -147,12 +147,15 @@ type DirectiveAdder interface {
 	// AddDirective adds a directive to the controller.
 	// This call de-duplicates equivalent directives.
 	//
+	// The reference records the Origin carried by ctx.
+	// ctx is not retained and does not bound the directive lifetime.
+	//
 	// cb receives values in order as they are emitted.
 	// cb can be nil.
 	// cb should not block.
 	//
 	// Returns the instance, new reference, and any error.
-	AddDirective(Directive, ReferenceHandler) (Instance, Reference, error)
+	AddDirective(ctx context.Context, dir Directive, cb ReferenceHandler) (Instance, Reference, error)
 }
 
 // HandlerAdder can add a handler to a bus.
@@ -233,13 +236,18 @@ type Instance interface {
 	// GetResolverErrors returns a snapshot of any errors returned by resolvers.
 	GetResolverErrors() []error
 
+	// GetReferences returns a snapshot of the live references and their origins.
+	GetReferences() []ReferenceInfo
+
 	// AddReference adds a reference to the directive.
+	// The reference records the Origin carried by ctx.
+	// ctx is not retained.
 	// cb is called for each value.
 	// cb calls should return immediately.
 	// the release callback is called immediately if already released
 	// If marked as a weak ref, the handler will not count towards the ref count.
 	// will never return nil
-	AddReference(cb ReferenceHandler, weakRef bool) Reference
+	AddReference(ctx context.Context, cb ReferenceHandler, weakRef bool) Reference
 
 	// AddDisposeCallback adds a callback that will be called when the instance
 	// is disposed, either when Close() is called, or when the reference count

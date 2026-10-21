@@ -108,6 +108,7 @@ func ExecOneOffWithFilter(
 	}
 
 	di, ref, err := bus.AddDirective(
+		ctx,
 		dir,
 		NewCallbackHandler(
 			func(v directive.AttachedValue) {

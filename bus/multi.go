@@ -85,6 +85,7 @@ func ExecCollectValuesWithFilter[T directive.Value](
 	var returned bool
 
 	di, ref, err := bus.AddDirective(
+		ctx,
 		dir,
 		NewCallbackHandler(
 			func(v directive.AttachedValue) {
@@ -323,6 +324,7 @@ func ExecCollectValuesWatchWithFilter[T directive.Value](
 	}
 
 	di, ref, err := bus.AddDirective(
+		ctx,
 		dir,
 		NewCallbackHandler(
 			func(v directive.AttachedValue) { // Add handler

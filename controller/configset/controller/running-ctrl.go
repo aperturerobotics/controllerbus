@@ -98,7 +98,7 @@ func (c *runningController) Execute(ctx context.Context) (rerr error) {
 
 		var disposeCb func()
 		disposed := make(chan struct{})
-		updValCh, updValDir, execRef, err := bus.ExecOneOffWatchCh[resolver.LoadControllerWithConfigValue](c.c.bus, execDir)
+		updValCh, updValDir, execRef, err := bus.ExecOneOffWatchCh[resolver.LoadControllerWithConfigValue](ctx, c.c.bus, execDir)
 		if err != nil {
 			if err == context.Canceled {
 				return err

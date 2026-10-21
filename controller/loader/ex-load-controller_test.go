@@ -146,6 +146,7 @@ func TestExecControllerAttachedBeforeValue(t *testing.T) {
 	attached := make(chan bool, 1)
 	factory := &failingFactory{ctrl: &failingController{}}
 	_, ref, err := b.AddDirective(
+		ctx,
 		loader.NewExecController(factory, &boilerplate_controller.Config{}),
 		bus.NewCallbackHandler(func(av directive.AttachedValue) {
 			ctrl := av.GetValue().(loader.ExecControllerValue).GetController()

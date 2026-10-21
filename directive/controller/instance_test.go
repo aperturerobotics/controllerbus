@@ -30,14 +30,14 @@ func TestDisposeSkipsWeakRefReleasedByValueRemovedCallback(t *testing.T) {
 	}
 	defer removeHandler()
 
-	di, strongRef, err := ctrl.AddDirective(&directive_mock.MockDirective{}, nil)
+	di, strongRef, err := ctrl.AddDirective(context.Background(), &directive_mock.MockDirective{}, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
 	<-readyCh
 
 	weakHandler := &countingRefHandler{}
-	weakRef := di.AddReference(weakHandler, true)
+	weakRef := di.AddReference(context.Background(), weakHandler, true)
 	releaseWeakFunc := weakRef.Release
 	releaseWeak.Store(&releaseWeakFunc)
 
@@ -96,7 +96,7 @@ func TestRemovedResolverClearsErrors(t *testing.T) {
 	ctx, cancel := context.WithTimeout(t.Context(), 5*time.Second)
 	defer cancel()
 	ctrl := controller.NewController(ctx, logrus.NewEntry(logrus.New()))
-	di, ref, err := ctrl.AddDirective(&directive_mock.MockDirective{}, nil)
+	di, ref, err := ctrl.AddDirective(ctx, &directive_mock.MockDirective{}, nil)
 	if err != nil {
 		t.Fatal(err)
 	}

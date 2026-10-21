@@ -40,6 +40,7 @@ func (r *BusBridgeResolver) Resolve(ctx context.Context, handler directive.Resol
 	vmap := make(map[uint32]uint32)
 
 	di, diRef, err := r.target.AddDirective(
+		ctx,
 		r.dir,
 		bus.NewCallbackHandler(
 			func(av directive.AttachedValue) {

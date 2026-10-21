@@ -74,7 +74,7 @@ func (r *resolver) updateContextLocked(ctx *context.Context) {
 		r.err = nil
 		r.exited, r.stopped = false, false
 		r.setIdleLocked(false)
-		r.ctx, r.ctxCancel = context.WithCancel(*ctx)
+		r.ctx, r.ctxCancel = context.WithCancel(r.hnd.handlerContext(*ctx))
 		hnd := &resolverHandler{r: r, ctx: r.ctx}
 		go hnd.executeResolver(r.ctx, exitedCh, waitCh)
 	}

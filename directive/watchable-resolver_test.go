@@ -57,7 +57,7 @@ func TestWatchableResolver(t *testing.T) {
 		cbChan <- cbValues{removed: removedValue.GetValue().(int)}
 	}, nil)
 
-	_, dirRef, err := dc.AddDirective(dir, directive.NewLogHandler(le, handler))
+	_, dirRef, err := dc.AddDirective(ctx, dir, directive.NewLogHandler(le, handler))
 	if err != nil {
 		t.Fatal(err.Error())
 	}

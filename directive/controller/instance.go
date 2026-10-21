@@ -78,6 +78,7 @@ func newDirectiveInstance(
 	c *Controller,
 	id uint32,
 	dir directive.Directive,
+	origin directive.Origin,
 	h directive.ReferenceHandler,
 ) (*directiveInstance, directive.Reference) {
 	i := &directiveInstance{
@@ -88,7 +89,9 @@ func newDirectiveInstance(
 	}
 	// #nosec G118 -- cancel func is stored on directiveInstance and called when the instance is released.
 	i.ctx, i.ctxCancel = context.WithCancel(c.ctx)
-	return i, i.addReferenceLocked(h, false)
+	// Directives added under the instance context have this instance as origin.
+	i.ctx = directive.WithOrigin(i.ctx, directive.Origin{Directive: i})
+	return i, i.addReferenceLocked(origin, h, false)
 }
 
 // GetContext returns a context that is canceled when Instance is released.
@@ -131,6 +134,17 @@ func (i *directiveInstance) GetResolverErrors() []error {
 	errs := i.getResolverErrsLocked()
 	i.c.mtx.Unlock()
 	return errs
+}
+
+// GetReferences returns a snapshot of the live references and their origins.
+func (i *directiveInstance) GetReferences() []directive.ReferenceInfo {
+	i.c.mtx.Lock()
+	defer i.c.mtx.Unlock()
+	refs := make([]directive.ReferenceInfo, len(i.refs))
+	for idx, ref := range i.refs {
+		refs[idx] = directive.ReferenceInfo{Origin: ref.origin, Weak: ref.weak}
+	}
+	return refs
 }
 
 // getResolverErrsLocked returns the list of resolver errors while c.mtx is locked.
@@ -255,16 +269,18 @@ func (i *directiveInstance) getResolverAttachedValsLocked() []directive.Attached
 // cb calls should return immediately.
 // returns nil if the directive is already expired.
 // If marked as a weak ref, the handler will not count towards the ref count.
-func (i *directiveInstance) AddReference(cb directive.ReferenceHandler, weakRef bool) directive.Reference {
+// The reference records the Origin carried by ctx.
+func (i *directiveInstance) AddReference(ctx context.Context, cb directive.ReferenceHandler, weakRef bool) directive.Reference {
+	origin := directive.OriginFromContext(ctx)
 	i.c.mtx.Lock()
 	defer i.c.mtx.Unlock()
-	return i.addReferenceLocked(cb, weakRef)
+	return i.addReferenceLocked(origin, cb, weakRef)
 }
 
 // addReferenceLocked adds a reference while i.c.mtx is locked.
 // returns nil if the directive is already expired.
-func (i *directiveInstance) addReferenceLocked(cb directive.ReferenceHandler, weakRef bool) directive.Reference {
-	ref := &dirRef{di: i, h: cb, weak: weakRef}
+func (i *directiveInstance) addReferenceLocked(origin directive.Origin, cb directive.ReferenceHandler, weakRef bool) directive.Reference {
+	ref := &dirRef{di: i, h: cb, weak: weakRef, origin: origin}
 	if i.released.Load() {
 		ref.released.Store(true)
 		if ref.h != nil {
@@ -759,7 +775,7 @@ func (i *directiveInstance) callHandlerUnlocked(handler *handler) (res []*resolv
 		}
 	}()
 
-	resolvers, err := handler.h.HandleDirective(i.ctx, i)
+	resolvers, err := handler.h.HandleDirective(handler.handlerContext(i.ctx), i)
 	if err != nil {
 		return nil, err
 	}

@@ -18,6 +18,7 @@ import (
 // Calls with nil when the value becomes unset.
 // If the callback returns false, the value is rejected, and the next value will be used instead.
 func ExecOneOffWatchCb[T directive.ComparableValue](
+	ctx context.Context,
 	cb func(val directive.TypedAttachedValue[T]) bool,
 	b Bus,
 	dir directive.Directive,
@@ -26,6 +27,7 @@ func ExecOneOffWatchCb[T directive.ComparableValue](
 	vals := make(map[uint32]directive.TypedAttachedValue[T], 1)
 
 	di, ref, err := b.AddDirective(
+		ctx,
 		dir,
 		NewCallbackHandler(
 			func(av directive.AttachedValue) {
@@ -88,6 +90,7 @@ func ExecOneOffWatchCb[T directive.ComparableValue](
 // Stores the latest value into the ccontainer.
 // Continues to watch for changes until the directive is released.
 func ExecOneOffWatchCtr[T directive.ComparableValue](
+	ctx context.Context,
 	ctr *ccontainer.CContainer[T],
 	b Bus,
 	dir directive.Directive,
@@ -96,7 +99,7 @@ func ExecOneOffWatchCtr[T directive.ComparableValue](
 	directive.Reference,
 	error,
 ) {
-	return ExecOneOffWatchCb(func(val directive.TypedAttachedValue[T]) bool {
+	return ExecOneOffWatchCb(ctx, func(val directive.TypedAttachedValue[T]) bool {
 		if val == nil {
 			var empty T
 			ctr.SetValue(empty)
@@ -116,6 +119,7 @@ func ExecOneOffWatchCtr[T directive.ComparableValue](
 // Calls the callback when the selected value changes.
 // Calls with nil when the value becomes unset.
 func ExecOneOffWatchSelectCb[T directive.ComparableValue](
+	ctx context.Context,
 	b Bus,
 	dir directive.Directive,
 	selectValue func(vals []directive.TypedAttachedValue[T]) int,
@@ -152,6 +156,7 @@ func ExecOneOffWatchSelectCb[T directive.ComparableValue](
 	}
 
 	return b.AddDirective(
+		ctx,
 		dir,
 		directive.NewTypedCallbackHandler(
 			func(av directive.TypedAttachedValue[T]) {
@@ -192,11 +197,12 @@ func ExecOneOffWatchSelectCb[T directive.ComparableValue](
 // The routine will be restarted when the value changes.
 // Note: the routine will not start until SetContext and SetStateRoutine are called on the routine container.
 func ExecOneOffWatchRoutine[T directive.ComparableValue](
+	ctx context.Context,
 	routineCtr *routine.StateRoutineContainer[T],
 	b Bus,
 	dir directive.Directive,
 ) (directive.Instance, directive.Reference, error) {
-	return ExecOneOffWatchCb(func(val directive.TypedAttachedValue[T]) bool {
+	return ExecOneOffWatchCb(ctx, func(val directive.TypedAttachedValue[T]) bool {
 		if val == nil {
 			var empty T
 			routineCtr.SetState(empty)
@@ -212,11 +218,12 @@ func ExecOneOffWatchRoutine[T directive.ComparableValue](
 // Continues to watch for changes until the directive is released.
 // Returns a nil value if the value becomes unset.
 func ExecOneOffWatchCh[T directive.ComparableValue](
+	ctx context.Context,
 	b Bus,
 	dir directive.Directive,
 ) (<-chan directive.TypedAttachedValue[T], directive.Instance, directive.Reference, error) {
 	valCh := make(chan directive.TypedAttachedValue[T], 1)
-	di, diRef, err := ExecOneOffWatchCb(func(val directive.TypedAttachedValue[T]) bool {
+	di, diRef, err := ExecOneOffWatchCb(ctx, func(val directive.TypedAttachedValue[T]) bool {
 		for {
 			select {
 			case valCh <- val:
@@ -250,7 +257,7 @@ func ExecOneOffWatchLatestCb[T directive.ComparableValue](
 	initCb func(di directive.Instance, ref directive.Reference) error,
 	valCb func(val directive.TypedAttachedValue[T]) error,
 ) error {
-	valCh, di, ref, err := ExecOneOffWatchCh[T](b, dir)
+	valCh, di, ref, err := ExecOneOffWatchCh[T](ctx, b, dir)
 	if err != nil {
 		return err
 	}
@@ -285,6 +292,7 @@ func ExecOneOffWatchLatestCb[T directive.ComparableValue](
 // The callback can return an optional function to call when the value was removed.
 // The callback will continue to be called until the ref is removed.
 func ExecWatchEffect[T directive.ComparableValue](
+	ctx context.Context,
 	cb func(val directive.TypedAttachedValue[T]) func(),
 	b Bus,
 	dir directive.Directive,
@@ -292,6 +300,7 @@ func ExecWatchEffect[T directive.ComparableValue](
 	valRels := make(map[uint32]func(), 1)
 
 	di, ref, err := b.AddDirective(
+		ctx,
 		dir,
 		NewCallbackHandler(
 			func(av directive.AttachedValue) {
@@ -398,7 +407,7 @@ func ExecWatchTransformEffect[T, E directive.ComparableValue](
 	)
 	transforms.SetContext(ctx, true)
 
-	return ExecWatchEffect(func(val directive.TypedAttachedValue[T]) func() {
+	return ExecWatchEffect(ctx, func(val directive.TypedAttachedValue[T]) func() {
 		mtx.Lock()
 		vals[val.GetValueID()] = val
 		transforms.SetKey(val.GetValueID(), true)
@@ -424,12 +433,13 @@ func ExecWatchTransformEffect[T, E directive.ComparableValue](
 // The callback can return an optional function to call when the value was removed.
 // The callback will continue to be called until the ref is removed.
 func ExecOneOffWatchEffect[T directive.ComparableValue](
+	ctx context.Context,
 	cb func(val directive.TypedAttachedValue[T]) func(),
 	b Bus,
 	dir directive.Directive,
 ) (directive.Instance, directive.Reference, error) {
 	var currRel func()
-	return ExecOneOffWatchCb(func(val directive.TypedAttachedValue[T]) bool {
+	return ExecOneOffWatchCb(ctx, func(val directive.TypedAttachedValue[T]) bool {
 		if currRel != nil {
 			currRel()
 			currRel = nil

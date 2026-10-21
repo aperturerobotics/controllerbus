@@ -60,7 +60,7 @@ func waitExecControllerRunning(
 	var runningID uint32
 	var returned bool
 	execValueCh := make(chan directive.AttachedValue, 1)
-	di, diRef, err := b.AddDirective(dir, bus.NewCallbackHandler(
+	di, diRef, err := b.AddDirective(ctx, dir, bus.NewCallbackHandler(
 		func(av directive.AttachedValue) {
 			retVal, _ := av.GetValue().(ExecControllerValue)
 			if retVal == nil {

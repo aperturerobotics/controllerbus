@@ -74,7 +74,7 @@ func (r *loadWithConfigResolver) Resolve(ctx context.Context, vh directive.Resol
 	execDir := loader.NewExecController(factory, conf)
 
 	// pass through all values.
-	_, execRef, err := r.bus.AddDirective(execDir, bus.NewPassThruHandler(vh, valCtxCancel))
+	_, execRef, err := r.bus.AddDirective(ctx, execDir, bus.NewPassThruHandler(vh, valCtxCancel))
 	if err != nil {
 		_, _ = vh.AddValue(loader.NewExecControllerValue(
 			time.Now(),

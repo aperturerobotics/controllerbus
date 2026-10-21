@@ -115,6 +115,7 @@ func (r *ExecControllerRequest) Execute(
 	removedCh := make(chan configset.ApplyConfigSetValue, 1)
 
 	_, dirRef, err := cbus.AddDirective(
+		ctx,
 		configset.NewApplyConfigSet(confSet),
 		bus.NewCallbackHandler(
 			// value added

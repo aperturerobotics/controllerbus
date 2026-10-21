@@ -59,6 +59,7 @@ func (r *TypedTransformResolver[V, T]) Resolve(ctx context.Context, handler Reso
 		}
 	}
 	di, ref, err := r.adder.AddDirective(
+		ctx,
 		r.dir,
 		NewTypedCallbackHandler(
 			func(tav TypedAttachedValue[V]) {

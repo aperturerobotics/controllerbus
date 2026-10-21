@@ -3,6 +3,8 @@
 package main
 
 import (
+	"context"
+
 	"github.com/aperturerobotics/controllerbus/bus"
 	"github.com/aperturerobotics/controllerbus/controller/resolver"
 	"github.com/aperturerobotics/controllerbus/controller/resolver/static"
@@ -13,10 +15,11 @@ import (
 
 // addHotLoader adds the hot loader to the bus.
 // no-op on js
-func addHotLoader(b bus.Bus, sr *static.Resolver) (directive.Reference, error) {
+func addHotLoader(ctx context.Context, b bus.Bus, sr *static.Resolver) (directive.Reference, error) {
 	sr.AddFactory(hot_loader_filesystem.NewFactory(b))
 
 	_, hlRef, err := b.AddDirective(
+		ctx,
 		resolver.NewLoadControllerWithConfig(&hot_loader_filesystem.Config{
 			Dir:   pluginDir,
 			Watch: true,

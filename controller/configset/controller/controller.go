@@ -77,7 +77,8 @@ ExecLoop:
 		for k, c := range c.controllers {
 			if _, ok := execControllers[k]; !ok {
 				// #nosec G118 -- cancel func is stored in execControllers and called when the controller is removed.
-				nctx, nctxCancel := context.WithCancel(ctx)
+				// The entry's controllers record the ConfigSet key as their origin.
+				nctx, nctxCancel := context.WithCancel(directive.WithConfigKey(ctx, k))
 				execControllers[k] = nctxCancel
 				go func(nctx context.Context, ctrl *runningController) {
 					_ = ctrl.Execute(nctx)

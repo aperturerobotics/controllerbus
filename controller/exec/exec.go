@@ -30,6 +30,7 @@ func ExecuteController(
 	removedCh := make(chan resolver.LoadControllerWithConfigValue, 1)
 
 	_, dirRef, err := cbus.AddDirective(
+		ctx,
 		resolver.NewLoadControllerWithConfig(conf),
 		bus.NewCallbackHandler(
 			// value added

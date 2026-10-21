@@ -65,11 +65,13 @@ func (c *Controller) GetDirectivesBroadcast() *broadcast.Broadcast {
 // cb can be nil.
 // cb should not block.
 //
-// Returns the instance, new reference, and anynke error.
+// Returns the instance, new reference, and any error.
 func (c *Controller) AddDirective(
+	ctx context.Context,
 	dir directive.Directive,
 	ref directive.ReferenceHandler,
 ) (directive.Instance, directive.Reference, error) {
+	origin := directive.OriginFromContext(ctx)
 	c.mtx.Lock()
 	defer c.mtx.Unlock()
 
@@ -84,14 +86,14 @@ func (c *Controller) AddDirective(
 					di.removeLocked(diIdx)
 				} else {
 					// Add a reference to the other directive & return.
-					return di, di.addReferenceLocked(ref, false), nil
+					return di, di.addReferenceLocked(origin, ref, false), nil
 				}
 			}
 		}
 	}
 
 	// Push the new directive to the list.
-	di, diRef := newDirectiveInstance(c, c.dirID, dir, ref)
+	di, diRef := newDirectiveInstance(c, c.dirID, dir, origin, ref)
 	c.dirID++
 	di.logger().Debug("added directive")
 	c.dir = append(c.dir, di)

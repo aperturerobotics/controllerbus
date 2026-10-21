@@ -141,6 +141,7 @@ func TestPartialConfigSetApply(t *testing.T) {
 	// Apply the ConfigSet via the ApplyConfigSet directive.
 	dir := configset.NewApplyConfigSet(cs)
 	_, applyRef, err := b.AddDirective(
+		ctx,
 		dir,
 		bus.NewCallbackHandler(
 			func(av directive.AttachedValue) {
