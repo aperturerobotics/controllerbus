@@ -21,10 +21,10 @@
   "type": "module",
   "scripts": {
     "check": "bun run typecheck && bun run lint",
-    "typecheck": "tsgo --noEmit -p tsconfig.json",
-    "deps": "depcheck --ignore-patterns=.eslintrc.cjs,package.json --ignores depcheck,@aptre/common,prettier,rimraf,typescript,@typescript/native-preview",
+    "typecheck": "tsrs --noEmit -p tsconfig.json",
+    "deps": "depcheck --ignore-patterns=.eslintrc.cjs,package.json --ignores depcheck,@aptre/common,prettier,rimraf,typescript,tsrs",
     "clean": "rimraf ./dist/",
-    "build": "tsgo --project tsconfig.json --noEmit false --outDir ./dist/",
+    "build": "tsrs --project tsconfig.json --noEmit false --outDir ./dist/",
     "codegen": "bun run gen",
     "gen": "bun run go:aptre -- generate",
     "gen:force": "bun run go:aptre -- generate --force",
@@ -57,7 +57,7 @@
   "devDependencies": {
     "@aptre/common": "0.35.2",
     "@eslint/js": "^10.0.1",
-    "@typescript/native-preview": "7.0.0-dev.20260707.2",
+    "tsrs": "0.18.0-ts7.1.0-dev.20260929",
     "depcheck": "^1.4.7",
     "eslint": "10.10.0",
     "eslint-config-prettier": "^10.1.8",
