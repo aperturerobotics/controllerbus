@@ -72,8 +72,8 @@ func (b *Bus) GetControllersBroadcast() *broadcast.Broadcast {
 }
 
 // AddController attaches a controller and calls Execute asynchronously.
-// Its release function cancels, detaches, waits for Execute, closes once, and
-// reports the lifecycle result through cb before returning.
+// The release function cancels, detaches, waits for Execute, and closes once.
+// It reports the lifecycle result through cb before returning.
 func (b *Bus) AddController(ctx context.Context, ctrl controller.Controller, cb func(exitErr error)) (func(), error) {
 	subCtx, subCtxCancel := context.WithCancel(directive.WithOriginController(ctx, ctrl.GetControllerInfo().GetId()))
 	attached, err := b.attachController(ctrl, subCtxCancel, cb)
@@ -119,8 +119,8 @@ func (b *Bus) handleControllerPanic(outErr *error) {
 }
 
 // ExecuteController attaches a controller and calls Execute synchronously.
-// A nil return leaves the controller attached for RemoveController. A terminal
-// failure finalizes the attachment before returning.
+// A nil return leaves the controller attached for RemoveController.
+// A terminal failure finalizes the attachment before returning.
 func (b *Bus) ExecuteController(ctx context.Context, c controller.Controller) error {
 	subCtx, subCtxCancel := context.WithCancel(directive.WithOriginController(ctx, c.GetControllerInfo().GetId()))
 	attached, err := b.attachController(c, subCtxCancel, nil)

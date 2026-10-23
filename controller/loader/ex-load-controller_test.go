@@ -131,8 +131,8 @@ func TestWaitExecControllerRunningRetry(t *testing.T) {
 	}
 }
 
-// TestExecControllerAttachedBeforeValue checks that a controller is attached to
-// the bus when the loader publishes it, so a directive added next reaches it.
+// TestExecControllerAttachedBeforeValue checks the loader attaches a controller before publishing it.
+// A directive added from the value callback reaches the controller.
 func TestExecControllerAttachedBeforeValue(t *testing.T) {
 	// Start a bus with the loader.
 	ctx, cancel := context.WithTimeout(t.Context(), 10*time.Second)

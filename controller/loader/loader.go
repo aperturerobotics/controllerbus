@@ -38,13 +38,14 @@ func (c *Controller) GetControllerInfo() *controller.Info {
 	)
 }
 
-// Execute returns immediately; the loader works through HandleDirective.
+// Execute returns immediately.
+// The loader works through HandleDirective.
 func (c *Controller) Execute(ctx context.Context) error {
 	return nil
 }
 
-// HandleDirective resolves ExecController directives. The context is
-// canceled when the directive instance expires.
+// HandleDirective resolves ExecController directives.
+// The context is canceled when the directive instance expires.
 func (c *Controller) HandleDirective(ctx context.Context, di directive.Instance) ([]directive.Resolver, error) {
 	if d, ok := di.GetDirective().(ExecController); ok {
 		return c.resolveExecController(ctx, d)
@@ -52,7 +53,8 @@ func (c *Controller) HandleDirective(ctx context.Context, di directive.Instance)
 	return nil, nil
 }
 
-// Close releases nothing; each loaded controller is released with its directive.
+// Close releases nothing.
+// Each loaded controller is released with its directive.
 func (c *Controller) Close() error {
 	return nil
 }

@@ -19,7 +19,8 @@ type attachedCtrl struct {
 	ctrl controller.Controller
 	// rel detaches directive handling.
 	rel func()
-	// detached excludes a closing controller from active lookup; guarded by Bus.mtx.
+	// detached excludes a closing controller from active lookup.
+	// Guarded by Bus.mtx.
 	detached bool
 
 	// cancel stops execution.

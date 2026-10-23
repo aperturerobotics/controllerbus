@@ -44,11 +44,11 @@ func (c *Controller) resolveExecController(ctx context.Context, dir ExecControll
 	return directive.R(newResolver(ctx, dir, c), nil)
 }
 
-// Resolve constructs the controller and runs it on the bus, retrying with
-// backoff after a failure. The value carrying the controller is emitted only
-// after the bus attaches it, so a directive added after the value is observed
-// is offered to the controller. The controller stays attached until ctx is
-// canceled or the controller is removed from the bus.
+// Resolve constructs the controller and runs it on the bus.
+// It retries with backoff after a failure.
+// The value carrying the controller is emitted after the bus attaches it.
+// A directive added after the value is observed is offered to the controller.
+// The controller stays attached until ctx is canceled or it is removed from the bus.
 func (c *resolver) Resolve(ctx context.Context, vh directive.ResolverHandler) error {
 	// Read the factory and config to construct.
 	config := c.dir.GetExecControllerConfig()

@@ -9,12 +9,10 @@ import (
 	"github.com/aperturerobotics/controllerbus/directive"
 )
 
-// FactoryResolverWatcher is an optional side interface for FactoryResolver
-// implementations that can wake pending lookups when their factory set
-// changes. When implemented, LoadFactoryByConfig holds the directive open and
-// re-checks after the wait channel fires, enabling partial ConfigSet apply
-// where some factories register later. Implementations without this interface
-// fall back to a single lookup with no re-check.
+// FactoryResolverWatcher wakes pending lookups when a FactoryResolver's factory set changes.
+// LoadFactoryByConfig holds the directive open and re-checks when the wait channel closes.
+// A ConfigSet entry whose factory registers later then starts.
+// A FactoryResolver without it gets a single lookup.
 type FactoryResolverWatcher interface {
 	// GetFactoryMatchingConfigWatch returns the factory matching the config
 	// and a wait channel that closes when the resolver's factory set changes.
@@ -82,7 +80,7 @@ func (r *LoadFactoryByConfigResolver) Resolve(
 			return nil
 		}
 		if waitCh == nil {
-			// No watcher; legacy behavior.
+			// A resolver without a watcher gets a single lookup.
 			return nil
 		}
 		select {

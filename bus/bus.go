@@ -14,10 +14,10 @@ var ErrClosed = errors.New("controller bus is closed")
 
 // ControllerCloseError reports a Controller.Close failure.
 //
-// AddController reports this error through its callback. ExecuteController and
-// an AddController attachment failure may include it in their returned error.
-// Callers can distinguish close failures from execution failures with
-// errors.As.
+// AddController reports this error through its callback.
+// ExecuteController may include it in its returned error.
+// An AddController attachment failure may include it in its returned error.
+// Use errors.As to tell a close failure from an execution failure.
 type ControllerCloseError struct {
 	// Err is the controller's cleanup failure.
 	Err error
@@ -33,8 +33,8 @@ func (e *ControllerCloseError) Unwrap() error {
 	return e.Err
 }
 
-// Bus manages running controllers. It has an attached directive controller,
-// which is used to build declarative state requests between controllers.
+// Bus manages running controllers.
+// Its directive controller carries declarative state requests between controllers.
 type Bus interface {
 	// Controller is the directive controller.
 	directive.Controller
@@ -46,35 +46,35 @@ type Bus interface {
 	GetControllersBroadcast() *broadcast.Broadcast
 
 	// AddController attaches a controller and calls Execute asynchronously.
-	// The controller receives directive callbacks until it is released,
-	// Execute returns an error, or Execute panics.
+	// The controller receives directive callbacks until it is released.
+	// An Execute error or panic also ends directive callbacks.
 	//
-	// The returned release function cancels the Execute context, detaches
-	// directive handling, waits for Execute to return, calls Close once, calls
-	// cb, and then returns. Repeated release calls are idempotent.
+	// The release function cancels the Execute context.
+	// It then detaches directive handling and waits for Execute to return.
+	// It then calls Close once, calls cb, and returns.
+	// Repeated release calls are idempotent.
 	//
-	// cb receives the execution error, a ControllerCloseError, both errors
-	// joined together, or nil when release completes without either error.
+	// cb receives the execution error, a ControllerCloseError, or both joined.
+	// cb receives nil if release completes with neither error.
 	// cb can be nil.
 	AddController(ctx context.Context, ctrl controller.Controller, cb func(exitErr error)) (func(), error)
 
 	// ExecuteController attaches a controller and calls Execute synchronously.
-	// A nil Execute return leaves the controller attached until
-	// RemoveController is called. An Execute error or panic detaches the
-	// controller, calls Close once, and is returned, joined with any
-	// ControllerCloseError.
-	// RemoveController may be called concurrently to cancel and finalize the
-	// synchronous execution.
+	// A nil Execute return leaves the controller attached until RemoveController.
+	// An Execute error or panic detaches the controller and calls Close once.
+	// Returns the Execute error joined with any ControllerCloseError.
+	// RemoveController may be called concurrently to cancel and finalize it.
 	ExecuteController(context.Context, controller.Controller) error
 
-	// RemoveController synchronously releases one attached instance of the
-	// controller. It cancels that instance's Execute context, detaches
-	// directive handling, waits for Execute to return, and calls Close once.
+	// RemoveController synchronously releases one attached instance of the controller.
+	// It cancels that instance's Execute context and detaches directive handling.
+	// It then waits for Execute to return and calls Close once.
 	RemoveController(controller.Controller)
 
-	// Close rejects new controllers, cancels admitted controllers, and waits
-	// for their Execute, Close, and completion callbacks, including releases
-	// already in progress. It returns joined ControllerCloseError values.
+	// Close rejects new controllers and cancels admitted controllers.
+	// It waits for their Execute, Close, and completion callbacks.
+	// It also waits for releases already in progress.
+	// Returns the joined ControllerCloseError values.
 	// Repeated calls wait for the same shutdown and return the same result.
 	// Call Close from the owning host, never from an owned controller lifecycle.
 	Close() error

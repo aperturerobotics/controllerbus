@@ -12,9 +12,9 @@ import (
 	boilerplate_v1 "github.com/aperturerobotics/controllerbus/example/boilerplate/v1"
 )
 
-// TestOneOffTransformCancellation allows cancellation to win while the accepted
-// value's transformation is still returning. Both APIs must return an empty
-// result on cancellation without accessing the callback's unpublished value.
+// TestOneOffTransformCancellation cancels while an accepted value's transform is returning.
+// Both APIs must return an empty result on cancellation.
+// Neither may read the callback's unpublished value.
 func TestOneOffTransformCancellation(t *testing.T) {
 	for _, typed := range []bool{false, true} {
 		for range 32 {

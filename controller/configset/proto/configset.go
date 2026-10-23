@@ -74,10 +74,11 @@ func MergeConfigSetMaps(out ConfigSetMap, sets ...ConfigSetMap) {
 	}
 }
 
-// MarshalDeterministicVT encodes the set with its configs in ID order, so
-// equal sets encode to equal bytes. MarshalVT follows Go map iteration order.
-// Protobuf merges repeated map entries on decode, so the concatenated
-// single-entry encodings decode to the full set.
+// MarshalDeterministicVT encodes the set with its configs in ID order.
+// Equal sets encode to equal bytes.
+// MarshalVT follows Go map iteration order instead.
+// The output is a concatenation of single-entry encodings.
+// Protobuf merges repeated map entries on decode, recovering the full set.
 func (c *ConfigSet) MarshalDeterministicVT() ([]byte, error) {
 	configs := c.GetConfigs()
 	var out []byte

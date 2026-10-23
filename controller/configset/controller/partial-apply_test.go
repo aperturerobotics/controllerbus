@@ -82,10 +82,10 @@ var _ controller.Factory = ((*partialApplyFactory)(nil))
 // _ is a type assertion
 var _ controller.Controller = ((*partialApplyController)(nil))
 
-// TestPartialConfigSetApply exercises the partial-apply hypothesis: applying
-// a ConfigSet with one missing factory should NOT error, the present factory
-// should start, and registering the missing factory later should start the
-// second controller.
+// TestPartialConfigSetApply applies a ConfigSet with one factory missing.
+// The apply does not error.
+// The present factory's controller starts.
+// Registering the missing factory later starts the second controller.
 func TestPartialConfigSetApply(t *testing.T) {
 	log := logrus.New()
 	log.SetLevel(logrus.DebugLevel)
@@ -99,7 +99,7 @@ func TestPartialConfigSetApply(t *testing.T) {
 		t.Fatal(err.Error())
 	}
 
-	// Register only factory A initially; factory B is intentionally missing.
+	// Register only factory A.
 	sr.AddFactory(boilerplate.NewFactory(b))
 
 	// Boot the configset controller.
@@ -199,7 +199,7 @@ func TestPartialConfigSetApply(t *testing.T) {
 		t.Log(msg)
 	}
 
-	// Sanity: at this point ctrl-b should NOT have a running controller.
+	// ctrl-b has no running controller yet.
 	if st := getState("ctrl-b"); st != nil && st.GetController() != nil {
 		t.Fatalf("ctrl-b unexpectedly already running before factory registered")
 	}

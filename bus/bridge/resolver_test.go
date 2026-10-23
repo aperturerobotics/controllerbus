@@ -56,7 +56,8 @@ func TestBusBridgeOptionalLookup(t *testing.T) {
 				t.Cleanup(release)
 			}
 
-			// An idle empty lookup completes without a value; errors retain their identity.
+			// An idle empty lookup completes without a value.
+			// A provider failure reaches the caller as the same error.
 			value, _, ref, err := bus.ExecOneOff(ctx, child, &boilerplate.Boilerplate{MessageText: "optional"}, bus.ReturnIfIdle(true), nil)
 			if ref != nil {
 				ref.Release()

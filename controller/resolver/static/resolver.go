@@ -110,10 +110,9 @@ func (r *Resolver) GetFactoryMatchingConfig(
 	return f, nil
 }
 
-// GetFactoryMatchingConfigWatch returns the factory matching the config and a
-// wait channel that will be closed when the resolver's factory set changes.
-// Use this to wake idle resolvers when new factories are registered. Returns
-// (nil, waitCh, nil) when no factory currently matches.
+// GetFactoryMatchingConfigWatch returns the factory matching the config.
+// The wait channel closes when the resolver's factory set changes.
+// Returns (nil, waitCh, nil) if no factory currently matches.
 func (r *Resolver) GetFactoryMatchingConfigWatch(
 	ctx context.Context, c config.Config,
 ) (controller.Factory, <-chan struct{}, error) {

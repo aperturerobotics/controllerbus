@@ -10,10 +10,10 @@ import (
 	"github.com/aperturerobotics/controllerbus/directive"
 )
 
-// WaitExecControllerRunning executes any directive which yields
-// ExecControllerValue and waits for either a error or success state before
-// returning. Disposed is called once if the directive is disposed or the
-// returned controller leaves RUNNING, such as when it exits with an error.
+// WaitExecControllerRunning executes a directive yielding ExecControllerValue.
+// It waits for an error or success state before returning.
+// Disposed is called once if the directive is disposed.
+// Disposed is called once if the returned controller leaves RUNNING.
 func WaitExecControllerRunning(
 	ctx context.Context,
 	b bus.Bus,
@@ -23,10 +23,10 @@ func WaitExecControllerRunning(
 	return waitExecControllerRunning(ctx, b, dir, disposeCb, false)
 }
 
-// WaitExecControllerRunningRetry is WaitExecControllerRunning for callers that
-// need the controller rather than its first outcome. A failed execution is
-// retried by the loader after backoff, so the wait continues until the
-// controller runs or ctx ends. Disposed is called as in WaitExecControllerRunning.
+// WaitExecControllerRunningRetry is WaitExecControllerRunning that outlasts failures.
+// The loader retries a failed execution after backoff.
+// The wait continues until the controller runs or ctx ends.
+// Disposed is called as in WaitExecControllerRunning.
 func WaitExecControllerRunningRetry(
 	ctx context.Context,
 	b bus.Bus,
@@ -36,8 +36,8 @@ func WaitExecControllerRunningRetry(
 	return waitExecControllerRunning(ctx, b, dir, disposeCb, true)
 }
 
-// waitExecControllerRunning waits for the directive's controller to run. An
-// execution error ends the wait unless retry is set.
+// waitExecControllerRunning waits for the directive's controller to run.
+// An execution error ends the wait unless retry is set.
 func waitExecControllerRunning(
 	ctx context.Context,
 	b bus.Bus,
@@ -55,7 +55,8 @@ func waitExecControllerRunning(
 		}
 	}
 
-	// runningID identifies the current running value; returned marks it handed to the caller.
+	// runningID identifies the current running value.
+	// returned marks it handed to the caller.
 	var mtx sync.Mutex
 	var runningID uint32
 	var returned bool
@@ -152,8 +153,8 @@ func WaitExecControllerRunningRetryTyped[T controller.Controller](
 	return typedExecController[T](WaitExecControllerRunningRetry(ctx, b, dir, disposeCb))
 }
 
-// typedExecController asserts the controller type of a wait result, releasing
-// the reference on a mismatch.
+// typedExecController asserts the controller type of a wait result.
+// The reference is released on a mismatch.
 func typedExecController[T controller.Controller](
 	ctrl controller.Controller,
 	di directive.Instance,

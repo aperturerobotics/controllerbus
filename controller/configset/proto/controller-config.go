@@ -54,8 +54,8 @@ func (c *ControllerConfig) Validate() error {
 	return nil
 }
 
-// Resolve resolves the config into a configset.ControllerConfig. It returns
-// ErrUnknownConfigID when the bus settles with no constructor for the ID.
+// Resolve resolves the config into a configset.ControllerConfig.
+// Returns ErrUnknownConfigID if the bus settles with no constructor for the ID.
 func (c *ControllerConfig) Resolve(ctx context.Context, b bus.Bus) (configset.ControllerConfig, error) {
 	// Require a config ID.
 	if len(c.GetId()) == 0 {
