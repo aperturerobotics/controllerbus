@@ -133,3 +133,53 @@ func TestRemovedResolverClearsErrors(t *testing.T) {
 	await(idleErrors, false)
 	await(stateErrors, false)
 }
+
+// TestResolverAttachedWhileFullStartsAfterRemoval proves a resolver attached
+// while the directive holds its maximum values starts once a value goes, so a
+// handler replacing another never leaves the directive without one.
+func TestResolverAttachedWhileFullStartsAfterRemoval(t *testing.T) {
+	// Fill a directive capped at one value with the first handler's value.
+	ctx, cancel := context.WithTimeout(t.Context(), 5*time.Second)
+	defer cancel()
+	ctrl := controller.NewController(ctx, logrus.NewEntry(logrus.New()))
+	valueHandler := func(val string) directive.Handler {
+		return directive.NewFuncHandler(func(context.Context, directive.Instance) ([]directive.Resolver, error) {
+			return directive.R(directive.NewValueResolver([]string{val}), nil)
+		})
+	}
+	removeFirst, err := ctrl.AddHandler(valueHandler("first"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	dir := &directive_mock.MockDirective{ValueOpts: directive.ValueOptions{MaxValueCount: 1, MaxValueHardCap: true}}
+	di, ref, err := ctrl.AddDirective(ctx, dir, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer ref.Release()
+	values := make(chan []directive.AttachedValue, 16)
+	defer di.AddStateCallback(func(_ bool, _ []error, vals []directive.AttachedValue) { values <- vals })()
+	awaitValue := func(want string) {
+		t.Helper()
+		for {
+			select {
+			case vals := <-values:
+				if len(vals) == 1 && vals[0].GetValue() == want {
+					return
+				}
+			case <-ctx.Done():
+				t.Fatalf("directive did not hold %q", want)
+			}
+		}
+	}
+	awaitValue("first")
+
+	// Attach the second handler while full, then remove the first.
+	removeSecond, err := ctrl.AddHandler(valueHandler("second"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer removeSecond()
+	removeFirst()
+	awaitValue("second")
+}

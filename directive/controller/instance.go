@@ -793,8 +793,10 @@ func (i *directiveInstance) attachStartResolverLocked(res *resolver) {
 	i.res = append(i.res, res)
 	if i.full {
 		// already full => already idle => don't call handleIdleStateLocked.
+		// Mark it stopped so handleNotFullLocked starts it below the cap.
 		res.idle = true
 		res.updateContextLocked(nil)
+		res.stopped = true
 	} else {
 		// we possibly just transitioned from idle => not idle.
 		res.updateContextLocked(&i.ctx)
