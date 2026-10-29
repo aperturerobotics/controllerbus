@@ -29,13 +29,20 @@ func newResolver(ctx context.Context, dir ExecController, controller *Controller
 	}
 }
 
-// newExecBackoff constructs the default exec backoff.
+// execStableDuration is how long a controller must run before its failure
+// starts a fresh backoff.
+const execStableDuration = time.Second * 10
+
+// newExecBackoff constructs the default exec backoff. It never stops: a
+// controller that fails for a long time, such as on a full disk, starts again
+// once the cause clears.
 func newExecBackoff() backoff.BackOff {
 	// Retry quickly at first, then at most every two seconds.
 	ebo := backoff.NewExponentialBackOff()
 	ebo.InitialInterval = time.Millisecond * 100
 	ebo.Multiplier = 1.8
 	ebo.MaxInterval = time.Second * 2
+	ebo.MaxElapsedTime = 0
 	return ebo
 }
 
@@ -45,7 +52,10 @@ func (c *Controller) resolveExecController(ctx context.Context, dir ExecControll
 }
 
 // Resolve constructs the controller and runs it on the bus.
-// It retries with backoff after a failure.
+// It retries with backoff after a failure. The backoff counts only the
+// failures since the controller last ran for execStableDuration, so a
+// directive's backoff that stops gives up on a controller that cannot stay
+// up, not on one that ran for hours before failing.
 // The value carrying the controller is emitted after the bus attaches it.
 // A directive added after the value is observed is offered to the controller.
 // The controller stays attached until ctx is canceled or it is removed from the bus.
@@ -132,8 +142,12 @@ func (c *resolver) Resolve(ctx context.Context, vh directive.ResolverHandler) er
 				_ = vh.ClearValues()
 				return nil
 			}
+			execDur := time.Since(t1)
+			if execDur >= execStableDuration {
+				execBackoff.Reset()
+			}
 			le.
-				WithField("exec-dur", time.Since(t1).String()).
+				WithField("exec-dur", execDur.String()).
 				WithError(err).
 				Warn("controller exited with error")
 			lastErr = err
