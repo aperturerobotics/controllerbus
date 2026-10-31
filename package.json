@@ -55,7 +55,7 @@
     "singleQuote": true
   },
   "devDependencies": {
-    "@aptre/common": "0.36.5",
+    "@aptre/common": "0.37.0",
     "depcheck": "^1.4.7",
     "happy-dom": "21.0.4",
     "oxlint": "^1.76.0",
@@ -66,13 +66,13 @@
     "vitest": "^5.0.0"
   },
   "dependencies": {
-    "@aptre/protobuf-es-lite": "1.2.4",
+    "@aptre/protobuf-es-lite": "1.2.6",
     "starpc": "^0.52.3"
   },
   "resolutions": {
-    "@aptre/protobuf-es-lite": "1.2.4"
+    "@aptre/protobuf-es-lite": "1.2.6"
   },
   "overrides": {
-    "@aptre/protobuf-es-lite": "1.2.4"
+    "@aptre/protobuf-es-lite": "1.2.6"
   }
 }
