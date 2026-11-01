@@ -48,6 +48,7 @@ func (r *lookupConfigSetResolver) Resolve(
 	ctx context.Context,
 	handler directive.ResolverHandler,
 ) error {
+	// Require controller keys before retaining their references.
 	ctrlKeys := r.dir.GetLookupConfigSetControllerKeys()
 	if len(ctrlKeys) == 0 {
 		return nil
@@ -81,16 +82,27 @@ func (r *lookupConfigSetResolver) Resolve(
 			continue
 		}
 
+		// Refuse a late reference after the directive's cleanup detached its map.
 		r.refsMtx.Lock()
+		if err := r.ctx.Err(); err != nil {
+			r.refsMtx.Unlock()
+			ref.Release()
+			return err
+		}
 		r.refs[ref] = 0
 		r.refsMtx.Unlock()
+
+		// Publish each reference state while it remains in the active map.
 		ref.AddStateCallback(func(st configset.State) {
+			// Ignore a retired reference while its old callback drains.
 			r.refsMtx.Lock()
 			v, vOk := r.refs[ref]
 			if !vOk {
 				r.refsMtx.Unlock()
 				return
 			}
+
+			// Replace the prior value with the current controller state.
 			if v != 0 {
 				handler.RemoveValue(v)
 			}
@@ -108,16 +120,22 @@ func (r *lookupConfigSetResolver) Resolve(
 	return nil
 }
 
-// waitCleanupRefs waits for the context to complete, then release refs
+// waitCleanupRefs detaches references before releasing them outside callbacks' lock order.
 func (r *lookupConfigSetResolver) waitCleanupRefs(ctx context.Context) {
+	// Wait until the owning directive ends.
 	<-ctx.Done()
+
+	// Detach callbacks' map before waiting on a reference's own mutex.
 	r.refsMtx.Lock()
-	for ref := range r.refs {
-		ref.Release()
-		delete(r.refs, ref)
-	}
+	refs := r.refs
+	r.refs = make(map[configset.Reference]uint32)
 	r.refsMtx.Unlock()
+
+	// Release without refsMtx: state callbacks take the reference mutex first.
+	for ref := range refs {
+		ref.Release()
+	}
 }
 
 // _ is a type assertion
-var _ directive.Resolver = ((*lookupConfigSetResolver)(nil))
+var _ directive.Resolver = (*lookupConfigSetResolver)(nil)
