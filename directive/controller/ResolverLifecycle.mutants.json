@@ -1,0 +1,26 @@
+[
+  {
+    "name": "old attachment accepts a removed handler or directive",
+    "replace": [
+      [
+        "  /\\ handler = \"attached\" /\\ directive = \"attached\"\n  /\\ resolver' = \"pending\"",
+        "  /\\ resolver' = \"pending\""
+      ]
+    ],
+    "expect": "OnlyLiveRegistrations"
+  },
+  {
+    "name": "startup publishes its context after reentrant idle notification",
+    "replace": [
+      [
+        "  /\\ context' = \"running\"\n",
+        "  /\\ context' = \"absent\"\n"
+      ],
+      [
+        "  /\\ notify' = FALSE\n  /\\ UNCHANGED <<handler, directive, call, resolver, context, full>>",
+        "  /\\ notify' = FALSE\n  /\\ context' = \"running\"\n  /\\ UNCHANGED <<handler, directive, call, resolver, full>>"
+      ]
+    ],
+    "expect": "RemovedCannotRun"
+  }
+]
