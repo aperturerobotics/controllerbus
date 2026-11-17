@@ -50,6 +50,11 @@ func newResolver(di *directiveInstance, hnd *handler, res directive.Resolver) *r
 //
 // if ctx is nil, stops the resolver.
 func (r *resolver) updateContextLocked(ctx *context.Context) {
+	// Removal also prevents restarts after an idle callback releases the lock.
+	if ctx != nil && (r.di.released.Load() || r.hnd.rel.Load()) {
+		return
+	}
+
 	// keep the resolver running if it hasn't exited
 	if ctx != nil && r.ctx != nil && !r.exited {
 		select {
@@ -73,10 +78,13 @@ func (r *resolver) updateContextLocked(ctx *context.Context) {
 		r.exitedCh = exitedCh
 		r.err = nil
 		r.exited, r.stopped = false, false
-		r.setIdleLocked(false)
 		r.ctx, r.ctxCancel = context.WithCancel(r.hnd.handlerContext(*ctx))
 		hnd := &resolverHandler{r: r, ctx: r.ctx}
 		go hnd.executeResolver(r.ctx, exitedCh, waitCh)
+
+		// Idle callbacks may remove the handler or directive. Publish the
+		// running context first so removal cancels it without a later start.
+		r.setIdleLocked(false)
 	}
 }
 

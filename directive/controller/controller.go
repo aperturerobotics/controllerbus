@@ -43,6 +43,7 @@ func NewController(ctx context.Context, le *logrus.Entry) *Controller {
 
 // GetDirectives returns a list of all currently executing directives.
 func (c *Controller) GetDirectives() []directive.Instance {
+	// Snapshot the current directive registrations under the controller lock.
 	c.mtx.Lock()
 	dirs := make([]directive.Instance, len(c.dir))
 	for i, di := range c.dir {
@@ -79,6 +80,7 @@ func (c *Controller) AddDirective(
 	dir directive.Directive,
 	ref directive.ReferenceHandler,
 ) (directive.Instance, directive.Reference, error) {
+	// Read the caller origin before changing directive registrations.
 	origin := directive.OriginFromContext(ctx)
 	c.mtx.Lock()
 	defer c.mtx.Unlock()
@@ -133,6 +135,7 @@ func (c *Controller) AddDirective(
 	// attach returned resolvers while mtx is locked
 	c.mtx.Lock() // note: unlocked in Defer above
 
+	// Attach returned resolvers and publish readiness for the live directive.
 	if !di.released.Load() {
 		for _, res := range resolvers {
 			di.attachStartResolverLocked(res)
@@ -162,14 +165,18 @@ func (c *Controller) AddHandler(handler directive.Handler) (func(), error) {
 
 // addHandlersLocked adds a set of handlers while c.mtx is locked.
 func (c *Controller) addHandlerLocked(handler directive.Handler) (func(), error) {
+	// Publish the handler before calling it for existing directives.
 	hnd := newHandler(handler)
 	c.hnd = append(c.hnd, hnd)
 
+	// Snapshot the directives that the new handler must receive.
 	dirs := make([]*directiveInstance, len(c.dir))
 	copy(dirs, c.dir)
-	// unlock temporarily
+
+	// Call handlers without holding the controller mutex.
 	c.mtx.Unlock()
 
+	// Collect each returned resolver with the directive it belongs to.
 	var resolvers []*resolver
 	var dis []*directiveInstance
 	for _, di := range dirs {
@@ -200,10 +207,11 @@ func (c *Controller) addHandlerLocked(handler directive.Handler) (func(), error)
 		dis[i].attachStartResolverLocked(res)
 	}
 	relHandler := func() {
-		if !hnd.rel.Swap(true) {
-			c.mtx.Lock()
+		// Serialize removal with resolver attachment and startup.
+		c.mtx.Lock()
+		defer c.mtx.Unlock()
+		if !hnd.rel.Load() {
 			c.removeHandlerLocked(hnd)
-			c.mtx.Unlock()
 		}
 	}
 
@@ -216,7 +224,8 @@ func (c *Controller) addHandlerLocked(handler directive.Handler) (func(), error)
 func (c *Controller) removeHandlerLocked(hnd *handler) bool {
 	// mark released
 	hnd.rel.Store(true)
-	// remove from list
+
+	// Remove the handler registration before retiring its resolvers.
 	var found bool
 	for i, ih := range c.hnd {
 		if ih == hnd {
@@ -230,7 +239,8 @@ func (c *Controller) removeHandlerLocked(hnd *handler) bool {
 	if !found {
 		return false
 	}
-	// cancel all resolvers associated with the handler
+
+	// Cancel all resolvers associated with the removed handler.
 	for _, di := range c.dir {
 		di.removeHandlerLocked(hnd)
 	}
@@ -238,4 +248,4 @@ func (c *Controller) removeHandlerLocked(hnd *handler) bool {
 }
 
 // _ is a type assertion
-var _ directive.Controller = ((*Controller)(nil))
+var _ directive.Controller = (*Controller)(nil)

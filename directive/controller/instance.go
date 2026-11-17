@@ -108,10 +108,13 @@ func (i *directiveInstance) GetDirective() directive.Directive {
 //
 // Ex: DoSomething or DoSomething<param=foo>
 func (i *directiveInstance) GetDirectiveIdent() string {
+	// Reuse the cached directive name when another caller already built it.
 	existing := i.ident.Load()
 	if existing != nil {
 		return *existing
 	}
+
+	// Encode the directive's optional debug parameters.
 	var dirDebugStr string
 	debuggable, isDebuggable := i.dir.(directive.Debuggable)
 	if isDebuggable {
@@ -120,6 +123,8 @@ func (i *directiveInstance) GetDirectiveIdent() string {
 			dirDebugStr, _ = url.PathUnescape(dirDebugStr)
 		}
 	}
+
+	// Cache the complete display name for later callers.
 	dirNameDebugStr := i.dir.GetName()
 	if dirDebugStr != "" {
 		dirNameDebugStr += "<" + dirDebugStr + ">"
@@ -138,6 +143,7 @@ func (i *directiveInstance) GetResolverErrors() []error {
 
 // GetReferences returns a snapshot of the live references and their origins.
 func (i *directiveInstance) GetReferences() []directive.ReferenceInfo {
+	// Snapshot reference metadata under the controller lock.
 	i.c.mtx.Lock()
 	defer i.c.mtx.Unlock()
 	refs := make([]directive.ReferenceInfo, len(i.refs))
@@ -225,6 +231,7 @@ func (i *directiveInstance) deferCheckStateChanged() func() {
 
 // maybeCallStateChanged checks if state changed and calls callbacks if so.
 func (i *directiveInstance) maybeCallStateChanged() {
+	// Skip state notification when there are no observers or the snapshot is current.
 	if len(i.stateChanged) == 0 || i.stateChangedSnapshot.set {
 		return
 	}
@@ -254,6 +261,7 @@ func (i *directiveInstance) getResolverAttachedValsLocked() []directive.Attached
 		numVals += len(resolver.vals)
 	}
 
+	// Allocate one snapshot containing every currently attached value.
 	vals := make([]directive.AttachedValue, 0, numVals)
 	for _, resolver := range i.res {
 		for _, val := range resolver.vals {
@@ -280,6 +288,7 @@ func (i *directiveInstance) AddReference(ctx context.Context, cb directive.Refer
 // addReferenceLocked adds a reference while i.c.mtx is locked.
 // returns nil if the directive is already expired.
 func (i *directiveInstance) addReferenceLocked(origin directive.Origin, cb directive.ReferenceHandler, weakRef bool) directive.Reference {
+	// Return an already-released reference if the directive has ended.
 	ref := &dirRef{di: i, h: cb, weak: weakRef, origin: origin}
 	if i.released.Load() {
 		ref.released.Store(true)
@@ -290,6 +299,8 @@ func (i *directiveInstance) addReferenceLocked(origin directive.Origin, cb direc
 		}
 		return ref
 	}
+
+	// Insert weak references before strong references for disposal checks.
 	firstRef := len(i.refs) == 0
 	firstNonWeakRef := !firstRef && !weakRef && i.refs[len(i.refs)-1].weak
 	if weakRef {
@@ -297,6 +308,8 @@ func (i *directiveInstance) addReferenceLocked(origin directive.Origin, cb direc
 	} else {
 		i.refs = append(i.refs, ref)
 	}
+
+	// Collect the current values for the new reference.
 	var cbs []func()
 	if cb != nil {
 		for _, res := range i.res {
@@ -307,6 +320,8 @@ func (i *directiveInstance) addReferenceLocked(origin directive.Origin, cb direc
 			}
 		}
 	}
+
+	// Keep the directive alive when its first strong reference arrives.
 	if !weakRef && (firstRef || firstNonWeakRef) {
 		i.handleReferencedLocked()
 	}
@@ -445,11 +460,13 @@ func (i *directiveInstance) handleNotFullLocked() {
 
 // checkFullLocked checks if we have reached the maximum value cap.
 func (i *directiveInstance) checkFullLocked() {
+	// Compare the current value count with the configured cap.
 	maxVals := i.valueOpts.MaxValueCount
 	if maxVals == 0 {
 		return
 	}
 
+	// Apply the transition into or out of the full state.
 	valueCount := i.countValuesLocked()
 	isFull := valueCount >= maxVals
 	if isFull {
@@ -467,20 +484,24 @@ func (i *directiveInstance) handleIdleStateLocked() {
 		return
 	}
 
+	// Invalidate the state snapshot before publishing the new idle state.
 	defer i.deferCheckStateChanged()()
 	i.idle = idle
 	i.stateChangedSnapshot = directiveStateSnapshot{} // mark state as changed
 
+	// Publish the idle transition through the existing callback queue.
 	i.notifyIdleCallbacksLocked()
 }
 
 // notifyIdleCallbacksLocked publishes current idle state and resolver errors.
 // The controller mutex is held by the caller.
 func (i *directiveInstance) notifyIdleCallbacksLocked() {
+	// Skip idle notifications when no callback is registered.
 	if len(i.idles) == 0 {
 		return
 	}
 
+	// Capture the idle state and resolver errors for every observer.
 	idle := i.ready && i.idle
 	errs := i.getResolverErrsLocked()
 	var cbs []func()
@@ -512,20 +533,25 @@ func (i *directiveInstance) removeStateCallbackLocked(cb *callback[directive.Sta
 
 // addValueLocked adds a value to the instance while i.c.mtx is locked
 func (i *directiveInstance) addValueLocked(res *resolver, val directive.Value) (uint32, bool) {
+	// Defer state notification until the value and its cap state agree.
 	defer i.deferCheckStateChanged()()
 
+	// Reject a value that would exceed the hard cap.
 	maxVals := i.valueOpts.MaxValueCount
 	if maxVals != 0 && i.countValuesLocked() >= maxVals && i.valueOpts.MaxValueHardCap {
 		return 0, false
 	}
 
+	// Allocate the next value identifier.
 	i.valCtr++
 	vid := i.valCtr
 
+	// Attach the value before notifying references.
 	v := &value{id: vid, val: val}
 	res.vals = append(res.vals, v)
 	i.stateChangedSnapshot = directiveStateSnapshot{} // mark state as changed
 
+	// Notify live references before updating the directive cap.
 	var cbs []func()
 	for _, ref := range i.refs {
 		if !ref.released.Load() && ref.h != nil {
@@ -588,10 +614,12 @@ func (i *directiveInstance) addValueRemovedCallbackLocked(res *resolver, valID u
 // addResolverRemovedCallbackLocked adds a callback to be called when the given resolver is removed.
 // returns nil, nil, false if the resolver was already removed
 func (i *directiveInstance) addResolverRemovedCallbackLocked(res *resolver, cb func()) (func(), bool) {
+	// Register the resolver removal callback while the resolver is attached.
 	if !slices.Contains(i.res, res) {
 		return nil, false
 	}
 
+	// Make callback release idempotent under the controller lock.
 	rel := newCallback(cb)
 	res.rels = append(res.rels, rel)
 	relLocked := func() {
@@ -614,10 +642,12 @@ func (i *directiveInstance) addResolverRemovedCallbackLocked(res *resolver, cb f
 // attachStartSubResolverLocked adds and starts a sub-resolver for a parent resolver.
 // returns nil, nil, false if the resolver was already removed
 func (i *directiveInstance) attachStartSubResolverLocked(res *resolver, subRes directive.Resolver, removedCb func()) (func(), bool) {
+	// Reject child resolvers whose parent registration has ended.
 	if !slices.Contains(i.res, res) || res.hnd.rel.Load() || i.released.Load() {
 		return nil, false
 	}
 
+	// Attach the child with its removal callback.
 	subResReg := newResolver(i, res.hnd, subRes)
 	if removedCb != nil {
 		subResReg.rels = append(subResReg.rels, newCallback(removedCb))
@@ -633,13 +663,16 @@ func (i *directiveInstance) attachStartSubResolverLocked(res *resolver, subRes d
 
 // onValuesRemovedLocked is called after removing values from a resolver.
 func (i *directiveInstance) onValuesRemovedLocked(vals ...*value) {
+	// Skip value removal notification when nothing was removed.
 	if len(vals) == 0 {
 		return
 	}
 
+	// Invalidate the snapshot before publishing removals.
 	defer i.deferCheckStateChanged()()
 	i.stateChangedSnapshot = directiveStateSnapshot{} // mark state as changed
 
+	// Collect removal callbacks and reference events in their existing order.
 	var cbs []callbackEvent
 	for _, val := range vals {
 		for _, removedCallback := range val.removeCallbacks {
@@ -665,6 +698,7 @@ func (i *directiveInstance) onValuesRemovedLocked(vals ...*value) {
 // already disposed, but will be made in a new goroutine.
 // Returns a callback release function.
 func (i *directiveInstance) AddDisposeCallback(cb func()) func() {
+	// Observe disposal and register its callback under one lock.
 	i.c.mtx.Lock()
 	if i.released.Load() {
 		i.c.mtx.Unlock()
@@ -687,13 +721,17 @@ func (i *directiveInstance) AddDisposeCallback(cb func()) func() {
 // Called immediately with the initial state.
 // Returns a callback release function.
 func (i *directiveInstance) AddIdleCallback(cb directive.IdleCallback) func() {
+	// Register the idle callback before publishing the current state.
 	i.c.mtx.Lock()
 	defer i.c.mtx.Unlock()
 
+	// Record the current idle state and resolver errors for the callback.
 	cbCtr := newCallback(cb)
 	i.idles = append(i.idles, cbCtr)
 	isIdle := i.ready && i.idle
 	errs := i.getResolverErrsLocked()
+
+	// Publish the initial state through the existing callback queue.
 	i.callCallbacksLocked(func() {
 		cb(isIdle, errs)
 	})
@@ -712,13 +750,16 @@ func (i *directiveInstance) AddIdleCallback(cb directive.IdleCallback) func() {
 // This is more expensive than AddIdleCallback or AddDisposeCallback.
 // Returns a callback release function.
 func (i *directiveInstance) AddStateCallback(cb directive.StateCallback) func() {
+	// Register the state callback under the controller lock.
 	i.c.mtx.Lock()
 	defer i.c.mtx.Unlock()
 
+	// Capture the current state for the new callback.
 	cbCtr := newCallback(cb)
 	i.stateChanged = append(i.stateChanged, cbCtr)
 	stateSnapshot := i.getDirectiveStateSnapshotLocked()
 
+	// Publish the initial state through the existing callback queue.
 	i.callCallbacksLocked(func() {
 		cb(stateSnapshot.idle, stateSnapshot.errs, stateSnapshot.attachedVals)
 	})
@@ -747,6 +788,7 @@ func (i *directiveInstance) Close() {
 // If inclWeakRefs=true, keeps the instance if there are any weak refs.
 // Returns if the directive instance was closed.
 func (i *directiveInstance) CloseIfUnreferenced(inclWeakRefs bool) bool {
+	// Dispose only after checking both release state and reference strength.
 	i.c.mtx.Lock()
 	defer i.c.mtx.Unlock()
 	if i.released.Load() {
@@ -768,6 +810,7 @@ func (i *directiveInstance) CloseIfUnreferenced(inclWeakRefs bool) bool {
 //
 // expects c.mtx to not be locked
 func (i *directiveInstance) callHandlerUnlocked(handler *handler) (res []*resolver, err error) {
+	// Convert a handler panic into a resolver construction failure.
 	defer func() {
 		if rerr := recover(); rerr != nil {
 			perr := handlePanic(i.logger(), rerr)
@@ -777,6 +820,7 @@ func (i *directiveInstance) callHandlerUnlocked(handler *handler) (res []*resolv
 		}
 	}()
 
+	// Call the handler without holding the controller mutex.
 	resolvers, err := handler.h.HandleDirective(handler.handlerContext(i.ctx), i)
 	if err != nil {
 		return nil, err
@@ -788,8 +832,16 @@ func (i *directiveInstance) callHandlerUnlocked(handler *handler) (res []*resolv
 	return out, nil
 }
 
-// attachStartResolverLocked attaches and starts a resolver while i.c.mtx is locked
+// attachStartResolverLocked attaches and starts a resolver while i.c.mtx is locked.
 func (i *directiveInstance) attachStartResolverLocked(res *resolver) {
+	// A pending handler call owns no attached resolver. Removal is terminal:
+	// only a live handler and directive may attach its returned resolvers.
+	// The controller mutex serializes this transition with both removals.
+	if i.released.Load() || res.hnd.rel.Load() {
+		return
+	}
+
+	// Publish the resolver before starting it or notifying idle callbacks.
 	i.res = append(i.res, res)
 	if i.full {
 		// already full => already idle => don't call handleIdleStateLocked.
@@ -887,19 +939,23 @@ func (i *directiveInstance) removeResolverLocked(resIdx int, rres *resolver) {
 		}
 	}
 
+	// Defer state notification while retiring the resolver.
 	defer i.deferCheckStateChanged()()
 	i.stateChangedSnapshot = directiveStateSnapshot{}
 	previousIdle := i.idle
 
 	// remove the resolver from the list
 	i.res = append(i.res[:resIdx], i.res[resIdx+1:]...)
-	// cancel the resolver
+
+	// Cancel the resolver after removing its registration.
 	rres.updateContextLocked(nil)
-	// remove values associated with the resolver
+
+	// Remove every value associated with the retired resolver.
 	vals := rres.vals
 	rres.vals = nil
 	i.onValuesRemovedLocked(vals...)
-	// call the resolver removed callbacks
+
+	// Notify resolver removal callbacks after removing its values.
 	var cbs []func()
 	for _, cb := range rres.rels {
 		if !cb.released.Swap(true) && cb.cb != nil {
@@ -908,7 +964,8 @@ func (i *directiveInstance) removeResolverLocked(resIdx int, rres *resolver) {
 	}
 	rres.rels = nil
 	i.callCallbacksLocked(cbs...)
-	// Removing an already-idle failed resolver still changes its error list.
+
+	// Publish a changed error list even if the idle state stays the same.
 	i.handleIdleStateLocked()
 	if rres.err != nil && previousIdle == i.idle {
 		i.notifyIdleCallbacksLocked()
@@ -928,6 +985,7 @@ func (i *directiveInstance) callCallbacksLocked(cbs ...func()) {
 
 // callCallbackEventsLocked calls the refsCbs list or adds to queue.
 func (i *directiveInstance) callCallbackEventsLocked(cbs ...callbackEvent) {
+	// Queue callback events and allow the current dispatcher to drain them.
 	if len(cbs)+len(i.refCbs) == 0 {
 		return
 	}
@@ -959,6 +1017,7 @@ func (i *directiveInstance) callCallbackEventsLocked(cbs ...callbackEvent) {
 
 // handlePanic converts a panic error into a regular error
 func handlePanic(le *logrus.Entry, panicErr any) error {
+	// Convert the recovered panic to an error before logging it.
 	debug.PrintStack()
 	e, eOk := panicErr.(error)
 	if !eOk {
@@ -975,4 +1034,4 @@ func (i *directiveInstance) logger() *logrus.Entry {
 }
 
 // _ is a type assertion
-var _ directive.Instance = ((*directiveInstance)(nil))
+var _ directive.Instance = (*directiveInstance)(nil)
