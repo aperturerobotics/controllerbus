@@ -1,0 +1,7 @@
+[
+  {
+    "name": "old callback keeps mutation notifications suppressed",
+    "replace": [["  /\\ suppressed' = HoldSuppressionDuringCallback", "  /\\ suppressed' = TRUE"]],
+    "expect": "QuiescentSeesLatest"
+  }
+]

@@ -51,7 +51,7 @@ type directiveInstance struct {
 	// only populated when len(stateChanged) != 0 for performance
 	// when this changes, call the stateChanged callbacks
 	stateChangedSnapshot directiveStateSnapshot
-	// stateChangedSkip indicates we are already checking for state changes in this call stack
+	// stateChangedSkip coalesces nested mutations until their outer state check.
 	stateChangedSkip bool
 	// callingRefs indicates we are currently calling a ref callback
 	callingRefCbs bool
@@ -224,8 +224,10 @@ func (i *directiveInstance) deferCheckStateChanged() func() {
 	// Set skip flag and return function to check state changes
 	i.stateChangedSkip = true
 	return func() {
-		i.maybeCallStateChanged()
+		// End the mutation batch before callbacks unlock the controller.
+		// Concurrent and reentrant changes must queue their own snapshots.
 		i.stateChangedSkip = false
+		i.maybeCallStateChanged()
 	}
 }
 

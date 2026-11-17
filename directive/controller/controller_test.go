@@ -169,3 +169,82 @@ func TestIdleCallbackRemovalCancelsStartingResolver(t *testing.T) {
 		t.Fatal("idle callback removal did not cancel the starting resolver")
 	}
 }
+
+// TestStateCallbackCapturesConcurrentValueChange requires a mutation made while
+// an earlier state callback is blocked to reach that same observer afterward.
+func TestStateCallbackCapturesConcurrentValueChange(t *testing.T) {
+	// Expose a real resolver handler without letting the resolver exit or idle.
+	ctx, cancel := context.WithTimeout(t.Context(), 5*time.Second)
+	defer cancel()
+	ctrl := NewController(ctx, nil)
+	handlers := make(chan directive.ResolverHandler, 1)
+	remove, err := ctrl.AddHandler(directive.NewFuncHandler(func(context.Context, directive.Instance) ([]directive.Resolver, error) {
+		return directive.R(directive.NewFuncResolver(func(ctx context.Context, handler directive.ResolverHandler) error {
+			handlers <- handler
+			<-ctx.Done()
+			return ctx.Err()
+		}), nil)
+	}))
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(remove)
+
+	// Retain the directive while the observer and resolver exchange values.
+	instance, ref, err := ctrl.AddDirective(ctx, &directive_mock.MockDirective{}, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(ref.Release)
+
+	// Pause the first value's notification with the controller mutex unlocked.
+	entered := make(chan struct{})
+	resume := make(chan struct{})
+	latest := 0
+	defer instance.AddStateCallback(func(_ bool, _ []error, vals []directive.AttachedValue) {
+		latest = len(vals)
+		if len(vals) == 1 {
+			close(entered)
+			select {
+			case <-resume:
+			case <-ctx.Done():
+			}
+		}
+	})()
+
+	// Acquire the resolver handler after the initial observer snapshot.
+	var handler directive.ResolverHandler
+	select {
+	case handler = <-handlers:
+	case <-ctx.Done():
+		t.Fatal("resolver did not start")
+	}
+
+	// Publish the first value and wait for its callback to release the lock.
+	firstDone := make(chan struct{})
+	go func() {
+		handler.AddValue("first")
+		close(firstDone)
+	}()
+	select {
+	case <-entered:
+	case <-ctx.Done():
+		t.Fatal("first value notification did not enter")
+	}
+
+	// Commit a second value while the first callback is still blocked.
+	if _, accepted := handler.AddValue("second"); !accepted {
+		t.Fatal("second value was rejected")
+	}
+	close(resume)
+	select {
+	case <-firstDone:
+	case <-ctx.Done():
+		t.Fatal("state callback queue did not drain")
+	}
+
+	// The dispatcher must deliver the second snapshot without another mutation.
+	if latest != 2 {
+		t.Fatalf("state observer retained %d values after two publications", latest)
+	}
+}
