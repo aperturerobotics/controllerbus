@@ -4,27 +4,27 @@ go 1.27.0
 
 require (
 	github.com/aperturerobotics/cli v1.1.0 // latest
-	github.com/aperturerobotics/common v0.36.5 // latest
-	github.com/aperturerobotics/fastjson v0.1.2-0.20260705010846-94f343f5bb34
-	github.com/aperturerobotics/fsnotify v1.9.1-0.20261007093243-45a75ed654f0
+	github.com/aperturerobotics/common v0.38.4 // latest
+	github.com/aperturerobotics/fastjson v0.1.2-0.20261024220211-b654d1d5b5aa
+	github.com/aperturerobotics/fsnotify v1.9.1-0.20261120090407-765f22ccaa33
 	github.com/aperturerobotics/json-iterator-lite v1.1.0 // master
-	github.com/aperturerobotics/protobuf-go-lite v0.19.1-0.20261018054529-f60c4d2691ea // latest
+	github.com/aperturerobotics/protobuf-go-lite v0.19.1-0.20261120061248-f1c7d6295149 // latest
 	github.com/aperturerobotics/starpc v0.52.3 // latest
-	github.com/aperturerobotics/util v1.34.10-0.20261024061815-104de78e8992 // latest
+	github.com/aperturerobotics/util v1.34.10-0.20261120060243-dd75621b3f94 // latest
 	github.com/mr-tron/base58 v1.3.0
 	github.com/pkg/errors v0.9.1
-	github.com/sergi/go-diff v1.4.0
+	github.com/sergi/go-diff v1.4.5
 	github.com/sirupsen/logrus v1.10.2
 	github.com/zeebo/blake3 v0.2.4
-	golang.org/x/mod v0.42.0
-	golang.org/x/tools v0.52.0
+	golang.org/x/mod v0.43.0
+	golang.org/x/tools v0.53.0
 	mvdan.cc/gofumpt v0.12.0
 )
 
 require (
 	github.com/aperturerobotics/abseil-cpp v0.0.0-20260131110040-4bb56e2f9017 // indirect
-	github.com/aperturerobotics/go-protoc-gen-prost v0.0.0-20261003014807-d46d22154f35 // indirect
-	github.com/aperturerobotics/go-protoc-wasi v0.0.0-20260808023521-7b1595380c3f // indirect
+	github.com/aperturerobotics/go-protoc-gen-prost v0.0.0-20261024221648-a1c7ae9a2bb8 // indirect
+	github.com/aperturerobotics/go-protoc-wasi v0.0.0-20261024220153-869f5fcfca4f // indirect
 	github.com/aperturerobotics/go-websocket v1.8.15-0.20260619192713-a096778f08c1 // indirect
 	github.com/aperturerobotics/protobuf v0.0.0-20260203024654-8201686529c4 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.10 // indirect
@@ -33,8 +33,8 @@ require (
 	github.com/stretchr/testify v1.12.1 // indirect
 	github.com/tetratelabs/wazero v1.12.0 // indirect
 	github.com/xrash/smetrics v0.0.0-20250705151800-55b8f293f342 // indirect
-	golang.org/x/sync v0.24.0 // indirect
-	golang.org/x/sys v0.49.0 // indirect
+	golang.org/x/sync v0.25.0 // indirect
+	golang.org/x/sys v0.50.0 // indirect
 	google.golang.org/protobuf v1.36.12 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
