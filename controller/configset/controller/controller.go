@@ -47,7 +47,7 @@ func NewController(le *logrus.Entry, bus bus.Bus) (*Controller, error) {
 
 // Execute executes the controller goroutine.
 // Returning nil ends execution.
-// Returning an error triggers a retry with backoff.
+// Returning an error ends this instance, and the bus closes it.
 func (c *Controller) Execute(ctx context.Context) error {
 	execControllers := make(map[string]context.CancelFunc)
 ExecLoop:

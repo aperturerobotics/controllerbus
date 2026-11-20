@@ -55,7 +55,7 @@ func (c *CallbackController) HandleDirective(ctx context.Context, di directive.I
 
 // Execute executes the controller goroutine.
 // Returning nil ends execution.
-// Returning an error triggers a retry with backoff.
+// Returning an error ends this instance, and the bus closes it.
 func (c *CallbackController) Execute(ctx context.Context) error {
 	if c.execute != nil {
 		return c.execute(ctx)

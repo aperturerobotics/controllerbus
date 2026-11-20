@@ -47,7 +47,7 @@ func (c *ToyController) HandleDirective(
 
 // Execute executes the controller goroutine.
 // Returning nil ends execution.
-// Returning an error triggers a retry with backoff.
+// Returning an error ends this instance, and the bus closes it.
 func (c *ToyController) Execute(ctx context.Context) error {
 	c.le.Debug("toy controller executed")
 	<-ctx.Done()

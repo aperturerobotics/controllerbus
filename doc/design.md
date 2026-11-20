@@ -91,7 +91,7 @@ All controllers must implement the `controller.Controller` interface.
 
 *   **`GetControllerInfo()`**: Returns static metadata about the controller (`*controller.Info`).
 *   **`HandleDirective(ctx context.Context, di directive.Instance)`**: Called by the bus for each active directive instance. The controller inspects the directive (`di.GetDirective()`) and returns a slice of `directive.Resolver` implementations if it can handle the directive, or `nil` otherwise. The context is canceled when the directive instance expires.
-*   **`Execute(ctx context.Context)`**: The main entry point for the controller's long-running logic. It receives a context that is canceled when the controller should shut down. Returning `nil` indicates successful completion. Returning an error triggers a retry mechanism by the bus (without reconstructing the controller).
+*   **`Execute(ctx context.Context)`**: The main entry point for the controller's long-running logic. It receives a context that is canceled when the controller should shut down. Returning `nil` ends the background work while the controller stays attached. Returning an error detaches and closes that instance; the bus does not restart it, and the loader's `ExecController` directive constructs a new instance after backoff.
 *   **`Close()`**: Called when the controller is permanently shutting down, allowing it to release resources.
 
 ### Base Implementation (`bus/controller.go`)
@@ -244,13 +244,13 @@ Controllers and directives have well-defined lifecycles.
 3.  **Execution**: `Controller.Execute` called by the bus in a goroutine.
 4.  **Running**: Controller processes directives (`HandleDirective`) and executes its logic. Resolvers are managed by the bus.
 5.  **Shutdown Signal**: Context passed to `Execute` is canceled.
-6.  **Execution Exit**: `Execute` returns. `nil` for clean exit, `error` for retry.
+6.  **Execution Exit**: `Execute` returns. `nil` for clean exit, `error` to detach and close the instance.
 7.  **Closing**: `Controller.Close` called by the bus.
 8.  **Removal from Bus**: Controller removed from the bus registry.
 
 ### Error Handling
 
-*   Errors from `Controller.Execute` trigger retries with backoff.
+*   An error from `Controller.Execute` detaches and closes that instance; the loader constructs a new one after backoff.
 *   Errors from `Resolver.Resolve` mark that resolver as failed; it won't be retried automatically by the core bus (though `RetryResolver` can be used). Resolver errors are reported via `IdleCallback`.
 *   `directive.ErrDirectiveDisposed` (`directive/errors.go`) is a standard error indicating a directive was unexpectedly terminated.
 
