@@ -1,7 +1,25 @@
-// Package directive declares the Directive type. The Directive is an
-// instruction to all controllers attached to a bus indicating desired state.
-// Directives are de-duplicated in the controller. Each directive is added with
-// a listener, which receives events with links matching the directive.
+// Package directive declares the Directive, a declarative request for state
+// that every controller attached to a bus may answer.
+//
+// AddDirective returns the Instance for a Directive and a Reference whose
+// ReferenceHandler sees each Value added and removed. An equivalent Directive,
+// by DirectiveWithEquiv, joins the existing Instance with a new Reference
+// unless it Superceeds it, which removes the old Instance. Each Handler's
+// HandleDirective is offered every Instance, including those that existed
+// before AddHandler, and returns the Resolvers that answer it.
+//
+// Each Resolver runs in its own goroutine and emits Values, numbered from 1,
+// through its ResolverHandler. When Resolve returns, the resolver is idle and
+// its error is kept for GetResolverErrors; it is not run again, so a resolver
+// that should retry wraps itself in a RetryResolver. An Instance is idle once
+// every Handler has been offered it and no resolver is running, and its idle
+// callbacks receive the resolver errors. Reaching MaxValueCount stops the
+// resolvers that have no value; MaxValueHardCap also refuses further values.
+//
+// A weak Reference does not keep an Instance alive. When the last other
+// Reference is released, the Instance is removed at once if UnrefDisposeDur is
+// zero, or if UnrefDisposeEmptyImmediate is set and it has no Values, and
+// otherwise after UnrefDisposeDur unless a new Reference arrives first.
 package directive
 
 import (
@@ -85,7 +103,7 @@ type ValueOptions struct {
 // Directive implements a requested state (with a set of values).
 type Directive interface {
 	// Validate validates the directive.
-	// This is a cursory validation to see if the values "look correct."
+	// This is a cursory validation to see if the values look correct.
 	Validate() error
 
 	// GetValueOptions returns options relating to value handling.
@@ -245,9 +263,9 @@ type Instance interface {
 	// ctx is not retained.
 	// cb is called for each value.
 	// cb calls should return immediately.
-	// the release callback is called immediately if already released
+	// The release callback is called immediately if already released.
 	// If marked as a weak ref, the handler will not count towards the ref count.
-	// will never return nil
+	// It never returns nil.
 	AddReference(ctx context.Context, cb ReferenceHandler, weakRef bool) Reference
 
 	// AddDisposeCallback adds a callback that will be called when the instance
@@ -320,9 +338,6 @@ func (t *attachedValue) GetValue() Value {
 	return t.val
 }
 
-// _ is a type assertion
-var _ AttachedValue = &attachedValue{}
-
 // TypedAttachedValue is a typed value with some metadata.
 type TypedAttachedValue[T ComparableValue] interface {
 	// GetValueID returns the value ID.
@@ -355,9 +370,6 @@ func (t *typedAttachedValue[T]) GetValue() T {
 	return t.val
 }
 
-// _ is a type assertion
-var _ TypedAttachedValue[int] = &typedAttachedValue[int]{}
-
 // TransformedAttachedValue is an AttachedValue with a transformed value.
 type TransformedAttachedValue[T, E ComparableValue] interface {
 	TypedAttachedValue[T]
@@ -384,9 +396,6 @@ func NewTransformedAttachedValue[T, E ComparableValue](
 func (v *transformedAttachedValue[T, E]) GetTransformedValue() E {
 	return v.xfrm
 }
-
-// _ is a type assertion
-var _ TransformedAttachedValue[int, int] = ((*transformedAttachedValue[int, int])(nil))
 
 // ValueHandler handles values emitted by a resolver.
 type ValueHandler interface {
@@ -483,3 +492,10 @@ type Handler interface {
 // The passed context is canceled when the directive instance expires.
 // NOTE: the passed context is not canceled when the handler is removed.
 type HandlerFunc = func(context.Context, Instance) ([]Resolver, error)
+
+// _ are type assertions.
+var (
+	_ AttachedValue                      = &attachedValue{}
+	_ TypedAttachedValue[int]            = &typedAttachedValue[int]{}
+	_ TransformedAttachedValue[int, int] = ((*transformedAttachedValue[int, int])(nil))
+)

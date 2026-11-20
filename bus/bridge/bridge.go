@@ -53,7 +53,7 @@ func (b *BusBridge) GetControllerInfo() *controller.Info {
 
 // Execute executes the controller goroutine.
 // Returning nil ends execution.
-// Returning an error triggers a retry with backoff.
+// Returning an error ends this instance, and the bus closes it.
 func (b *BusBridge) Execute(ctx context.Context) error {
 	return nil
 }

@@ -1,3 +1,15 @@
+// Package bus declares the Bus, which runs attached controllers and carries
+// directives between them, and the helpers that add a directive and wait for
+// its values.
+//
+// The Bus is a directive controller that also owns controller lifetimes: each
+// attachment runs Execute once, offers the controller every directive until it
+// is released, and closes it once after Execute returns. inmem provides the
+// in-process Bus. ExecOneOff, ExecWaitValue and ExecCollectValues add a
+// directive and return its value or values with the Reference that keeps them,
+// which the caller releases; an idle callback decides whether an idle Instance
+// ends the wait, and a resolver error fails it. ExecWatchEffect calls back for
+// each value until its Reference is released.
 package bus
 
 import (
