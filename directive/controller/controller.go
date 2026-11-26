@@ -6,7 +6,6 @@ import (
 	"sync"
 
 	"github.com/aperturerobotics/controllerbus/directive"
-	"github.com/aperturerobotics/util/broadcast"
 	"github.com/sirupsen/logrus"
 )
 
@@ -16,11 +15,11 @@ type Controller struct {
 	ctx context.Context
 	// le is the logger for logging events related to the controller
 	le *logrus.Entry
-	// bcast is signaled when directives are added or removed.
-	bcast broadcast.Broadcast
-
 	// mtx guards below fields
 	mtx sync.Mutex
+	// changed is closed when the directives or their references next change.
+	// It is nil until a caller waits, and again once closed.
+	changed chan struct{}
 	// dirID contains the next directive instance id
 	dirID uint32
 	// dir contains the list of running directive instances
@@ -53,18 +52,27 @@ func (c *Controller) GetDirectives() []directive.Instance {
 	return dirs
 }
 
-// GetDirectivesBroadcast returns the directives broadcast.
-// It is signaled when a directive is added or removed.
-// It is signaled when a reference to a directive is added or released.
-func (c *Controller) GetDirectivesBroadcast() *broadcast.Broadcast {
-	return &c.bcast
+// GetDirectivesWaitCh returns a channel closed when a directive is next added
+// or removed, or a reference to a directive is next added or released.
+//
+// A watcher takes the channel, reads the directives, and waits on the channel:
+// a change during the read closes the channel already taken. The controller's
+// own mutex guards the channel, so a watcher holds no lock while it reads.
+func (c *Controller) GetDirectivesWaitCh() <-chan struct{} {
+	c.mtx.Lock()
+	defer c.mtx.Unlock()
+	if c.changed == nil {
+		c.changed = make(chan struct{})
+	}
+	return c.changed
 }
 
-// broadcastLocked signals the directives broadcast while c.mtx is locked.
+// broadcastLocked wakes the directives watchers while c.mtx is locked.
 func (c *Controller) broadcastLocked() {
-	c.bcast.HoldLock(func(broadcast func(), _ func() <-chan struct{}) {
-		broadcast()
-	})
+	if c.changed != nil {
+		close(c.changed)
+		c.changed = nil
+	}
 }
 
 // AddDirective adds a directive to the controller.

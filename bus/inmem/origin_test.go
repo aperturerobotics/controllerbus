@@ -203,13 +203,6 @@ func TestOriginBroadcast(t *testing.T) {
 	}
 	defer first.Release()
 
-	waitCh := func() <-chan struct{} {
-		var ch <-chan struct{}
-		b.GetDirectivesBroadcast().HoldLock(func(_ func(), getWaitCh func() <-chan struct{}) {
-			ch = getWaitCh()
-		})
-		return ch
-	}
 	expectSignal := func(what string, ch <-chan struct{}) {
 		t.Helper()
 		select {
@@ -219,14 +212,14 @@ func TestOriginBroadcast(t *testing.T) {
 		}
 	}
 
-	ch := waitCh()
+	ch := b.GetDirectivesWaitCh()
 	_, second, err := b.AddDirective(ctx, d, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
 	expectSignal("adding a deduplicated reference", ch)
 
-	ch = waitCh()
+	ch = b.GetDirectivesWaitCh()
 	second.Release()
 	expectSignal("releasing a reference", ch)
 }

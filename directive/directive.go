@@ -27,8 +27,6 @@ import (
 	"context"
 	"slices"
 	"time"
-
-	"github.com/aperturerobotics/util/broadcast"
 )
 
 // DebugValues maps string key to a list of values.
@@ -197,10 +195,11 @@ type Controller interface {
 	// DirectiveLister has GetDirectives.
 	DirectiveLister
 
-	// GetDirectivesBroadcast returns the directives broadcast.
-	// It is signaled when a directive is added or removed.
-	// It is signaled when a reference to a directive is added or released.
-	GetDirectivesBroadcast() *broadcast.Broadcast
+	// GetDirectivesWaitCh returns a channel closed when a directive is next
+	// added or removed, or a reference to a directive is next added or
+	// released. Take the channel before reading the directives, so a change
+	// during the read is not missed.
+	GetDirectivesWaitCh() <-chan struct{}
 
 	// DirectiveAdder has AddDirective.
 	DirectiveAdder
