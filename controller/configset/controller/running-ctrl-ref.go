@@ -50,9 +50,8 @@ func (r *runningControllerRef) GetState() configset.State {
 func (r *runningControllerRef) AddStateCallback(cb func(configset.State)) {
 	r.mtx.Lock()
 	r.cbs = append(r.cbs, cb)
-	rc := r.rc
 	r.mtx.Unlock()
-	cb(rc.GetState())
+	cb(r.GetState())
 }
 
 // GetRunningController gets the running controller.
