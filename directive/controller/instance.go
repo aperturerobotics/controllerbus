@@ -823,7 +823,7 @@ func (i *directiveInstance) callHandlerUnlocked(handler *handler) (res []*resolv
 	}()
 
 	// Call the handler without holding the controller mutex.
-	resolvers, err := handler.h.HandleDirective(handler.handlerContext(i.ctx), i)
+	resolvers, err := handler.handleDirective(i.ctx, i)
 	if err != nil {
 		return nil, err
 	}
