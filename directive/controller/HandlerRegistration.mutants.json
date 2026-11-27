@@ -1,0 +1,8 @@
+[
+  {"name":"publish retirement after cancellation callbacks","replace":[["retired' = TRUE","retired' = FALSE"]],"expect":"RetirementBeforeCallbacks"},
+  {"name":"attach a late result without checking retirement","replace":[["accepted == ~retired /\\ i \\in alive","accepted == i \\in alive"]],"expect":"InvocationRetirementOrder"},
+  {"name":"attach a late result to a removed directive","replace":[["accepted == ~retired /\\ i \\in alive","accepted == ~retired"]],"expect":"InvocationRetirementOrder"},
+  {"name":"finish before every directive has been retired","replace":[["removal = \"canceling\" /\\ remaining = {}","removal = \"canceling\""]],"expect":"RetirementComplete"},
+  {"name":"release a resolver without canceling its context","replace":[["canceled' = canceled \\cup (attached \\cap {i})\n  /\\ attached' = attached \\ {i}\n  /\\ UNCHANGED <<listed, retired, removal, call","canceled' = canceled\n  /\\ attached' = attached \\ {i}\n  /\\ UNCHANGED <<listed, retired, removal, call"]],"expect":"CancellationBeforeRelease"},
+  {"name":"invoke using the caller origin instead of the registration origin","replace":[["IF controllerID = \"\" THEN \"upstream\" ELSE controllerID]\n","\"upstream\"]\n"]],"expect":"OriginContext"}
+]
