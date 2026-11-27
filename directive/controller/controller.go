@@ -230,28 +230,17 @@ func (c *Controller) addHandlerLocked(handler directive.Handler) (func(), error)
 //
 // returns if the handler was found in the set
 func (c *Controller) removeHandlerLocked(hnd *handler) bool {
-	// mark released
-	hnd.rel.Store(true)
-
-	// Remove the handler registration before retiring its resolvers.
-	var found bool
-	for i, ih := range c.hnd {
-		if ih == hnd {
-			c.hnd[i] = c.hnd[len(c.hnd)-1]
-			c.hnd[len(c.hnd)-1] = nil
-			c.hnd = c.hnd[:len(c.hnd)-1]
-			found = true
-			break
-		}
-	}
-	if !found {
+	// Take the registration out of the handler set.
+	idx := slices.Index(c.hnd, hnd)
+	if idx < 0 {
 		return false
 	}
+	last := len(c.hnd) - 1
+	c.hnd[idx], c.hnd[last] = c.hnd[last], nil
+	c.hnd = c.hnd[:last]
 
-	// Cancel all resolvers associated with the removed handler.
-	for _, di := range c.dir {
-		di.removeHandlerLocked(hnd)
-	}
+	// Retire it, so no pending call attaches resolvers, and cancel its resolvers.
+	hnd.retire(c.dir)
 	return true
 }
 

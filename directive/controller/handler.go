@@ -8,9 +8,15 @@ import (
 	"github.com/aperturerobotics/controllerbus/directive"
 )
 
-// handler contains a directive handler.
+// handler is a directive handler's registration with a Controller.
+//
+// Removal retires the registration, and retirement is terminal. The
+// controller retires a registration with its mutex held, before it cancels the
+// registration's resolvers, and attaches returned resolvers with the same mutex
+// held only while the registration is live. A HandleDirective call that was
+// pending at removal therefore attaches nothing.
 type handler struct {
-	// rel indicates the handler has been removed
+	// rel indicates the registration has been retired
 	rel atomic.Bool
 	// h is the directive handler
 	h directive.Handler
@@ -33,4 +39,20 @@ func (h *handler) handlerContext(ctx context.Context) context.Context {
 		return ctx
 	}
 	return directive.WithOriginController(ctx, h.controllerID)
+}
+
+// handleDirective calls the handler for di with the handler's controller as
+// the origin of ctx. The caller must not hold the controller mutex.
+func (h *handler) handleDirective(ctx context.Context, di directive.Instance) ([]directive.Resolver, error) {
+	return h.h.HandleDirective(h.handlerContext(ctx), di)
+}
+
+// retire marks the registration removed and cancels its resolvers in each of
+// dirs. The caller holds the controller mutex and has already taken the
+// registration out of the controller's handler set.
+func (h *handler) retire(dirs []*directiveInstance) {
+	h.rel.Store(true)
+	for _, di := range dirs {
+		di.removeHandlerLocked(h)
+	}
 }
