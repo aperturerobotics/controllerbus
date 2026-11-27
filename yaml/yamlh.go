@@ -324,25 +324,6 @@ func (e *yaml_event_t) scalar_style() yaml_scalar_style_t     { return yaml_scal
 func (e *yaml_event_t) sequence_style() yaml_sequence_style_t { return yaml_sequence_style_t(e.style) }
 func (e *yaml_event_t) mapping_style() yaml_mapping_style_t   { return yaml_mapping_style_t(e.style) }
 
-// The prototype of a read handler.
-//
-// The read handler is called when the parser needs to read more bytes from the
-// source. The handler should write not more than size bytes to the buffer.
-// The number of written bytes should be set to the size_read variable.
-//
-// [in,out]   data        A pointer to an application data specified by
-//
-//	yaml_parser_set_input().
-//
-// [out]      buffer      The buffer to write the data from the source.
-// [in]       size        The size of the buffer.
-// [out]      size_read   The actual number of bytes read from the source.
-//
-// On success, the handler should return 1.  If the handler failed,
-// the returned value should be 0. On EOF, the handler should set the
-// size_read to 0 and return 1.
-type yaml_read_handler_t func(parser *yaml_parser_t, buffer []byte) (n int, err error)
-
 // This structure holds information about a potential simple key.
 type yaml_simple_key_t struct {
 	possible     bool        // Is a simple key possible?
@@ -436,33 +417,29 @@ func (ps yaml_parser_state_t) String() string {
 	return "<unknown parser state>"
 }
 
-// The parser structure.
-//
-// All members are internal. Manage the structure using the
-// yaml_parser_ family of functions.
-type yaml_parser_t struct {
-
-	// Error handling
-
+// yaml_problem_t is why a layer stopped: the reader, scanner or parser that
+// failed sets it once, and every later call returns at once.
+type yaml_problem_t struct {
 	error yaml_error_type_t // Error type.
 
-	problem string // Error description.
-
-	// The byte about which the problem occurred.
-	problem_offset int
-	problem_value  int
-	problem_mark   yaml_mark_t
+	problem      string      // Error description.
+	problem_mark yaml_mark_t // Where the problem occurred.
 
 	// The error context.
 	context      string
 	context_mark yaml_mark_t
+}
+
+// yaml_scanner_t turns input bytes into tokens. It owns the reader, which
+// decodes the input into characters, and the token queue the parser reads
+// through peek_token and skip_token. It never sees the parser.
+type yaml_scanner_t struct {
+	yaml_problem_t
 
 	// Reader stuff
 
-	read_handler yaml_read_handler_t // Read handler.
-
 	input     []byte // String input data.
-	input_pos int
+	input_pos int    // The next input byte to copy into the raw buffer.
 
 	eof bool // EOF flag
 
@@ -483,19 +460,12 @@ type yaml_parser_t struct {
 
 	// Comments
 
-	head_comment []byte // The current head comments
-	line_comment []byte // The current line comments
-	foot_comment []byte // The current foot comments
-	tail_comment []byte // Foot comment that happens at the end of a block.
-	stem_comment []byte // Comment in item preceding a nested structure (list inside list item, etc)
-
 	comments      []yaml_comment_t // The folded comments for all parsed tokens
 	comments_head int
 
 	// Scanner stuff
 
 	stream_start_produced bool // Have we started to scan the input stream?
-	stream_end_produced   bool // Have we reached the end of the input stream?
 
 	flow_level int // The number of unclosed '[' and '{' indicators.
 
@@ -510,14 +480,32 @@ type yaml_parser_t struct {
 	simple_key_allowed bool                // May a simple key occur at the current position?
 	simple_keys        []yaml_simple_key_t // The stack of simple keys.
 	simple_keys_by_tok map[int]int         // possible simple_key indexes indexed by token_number
+}
+
+// yaml_parser_t turns the scanner's tokens into events. It reads tokens only
+// through peek_token and skip_token, which take each token's comments from
+// the scanner as they pass.
+type yaml_parser_t struct {
+	yaml_problem_t
+
+	scanner yaml_scanner_t // The scanner the tokens come from.
+
+	// Comments
+
+	head_comment []byte // The current head comments
+	line_comment []byte // The current line comments
+	foot_comment []byte // The current foot comments
+	tail_comment []byte // Foot comment that happens at the end of a block.
+	stem_comment []byte // Comment in item preceding a nested structure (list inside list item, etc)
 
 	// Parser stuff
+
+	stream_end_produced bool // Has the parser taken the STREAM-END token?
 
 	state          yaml_parser_state_t    // The current parser state.
 	states         []yaml_parser_state_t  // The parser states stack.
 	marks          []yaml_mark_t          // The stack of marks.
 	tag_directives []yaml_tag_directive_t // The list of TAG directives.
-
 }
 
 type yaml_comment_t struct {
