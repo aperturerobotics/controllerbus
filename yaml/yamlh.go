@@ -521,22 +521,18 @@ type yaml_comment_t struct {
 
 // Emitter Definitions
 
-// The prototype of a write handler.
-//
-// The write handler is called when the emitter needs to flush the accumulated
-// characters to the output.  The handler should write @a size bytes of the
-// @a buffer to the output.
-//
-// @param[in,out]   data        A pointer to an application data specified by
-//
-//	yaml_emitter_set_output().
-//
-// @param[in]       buffer      The buffer with bytes to be written.
-// @param[in]       size        The size of the buffer.
-//
-// @returns On success, the handler should return @c 1.  If the handler failed,
-// the returned value should be @c 0.
-type yaml_write_handler_t func(emitter *yaml_emitter_t, buffer []byte) error
+// The writer holds the emitter's output and the position it has reached.
+type yaml_writer_t struct {
+	out        []byte       // The output written so far.
+	line_break yaml_break_t // The preferred line break.
+
+	line       int  // The current line.
+	column     int  // The current column.
+	whitespace bool // If the last character was a whitespace?
+	indention  bool // If the last character was an indentation character (' ', '-', '?', ':')?
+
+	space_above bool // Is there's an empty line above?
+}
 
 type yaml_emitter_state_t int
 
@@ -577,26 +573,16 @@ type yaml_emitter_t struct {
 	error   yaml_error_type_t // Error type.
 	problem string            // Error description.
 
-	// Writer stuff
-
-	write_handler yaml_write_handler_t // Write handler.
-
-	output_buffer *[]byte // String output data.
-
-	buffer     []byte // The working buffer.
-	buffer_pos int    // The current position of the buffer.
-
-	raw_buffer []byte // The raw buffer.
+	writer yaml_writer_t // The output.
 
 	encoding yaml_encoding_t // The stream encoding.
 
 	// Emitter stuff
 
-	canonical   bool         // If the output is in the canonical style?
-	best_indent int          // The number of indentation spaces.
-	best_width  int          // The preferred width of the output lines.
-	unicode     bool         // Allow unescaped non-ASCII characters?
-	line_break  yaml_break_t // The preferred line break.
+	canonical   bool // If the output is in the canonical style?
+	best_indent int  // The number of indentation spaces.
+	best_width  int  // The preferred width of the output lines.
+	unicode     bool // Allow unescaped non-ASCII characters?
 
 	state  yaml_emitter_state_t   // The current emitter state.
 	states []yaml_emitter_state_t // The stack of states.
@@ -617,14 +603,9 @@ type yaml_emitter_t struct {
 	mapping_context    bool // Is it a mapping context?
 	simple_key_context bool // Is it a simple mapping key context?
 
-	line       int  // The current line.
-	column     int  // The current column.
-	whitespace bool // If the last character was a whitespace?
-	indention  bool // If the last character was an indentation character (' ', '-', '?', ':')?
 	open_ended bool // If an explicit document end is required?
 
-	space_above bool // Is there's an empty line above?
-	foot_indent int  // The indent used to write the foot comment above, or -1 if none.
+	foot_indent int // The indent used to write the foot comment above, or -1 if none.
 
 	// Anchor analysis.
 	anchor_data struct {

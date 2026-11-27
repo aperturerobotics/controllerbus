@@ -22,27 +22,72 @@
 
 package yaml
 
-// Set the writer error and return false.
-func yaml_emitter_set_writer_error(emitter *yaml_emitter_t, problem string) bool {
-	emitter.error = yaml_WRITER_ERROR
-	emitter.problem = problem
-	return false
+// The writer appends the emitter's output to memory, so a write cannot fail.
+// It tracks the line and column of the next character and whether the last
+// one written was whitespace or indentation, which the emitter reads to lay
+// out what follows.
+
+// Put a character to the output.
+func put(writer *yaml_writer_t, value byte) {
+	writer.out = append(writer.out, value)
+	writer.column++
 }
 
-// Flush the output buffer.
-func yaml_emitter_flush(emitter *yaml_emitter_t) bool {
-	if emitter.write_handler == nil {
-		panic("write handler not set")
-	}
+// Write the UTF-8 byte order mark.
+func write_bom(writer *yaml_writer_t) {
+	writer.out = append(writer.out, '\xEF', '\xBB', '\xBF')
+}
 
-	// Check if the buffer is empty.
-	if emitter.buffer_pos == 0 {
-		return true
+// Put a line break to the output.
+func put_break(writer *yaml_writer_t) {
+	switch writer.line_break {
+	case yaml_CR_BREAK:
+		writer.out = append(writer.out, '\r')
+	case yaml_LN_BREAK:
+		writer.out = append(writer.out, '\n')
+	case yaml_CRLN_BREAK:
+		writer.out = append(writer.out, '\r', '\n')
+	default:
+		panic("unknown line break setting")
 	}
+	end_line(writer)
+}
 
-	if err := emitter.write_handler(emitter, emitter.buffer[:emitter.buffer_pos]); err != nil {
-		return yaml_emitter_set_writer_error(emitter, "write error: "+err.Error())
+// end_line moves the writer to the start of the next line.
+func end_line(writer *yaml_writer_t) {
+	if writer.column == 0 {
+		writer.space_above = true
 	}
-	emitter.buffer_pos = 0
-	return true
+	writer.column = 0
+	writer.line++
+	writer.indention = true
+}
+
+// Copy the character at s[*i] to the output and advance *i past it.
+func write(writer *yaml_writer_t, s []byte, i *int) {
+	w := width(s[*i])
+	if w < 1 || w > 4 {
+		panic("unknown character width")
+	}
+	writer.out = append(writer.out, s[*i:*i+w]...)
+	writer.column++
+	*i += w
+}
+
+// Write a whole string to the output.
+func write_all(writer *yaml_writer_t, s []byte) {
+	for i := 0; i < len(s); {
+		write(writer, s, &i)
+	}
+}
+
+// Copy the line break at s[*i] to the output and advance *i past it.
+func write_break(writer *yaml_writer_t, s []byte, i *int) {
+	if s[*i] == '\n' {
+		put_break(writer)
+		*i++
+		return
+	}
+	write(writer, s, i)
+	end_line(writer)
 }
