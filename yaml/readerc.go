@@ -22,16 +22,10 @@
 
 package yaml
 
-import (
-	"io"
-)
-
 // Set the reader error and return 0.
-func yaml_parser_set_reader_error(parser *yaml_parser_t, problem string, offset int, value int) bool {
-	parser.error = yaml_READER_ERROR
-	parser.problem = problem
-	parser.problem_offset = offset
-	parser.problem_value = value
+func yaml_scanner_set_reader_error(scanner *yaml_scanner_t, problem string) bool {
+	scanner.error = yaml_READER_ERROR
+	scanner.problem = problem
 	return false
 }
 
@@ -44,65 +38,66 @@ const (
 
 // Determine the input stream encoding by checking the BOM symbol. If no BOM is
 // found, the UTF-8 encoding is assumed. Return 1 on success, 0 on failure.
-func yaml_parser_determine_encoding(parser *yaml_parser_t) bool {
+func yaml_scanner_determine_encoding(scanner *yaml_scanner_t) bool {
 	// Ensure that we had enough bytes in the raw buffer.
-	for !parser.eof && len(parser.raw_buffer)-parser.raw_buffer_pos < 3 {
-		if !yaml_parser_update_raw_buffer(parser) {
+	for !scanner.eof && len(scanner.raw_buffer)-scanner.raw_buffer_pos < 3 {
+		if !yaml_scanner_update_raw_buffer(scanner) {
 			return false
 		}
 	}
 
 	// Determine the encoding.
-	buf := parser.raw_buffer
-	pos := parser.raw_buffer_pos
+	buf := scanner.raw_buffer
+	pos := scanner.raw_buffer_pos
 	avail := len(buf) - pos
 	if avail >= 2 && buf[pos] == bom_UTF16LE[0] && buf[pos+1] == bom_UTF16LE[1] {
-		parser.encoding = yaml_UTF16LE_ENCODING
-		parser.raw_buffer_pos += 2
-		parser.offset += 2
+		scanner.encoding = yaml_UTF16LE_ENCODING
+		scanner.raw_buffer_pos += 2
+		scanner.offset += 2
 	} else if avail >= 2 && buf[pos] == bom_UTF16BE[0] && buf[pos+1] == bom_UTF16BE[1] {
-		parser.encoding = yaml_UTF16BE_ENCODING
-		parser.raw_buffer_pos += 2
-		parser.offset += 2
+		scanner.encoding = yaml_UTF16BE_ENCODING
+		scanner.raw_buffer_pos += 2
+		scanner.offset += 2
 	} else if avail >= 3 && buf[pos] == bom_UTF8[0] && buf[pos+1] == bom_UTF8[1] && buf[pos+2] == bom_UTF8[2] {
-		parser.encoding = yaml_UTF8_ENCODING
-		parser.raw_buffer_pos += 3
-		parser.offset += 3
+		scanner.encoding = yaml_UTF8_ENCODING
+		scanner.raw_buffer_pos += 3
+		scanner.offset += 3
 	} else {
-		parser.encoding = yaml_UTF8_ENCODING
+		scanner.encoding = yaml_UTF8_ENCODING
 	}
 	return true
 }
 
 // Update the raw buffer.
-func yaml_parser_update_raw_buffer(parser *yaml_parser_t) bool {
-	size_read := 0
-
+func yaml_scanner_update_raw_buffer(scanner *yaml_scanner_t) bool {
 	// Return if the raw buffer is full.
-	if parser.raw_buffer_pos == 0 && len(parser.raw_buffer) == cap(parser.raw_buffer) {
+	if scanner.raw_buffer_pos == 0 && len(scanner.raw_buffer) == cap(scanner.raw_buffer) {
 		return true
 	}
 
 	// Return on EOF.
-	if parser.eof {
+	if scanner.eof {
 		return true
 	}
 
 	// Move the remaining bytes in the raw buffer to the beginning.
-	if parser.raw_buffer_pos > 0 && parser.raw_buffer_pos < len(parser.raw_buffer) {
-		copy(parser.raw_buffer, parser.raw_buffer[parser.raw_buffer_pos:])
+	if scanner.raw_buffer_pos > 0 && scanner.raw_buffer_pos < len(scanner.raw_buffer) {
+		copy(scanner.raw_buffer, scanner.raw_buffer[scanner.raw_buffer_pos:])
 	}
-	parser.raw_buffer = parser.raw_buffer[:len(parser.raw_buffer)-parser.raw_buffer_pos]
-	parser.raw_buffer_pos = 0
+	scanner.raw_buffer = scanner.raw_buffer[:len(scanner.raw_buffer)-scanner.raw_buffer_pos]
+	scanner.raw_buffer_pos = 0
 
-	// Call the read handler to fill the buffer.
-	size_read, err := parser.read_handler(parser, parser.raw_buffer[len(parser.raw_buffer):cap(parser.raw_buffer)])
-	parser.raw_buffer = parser.raw_buffer[:len(parser.raw_buffer)+size_read]
-	if err == io.EOF {
-		parser.eof = true
-	} else if err != nil {
-		return yaml_parser_set_reader_error(parser, "input error: "+err.Error(), parser.offset, -1)
+	// Copy the next input bytes into the free end of the raw buffer. The
+	// input is in memory, so EOF comes on the first call after all of it is
+	// copied.
+	if scanner.input_pos == len(scanner.input) {
+		scanner.eof = true
+		return true
 	}
+	free := scanner.raw_buffer[len(scanner.raw_buffer):cap(scanner.raw_buffer)]
+	n := copy(free, scanner.input[scanner.input_pos:])
+	scanner.input_pos += n
+	scanner.raw_buffer = scanner.raw_buffer[:len(scanner.raw_buffer)+n]
 	return true
 }
 
@@ -110,49 +105,45 @@ func yaml_parser_update_raw_buffer(parser *yaml_parser_t) bool {
 // Return true on success, false on failure.
 //
 // The length is supposed to be significantly less that the buffer size.
-func yaml_parser_update_buffer(parser *yaml_parser_t, length int) bool {
-	if parser.read_handler == nil {
-		panic("read handler must be set")
-	}
-
+func yaml_scanner_update_buffer(scanner *yaml_scanner_t, length int) bool {
 	// [Go] This function was changed to guarantee the requested length size at EOF.
 	// The fact we need to do this is pretty awful, but the description above implies
 	// for that to be the case, and there are tests
 
 	// Return if the buffer contains enough characters.
-	if parser.unread >= length {
+	if scanner.unread >= length {
 		return true
 	}
 
 	// Determine the input encoding if it is not known yet.
-	if parser.encoding == yaml_ANY_ENCODING {
-		if !yaml_parser_determine_encoding(parser) {
+	if scanner.encoding == yaml_ANY_ENCODING {
+		if !yaml_scanner_determine_encoding(scanner) {
 			return false
 		}
 	}
 
 	// Move the unread characters to the beginning of the buffer.
-	buffer_len := len(parser.buffer)
-	if parser.buffer_pos > 0 && parser.buffer_pos < buffer_len {
-		copy(parser.buffer, parser.buffer[parser.buffer_pos:])
-		buffer_len -= parser.buffer_pos
-		parser.buffer_pos = 0
-	} else if parser.buffer_pos == buffer_len {
+	buffer_len := len(scanner.buffer)
+	if scanner.buffer_pos > 0 && scanner.buffer_pos < buffer_len {
+		copy(scanner.buffer, scanner.buffer[scanner.buffer_pos:])
+		buffer_len -= scanner.buffer_pos
+		scanner.buffer_pos = 0
+	} else if scanner.buffer_pos == buffer_len {
 		buffer_len = 0
-		parser.buffer_pos = 0
+		scanner.buffer_pos = 0
 	}
 
 	// Open the whole buffer for writing, and cut it before returning.
-	parser.buffer = parser.buffer[:cap(parser.buffer)]
+	scanner.buffer = scanner.buffer[:cap(scanner.buffer)]
 
 	// Fill the buffer until it has enough characters.
 	first := true
-	for parser.unread < length {
+	for scanner.unread < length {
 
 		// Fill the raw buffer if necessary.
-		if !first || parser.raw_buffer_pos == len(parser.raw_buffer) {
-			if !yaml_parser_update_raw_buffer(parser) {
-				parser.buffer = parser.buffer[:buffer_len]
+		if !first || scanner.raw_buffer_pos == len(scanner.raw_buffer) {
+			if !yaml_scanner_update_raw_buffer(scanner) {
+				scanner.buffer = scanner.buffer[:buffer_len]
 				return false
 			}
 		}
@@ -160,14 +151,14 @@ func yaml_parser_update_buffer(parser *yaml_parser_t, length int) bool {
 
 		// Decode the raw buffer.
 	inner:
-		for parser.raw_buffer_pos != len(parser.raw_buffer) {
+		for scanner.raw_buffer_pos != len(scanner.raw_buffer) {
 			var value rune
 			var width int
 
-			raw_unread := len(parser.raw_buffer) - parser.raw_buffer_pos
+			raw_unread := len(scanner.raw_buffer) - scanner.raw_buffer_pos
 
 			// Decode the next character.
-			switch parser.encoding {
+			switch scanner.encoding {
 			case yaml_UTF8_ENCODING:
 				// Decode a UTF-8 character.  Check RFC 3629
 				// (http://www.ietf.org/rfc/rfc3629.txt) for more details.
@@ -188,7 +179,7 @@ func yaml_parser_update_buffer(parser *yaml_parser_t, length int) bool {
 				// surrogate pairs.
 
 				// Determine the length of the UTF-8 sequence.
-				octet := parser.raw_buffer[parser.raw_buffer_pos]
+				octet := scanner.raw_buffer[scanner.raw_buffer_pos]
 				switch {
 				case octet&0x80 == 0x00:
 					width = 1
@@ -200,17 +191,15 @@ func yaml_parser_update_buffer(parser *yaml_parser_t, length int) bool {
 					width = 4
 				default:
 					// The leading octet is invalid.
-					return yaml_parser_set_reader_error(parser,
-						"invalid leading UTF-8 octet",
-						parser.offset, int(octet))
+					return yaml_scanner_set_reader_error(scanner,
+						"invalid leading UTF-8 octet")
 				}
 
 				// Check if the raw buffer contains an incomplete character.
 				if width > raw_unread {
-					if parser.eof {
-						return yaml_parser_set_reader_error(parser,
-							"incomplete UTF-8 octet sequence",
-							parser.offset, -1)
+					if scanner.eof {
+						return yaml_scanner_set_reader_error(scanner,
+							"incomplete UTF-8 octet sequence")
 					}
 					break inner
 				}
@@ -231,13 +220,12 @@ func yaml_parser_update_buffer(parser *yaml_parser_t, length int) bool {
 
 				// Check and decode the trailing octets.
 				for k := 1; k < width; k++ {
-					octet = parser.raw_buffer[parser.raw_buffer_pos+k]
+					octet = scanner.raw_buffer[scanner.raw_buffer_pos+k]
 
 					// Check if the octet is valid.
 					if (octet & 0xC0) != 0x80 {
-						return yaml_parser_set_reader_error(parser,
-							"invalid trailing UTF-8 octet",
-							parser.offset+k, int(octet))
+						return yaml_scanner_set_reader_error(scanner,
+							"invalid trailing UTF-8 octet")
 					}
 
 					// Decode the octet.
@@ -251,21 +239,19 @@ func yaml_parser_update_buffer(parser *yaml_parser_t, length int) bool {
 				case width == 3 && value >= 0x800:
 				case width == 4 && value >= 0x10000:
 				default:
-					return yaml_parser_set_reader_error(parser,
-						"invalid length of a UTF-8 sequence",
-						parser.offset, -1)
+					return yaml_scanner_set_reader_error(scanner,
+						"invalid length of a UTF-8 sequence")
 				}
 
 				// Check the range of the value.
 				if value >= 0xD800 && value <= 0xDFFF || value > 0x10FFFF {
-					return yaml_parser_set_reader_error(parser,
-						"invalid Unicode character",
-						parser.offset, int(value))
+					return yaml_scanner_set_reader_error(scanner,
+						"invalid Unicode character")
 				}
 
 			case yaml_UTF16LE_ENCODING, yaml_UTF16BE_ENCODING:
 				var low, high int
-				if parser.encoding == yaml_UTF16LE_ENCODING {
+				if scanner.encoding == yaml_UTF16LE_ENCODING {
 					low, high = 0, 1
 				} else {
 					low, high = 1, 0
@@ -297,23 +283,21 @@ func yaml_parser_update_buffer(parser *yaml_parser_t, length int) bool {
 
 				// Check for incomplete UTF-16 character.
 				if raw_unread < 2 {
-					if parser.eof {
-						return yaml_parser_set_reader_error(parser,
-							"incomplete UTF-16 character",
-							parser.offset, -1)
+					if scanner.eof {
+						return yaml_scanner_set_reader_error(scanner,
+							"incomplete UTF-16 character")
 					}
 					break inner
 				}
 
 				// Get the character.
-				value = rune(parser.raw_buffer[parser.raw_buffer_pos+low]) +
-					(rune(parser.raw_buffer[parser.raw_buffer_pos+high]) << 8)
+				value = rune(scanner.raw_buffer[scanner.raw_buffer_pos+low]) +
+					(rune(scanner.raw_buffer[scanner.raw_buffer_pos+high]) << 8)
 
 				// Check for unexpected low surrogate area.
 				if value&0xFC00 == 0xDC00 {
-					return yaml_parser_set_reader_error(parser,
-						"unexpected low surrogate area",
-						parser.offset, int(value))
+					return yaml_scanner_set_reader_error(scanner,
+						"unexpected low surrogate area")
 				}
 
 				// Check for a high surrogate area.
@@ -322,23 +306,21 @@ func yaml_parser_update_buffer(parser *yaml_parser_t, length int) bool {
 
 					// Check for incomplete surrogate pair.
 					if raw_unread < 4 {
-						if parser.eof {
-							return yaml_parser_set_reader_error(parser,
-								"incomplete UTF-16 surrogate pair",
-								parser.offset, -1)
+						if scanner.eof {
+							return yaml_scanner_set_reader_error(scanner,
+								"incomplete UTF-16 surrogate pair")
 						}
 						break inner
 					}
 
 					// Get the next character.
-					value2 := rune(parser.raw_buffer[parser.raw_buffer_pos+low+2]) +
-						(rune(parser.raw_buffer[parser.raw_buffer_pos+high+2]) << 8)
+					value2 := rune(scanner.raw_buffer[scanner.raw_buffer_pos+low+2]) +
+						(rune(scanner.raw_buffer[scanner.raw_buffer_pos+high+2]) << 8)
 
 					// Check for a low surrogate area.
 					if value2&0xFC00 != 0xDC00 {
-						return yaml_parser_set_reader_error(parser,
-							"expected low surrogate area",
-							parser.offset+2, int(value2))
+						return yaml_scanner_set_reader_error(scanner,
+							"expected low surrogate area")
 					}
 
 					// Generate the value of the surrogate pair.
@@ -365,48 +347,47 @@ func yaml_parser_update_buffer(parser *yaml_parser_t, length int) bool {
 			case value >= 0xE000 && value <= 0xFFFD:
 			case value >= 0x10000 && value <= 0x10FFFF:
 			default:
-				return yaml_parser_set_reader_error(parser,
-					"control characters are not allowed",
-					parser.offset, int(value))
+				return yaml_scanner_set_reader_error(scanner,
+					"control characters are not allowed")
 			}
 
 			// Move the raw pointers.
-			parser.raw_buffer_pos += width
-			parser.offset += width
+			scanner.raw_buffer_pos += width
+			scanner.offset += width
 
 			// Finally put the character into the buffer.
 			if value <= 0x7F {
 				// 0000 0000-0000 007F . 0xxxxxxx
-				parser.buffer[buffer_len+0] = byte(value)
+				scanner.buffer[buffer_len+0] = byte(value)
 				buffer_len += 1
 			} else if value <= 0x7FF {
 				// 0000 0080-0000 07FF . 110xxxxx 10xxxxxx
-				parser.buffer[buffer_len+0] = byte(0xC0 + (value >> 6))
-				parser.buffer[buffer_len+1] = byte(0x80 + (value & 0x3F))
+				scanner.buffer[buffer_len+0] = byte(0xC0 + (value >> 6))
+				scanner.buffer[buffer_len+1] = byte(0x80 + (value & 0x3F))
 				buffer_len += 2
 			} else if value <= 0xFFFF {
 				// 0000 0800-0000 FFFF . 1110xxxx 10xxxxxx 10xxxxxx
-				parser.buffer[buffer_len+0] = byte(0xE0 + (value >> 12))
-				parser.buffer[buffer_len+1] = byte(0x80 + ((value >> 6) & 0x3F))
-				parser.buffer[buffer_len+2] = byte(0x80 + (value & 0x3F))
+				scanner.buffer[buffer_len+0] = byte(0xE0 + (value >> 12))
+				scanner.buffer[buffer_len+1] = byte(0x80 + ((value >> 6) & 0x3F))
+				scanner.buffer[buffer_len+2] = byte(0x80 + (value & 0x3F))
 				buffer_len += 3
 			} else {
 				// 0001 0000-0010 FFFF . 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
-				parser.buffer[buffer_len+0] = byte(0xF0 + (value >> 18))
-				parser.buffer[buffer_len+1] = byte(0x80 + ((value >> 12) & 0x3F))
-				parser.buffer[buffer_len+2] = byte(0x80 + ((value >> 6) & 0x3F))
-				parser.buffer[buffer_len+3] = byte(0x80 + (value & 0x3F))
+				scanner.buffer[buffer_len+0] = byte(0xF0 + (value >> 18))
+				scanner.buffer[buffer_len+1] = byte(0x80 + ((value >> 12) & 0x3F))
+				scanner.buffer[buffer_len+2] = byte(0x80 + ((value >> 6) & 0x3F))
+				scanner.buffer[buffer_len+3] = byte(0x80 + (value & 0x3F))
 				buffer_len += 4
 			}
 
-			parser.unread++
+			scanner.unread++
 		}
 
 		// On EOF, put NUL into the buffer and return.
-		if parser.eof {
-			parser.buffer[buffer_len] = 0
+		if scanner.eof {
+			scanner.buffer[buffer_len] = 0
 			buffer_len++
-			parser.unread++
+			scanner.unread++
 			break
 		}
 	}
@@ -416,9 +397,9 @@ func yaml_parser_update_buffer(parser *yaml_parser_t, length int) bool {
 	// has a given length is Go) panicking; or C) accessing invalid memory.
 	// This happens here due to the EOF above breaking early.
 	for buffer_len < length {
-		parser.buffer[buffer_len] = 0
+		scanner.buffer[buffer_len] = 0
 		buffer_len++
 	}
-	parser.buffer = parser.buffer[:buffer_len]
+	scanner.buffer = scanner.buffer[:buffer_len]
 	return true
 }

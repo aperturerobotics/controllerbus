@@ -119,46 +119,15 @@ func JSONToYAML(j []byte) ([]byte, error) {
 }
 
 func newEventParser(dat []byte) *eventParser {
-	p := &eventParser{
+	return &eventParser{
+		parser:  yaml_new_parser(dat),
 		anchors: make(map[string]any),
 	}
-	p.parser = yaml_parser_t{
-		raw_buffer:   make([]byte, 0, input_raw_buffer_size),
-		buffer:       make([]byte, 0, input_buffer_size),
-		read_handler: yamlInputReadHandler,
-		input:        dat,
-	}
-	return p
-}
-
-func yamlInputReadHandler(parser *yaml_parser_t, buffer []byte) (int, error) {
-	if parser.input_pos == len(parser.input) {
-		return 0, io.EOF
-	}
-	n := copy(buffer, parser.input[parser.input_pos:])
-	parser.input_pos += n
-	return n, nil
-}
-
-func yaml_insert_token(parser *yaml_parser_t, pos int, token *yaml_token_t) {
-	if parser.tokens_head > 0 && len(parser.tokens) == cap(parser.tokens) {
-		if parser.tokens_head != len(parser.tokens) {
-			copy(parser.tokens, parser.tokens[parser.tokens_head:])
-		}
-		parser.tokens = parser.tokens[:len(parser.tokens)-parser.tokens_head]
-		parser.tokens_head = 0
-	}
-	parser.tokens = append(parser.tokens, *token)
-	if pos < 0 {
-		return
-	}
-	copy(parser.tokens[parser.tokens_head+pos+1:], parser.tokens[parser.tokens_head+pos:])
-	parser.tokens[parser.tokens_head+pos] = *token
 }
 
 func (p *eventParser) next() (yaml_event_t, error) {
 	var ev yaml_event_t
-	if yaml_parser_parse(&p.parser, &ev) {
+	if p.parser.parse(&ev) {
 		return ev, nil
 	}
 	return ev, parserError(&p.parser)
