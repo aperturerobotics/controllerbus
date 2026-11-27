@@ -1,0 +1,22 @@
+[
+  {
+    "name": "value removal and owner cleanup both release the acquisition",
+    "replace": [
+      [
+        "DirectReleaseOnRemoval == FALSE",
+        "DirectReleaseOnRemoval == TRUE"
+      ]
+    ],
+    "expect": "AtMostOnce"
+  },
+  {
+    "name": "a late callback targets a shared notification channel",
+    "replace": [
+      [
+        "SharedNotification == FALSE",
+        "SharedNotification == TRUE"
+      ]
+    ],
+    "expect": "NoCrossAcquisitionRelease"
+  }
+]

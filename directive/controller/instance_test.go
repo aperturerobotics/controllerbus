@@ -183,3 +183,218 @@ func TestResolverAttachedWhileFullStartsAfterRemoval(t *testing.T) {
 	removeFirst()
 	awaitValue("second")
 }
+
+// TestAccessResolverReleasesRemovedValueOnce removes an acquisition before its
+// removal callback is registered and requires cancellation to release it once.
+func TestAccessResolverReleasesRemovedValueOnce(t *testing.T) {
+	// Hold value publication while its directive is removed.
+	ctx, cancel := context.WithTimeout(t.Context(), 5*time.Second)
+	defer cancel()
+	ctrl := controller.NewController(ctx, logrus.NewEntry(logrus.New()))
+	added := make(chan struct{})
+	resume := make(chan struct{})
+	done := make(chan error, 1)
+	var releases atomic.Int32
+	access := directive.NewAccessResolver(func(context.Context, func()) (string, func(), error) {
+		return "value", func() { releases.Add(1) }, nil
+	})
+	remove, err := ctrl.AddHandler(directive.NewFuncHandler(func(context.Context, directive.Instance) ([]directive.Resolver, error) {
+		return directive.R(directive.NewFuncResolver(func(ctx context.Context, handler directive.ResolverHandler) error {
+			err := access.Resolve(ctx, handler)
+			done <- err
+			return err
+		}), nil)
+	}))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer remove()
+
+	// Pause AddValue before AccessResolver can register its removal callback.
+	handler := directive.NewCallbackHandler(func(directive.AttachedValue) {
+		close(added)
+		select {
+		case <-resume:
+		case <-ctx.Done():
+		}
+	}, nil, nil)
+	_, ref, err := ctrl.AddDirective(ctx, &directive_mock.MockDirective{}, handler)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer ref.Release()
+	select {
+	case <-added:
+	case <-ctx.Done():
+		t.Fatal("access value was not published")
+	}
+
+	// Remove the value, then let late callback registration observe removal.
+	ref.Release()
+	close(resume)
+	select {
+	case err := <-done:
+		if !errors.Is(err, context.Canceled) {
+			t.Fatalf("resolver returned %v, want cancellation", err)
+		}
+	case <-ctx.Done():
+		t.Fatal("access resolver did not finish")
+	}
+	if got := releases.Load(); got != 1 {
+		t.Fatalf("acquisition released %d times, want once", got)
+	}
+}
+
+// TestAccessResolverReplacesInvalidatedValue retires an invalidated acquisition
+// before publishing its replacement, then releases that replacement on removal.
+func TestAccessResolverReplacesInvalidatedValue(t *testing.T) {
+	// Record acquisitions and releases from the real directive controller.
+	ctx, cancel := context.WithTimeout(t.Context(), 5*time.Second)
+	defer cancel()
+	ctrl := controller.NewController(ctx, logrus.NewEntry(logrus.New()))
+	invalidators := make(chan func(), 2)
+	values := make(chan int32, 2)
+	released := make(chan int32, 2)
+	done := make(chan error, 1)
+	var acquired, releaseCount atomic.Int32
+	var acquiredBeforeRelease atomic.Bool
+	access := directive.NewAccessResolver(func(_ context.Context, invalidate func()) (int32, func(), error) {
+		id := acquired.Add(1)
+		if releaseCount.Load() != id-1 {
+			acquiredBeforeRelease.Store(true)
+		}
+		invalidators <- invalidate
+		return id, func() {
+			releaseCount.Add(1)
+			released <- id
+		}, nil
+	})
+	remove, err := ctrl.AddHandler(directive.NewFuncHandler(func(context.Context, directive.Instance) ([]directive.Resolver, error) {
+		return directive.R(directive.NewFuncResolver(func(ctx context.Context, handler directive.ResolverHandler) error {
+			err := access.Resolve(ctx, handler)
+			done <- err
+			return err
+		}), nil)
+	}))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer remove()
+
+	// Observe the first publication before invalidating its acquisition twice.
+	handler := directive.NewCallbackHandler(func(value directive.AttachedValue) {
+		values <- value.GetValue().(int32)
+	}, nil, nil)
+	_, ref, err := ctrl.AddDirective(ctx, &directive_mock.MockDirective{}, handler)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer ref.Release()
+	select {
+	case id := <-values:
+		if id != 1 {
+			t.Fatalf("first acquisition = %d, want 1", id)
+		}
+	case <-ctx.Done():
+		t.Fatal("first acquisition was not published")
+	}
+	var invalidate func()
+	select {
+	case invalidate = <-invalidators:
+	case <-ctx.Done():
+		t.Fatal("getter did not provide its invalidator")
+	}
+	invalidate()
+	invalidate()
+
+	// A replacement is published only after the old acquisition is released.
+	select {
+	case id := <-values:
+		if id != 2 {
+			t.Fatalf("replacement acquisition = %d, want 2", id)
+		}
+	case <-ctx.Done():
+		t.Fatal("replacement was not published")
+	}
+	if acquiredBeforeRelease.Load() {
+		t.Fatal("replacement was acquired before the prior release")
+	}
+	select {
+	case id := <-released:
+		if id != 1 {
+			t.Fatalf("retired acquisition = %d, want 1", id)
+		}
+	case <-ctx.Done():
+		t.Fatal("prior acquisition was not released")
+	}
+
+	// Exercise notifications retained after their replacement was published.
+	invalidate()
+	invalidate()
+
+	// Join cancellation and require exactly one release of the replacement.
+	ref.Release()
+	select {
+	case err := <-done:
+		if !errors.Is(err, context.Canceled) {
+			t.Fatalf("resolver returned %v, want cancellation", err)
+		}
+	case <-ctx.Done():
+		t.Fatal("replacement resolver did not finish")
+	}
+	select {
+	case id := <-released:
+		if id != 2 {
+			t.Fatalf("last released acquisition = %d, want 2", id)
+		}
+	case <-ctx.Done():
+		t.Fatal("replacement acquisition was not released")
+	}
+	if got := acquired.Load(); got != 2 {
+		t.Fatalf("late invalidation created acquisition %d", got)
+	}
+	select {
+	case id := <-released:
+		t.Fatalf("acquisition %d released again", id)
+	default:
+	}
+}
+
+// BenchmarkAccessResolverLifecycle measures a real controller's acquisition,
+// publication, removal and joined resolver cleanup with a no-op getter backend.
+func BenchmarkAccessResolverLifecycle(b *testing.B) {
+	// Keep one controller and join every resolver before the next acquisition.
+	ctx := b.Context()
+	ctrl := controller.NewController(ctx, logrus.NewEntry(logrus.New()))
+	published := make(chan struct{}, 1)
+	done := make(chan error, 1)
+	access := directive.NewAccessResolver(func(context.Context, func()) (string, func(), error) {
+		return "value", func() {}, nil
+	})
+	remove, err := ctrl.AddHandler(directive.NewFuncHandler(func(context.Context, directive.Instance) ([]directive.Resolver, error) {
+		return directive.R(directive.NewFuncResolver(func(ctx context.Context, handler directive.ResolverHandler) error {
+			err := access.Resolve(ctx, handler)
+			done <- err
+			return err
+		}), nil)
+	}))
+	if err != nil {
+		b.Fatal(err)
+	}
+	defer remove()
+	handler := directive.NewCallbackHandler(func(directive.AttachedValue) { published <- struct{}{} }, nil, nil)
+	b.ReportAllocs()
+
+	// Include the complete real-controller cycle, excluding external backend work.
+	for b.Loop() {
+		_, ref, err := ctrl.AddDirective(ctx, &directive_mock.MockDirective{}, handler)
+		if err != nil {
+			b.Fatal(err)
+		}
+		<-published
+		ref.Release()
+		if err := <-done; !errors.Is(err, context.Canceled) {
+			b.Fatal(err)
+		}
+	}
+}
