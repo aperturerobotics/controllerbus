@@ -17,18 +17,18 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-// debounceTime debounces re-sync requests
-var debounceTime = time.Second
+// debounceTime coalesces filesystem events before reconciling plugins.
+const debounceTime = time.Second
 
 // Watcher watches a filesystem path to load and reload plugins.
 type Watcher struct {
-	// le is the logger
+	// le is the logger.
 	le *logrus.Entry
-	// bus is the controller bus
+	// bus is the controller bus.
 	bus bus.Bus
-	// mtx guards below fields
+	// mtx guards loadedPlugins.
 	mtx sync.Mutex
-	// loadedPlugins is the set of loaded plugins
+	// loadedPlugins holds the plugins attached by this watcher.
 	loadedPlugins map[string]*shared.LoadedPlugin
 }
 
@@ -43,6 +43,7 @@ func NewWatcher(le *logrus.Entry, bus bus.Bus) *Watcher {
 
 // UnloadPlugin unloads a loaded plugin by ID.
 func (w *Watcher) UnloadPlugin(id string) {
+	// Remove the tracked plugin before running its unload hooks.
 	w.mtx.Lock()
 	plug, plugOk := w.loadedPlugins[id]
 	if !plugOk {
@@ -54,26 +55,29 @@ func (w *Watcher) UnloadPlugin(id string) {
 		Info("unloading plugin")
 	delete(w.loadedPlugins, id)
 	w.mtx.Unlock()
+
+	// Unload hooks run without the watcher lock.
 	plug.Close()
 }
 
 // LoadPlugin loads a plugin from a path.
 //
-// If the path was already loaded, no-op.
+// A path already loaded is left unchanged.
 func (w *Watcher) LoadPlugin(ctx context.Context, plugPath string) error {
 	w.mtx.Lock()
 	defer w.mtx.Unlock()
-
 	return w.loadPluginLocked(ctx, plugPath)
 }
 
 // loadPluginLocked loads plugin if mtx is locked by caller.
 func (w *Watcher) loadPluginLocked(ctx context.Context, plugPath string) error {
+	// Keep the existing resolver when this path is already loaded.
 	_, plugOk := w.loadedPlugins[plugPath]
 	if plugOk {
 		return nil
 	}
 
+	// Attach the shared library and retain it for later reconciliation.
 	w.le.
 		WithField("plugin-path", plugPath).
 		Info("loading plugin")
@@ -87,6 +91,8 @@ func (w *Watcher) loadPluginLocked(ctx context.Context, plugPath string) error {
 		return err
 	}
 	w.loadedPlugins[plugPath] = lp
+
+	// Report the binary identity supplied by the loaded plugin.
 	w.le.
 		WithField("plugin-path", plugPath).
 		WithField("plugin-binary-id", lp.GetBinaryID()).
@@ -99,9 +105,11 @@ func (w *Watcher) loadPluginLocked(ctx context.Context, plugPath string) error {
 //
 // If any plugin files were removed, unloads those plugins.
 func (w *Watcher) SyncPlugins(ctx context.Context, scanDir string) error {
+	// Serialize discovery and reconciliation against manual loads and unloads.
 	w.mtx.Lock()
 	defer w.mtx.Unlock()
 
+	// Discover the shared libraries and snapshot their file metadata.
 	dirContents, err := os.ReadDir(scanDir)
 	if err != nil {
 		return err
@@ -126,6 +134,8 @@ func (w *Watcher) SyncPlugins(ctx context.Context, scanDir string) error {
 		}
 		foundNames[plugPath] = dfStat
 	}
+
+	// Unload removed or changed binaries before loading replacements.
 	for loadedID, loadedInfo := range w.loadedPlugins {
 		foundPlugin, ok := foundNames[loadedID]
 		if !ok {
@@ -141,8 +151,8 @@ func (w *Watcher) SyncPlugins(ctx context.Context, scanDir string) error {
 			continue
 		}
 
-		plugsEqual := foundPlugin.Equal(&loadedInfo.PluginStat)
-		if plugsEqual {
+		// Compare through the loaded plugin's existing stats API.
+		if loadedInfo.Equal(foundPlugin) {
 			continue
 		}
 		w.le.Debugf(
@@ -156,6 +166,8 @@ func (w *Watcher) SyncPlugins(ctx context.Context, scanDir string) error {
 		loadedInfo.Close()
 		delete(w.loadedPlugins, loadedID)
 	}
+
+	// Attach discovered paths that are no longer in the loaded set.
 	for plugFile := range foundNames {
 		if _, ok := w.loadedPlugins[plugFile]; !ok {
 			if err := w.loadPluginLocked(ctx, plugFile); err != nil {
@@ -180,26 +192,29 @@ func (w *Watcher) UnloadAll() {
 
 // Execute executes the watcher and loads / runs plugins.
 func (w *Watcher) Execute(ctx context.Context, syncDir string, watch bool) error {
+	// Keep every loaded resolver within this watcher run.
 	defer w.UnloadAll()
 	if err := w.SyncPlugins(ctx, syncDir); err != nil {
 		return err
 	}
 
+	// A one-shot scan keeps its plugins until cancellation.
 	if !watch {
 		<-ctx.Done()
 		return nil
 	}
 
+	// Subscribe to directory changes for subsequent reconciliation.
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
 		return err
 	}
 	defer watcher.Close()
-
 	if err := watcher.Add(syncDir); err != nil {
 		return err
 	}
 
+	// Reconcile each coalesced batch of filesystem changes.
 	for {
 		happened, err := debounce_fswatcher.DebounceFSWatcherEvents(ctx, watcher, debounceTime, nil)
 		if err != nil {
