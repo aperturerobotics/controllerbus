@@ -87,8 +87,7 @@ func JSONToYAML(j []byte) ([]byte, error) {
 		return nil, errors.New("yaml: JSON input contains multiple values")
 	}
 
-	var out []byte
-	emitter := newEmitter(&out)
+	emitter := newEmitter()
 	if err := emit(&emitter, yaml_event_t{
 		typ:      yaml_STREAM_START_EVENT,
 		encoding: yaml_UTF8_ENCODING,
@@ -115,7 +114,7 @@ func JSONToYAML(j []byte) ([]byte, error) {
 	}); err != nil {
 		return nil, err
 	}
-	return out, nil
+	return emitter.writer.out, nil
 }
 
 func newEventParser(dat []byte) *eventParser {
@@ -446,23 +445,14 @@ func keyString(val any) (string, error) {
 	}
 }
 
-func newEmitter(out *[]byte) yaml_emitter_t {
+func newEmitter() yaml_emitter_t {
 	return yaml_emitter_t{
-		write_handler: yamlOutputWriteHandler,
-		output_buffer: out,
-		buffer:        make([]byte, output_buffer_size),
-		raw_buffer:    make([]byte, 0, output_raw_buffer_size),
-		states:        make([]yaml_emitter_state_t, 0, initial_stack_size),
-		events:        make([]yaml_event_t, 0, initial_queue_size),
-		best_indent:   2,
-		best_width:    -1,
-		unicode:       true,
+		states:      make([]yaml_emitter_state_t, 0, initial_stack_size),
+		events:      make([]yaml_event_t, 0, initial_queue_size),
+		best_indent: 2,
+		best_width:  -1,
+		unicode:     true,
 	}
-}
-
-func yamlOutputWriteHandler(emitter *yaml_emitter_t, buffer []byte) error {
-	*emitter.output_buffer = append(*emitter.output_buffer, buffer...)
-	return nil
 }
 
 func emit(emitter *yaml_emitter_t, ev yaml_event_t) error {
